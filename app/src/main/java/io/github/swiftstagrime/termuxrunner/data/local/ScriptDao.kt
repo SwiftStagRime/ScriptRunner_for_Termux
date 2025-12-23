@@ -1,0 +1,30 @@
+package io.github.swiftstagrime.termuxrunner.data.local
+
+import androidx.room.Dao
+import androidx.room.Delete
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
+import androidx.room.Query
+import kotlinx.coroutines.flow.Flow
+
+@Dao
+interface ScriptDao {
+
+    @Query("SELECT * FROM scripts ORDER BY id DESC")
+    fun getAllScripts(): Flow<List<ScriptEntity>>
+
+    @Query("SELECT * FROM scripts WHERE id = :id")
+    suspend fun getScriptById(id: Int): ScriptEntity?
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertScript(script: ScriptEntity)
+
+    @Delete
+    suspend fun deleteScript(script: ScriptEntity)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertScripts(scripts: List<ScriptEntity>)
+
+    @Query("SELECT * FROM scripts")
+    suspend fun getAllScriptsOneShot(): List<ScriptEntity>
+}
