@@ -1,0 +1,58 @@
+Script Runner for Termux
+
+A secure Android bridge for managing and executing scripts via Termux. This app allows you to automate tasks, manage environment variables, and create home screen shortcuts for your favorite scripts with a focus on security and ease of use.
+Features
+
+    Integrated Script Editor: Write and modify scripts directly within the app.
+
+    Flexible Execution: Support for background execution or interactive Termux sessions.
+
+    Highly Configurable:
+
+        Support for any file extension.
+
+        Custom prefix commands and arguments.
+
+        Environment variable management.
+
+    Customization: Personalize your script shortcuts with custom icons.
+
+    Data Portability: Full support for importing and exporting your script library.
+
+Security First
+
+I know that scripts often handle sensitive information—whether it's API keys in environment variables or private logic.
+
+    Encrypted Storage: All script data and configurations are stored in an encrypted database using SQLCipher.
+
+Setup & Onboarding
+
+Small onboarding is present for easier setup.
+
+    Note on Permissions: During setup, you will be asked to grant the com.termux.permission.RUN_COMMAND permission. While the system warning may look intimidating, this is the standard and necessary way for third-party apps to securely send commands to Termux.
+
+Compatibility
+
+    Minimum SDK: 24 (Android 7.0)
+
+    Target SDK: 36 (Android 16/Preview)
+
+    Xiaomi / MIUI / HyperOS: Specific fixes are included to handle the unique way these systems manage shortcut permissions.
+
+    Other OEMs: If shortcuts do not appear, please manually check your "Background Start" or "Shortcut" permissions in your system settings, NOTE that some flavour might reject the permission later and not send exception to the app, sadly can't do much here.
+
+Current Status
+
+This project is currently in early development.
+
+    Testing: Lightly tested primarily on small .sh scripts.
+
+    Documentation: Detailed code description is currently under construction.
+
+    Translation: Might be comming, app uses string resources everywhere.
+
+    Stability: While functional, you may encounter edge cases. I recommend keeping backups of vital scripts using the built-in export feature.
+
+Contributing
+
+Contributions, bug reports, and feature requests are welcome! Since the app is in its early stages, feedback on how it handles different script types or OS flavors is especially valuable. This project is currently in early development.
