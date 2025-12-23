@@ -18,9 +18,6 @@ dependencyResolutionManagement {
         mavenCentral()
     }
 }
-/*plugins {
-    id("com.autonomousapps.build-health") version "3.5.0"
-}*/
 rootProject.name = "Script Runner for Termux"
 include(":app")
  
