@@ -21,6 +21,8 @@ android {
         versionName = "1.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        setProperty("archivesBaseName", "ScriptRunnerForTermux")
     }
     buildTypes {
         release {
