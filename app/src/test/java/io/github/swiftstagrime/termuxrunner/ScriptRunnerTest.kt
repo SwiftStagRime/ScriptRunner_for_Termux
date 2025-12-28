@@ -93,7 +93,7 @@ class ScriptRunnerTest {
 
         assertTrue(capturedCommand.contains("export API_KEY='123'"))
 
-        assertTrue(capturedCommand.contains("mkdir -p ~/termux_runner_scripts"))
+        assertTrue(capturedCommand.contains("mkdir -p ~/scriptrunner_for_termux"))
 
         assertTrue(capturedCommand.contains("base64 -d"))
 

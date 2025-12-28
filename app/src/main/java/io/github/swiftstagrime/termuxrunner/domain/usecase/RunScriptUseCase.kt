@@ -56,7 +56,7 @@ class RunScriptUseCase @Inject constructor(
         fileName: String,
         envVars: String
     ): String {
-        val tempDir = "~/termux_runner_scripts"
+        val tempDir = "~/scriptrunner_for_termux"
         val fullPath = "$tempDir/$fileName"
         val encodedCode = Base64.encodeToString(script.code.toByteArray(), Base64.NO_WRAP)
 
@@ -96,7 +96,7 @@ class RunScriptUseCase @Inject constructor(
             return "echo 'Error: Could not save script to device storage.'"
         }
 
-        val termuxDestPath = "~/termux_runner_scripts/$fileName"
+        val termuxDestPath = "~/scriptrunner_for_termux/$fileName"
 
         val runCmd = StringBuilder()
             .append(if (script.commandPrefix.isNotBlank()) "${script.commandPrefix} " else "")
@@ -106,7 +106,7 @@ class RunScriptUseCase @Inject constructor(
             .toString()
 
         return StringBuilder()
-            .append("mkdir -p ~/termux_runner_scripts && ")
+            .append("mkdir -p ~/scriptrunner_for_termux && ")
             .append("cp -f $termuxSourcePath $termuxDestPath && ")
             .append("chmod +x $termuxDestPath && ")
             .append("(")
