@@ -117,6 +117,8 @@ fun OnboardingScreen(
             ) {
                 Spacer(modifier = Modifier.height(8.dp))
                 CodeBlock(code = stringResource(R.string.setup_step_2_code))
+                Spacer(modifier = Modifier.height(8.dp))
+                CodeBlock(code = stringResource(R.string.setup_step_2_code_2))
             }
 
             // Step 3

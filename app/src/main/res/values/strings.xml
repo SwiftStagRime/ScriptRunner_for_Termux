@@ -32,8 +32,9 @@
     <string name="setup_step_1_title">Install Termux</string>
     <string name="setup_step_1_desc">Ensure Termux is installed from F-Droid (Play Store version is outdated).</string>
     <string name="setup_step_2_title">Configure Termux</string>
-    <string name="setup_step_2_desc">Run this in termux to allow external commands and shared storage:</string>
-    <string name="setup_step_2_code">termux-setup-storage &amp;&amp; mkdir -p ~/.termux &amp;&amp; echo \'allow-external-apps=true\' &gt;&gt; ~/.termux/termux.properties &amp;&amp; termux-reload-settings</string>
+    <string name="setup_step_2_desc">Run this in termux to allow external commands and shared storage(Note that you shouldn\'t run the first command if you already granted storage permission):</string>
+    <string name="setup_step_2_code">termux-setup-storage</string>
+    <string name="setup_step_2_code_2">mkdir -p ~/.termux &amp;&amp; echo \'allow-external-apps=true\' &gt;&gt; ~/.termux/termux.properties &amp;&amp; termux-reload-settings</string>
     <string name="setup_step_3_title">Link Permission</string>
     <string name="setup_step_3_desc">Allow this app to send commands to Termux.</string>
     <string name="grant_permission_label">Grant Permission</string>

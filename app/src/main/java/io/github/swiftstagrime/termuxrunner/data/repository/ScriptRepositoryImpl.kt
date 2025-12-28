@@ -2,18 +2,25 @@ package io.github.swiftstagrime.termuxrunner.data.repository
 
 import android.content.Context
 import android.net.Uri
+import android.util.Base64
 import dagger.hilt.android.qualifiers.ApplicationContext
-import io.github.swiftstagrime.termuxrunner.R
 import io.github.swiftstagrime.termuxrunner.data.local.ScriptDao
+import io.github.swiftstagrime.termuxrunner.data.local.ScriptEntity
+import io.github.swiftstagrime.termuxrunner.data.local.ScriptExportDto
 import io.github.swiftstagrime.termuxrunner.data.local.toEntity
+import io.github.swiftstagrime.termuxrunner.data.local.toExportDto
 import io.github.swiftstagrime.termuxrunner.domain.model.Script
 import io.github.swiftstagrime.termuxrunner.domain.repository.ScriptRepository
-import io.github.swiftstagrime.termuxrunner.ui.extensions.UiText
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import java.io.BufferedReader
+import java.io.File
+import java.io.FileOutputStream
 import java.io.InputStreamReader
+import java.util.UUID
 import javax.inject.Inject
 
 class ScriptRepositoryImpl @Inject constructor(
@@ -24,32 +31,85 @@ class ScriptRepositoryImpl @Inject constructor(
     private val json = Json {
         prettyPrint = true
         ignoreUnknownKeys = true
+        encodeDefaults = true
     }
 
     override suspend fun exportScripts(uri: Uri): Result<Unit> = runCatching {
-        val entities = dao.getAllScriptsOneShot()
-        val domainScripts = entities.map { it.toDomain() }
+        withContext(Dispatchers.IO) {
+            val entities = dao.getAllScriptsOneShot()
 
-        val jsonString = json.encodeToString(domainScripts)
+            val exportDtos = entities.map { entity ->
+                val script = entity.toDomain()
+                var base64Icon: String? = null
 
-        context.contentResolver.openOutputStream(uri)?.use { outputStream ->
-            outputStream.write(jsonString.toByteArray())
-        } ?: throw IllegalStateException(
-            UiText.StringResource(R.string.error_export_output).asString(context)
-        )
+                if (script.iconPath != null) {
+                    val file = File(script.iconPath)
+                    if (file.exists()) {
+                        val bytes = file.readBytes()
+                        base64Icon = Base64.encodeToString(bytes, Base64.NO_WRAP)
+                    }
+                }
+
+                script.toExportDto(base64Icon)
+            }
+
+            val jsonString = json.encodeToString(exportDtos)
+
+            context.contentResolver.openOutputStream(uri)?.use { outputStream ->
+                outputStream.write(jsonString.toByteArray())
+            } ?: throw IllegalStateException("Could not open output stream")
+        }
     }
 
     override suspend fun importScripts(uri: Uri): Result<Unit> = runCatching {
-        val jsonString = context.contentResolver.openInputStream(uri)?.use { inputStream ->
-            BufferedReader(InputStreamReader(inputStream)).readText()
-        } ?: throw IllegalStateException(
-            UiText.StringResource(R.string.error_import_input).asString(context)
-        )
+        withContext(Dispatchers.IO) {
+            val jsonString = context.contentResolver.openInputStream(uri)?.use { inputStream ->
+                BufferedReader(InputStreamReader(inputStream)).readText()
+            } ?: throw IllegalStateException("Could not open input stream")
 
-        val scripts = json.decodeFromString<List<Script>>(jsonString)
-        val entities = scripts.map { it.copy(id = 0).toEntity() }
+            val exportDtos = json.decodeFromString<List<ScriptExportDto>>(jsonString)
 
-        dao.insertScripts(entities)
+            val newEntities = exportDtos.map { dto ->
+                var newIconPath: String? = null
+
+                if (dto.iconBase64 != null) {
+                    try {
+                        val imageBytes = Base64.decode(dto.iconBase64, Base64.NO_WRAP)
+
+                        val directory = File(context.filesDir, "script_icons")
+                        if (!directory.exists()) directory.mkdirs()
+
+                        val fileName = "icon_${UUID.randomUUID()}.webp"
+                        val destFile = File(directory, fileName)
+
+                        FileOutputStream(destFile).use { out ->
+                            out.write(imageBytes)
+                        }
+
+                        newIconPath = destFile.absolutePath
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
+                }
+
+                ScriptEntity(
+                    id = 0,
+                    name = dto.name,
+                    code = dto.code,
+                    interpreter = dto.interpreter,
+                    fileExtension = dto.fileExtension,
+                    commandPrefix = dto.commandPrefix,
+                    runInBackground = dto.runInBackground,
+                    openNewSession = dto.openNewSession,
+                    executionParams = dto.executionParams,
+                    keepSessionOpen = dto.keepSessionOpen,
+                    envVars = dto.envVars,
+                    iconPath = newIconPath
+                )
+            }
+
+            dao.insertScripts(newEntities)
+        }
     }
 
     override fun getAllScripts(): Flow<List<Script>> {

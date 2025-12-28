@@ -14,7 +14,8 @@ class ScriptFileRepositoryImpl @Inject constructor(
 ) : ScriptFileRepository {
 
     override fun saveToBridge(fileName: String, code: String): String {
-        val downloadDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+        val downloadDir =
+            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
 
         val folderName = context.getString(R.string.bridge_folder_name)
         val bridgeDir = File(downloadDir, folderName)

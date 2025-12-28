@@ -1,6 +1,8 @@
 Script Runner for Termux
 
-A secure Android bridge for managing and executing scripts via Termux. This app allows you to automate tasks, manage environment variables, and create home screen shortcuts for your favorite scripts with a focus on security and ease of use.
+A secure Android bridge for managing and executing scripts via Termux. This app allows you to
+automate tasks, manage environment variables, and create home screen shortcuts for your favorite
+scripts with a focus on security and ease of use.
 Features
 
     Integrated Script Editor: Write and modify scripts directly within the app.
@@ -21,7 +23,8 @@ Features
 
 Security First
 
-I know that scripts often handle sensitive information—whether it's API keys in environment variables or private logic.
+I know that scripts often handle sensitive information—whether it's API keys in environment
+variables or private logic.
 
     Encrypted Storage: All script data and configurations are stored in an encrypted database using SQLCipher.
 
@@ -45,14 +48,16 @@ Current Status
 
 This project is currently in early development.
 
-    Testing: Lightly tested primarily on small .sh scripts.
+    Testing: Tested various extensions, and all works as expected
 
     Documentation: Detailed code description is currently under construction.
 
     Translation: Might be comming, app uses string resources everywhere.
 
-    Stability: While functional, you may encounter edge cases. I recommend keeping backups of vital scripts using the built-in export feature.
+    Stability: While functional, you may encounter edge cases. I recommend keeping backups of vital scripts using the built-in export feature. Also, BasicTextField starts lagging while typing at around 177K characters on Snapdragon 7s gen2, Snapdragon 8 gen3 does not have the same expirence. I have tested and linenumbergutter has no effect on perfomance, so it might be the internal implementation. I don't want to move to other ways of displaying stuff, because I will loose stylo support on my tablet 
 
 Contributing
 
-Contributions, bug reports, and feature requests are welcome! Since the app is in its early stages, feedback on how it handles different script types or OS flavors is especially valuable. This project is currently in early development.
+Contributions, bug reports, and feature requests are welcome! Since the app is in its early stages,
+feedback on how it handles different script types or OS flavors is especially valuable. This project
+is currently in early development.
