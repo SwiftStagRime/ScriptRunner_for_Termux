@@ -22,7 +22,10 @@ import java.io.FileOutputStream
 import java.io.InputStreamReader
 import java.util.UUID
 import javax.inject.Inject
-
+/**
+ * Repository implementation for managing scripts, handling database operations
+ * and script portability (import/export).
+ */
 class ScriptRepositoryImpl @Inject constructor(
     private val dao: ScriptDao,
     @ApplicationContext private val context: Context
@@ -42,6 +45,7 @@ class ScriptRepositoryImpl @Inject constructor(
                 val script = entity.toDomain()
                 var base64Icon: String? = null
 
+                // Convert local icon file to Base64 string for JSON portability
                 if (script.iconPath != null) {
                     val file = File(script.iconPath)
                     if (file.exists()) {
@@ -71,7 +75,7 @@ class ScriptRepositoryImpl @Inject constructor(
 
             val newEntities = exportDtos.map { dto ->
                 var newIconPath: String? = null
-
+                // Reconstruct icon file from Base64 if present in the import data
                 if (dto.iconBase64 != null) {
                     try {
                         val imageBytes = Base64.decode(dto.iconBase64, Base64.NO_WRAP)
@@ -93,7 +97,7 @@ class ScriptRepositoryImpl @Inject constructor(
                 }
 
                 ScriptEntity(
-                    id = 0,
+                    id = 0, // Ensure Room treats this as a new entry. Thus we are not overriding current scripts, note that this will lead possible to duplicates
                     name = dto.name,
                     code = dto.code,
                     interpreter = dto.interpreter,

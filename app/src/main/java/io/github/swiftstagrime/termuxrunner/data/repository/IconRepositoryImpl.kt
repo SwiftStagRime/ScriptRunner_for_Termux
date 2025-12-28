@@ -5,6 +5,9 @@ import io.github.swiftstagrime.termuxrunner.data.local.ImageStorageManager
 import io.github.swiftstagrime.termuxrunner.domain.repository.IconRepository
 import javax.inject.Inject
 
+/**
+ * Simple repo for better testability, saves icon and returns path
+ */
 class IconRepositoryImpl @Inject constructor(
     private val imageStorageManager: ImageStorageManager
 ) : IconRepository {

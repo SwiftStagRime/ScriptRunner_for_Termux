@@ -22,7 +22,9 @@ import io.github.swiftstagrime.termuxrunner.ui.features.runner.ScriptRunnerActiv
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
-
+/**
+ * Handles the creation of home screen shortcuts for quick script execution.
+ */
 class ShortcutRepositoryImpl @Inject constructor(
     @ApplicationContext private val context: Context
 ) : ShortcutRepository {
@@ -36,6 +38,7 @@ class ShortcutRepositoryImpl @Inject constructor(
     ) {
         if (!isPinningSupported()) return@withContext null
 
+        // Configure intent to trigger the script execution activity via a deep link
         val intent = Intent(context, ScriptRunnerActivity::class.java).apply {
             action = Intent.ACTION_VIEW
             putExtra("SCRIPT_ID", script.id)
@@ -70,6 +73,7 @@ class ShortcutRepositoryImpl @Inject constructor(
                 UiText.StringResource(R.string.error_decode_icon).asString(context)
             )
 
+        // Process the icon to meet Android's adaptive icon requirements (scaling and centering)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val targetSize = 256
 

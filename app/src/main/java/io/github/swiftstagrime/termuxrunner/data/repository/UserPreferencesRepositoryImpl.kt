@@ -12,6 +12,9 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
+/**
+ * Manages general app settings and UI preferences using Jetpack DataStore.
+ */
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "app_settings")
 
 class UserPreferencesRepositoryImpl @Inject constructor(

@@ -15,6 +15,10 @@ import java.io.FileOutputStream
 import java.util.UUID
 import javax.inject.Inject
 
+/**
+ * Manages the processing and internal storage of script icons.
+ */
+
 class ImageStorageManager @Inject constructor(
     @ApplicationContext private val context: Context
 ) {
@@ -23,7 +27,10 @@ class ImageStorageManager @Inject constructor(
         const val TARGET_SIZE_PX = 256
         const val ICON_DIR = "script_icons"
     }
-
+    /**
+     * Processes a selected image: decodes, resizes to fit [TARGET_SIZE_PX],
+     * and saves it as a WebP file. Returns the absolute path.
+     */
     suspend fun saveImageFromUri(uri: Uri): Result<String> = withContext(Dispatchers.IO) {
         try {
             val directory = File(context.filesDir, ICON_DIR)

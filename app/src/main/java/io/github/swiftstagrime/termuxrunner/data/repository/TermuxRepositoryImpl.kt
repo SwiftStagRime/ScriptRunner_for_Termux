@@ -15,7 +15,9 @@ import io.github.swiftstagrime.termuxrunner.R
 import io.github.swiftstagrime.termuxrunner.domain.repository.TermuxRepository
 import io.github.swiftstagrime.termuxrunner.ui.extensions.UiText
 import javax.inject.Inject
-
+/**
+ * Custom exceptions mapping Termux-specific integration failures to user-friendly strings.
+ */
 sealed class TermuxException(val uiText: UiText) : Exception()
 
 class TermuxNotInstalledException : TermuxException(
@@ -30,6 +32,9 @@ class TermuxBackgroundRestrictionException : TermuxException(
     UiText.StringResource(R.string.error_background_restriction)
 )
 
+/**
+ * Handles communication with the Termux app using its 'RunCommand' API.
+ */
 class TermuxRepositoryImpl @Inject constructor(
     @ApplicationContext private val context: Context
 ) : TermuxRepository {
@@ -37,10 +42,10 @@ class TermuxRepositoryImpl @Inject constructor(
     companion object {
         const val TERMUX_PACKAGE = "com.termux"
 
+        // Termux RunCommand API constants
         const val ACTION_RUN_COMMAND = "com.termux.RUN_COMMAND"
 
         const val PERMISSION_RUN_COMMAND = "com.termux.permission.RUN_COMMAND"
-
         const val EXTRA_COMMAND_PATH = "com.termux.RUN_COMMAND_PATH"
         const val EXTRA_ARGUMENTS = "com.termux.RUN_COMMAND_ARGUMENTS"
         const val EXTRA_BACKGROUND = "com.termux.RUN_COMMAND_BACKGROUND"
@@ -77,6 +82,7 @@ class TermuxRepositoryImpl @Inject constructor(
             throw TermuxPermissionException()
         }
 
+        // We route all commands through bash -c to support complex scripts/pipes
         val intent = Intent(ACTION_RUN_COMMAND).apply {
             setClassName(TERMUX_PACKAGE, "com.termux.app.RunCommandService")
             putExtra(EXTRA_COMMAND_PATH, "/data/data/com.termux/files/usr/bin/bash")
@@ -94,6 +100,7 @@ class TermuxRepositoryImpl @Inject constructor(
         } catch (_: SecurityException) {
             throw TermuxPermissionException()
         } catch (e: Exception) {
+            // Specifically handle Android 12+ foreground service restrictions
             if (e.message?.contains("ForegroundServiceStartNotAllowedException") == true) {
                 throw TermuxBackgroundRestrictionException()
             }
@@ -103,6 +110,8 @@ class TermuxRepositoryImpl @Inject constructor(
 
     override fun requestTermuxOverlay() {
         try {
+            // Attempt to open the "Draw over other apps" settings for Termux
+            // This is often required for Termux to start sessions from the background
             val intent = Intent(
                 Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
                 "package:com.termux".toUri()
@@ -111,6 +120,7 @@ class TermuxRepositoryImpl @Inject constructor(
             context.startActivity(intent)
         } catch (_: Exception) {
             try {
+                // Fallback to app details if direct overlay settings fail
                 val intent = Intent(
                     Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
                     "package:com.termux".toUri()

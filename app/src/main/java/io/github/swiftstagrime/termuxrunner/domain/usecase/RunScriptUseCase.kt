@@ -8,11 +8,15 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
+/**
+ * Use case to prepare and execute a script within the Termux environment.
+ */
 class RunScriptUseCase @Inject constructor(
     private val termuxRepository: TermuxRepository,
     private val scriptFileRepository: ScriptFileRepository
 ) {
     suspend operator fun invoke(script: Script) = withContext(Dispatchers.IO) {
+        // Sanitize and format environment variables for shell export
         val envVarString = StringBuilder()
         script.envVars.forEach { (key, value) ->
             if (key.matches(Regex("^[a-zA-Z_][a-zA-Z0-9_]*$"))) {
@@ -21,6 +25,7 @@ class RunScriptUseCase @Inject constructor(
             }
         }
 
+        // Determine file extension based on the selected interpreter
         val extension = if (script.fileExtension.isNotBlank()) {
             script.fileExtension.trim().removePrefix(".")
         } else {
@@ -36,6 +41,8 @@ class RunScriptUseCase @Inject constructor(
         val uniqueId = "${script.id}_${System.currentTimeMillis()}"
         val fileName = "script_$uniqueId.$extension"
 
+        // Use a 4KB threshold to decide between Base64 embedding or external file bridging
+        // to avoid Binder transaction size limits in Android Intents.
         val isLargeScript = script.code.length > 4000
 
         val finalCommand = if (isLargeScript) {
@@ -58,6 +65,7 @@ class RunScriptUseCase @Inject constructor(
     ): String {
         val tempDir = "~/scriptrunner_for_termux"
         val fullPath = "$tempDir/$fileName"
+        // Embed the script directly in the command as a Base64 string
         val encodedCode = Base64.encodeToString(script.code.toByteArray(), Base64.NO_WRAP)
 
         val runCmd = StringBuilder()
@@ -78,6 +86,7 @@ class RunScriptUseCase @Inject constructor(
             .append("rm -f $fullPath")
             .apply {
                 if (script.keepSessionOpen) {
+                    // Prevent session closure by waiting for input and restarting the shell
                     append($$"; echo; echo '--- Finished (Press Enter) ---'; read; exec $SHELL")
                 }
             }
@@ -89,6 +98,7 @@ class RunScriptUseCase @Inject constructor(
         fileName: String,
         envVars: String
     ): String {
+        // Save script to a bridge directory that Termux can access via 'termux-setup-storage'
         val termuxSourcePath = try {
             scriptFileRepository.saveToBridge(fileName, script.code)
         } catch (e: Exception) {

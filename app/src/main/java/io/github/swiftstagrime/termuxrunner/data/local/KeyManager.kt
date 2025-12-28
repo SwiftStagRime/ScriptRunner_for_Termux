@@ -24,6 +24,10 @@ import javax.inject.Singleton
 
 private val Context.keyDataStore: DataStore<Preferences> by preferencesDataStore(name = "secure_db_key")
 
+/**
+ * Manages the encryption key for the Room database using Google Tink and Android KeyStore.
+ */
+
 @Singleton
 class KeyManager @Inject constructor(
     @ApplicationContext private val context: Context
@@ -63,6 +67,7 @@ class KeyManager @Inject constructor(
             return loadExistingKey()
         } catch (e: Exception) {
             e.printStackTrace()
+            // If decryption fails (e.g., hardware key lost), wipe everything to start fresh
             resetAll()
             return generateNewKey()
         }
@@ -99,6 +104,7 @@ class KeyManager @Inject constructor(
     }
 
     private fun getMasterKeyOrThrow(): Aead {
+        // Integrates Tink with Android KeyStore for hardware-backed securi
         return AndroidKeysetManager.Builder()
             .withSharedPref(context, KEYSET_NAME, PREF_FILE_NAME)
             .withKeyTemplate(AEAD_KEY_TEMPLATE)
@@ -118,12 +124,13 @@ class KeyManager @Inject constructor(
 
         try {
             context.deleteSharedPreferences(PREF_FILE_NAME)
-
+            // Explicitly remove the master key from the Android hardware KeyStore
             val keyStore = KeyStore.getInstance("AndroidKeyStore")
             keyStore.load(null)
             keyStore.deleteEntry("master_key")
         } catch (_: Exception) {
         }
+        // Delete database as it's unrecoverable without the original key
         context.deleteDatabase(DB_NAME)
     }
 }

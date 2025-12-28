@@ -9,6 +9,9 @@ import java.io.File
 import java.io.IOException
 import javax.inject.Inject
 
+/**
+ * Repo for saving script to bridge folder if they are close to possibly exceeding Intent
+ */
 class ScriptFileRepositoryImpl @Inject constructor(
     @ApplicationContext private val context: Context
 ) : ScriptFileRepository {
