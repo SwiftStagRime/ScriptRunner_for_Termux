@@ -38,6 +38,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import io.github.swiftstagrime.termuxrunner.R
+import io.github.swiftstagrime.termuxrunner.ui.components.LanguageSelectorButton
 import io.github.swiftstagrime.termuxrunner.ui.preview.DevicePreviews
 import io.github.swiftstagrime.termuxrunner.ui.theme.ScriptRunnerForTermuxTheme
 
@@ -81,7 +82,22 @@ fun SettingsScreen(
                     color = MaterialTheme.colorScheme.primary
                 )
                 Spacer(modifier = Modifier.height(8.dp))
-
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
+                        .padding(16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = stringResource(R.string.language_label),
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                    LanguageSelectorButton()
+                }
+                Spacer(modifier = Modifier.height(12.dp))
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()

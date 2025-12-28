@@ -169,7 +169,7 @@ fun HomeScreen(
                         titleContentColor = MaterialTheme.colorScheme.onSurface,
                         actionIconContentColor = MaterialTheme.colorScheme.onSurface
                     ),
-                    title = { Text("My Scripts") },
+                    title = { Text(stringResource(R.string.home_title)) },
                     actions = {
                         IconButton(onClick = { isSearchActive = true }) {
                             Icon(

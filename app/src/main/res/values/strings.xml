@@ -1,7 +1,7 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Do not rename -->
-    <string name="app_name">Script Runner for Termux</string>
-    <string name="bridge_folder_name">TermuxRunnerBridge</string>
+    <string name="app_name" translatable="false">Script Runner for Termux</string>
+    <string name="bridge_folder_name" translatable="false">TermuxRunnerBridge</string>
+    <string name="language_label">Language</string>
 
     <!-- Settings -->
     <string name="settings_title">Settings</string>
@@ -14,7 +14,7 @@
     <string name="export_label">Export</string>
     <string name="developed_by">Developed by</string>
     <string name="open_github_description">Open Github</string>
-    <string name="export_filename">scripts_backup.json</string>
+    <string name="export_filename" translatable="false">scripts_backup.json</string>
 
     <string name="exporting">Exporting…</string>
     <string name="export_success">Export Successful</string>
@@ -33,8 +33,8 @@
     <string name="setup_step_1_desc">Ensure Termux is installed from F-Droid (Play Store version is outdated).</string>
     <string name="setup_step_2_title">Configure Termux</string>
     <string name="setup_step_2_desc">Run this in termux to allow external commands and shared storage(Note that you shouldn\'t run the first command if you already granted storage permission):</string>
-    <string name="setup_step_2_code">termux-setup-storage</string>
-    <string name="setup_step_2_code_2">mkdir -p ~/.termux &amp;&amp; echo \'allow-external-apps=true\' &gt;&gt; ~/.termux/termux.properties &amp;&amp; termux-reload-settings</string>
+    <string name="setup_step_2_code" translatable="false">termux-setup-storage</string>
+    <string name="setup_step_2_code_2" translatable="false">mkdir -p ~/.termux &amp;&amp; echo \'allow-external-apps=true\' &gt;&gt; ~/.termux/termux.properties &amp;&amp; termux-reload-settings</string>
     <string name="setup_step_3_title">Link Permission</string>
     <string name="setup_step_3_desc">Allow this app to send commands to Termux.</string>
     <string name="grant_permission_label">Grant Permission</string>
@@ -98,20 +98,20 @@
     <string name="label_script_name">Script Name</string>
     <string name="placeholder_script_name">My Automation Script</string>
     <string name="label_interpreter">Interpreter</string>
-    <string name="placeholder_interpreter">bash</string>
-    <string name="label_extension">Ext</string>
-    <string name="placeholder_extension">sh</string>
+    <string name="placeholder_interpreter" translatable="false">bash</string>
+    <string name="label_extension" translatable="false">Ext</string>
+    <string name="placeholder_extension" translatable="false">sh</string>
     <string name="label_prefix">Prefix Command</string>
     <string name="placeholder_prefix">e.g. sudo, time</string>
     <string name="label_arguments">Arguments</string>
-    <string name="placeholder_arguments" tools:ignore="TypographyDashes,Typos">-v --config config.json</string>
+    <string name="placeholder_arguments" translatable="false" tools:ignore="TypographyDashes,Typos">-v --config config.json</string>
     <string name="label_bg_execution">Background Execution</string>
     <string name="desc_bg_execution">Only show notification</string>
     <string name="label_interactive_session">Interactive Session</string>
     <string name="desc_interactive_session">Keep terminal open after finish</string>
     <string name="empty_env_vars">No environment variables set.</string>
     <string name="label_key">Key</string>
-    <string name="placeholder_key">API_KEY</string>
+    <string name="placeholder_key" translatable="false">API_KEY</string>
     <string name="label_value">Value</string>
     <string name="placeholder_value">12345</string>
     <string name="cd_remove">Remove</string>

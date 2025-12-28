@@ -1,10 +1,10 @@
 package io.github.swiftstagrime.termuxrunner.ui
 
 import android.os.Bundle
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -21,7 +21,7 @@ import io.github.swiftstagrime.termuxrunner.ui.navigation.rememberEntryProvider
 import io.github.swiftstagrime.termuxrunner.ui.theme.ScriptRunnerForTermuxTheme
 
 @AndroidEntryPoint
-class MainActivity : ComponentActivity() {
+class MainActivity : AppCompatActivity() {
 
     private val mainViewModel: MainViewModel by viewModels()
 

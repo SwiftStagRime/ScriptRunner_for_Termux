@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="language_label">Язык</string>
+    <!-- Settings -->
+    <string name="settings_title">Настройки</string>
+    <string name="back_description">Назад</string>
+    <string name="appearance_label">Внешний вид</string>
+    <string name="dynamic_color_title">Динамический цвет</string>
+    <string name="dynamic_color_subtitle">Использовать цвета обоев</string>
+    <string name="data_management_label">Управление данными</string>
+    <string name="import_label">Импорт</string>
+    <string name="export_label">Экспорт</string>
+    <string name="developed_by">Разработано</string>
+    <string name="open_github_description">Открыть Github</string>
+
+    <string name="exporting">Экспорт…</string>
+    <string name="export_success">Экспорт выполнен успешно</string>
+    <string name="export_failed">Ошибка экспорта: %1$s</string>
+    <string name="importing">Импорт…</string>
+    <string name="import_success">Импорт выполнен успешно</string>
+    <string name="import_failed">Ошибка импорта: %1$s</string>
+
+    <!-- Runner -->
+    <string name="script_runner_permission_denied">В доступе отказано</string>
+
+    <!-- Onboarding -->
+    <string name="onboarding_setup_title">Настройка</string>
+    <string name="onboarding_subtitle">Выполните эти шаги, чтобы связать приложение с Termux.</string>
+    <string name="setup_step_1_title">Установите Termux</string>
+    <string name="setup_step_1_desc">Убедитесь, что Termux установлен из F-Droid (версия в Play Store устарела).</string>
+    <string name="setup_step_2_title">Настройте Termux</string>
+    <string name="setup_step_2_desc">Выполните комманды в Termux, чтобы разрешить внешние команды и доступ к хранилищу (не выполняйте первую команду, если доступ к памяти уже предоставлен):</string>
+
+    <string name="setup_step_3_title">Разрешение связки приложений</string>
+    <string name="setup_step_3_desc">Разрешите этому приложению отправлять команды в Termux.</string>
+    <string name="grant_permission_label">Предоставить доступ</string>
+    <string name="setup_step_4_title">Разрешите запуск в фоне</string>
+    <string name="setup_step_4_desc">Найдите \'Termux\' в списке и включите \'Поверх других приложений\'. Это необходимо для запуска скриптов из фона.</string>
+    <string name="setup_step_5_title">Отключить экономию заряда</string>
+    <string name="setup_step_5_desc">Android ограничивает фоновые процессы. Вы должны установить использование батареи для Termux в режим \'Без ограничений\'.</string>
+    <string name="battery_warning_text">Если игнорировать: Скрипты и Ярлыки НЕ будут работать, пока вы не откроете Termux вручную, если Termux был убит ОС</string>
+
+    <!--Home -->
+    <string name="home_title">Мои скрипты</string>
+    <string name="search_placeholder">Поиск скриптов…</string>
+    <string name="cd_close_search">Закрыть поиск</string>
+    <string name="cd_clear_search">Очистить поиск</string>
+    <string name="cd_search">Поиск</string>
+    <string name="cd_settings">Настройки</string>
+    <string name="cd_add_script">Добавить скрипт</string>
+    <string name="empty_search_results">Скрипты не найдены.</string>
+    <string name="empty_scripts_list">Скриптов пока нет. Нажмите +, чтобы создать.</string>
+    <string name="cd_run_script">Запустить</string>
+    <string name="cd_more_options">Ещё</string>
+    <string name="menu_configuration">Конфигурация</string>
+    <string name="menu_pin_shortcut">Закрепить ярлык</string>
+    <string name="menu_delete">Удалить</string>
+    <string name="cd_script_icon">Иконка скрипта</string>
+    <string name="msg_running_script">Запуск: %1$s</string>
+    <string name="error_termux_not_installed">Ошибка: Termux не установлен.</string>
+    <string name="error_generic">Ошибка: %1$s</string>
+    <string name="msg_script_deleted">Скрипт удален</string>
+    <string name="msg_config_saved">Конфигурация сохранена</string>
+    <string name="msg_permission_denied">В доступе отказано. Невозможно запустить скрипт.</string>
+    <string name="error_shortcut_failed">Не удалось создать ярлык</string>
+    <string name="error_pinning_not_supported">Лаунчер не поддерживает закрепление ярлыков.</string>
+    <string name="msg_miui_shortcut_permission">MIUI требует вручную выдать разрешение на создание ярлыков.</string>
+    <string name="action_settings">Настройки</string>
+    <string name="msg_shortcut_denied_system">Система отклонила создание ярлыка.</string>
+
+    <!-- Editor -->
+    <string name="editor_untitled">Без названия</string>
+    <string name="editor_placeholder"># Начните кодить…</string>
+    <string name="editor_search_placeholder">Найти…</string>
+    <string name="cd_undo">Отменить</string>
+    <string name="cd_redo">Вернуть</string>
+    <string name="cd_comment">Закомментировать</string>
+    <string name="cd_hide_toolbar">Скрыть</string>
+    <string name="cd_show_toolbar">Показать панель</string>
+    <string name="cd_prev_match">Пред. совпадение</string>
+    <string name="cd_next_match">След. совпадение</string>
+    <string name="key_home">Home</string>
+    <string name="key_end">End</string>
+
+    <!-- Config -->
+    <string name="config_dialog_title">Настройки скрипта</string>
+    <string name="cd_close">Закрыть</string>
+    <string name="cd_save">Сохранить</string>
+    <string name="section_identity">Основное</string>
+    <string name="section_execution">Выполнение</string>
+    <string name="section_behavior">Поведение</string>
+    <string name="section_env_vars">Переменные окружения</string>
+    <string name="cd_add_icon">Добавить иконку</string>
+    <string name="label_script_name">Название скрипта</string>
+    <string name="placeholder_script_name">Мой скрипт</string>
+    <string name="label_interpreter">Интерпретатор</string>
+    <string name="label_prefix">Префикс команды</string>
+    <string name="placeholder_prefix">напр. sudo, time</string>
+    <string name="label_arguments">Аргументы</string>
+    <string name="label_bg_execution">Фоновое выполнение</string>
+    <string name="desc_bg_execution">Показывать только уведомление</string>
+    <string name="label_interactive_session">Интерактивная сессия</string>
+    <string name="desc_interactive_session">Оставить терминал открытым после завершения</string>
+    <string name="empty_env_vars">Переменные не заданы.</string>
+    <string name="label_key">Ключ</string>
+    <string name="label_value">Значение</string>
+    <string name="placeholder_value">12345</string>
+    <string name="cd_remove">Удалить</string>
+    <string name="btn_add_variable">Добавить переменную</string>
+    <string name="open_termux_settings">Открыть настройки Termux</string>
+    <string name="finish_setup_label">Я закончил настройку</string>
+    <string name="copy_clipboard_description">Копировать в буфер</string>
+    <string name="done_description">Готово</string>
+    <string name="error_description">Ошибка</string>
+
+    <!-- Config Errors -->
+    <string name="error_empty_name">Имя скрипта не может быть пустым</string>
+
+    <!-- Repo errors -->
+    <string name="error_termux_permission_missing">Отсутствует разрешение "Run Command" для Termux.</string>
+    <string name="error_background_restriction">Фоновое выполнение ограничено. Отключите экономию батареи для Termux/Runner.</string>
+    <string name="error_find_overlay_manually">Пожалуйста, найдите \'Поверх других приложений\' вручную.</string>
+    <string name="error_open_settings_manually">Не удалось открыть настройки. Пожалуйста, откройте настройки Android вручную.</string>
+    <string name="error_decode_icon">Не удалось декодировать файл иконки.</string>
+    <string name="error_export_output">Не удалось открыть поток для экспорта.</string>
+    <string name="error_import_input">Не удалось открыть поток для импорта.</string>
+    <string name="error_create_bridge_dir">Не удалось создать директорию моста</string>
+</resources>
+

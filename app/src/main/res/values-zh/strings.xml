@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="language_label">语言</string>
+    <!-- Settings -->
+    <string name="settings_title">设置</string>
+    <string name="back_description">返回</string>
+    <string name="appearance_label">外观</string>
+    <string name="dynamic_color_title">动态取色</string>
+    <string name="dynamic_color_subtitle">使用壁纸颜色</string>
+    <string name="data_management_label">数据管理</string>
+    <string name="import_label">导入</string>
+    <string name="export_label">导出</string>
+    <string name="developed_by">开发者</string>
+    <string name="open_github_description">打开 Github</string>
+
+    <string name="exporting">正在导出…</string>
+    <string name="export_success">导出成功</string>
+    <string name="export_failed">导出失败: %1$s</string>
+    <string name="importing">正在导入…</string>
+    <string name="import_success">导入成功</string>
+    <string name="import_failed">导入失败: %1$s</string>
+
+    <!-- Runner -->
+    <string name="script_runner_permission_denied">权限被拒绝</string>
+
+    <!-- Onboarding -->
+    <string name="onboarding_setup_title">设置向导</string>
+    <string name="onboarding_subtitle">请按照以下步骤将应用与 Termux 连接。</string>
+    <string name="setup_step_1_title">安装 Termux</string>
+    <string name="setup_step_1_desc">确保已从 F-Droid 安装 Termux（Play 商店版本已过时）。</string>
+    <string name="setup_step_2_title">配置 Termux</string>
+    <string name="setup_step_2_desc">在 Termux 中运行以下命令以允许外部应用调用及存储访问（如果已授予存储权限，请勿运行第一条命令）：</string>
+
+    <string name="setup_step_3_title">关联权限</string>
+    <string name="setup_step_3_desc">允许此应用向 Termux 发送命令。</string>
+    <string name="grant_permission_label">授予权限</string>
+    <string name="setup_step_4_title">允许后台启动</string>
+    <string name="setup_step_4_desc">在列表中找到 “Termux” 并启用 “显示在其他应用的上层”。后台运行脚本需要此权限。</string>
+    <string name="setup_step_5_title">禁用电池优化</string>
+    <string name="setup_step_5_desc">Android 会限制后台应用。您必须将 Termux 的电池使用量设置为 “无限制”。</string>
+    <string name="battery_warning_text">若忽略此项：除非您手动打开 Termux，否则脚本和快捷方式将无法运行。</string>
+
+    <!--Home -->
+    <string name="home_title">我的脚本</string>
+    <string name="search_placeholder">搜索脚本…</string>
+    <string name="cd_close_search">关闭搜索</string>
+    <string name="cd_clear_search">清除搜索</string>
+    <string name="cd_search">搜索</string>
+    <string name="cd_settings">设置</string>
+    <string name="cd_add_script">新建脚本</string>
+    <string name="empty_search_results">未找到匹配的脚本。</string>
+    <string name="empty_scripts_list">暂无脚本。点击 + 创建一个。</string>
+    <string name="cd_run_script">运行</string>
+    <string name="cd_more_options">更多</string>
+    <string name="menu_configuration">配置</string>
+    <string name="menu_pin_shortcut">固定快捷方式</string>
+    <string name="menu_delete">删除</string>
+    <string name="cd_script_icon">脚本图标</string>
+    <string name="msg_running_script">正在运行: %1$s</string>
+    <string name="error_termux_not_installed">错误: 未安装 Termux。</string>
+    <string name="error_generic">错误: %1$s</string>
+    <string name="msg_script_deleted">脚本已删除</string>
+    <string name="msg_config_saved">配置已保存</string>
+    <string name="msg_permission_denied">权限被拒绝，无法运行脚本。</string>
+    <string name="error_shortcut_failed">创建快捷方式信息失败</string>
+    <string name="error_pinning_not_supported">当前启动器不支持固定快捷方式。</string>
+    <string name="msg_miui_shortcut_permission">MIUI 需要手动开启 “创建桌面快捷方式” 权限。</string>
+    <string name="action_settings">去设置</string>
+    <string name="msg_shortcut_denied_system">系统拒绝了快捷方式请求。</string>
+
+    <!-- Editor -->
+    <string name="editor_untitled">无标题</string>
+    <string name="editor_placeholder"># 开始编写代码…</string>
+    <string name="editor_search_placeholder">查找…</string>
+    <string name="cd_undo">撤销</string>
+    <string name="cd_redo">重做</string>
+    <string name="cd_comment">注释</string>
+    <string name="cd_hide_toolbar">隐藏</string>
+    <string name="cd_show_toolbar">显示工具栏</string>
+    <string name="cd_prev_match">上一个</string>
+    <string name="cd_next_match">下一个</string>
+    <string name="key_home">Home</string>
+    <string name="key_end">End</string>
+
+    <!-- Config -->
+    <string name="config_dialog_title">脚本配置</string>
+    <string name="cd_close">关闭</string>
+    <string name="cd_save">保存</string>
+    <string name="section_identity">基本信息</string>
+    <string name="section_execution">执行选项</string>
+    <string name="section_behavior">行为设置</string>
+    <string name="section_env_vars">环境变量</string>
+    <string name="cd_add_icon">添加图标</string>
+    <string name="label_script_name">脚本名称</string>
+    <string name="placeholder_script_name">我的自动化脚本</string>
+    <string name="label_interpreter">解释器</string>
+    <string name="label_prefix">命令前缀</string>
+    <string name="placeholder_prefix">例如 sudo, time</string>
+    <string name="label_arguments">参数</string>
+    <string name="label_bg_execution">后台执行</string>
+    <string name="desc_bg_execution">仅显示通知</string>
+    <string name="label_interactive_session">交互式会话</string>
+    <string name="desc_interactive_session">运行结束后保持终端开启</string>
+    <string name="empty_env_vars">未设置环境变量。</string>
+    <string name="label_key">键 (Key)</string>
+    <string name="label_value">值 (Value)</string>
+    <string name="placeholder_value">12345</string>
+    <string name="cd_remove">移除</string>
+    <string name="btn_add_variable">添加变量</string>
+    <string name="open_termux_settings">打开 Termux 设置</string>
+    <string name="finish_setup_label">我已完成设置</string>
+    <string name="copy_clipboard_description">复制到剪贴板</string>
+    <string name="done_description">完成</string>
+    <string name="error_description">错误</string>
+
+    <!-- Config Errors -->
+    <string name="error_empty_name">脚本名称不能为空</string>
+
+    <!-- Repo errors -->
+    <string name="error_termux_permission_missing">缺少 Termux "Run Command" 权限。</string>
+    <string name="error_background_restriction">检测到后台限制。请为 Termux/Runner 关闭电池优化。</string>
+    <string name="error_find_overlay_manually">请手动找到 “显示在其他应用的上层” 选项。</string>
+    <string name="error_open_settings_manually">无法打开设置。请手动打开 Android 设置。</string>
+    <string name="error_decode_icon">无法解码图标文件。</string>
+    <string name="error_export_output">无法打开导出输出流。</string>
+    <string name="error_import_input">无法打开导入输入流。</string>
+    <string name="error_create_bridge_dir">无法创建 Bridge 目录</string>
+</resources>
+
+  

@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="language_label">Sprache</string>
+    <!-- Settings -->
+    <string name="settings_title">Einstellungen</string>
+    <string name="back_description">Zurück</string>
+    <string name="appearance_label">Darstellung</string>
+    <string name="dynamic_color_title">Dynamische Farben</string>
+    <string name="dynamic_color_subtitle">Hintergrundfarben verwenden</string>
+    <string name="data_management_label">Datenverwaltung</string>
+    <string name="import_label">Importieren</string>
+    <string name="export_label">Exportieren</string>
+    <string name="developed_by">Entwickelt von</string>
+    <string name="open_github_description">Github öffnen</string>
+
+    <string name="exporting">Exportieren…</string>
+    <string name="export_success">Export erfolgreich</string>
+    <string name="export_failed">Export fehlgeschlagen: %1$s</string>
+    <string name="importing">Importieren…</string>
+    <string name="import_success">Import erfolgreich</string>
+    <string name="import_failed">Import fehlgeschlagen: %1$s</string>
+
+    <!-- Runner -->
+    <string name="script_runner_permission_denied">Zugriff verweigert</string>
+
+    <!-- Onboarding -->
+    <string name="onboarding_setup_title">Einrichtung</string>
+    <string name="onboarding_subtitle">Folgen Sie diesen Schritten, um die App mit Termux zu verbinden.</string>
+    <string name="setup_step_1_title">Termux installieren</string>
+    <string name="setup_step_1_desc">Stellen Sie sicher, dass Termux von F-Droid installiert ist (die Play Store Version ist veraltet).</string>
+    <string name="setup_step_2_title">Termux konfigurieren</string>
+    <string name="setup_step_2_desc">Führen Sie dies in Termux aus, um externe Befehle und Speicherzugriff zu erlauben (Führen Sie den ersten Befehl nicht aus, wenn der Speicherzugriff bereits gewährt wurde):</string>
+
+    <string name="setup_step_3_title">Berechtigungen verknüpfen</string>
+    <string name="setup_step_3_desc">Dieser App erlauben, Befehle an Termux zu senden.</string>
+    <string name="grant_permission_label">Erlaubnis erteilen</string>
+    <string name="setup_step_4_title">Hintergrundstart erlauben</string>
+    <string name="setup_step_4_desc">Suchen Sie \'Termux\' in der Liste und aktivieren Sie \'Über anderen Apps einblenden\'. Dies ist erforderlich, damit Skripte im Hintergrund starten können.</string>
+    <string name="setup_step_5_title">Energiesparmodus deaktivieren</string>
+    <string name="setup_step_5_desc">Android schränkt Hintergrund-Apps ein. Sie müssen die Akkunutzung für Termux auf \'Nicht eingeschränkt\' setzen.</string>
+    <string name="battery_warning_text">Bei Ignorieren: Skripte und Verknüpfungen funktionieren NICHT, es sei denn, Sie öffnen Termux zuerst manuell.</string>
+
+    <!--Home -->
+    <string name="home_title">Meine Skripte</string>
+    <string name="search_placeholder">Skripte suchen…</string>
+    <string name="cd_close_search">Suche schließen</string>
+    <string name="cd_clear_search">Suche löschen</string>
+    <string name="cd_search">Suchen</string>
+    <string name="cd_settings">Einstellungen</string>
+    <string name="cd_add_script">Skript hinzufügen</string>
+    <string name="empty_search_results">Keine Skripte gefunden.</string>
+    <string name="empty_scripts_list">Noch keine Skripte. Tippen Sie auf +, um eines zu erstellen.</string>
+    <string name="cd_run_script">Ausführen</string>
+    <string name="cd_more_options">Mehr</string>
+    <string name="menu_configuration">Konfiguration</string>
+    <string name="menu_pin_shortcut">Verknüpfung anheften</string>
+    <string name="menu_delete">Löschen</string>
+    <string name="cd_script_icon">Skript-Symbol</string>
+    <string name="msg_running_script">Führe aus: %1$s</string>
+    <string name="error_termux_not_installed">Fehler: Termux ist nicht installiert.</string>
+    <string name="error_generic">Fehler: %1$s</string>
+    <string name="msg_script_deleted">Skript gelöscht</string>
+    <string name="msg_config_saved">Konfiguration gespeichert</string>
+    <string name="msg_permission_denied">Zugriff verweigert. Skripte können nicht ausgeführt werden.</string>
+    <string name="error_shortcut_failed">Verknüpfungsinformationen konnten nicht erstellt werden</string>
+    <string name="error_pinning_not_supported">Launcher unterstützt das Anheften nicht.</string>
+    <string name="msg_miui_shortcut_permission">MIUI erfordert manuelle Berechtigung zum Erstellen von Verknüpfungen.</string>
+    <string name="action_settings">Einstellungen</string>
+    <string name="msg_shortcut_denied_system">Verknüpfungsanfrage vom System abgelehnt.</string>
+
+    <!-- Editor -->
+    <string name="editor_untitled">Unbenannt</string>
+    <string name="editor_placeholder"># Code eingeben…</string>
+    <string name="editor_search_placeholder">Finden…</string>
+    <string name="cd_undo">Rückgängig</string>
+    <string name="cd_redo">Wiederholen</string>
+    <string name="cd_comment">Kommentieren</string>
+    <string name="cd_hide_toolbar">Ausblenden</string>
+    <string name="cd_show_toolbar">Leiste anzeigen</string>
+    <string name="cd_prev_match">Vorheriges</string>
+    <string name="cd_next_match">Nächstes</string>
+    <string name="key_home">Pos 1</string>
+    <string name="key_end">Ende</string>
+
+    <!-- Config -->
+    <string name="config_dialog_title">Skript-Konfiguration</string>
+    <string name="cd_close">Schließen</string>
+    <string name="cd_save">Speichern</string>
+    <string name="section_identity">Identität</string>
+    <string name="section_execution">Ausführung</string>
+    <string name="section_behavior">Verhalten</string>
+    <string name="section_env_vars">Umgebungsvariablen</string>
+    <string name="cd_add_icon">Symbol hinzufügen</string>
+    <string name="label_script_name">Skriptname</string>
+    <string name="placeholder_script_name">Mein Skript</string>
+    <string name="label_interpreter">Interpreter</string>
+    <string name="label_prefix">Befehls-Präfix</string>
+    <string name="placeholder_prefix">z. B. sudo, time</string>
+    <string name="label_arguments">Argumente</string>
+    <string name="label_bg_execution">Hintergrundausführung</string>
+    <string name="desc_bg_execution">Nur Benachrichtigung anzeigen</string>
+    <string name="label_interactive_session">Interaktive Sitzung</string>
+    <string name="desc_interactive_session">Terminal nach Ende offen lassen</string>
+    <string name="empty_env_vars">Keine Umgebungsvariablen.</string>
+    <string name="label_key">Schlüssel</string>
+    <string name="label_value">Wert</string>
+    <string name="placeholder_value">12345</string>
+    <string name="cd_remove">Entfernen</string>
+    <string name="btn_add_variable">Variable hinzufügen</string>
+    <string name="open_termux_settings">Termux-Einstellungen öffnen</string>
+    <string name="finish_setup_label">Einrichtung abgeschlossen</string>
+    <string name="copy_clipboard_description">In die Zwischenablage kopieren</string>
+    <string name="done_description">Fertig</string>
+    <string name="error_description">Fehler</string>
+
+    <!-- Config Errors -->
+    <string name="error_empty_name">Skriptname darf nicht leer sein</string>
+
+    <!-- Repo errors -->
+    <string name="error_termux_permission_missing">Termux "Run Command" Berechtigung fehlt.</string>
+    <string name="error_background_restriction">Hintergrundbeschränkung erkannt. Deaktivieren Sie die Akku-Optimierung für Termux/Runner.</string>
+    <string name="error_find_overlay_manually">Bitte finden Sie \'Über anderen Apps einblenden\' manuell.</string>
+    <string name="error_open_settings_manually">Einstellungen konnten nicht geöffnet werden. Bitte öffnen Sie die Android-Einstellungen manuell.</string>
+    <string name="error_decode_icon">Symboldatei konnte nicht dekodiert werden.</string>
+    <string name="error_export_output">Ausgabestrom für Export konnte nicht geöffnet werden.</string>
+    <string name="error_import_input">Eingabestrom für Import konnte nicht geöffnet werden.</string>
+    <string name="error_create_bridge_dir">Bridge-Verzeichnis konnte nicht erstellt werden</string>
+</resources>
+
+  

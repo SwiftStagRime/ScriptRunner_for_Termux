@@ -20,9 +20,9 @@ Features
     Customization: Personalize your script shortcuts with custom icons.
 
     Data Portability: Full support for importing and exporting your script library.
-    
-| Home | Editor | Config | Shortcut |
-| :---: | :---: | :---: | :---: |
+
+|                     Home                      |                     Editor                     |                     Config                      |                     Shortcut                      |
+|:---------------------------------------------:|:----------------------------------------------:|:-----------------------------------------------:|:-------------------------------------------------:|
 | <img src="screenshots/home.webp" width="200"> | <img src="screenshots/editor.jpg" width="200"> | <img src="screenshots/config.webp" width="200"> | <img src="screenshots/shortcut.webp" width="350"> |
 
 Security First
@@ -56,8 +56,7 @@ This project is currently in early development.
 
     Documentation: Detailed code description is currently under construction.
 
-    Translation: Might be comming, app uses string resources everywhere.
-
+    Translation: En and Ru are made by me, everything else is AI. You can always switch in settings or during onboarding
     Stability: While functional, you may encounter edge cases. I recommend keeping backups of vital scripts using the built-in export feature. Also, BasicTextField starts lagging while typing at around 177K characters on Snapdragon 7s gen2, Snapdragon 8 gen3 does not have the same expirence. I have tested and linenumbergutter has no effect on perfomance, so it might be the internal implementation. I don't want to move to other ways of displaying stuff, because I will loose stylo support on my tablet 
 
 Contributing

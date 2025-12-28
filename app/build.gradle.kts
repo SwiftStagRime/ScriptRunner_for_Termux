@@ -18,12 +18,9 @@ android {
         minSdk = 24
         targetSdk = 36
         versionCode = 1
-        versionName = "1.0"
+        versionName = "1.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-    }
-    androidResources {
-        localeFilters.addAll(listOf("en"))
     }
     buildTypes {
         release {
@@ -74,6 +71,7 @@ dependencies {
     implementation(libs.hilt.android)
     implementation(libs.androidx.material3)
     implementation(libs.androidx.exifinterface)
+    implementation(libs.androidx.appcompat)
     ksp(libs.hilt.compiler)
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.android.database.sqlcipher)

@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="language_label">Idioma</string>
+    <!-- Settings -->
+    <string name="settings_title">Configurações</string>
+    <string name="back_description">Voltar</string>
+    <string name="appearance_label">Aparência</string>
+    <string name="dynamic_color_title">Cor Dinâmica</string>
+    <string name="dynamic_color_subtitle">Usar cores do papel de parede</string>
+    <string name="data_management_label">Gerenciamento de Dados</string>
+    <string name="import_label">Importar</string>
+    <string name="export_label">Exportar</string>
+    <string name="developed_by">Desenvolvido por</string>
+    <string name="open_github_description">Abrir Github</string>
+
+    <string name="exporting">Exportando…</string>
+    <string name="export_success">Exportação concluída</string>
+    <string name="export_failed">Falha na exportação: %1$s</string>
+    <string name="importing">Importando…</string>
+    <string name="import_success">Importação concluída</string>
+    <string name="import_failed">Falha na importação: %1$s</string>
+
+    <!-- Runner -->
+    <string name="script_runner_permission_denied">Permissão negada</string>
+
+    <!-- Onboarding -->
+    <string name="onboarding_setup_title">Instalação</string>
+    <string name="onboarding_subtitle">Siga estes passos para conectar o aplicativo ao Termux.</string>
+    <string name="setup_step_1_title">Instalar o Termux</string>
+    <string name="setup_step_1_desc">Certifique-se de que o Termux foi instalado via F-Droid (a versão da Play Store está desatualizada).</string>
+    <string name="setup_step_2_title">Configurar o Termux</string>
+    <string name="setup_step_2_desc">Execute isso no Termux para permitir comandos externos e acesso ao armazenamento (não execute o primeiro comando se já tiver concedido permissão de armazenamento):</string>
+
+    <string name="setup_step_3_title">Vincular Permissões</string>
+    <string name="setup_step_3_desc">Permitir que este app envie comandos ao Termux.</string>
+    <string name="grant_permission_label">Conceder Permissão</string>
+    <string name="setup_step_4_title">Permitir Início em Segundo Plano</string>
+    <string name="setup_step_4_desc">Encontre o \'Termux\' na lista e ative \'Sobrepor a outros apps\'. Isso é necessário para rodar scripts em segundo plano.</string>
+    <string name="setup_step_5_title">Desativar Economia de Bateria</string>
+    <string name="setup_step_5_desc">O Android restringe apps em segundo plano. Você deve definir o uso de bateria do Termux como \'Irrestrito\'.</string>
+    <string name="battery_warning_text">Se ignorado: Scripts e Atalhos NÃO funcionarão a menos que você abra o Termux manualmente antes.</string>
+
+    <!--Home -->
+    <string name="home_title">Meus Scripts</string>
+    <string name="search_placeholder">Pesquisar scripts…</string>
+    <string name="cd_close_search">Fechar Pesquisa</string>
+    <string name="cd_clear_search">Limpar Pesquisa</string>
+    <string name="cd_search">Pesquisar</string>
+    <string name="cd_settings">Configurações</string>
+    <string name="cd_add_script">Adicionar Script</string>
+    <string name="empty_search_results">Nenhum script encontrado.</string>
+    <string name="empty_scripts_list">Sem scripts ainda. Toque em + para criar um.</string>
+    <string name="cd_run_script">Executar</string>
+    <string name="cd_more_options">Mais</string>
+    <string name="menu_configuration">Configuração</string>
+    <string name="menu_pin_shortcut">Fixar Atalho</string>
+    <string name="menu_delete">Excluir</string>
+    <string name="cd_script_icon">Ícone do Script</string>
+    <string name="msg_running_script">Executando: %1$s</string>
+    <string name="error_termux_not_installed">Erro: Termux não está instalado.</string>
+    <string name="error_generic">Erro: %1$s</string>
+    <string name="msg_script_deleted">Script excluído</string>
+    <string name="msg_config_saved">Configuração salva</string>
+    <string name="msg_permission_denied">Permissão negada. Não é possível executar scripts.</string>
+    <string name="error_shortcut_failed">Falha ao criar informações do atalho</string>
+    <string name="error_pinning_not_supported">O Launcher não suporta fixar atalhos.</string>
+    <string name="msg_miui_shortcut_permission">MIUI requer permissão manual para criar atalhos na tela inicial.</string>
+    <string name="action_settings">Configurações</string>
+    <string name="msg_shortcut_denied_system">Solicitação de atalho negada pelo sistema.</string>
+
+    <!-- Editor -->
+    <string name="editor_untitled">Sem Título</string>
+    <string name="editor_placeholder"># Comece a programar…</string>
+    <string name="editor_search_placeholder">Localizar…</string>
+    <string name="cd_undo">Desfazer</string>
+    <string name="cd_redo">Refazer</string>
+    <string name="cd_comment">Comentar</string>
+    <string name="cd_hide_toolbar">Ocultar</string>
+    <string name="cd_show_toolbar">Mostrar Barra</string>
+    <string name="cd_prev_match">Anterior</string>
+    <string name="cd_next_match">Próximo</string>
+    <string name="key_home">Home</string>
+    <string name="key_end">End</string>
+
+    <!-- Config -->
+    <string name="config_dialog_title">Configuração do Script</string>
+    <string name="cd_close">Fechar</string>
+    <string name="cd_save">Salvar</string>
+    <string name="section_identity">Identidade</string>
+    <string name="section_execution">Execução</string>
+    <string name="section_behavior">Comportamento</string>
+    <string name="section_env_vars">Variáveis de Ambiente</string>
+    <string name="cd_add_icon">Adicionar Ícone</string>
+    <string name="label_script_name">Nome do Script</string>
+    <string name="placeholder_script_name">Meu Script de Automação</string>
+    <string name="label_interpreter">Interpretador</string>
+    <string name="label_prefix">Prefixo do Comando</string>
+    <string name="placeholder_prefix">ex: sudo, time</string>
+    <string name="label_arguments">Argumentos</string>
+    <string name="label_bg_execution">Execução em Segundo Plano</string>
+    <string name="desc_bg_execution">Mostrar apenas notificação</string>
+    <string name="label_interactive_session">Sessão Interativa</string>
+    <string name="desc_interactive_session">Manter terminal aberto ao finalizar</string>
+    <string name="empty_env_vars">Nenhuma variável definida.</string>
+    <string name="label_key">Chave</string>
+    <string name="label_value">Valor</string>
+    <string name="placeholder_value">12345</string>
+    <string name="cd_remove">Remover</string>
+    <string name="btn_add_variable">Adicionar Variável</string>
+    <string name="open_termux_settings">Abrir Configurações do Termux</string>
+    <string name="finish_setup_label">Terminei a configuração</string>
+    <string name="copy_clipboard_description">Copiar para a área de transferência</string>
+    <string name="done_description">Concluído</string>
+    <string name="error_description">Erro</string>
+
+    <!-- Config Errors -->
+    <string name="error_empty_name">O nome do script não pode estar vazio</string>
+
+    <!-- Repo errors -->
+    <string name="error_termux_permission_missing">Permissão "Run Command" do Termux está faltando.</string>
+    <string name="error_background_restriction">Restrição de segundo plano detectada. Desative a otimização de bateria para Termux/Runner.</string>
+    <string name="error_find_overlay_manually">Por favor, encontre \'Sobrepor a outros apps\' manualmente.</string>
+    <string name="error_open_settings_manually">Não foi possível abrir as configurações. Abra as configurações do Android manualmente.</string>
+    <string name="error_decode_icon">Não foi possível decodificar o arquivo de ícone.</string>
+    <string name="error_export_output">Não foi possível abrir o fluxo de saída para exportação.</string>
+    <string name="error_import_input">Não foi possível abrir o fluxo de entrada para importação.</string>
+    <string name="error_create_bridge_dir">Não foi possível criar o diretório de ponte</string>
+</resources>

@@ -53,6 +53,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import io.github.swiftstagrime.termuxrunner.R
+import io.github.swiftstagrime.termuxrunner.ui.components.LanguageSelectorIcon
 import io.github.swiftstagrime.termuxrunner.ui.preview.DevicePreviews
 import io.github.swiftstagrime.termuxrunner.ui.theme.ScriptRunnerForTermuxTheme
 import kotlinx.coroutines.launch
@@ -78,7 +79,10 @@ fun OnboardingScreen(
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.background
-                )
+                ),
+                actions = {
+                    LanguageSelectorIcon()
+                }
             )
         }
     ) { padding ->
