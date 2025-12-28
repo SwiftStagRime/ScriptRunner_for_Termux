@@ -20,6 +20,10 @@ Features
     Customization: Personalize your script shortcuts with custom icons.
 
     Data Portability: Full support for importing and exporting your script library.
+    
+| Home | Editor | Config | Shortcut |
+| :---: | :---: | :---: | :---: |
+| <img src="screenshots/home.webp" width="200"> | <img src="screenshots/editor.jpg" width="200"> | <img src="screenshots/config.webp" width="200"> | <img src="screenshots/shortcut.webp" width="350"> |
 
 Security First
 
