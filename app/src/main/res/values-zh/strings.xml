@@ -81,6 +81,9 @@
     <string name="cd_next_match">下一个</string>
     <string name="key_home">Home</string>
     <string name="key_end">End</string>
+    <string name="error_script_not_found">未找到脚本。</string>
+    <string name="error_loading_failed">从数据库加载脚本失败。</string>
+    <string name="error_save_failed">保存脚本失败。</string>
 
     <!-- Config -->
     <string name="config_dialog_title">脚本配置</string>
@@ -106,14 +109,21 @@
     <string name="label_value">值 (Value)</string>
     <string name="placeholder_value">12345</string>
     <string name="cd_remove">移除</string>
+    <string name="reliability_monitoring">可靠性与监控</string>
+    <string name="auto_restart_lazarus">自动重启 (Lazarus)</string>
+    <string name="restarts_script_if_termux_is_killed_by_system">如果 Termux 被系统终止，则重启脚本</string>
+    <string name="advanced_timings">高级计时设置</string>
+    <string name="pulse_interval_s">心跳间隔 (秒)</string>
+    <string name="timeout_limit_s">超时限制 (秒)</string>
+    <string name="pulse_how_often_the_script_signals_it_is_alive_timeout_restart_if_no_signal_received_after_this_time">心跳：脚本发送存活信号的频率。\n超时：若在此时间后未收到信号则重启。</string>
+    <string name="experimental_warning">警告！实验性功能 - 可能会导致脚本出错或消耗过多电池和 CPU。</string>
     <string name="btn_add_variable">添加变量</string>
     <string name="open_termux_settings">打开 Termux 设置</string>
     <string name="finish_setup_label">我已完成设置</string>
     <string name="copy_clipboard_description">复制到剪贴板</string>
     <string name="done_description">完成</string>
     <string name="error_description">错误</string>
-
-    <!-- Config Errors -->
+    <string name="msg_notification_needed_for_heartbeat">需要通知权限以进行心跳监控</string>
     <string name="error_empty_name">脚本名称不能为空</string>
 
     <!-- Repo errors -->
@@ -126,5 +136,3 @@
     <string name="error_import_input">无法打开导入输入流。</string>
     <string name="error_create_bridge_dir">无法创建 Bridge 目录</string>
 </resources>
-
-  

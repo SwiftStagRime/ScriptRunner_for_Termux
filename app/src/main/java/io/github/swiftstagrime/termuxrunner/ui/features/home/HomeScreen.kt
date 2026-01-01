@@ -92,6 +92,9 @@ fun HomeScreen(
     onDeleteScript: (Script) -> Unit,
     onCreateShortcutClick: (Script) -> Unit,
     onUpdateScript: (Script) -> Unit,
+    onHeartbeatToggle: (Boolean) -> Unit,
+    isBatteryUnrestricted: Boolean,
+    onRequestBatteryUnrestricted: () -> Unit,
     snackbarHostState: SnackbarHostState,
     onProcessImage: suspend (Uri) -> String?
 ) {
@@ -261,7 +264,10 @@ fun HomeScreen(
                     onUpdateScript(updatedScript)
                     selectedScriptForConfig = null
                 },
-                onProcessImage = onProcessImage
+                onProcessImage = onProcessImage,
+                onHeartbeatToggle = onHeartbeatToggle,
+                isBatteryUnrestricted = isBatteryUnrestricted,
+                onRequestBatteryUnrestricted = onRequestBatteryUnrestricted
             )
         }
     }
@@ -486,7 +492,10 @@ private fun PreviewHomeScreen() {
             searchQuery = "",
             onSearchQueryChange = {},
             snackbarHostState = SnackbarHostState(),
-            onProcessImage = { null }
+            onProcessImage = { null },
+            onHeartbeatToggle = {},
+            isBatteryUnrestricted = false,
+            onRequestBatteryUnrestricted = {}
         )
     }
 }
@@ -507,7 +516,10 @@ private fun PreviewEmptyHome() {
             searchQuery = "",
             onSearchQueryChange = {},
             snackbarHostState = SnackbarHostState(),
-            onProcessImage = { null }
+            onProcessImage = { null },
+            onHeartbeatToggle = {},
+            isBatteryUnrestricted = false,
+            onRequestBatteryUnrestricted = {}
         )
     }
 }

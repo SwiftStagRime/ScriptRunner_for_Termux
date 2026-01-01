@@ -22,6 +22,7 @@ import java.io.FileOutputStream
 import java.io.InputStreamReader
 import java.util.UUID
 import javax.inject.Inject
+
 /**
  * Repository implementation for managing scripts, handling database operations
  * and script portability (import/export).
@@ -97,7 +98,7 @@ class ScriptRepositoryImpl @Inject constructor(
                 }
 
                 ScriptEntity(
-                    id = 0, // Ensure Room treats this as a new entry. Thus we are not overriding current scripts, note that this will lead possible to duplicates
+                    id = 0, // Ensure Room treats this as a new entry. Thus we are not overriding current scripts, note that this will lead to possible duplicates
                     name = dto.name,
                     code = dto.code,
                     interpreter = dto.interpreter,
@@ -107,6 +108,9 @@ class ScriptRepositoryImpl @Inject constructor(
                     openNewSession = dto.openNewSession,
                     executionParams = dto.executionParams,
                     keepSessionOpen = dto.keepSessionOpen,
+                    useHeartbeat = dto.useHeartbeat,
+                    heartbeatTimeout = dto.heartbeatTimeout,
+                    heartbeatInterval = dto.heartbeatInterval,
                     envVars = dto.envVars,
                     iconPath = newIconPath
                 )

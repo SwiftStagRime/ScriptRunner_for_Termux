@@ -11,6 +11,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -33,8 +35,12 @@ import io.github.swiftstagrime.termuxrunner.ui.theme.ScriptRunnerForTermuxTheme
 @Composable
 fun EditorScreen(
     script: Script,
+    snackbarHostState: SnackbarHostState,
     onBack: () -> Unit,
     onSave: (Script) -> Unit,
+    isBatteryUnrestricted: Boolean,
+    onRequestBatteryUnrestricted: () -> Unit,
+    onHeartbeatToggle: (Boolean) -> Unit,
     onProcessImage: suspend (Uri) -> String?
 ) {
     var codeState by remember(script.id) {
@@ -50,6 +56,7 @@ fun EditorScreen(
     var showConfigDialog by remember { mutableStateOf(false) }
 
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
                 title = {
@@ -104,7 +111,10 @@ fun EditorScreen(
                     showConfigDialog = false
                     onSave(configuredScript)
                 },
-                onProcessImage = onProcessImage
+                onProcessImage = onProcessImage,
+                onHeartbeatToggle = onHeartbeatToggle,
+                isBatteryUnrestricted = isBatteryUnrestricted,
+                onRequestBatteryUnrestricted = onRequestBatteryUnrestricted
             )
         }
     }
@@ -128,7 +138,11 @@ private fun PreviewEditorNewRaw() {
             ),
             onBack = {},
             onSave = {},
-            onProcessImage = { null }
+            onProcessImage = { null },
+            onHeartbeatToggle = {},
+            snackbarHostState = SnackbarHostState(),
+            isBatteryUnrestricted = false,
+            onRequestBatteryUnrestricted = {}
         )
     }
 }

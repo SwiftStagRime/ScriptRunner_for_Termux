@@ -2,6 +2,7 @@ package io.github.swiftstagrime.termuxrunner
 
 import android.util.Base64
 import io.github.swiftstagrime.termuxrunner.domain.model.Script
+import io.github.swiftstagrime.termuxrunner.domain.repository.MonitoringRepository
 import io.github.swiftstagrime.termuxrunner.domain.repository.ScriptFileRepository
 import io.github.swiftstagrime.termuxrunner.domain.repository.TermuxRepository
 import io.github.swiftstagrime.termuxrunner.domain.usecase.RunScriptUseCase
@@ -27,6 +28,9 @@ class RunScriptUseCaseTest {
     @MockK
     lateinit var scriptFileRepository: ScriptFileRepository
 
+    @MockK
+    lateinit var monitoringRepository: MonitoringRepository
+
     private lateinit var useCase: RunScriptUseCase
 
     @Before
@@ -42,7 +46,7 @@ class RunScriptUseCaseTest {
             java.util.Base64.getEncoder().encodeToString(bytes)
         }
 
-        useCase = RunScriptUseCase(termuxRepository, scriptFileRepository)
+        useCase = RunScriptUseCase(termuxRepository, scriptFileRepository, monitoringRepository)
     }
 
     @After

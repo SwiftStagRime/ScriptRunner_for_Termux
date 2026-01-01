@@ -83,6 +83,9 @@
     <string name="cd_show_toolbar">Show Toolbar</string>
     <string name="cd_prev_match">Previous match</string>
     <string name="cd_next_match">Next match</string>
+    <string name="error_script_not_found">Script not found.</string>
+    <string name="error_loading_failed">Failed to load script from database.</string>
+    <string name="error_save_failed">Failed to save script.</string>
     <string name="key_home">Home</string>
     <string name="key_end">End</string>
 
@@ -115,14 +118,21 @@
     <string name="label_value">Value</string>
     <string name="placeholder_value">12345</string>
     <string name="cd_remove">Remove</string>
+    <string name="reliability_monitoring">Reliability &amp; Monitoring</string>
+    <string name="auto_restart_lazarus">Auto-Restart (Lazarus)</string>
+    <string name="restarts_script_if_termux_is_killed_by_system">Restarts script if Termux is killed by system</string>
+    <string name="advanced_timings">Advanced Timings</string>
+    <string name="pulse_interval_s">Pulse Interval (s)</string>
+    <string name="timeout_limit_s">Timeout Limit (s)</string>
+    <string name="pulse_how_often_the_script_signals_it_is_alive_timeout_restart_if_no_signal_received_after_this_time">Pulse: How often the script signals it is alive.\nTimeout: Restart if no signal received after this time.</string>
+    <string name="experimental_warning">Warning! Experimental - may break the script or waste battery and CPU.</string>
     <string name="btn_add_variable">Add Variable</string>
     <string name="open_termux_settings">Open Termux Settings</string>
     <string name="finish_setup_label">I have finished setup</string>
     <string name="copy_clipboard_description">Copy to clipboard</string>
     <string name="done_description">Done</string>
     <string name="error_description">Error</string>
-
-    <!-- Config -->
+    <string name="msg_notification_needed_for_heartbeat">Notification permission is required for heartbeat</string>
     <string name="error_empty_name">Script name cannot be empty</string>
 
     <!-- Repo errors -->

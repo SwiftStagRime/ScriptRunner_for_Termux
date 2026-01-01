@@ -81,6 +81,9 @@
     <string name="cd_next_match">Nächstes</string>
     <string name="key_home">Pos 1</string>
     <string name="key_end">Ende</string>
+    <string name="error_script_not_found">Skript nicht gefunden.</string>
+    <string name="error_loading_failed">Laden des Skripts aus der Datenbank fehlgeschlagen.</string>
+    <string name="error_save_failed">Speichern des Skripts fehlgeschlagen.</string>
 
     <!-- Config -->
     <string name="config_dialog_title">Skript-Konfiguration</string>
@@ -106,14 +109,21 @@
     <string name="label_value">Wert</string>
     <string name="placeholder_value">12345</string>
     <string name="cd_remove">Entfernen</string>
+    <string name="reliability_monitoring">Zuverlässigkeit &amp; Überwachung</string>
+    <string name="auto_restart_lazarus">Automatischer Neustart (Lazarus)</string>
+    <string name="restarts_script_if_termux_is_killed_by_system">Startet das Skript neu, wenn Termux vom System beendet wird</string>
+    <string name="advanced_timings">Erweiterte Zeitsteuerung</string>
+    <string name="pulse_interval_s">Puls-Intervall (s)</string>
+    <string name="timeout_limit_s">Zeitlimit (s)</string>
+    <string name="pulse_how_often_the_script_signals_it_is_alive_timeout_restart_if_no_signal_received_after_this_time">Puls: Wie oft das Skript meldet, dass es aktiv ist.\nTimeout: Neustart, wenn nach dieser Zeit kein Signal empfangen wird.</string>
+    <string name="experimental_warning">Warnung! Experimentell - kann das Skript stören oder Akku und CPU beanspruchen.</string>
     <string name="btn_add_variable">Variable hinzufügen</string>
     <string name="open_termux_settings">Termux-Einstellungen öffnen</string>
     <string name="finish_setup_label">Einrichtung abgeschlossen</string>
     <string name="copy_clipboard_description">In die Zwischenablage kopieren</string>
     <string name="done_description">Fertig</string>
     <string name="error_description">Fehler</string>
-
-    <!-- Config Errors -->
+    <string name="msg_notification_needed_for_heartbeat">Benachrichtigungsberechtigung ist für den Heartbeat erforderlich</string>
     <string name="error_empty_name">Skriptname darf nicht leer sein</string>
 
     <!-- Repo errors -->
@@ -126,5 +136,3 @@
     <string name="error_import_input">Eingabestrom für Import konnte nicht geöffnet werden.</string>
     <string name="error_create_bridge_dir">Bridge-Verzeichnis konnte nicht erstellt werden</string>
 </resources>
-
-  

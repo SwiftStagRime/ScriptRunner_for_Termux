@@ -8,6 +8,7 @@ import android.net.Uri
 import android.os.Build
 import androidx.core.graphics.scale
 import dagger.hilt.android.qualifiers.ApplicationContext
+import io.github.swiftstagrime.termuxrunner.data.local.ImageStorageManager.Companion.TARGET_SIZE_PX
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -27,6 +28,7 @@ class ImageStorageManager @Inject constructor(
         const val TARGET_SIZE_PX = 256
         const val ICON_DIR = "script_icons"
     }
+
     /**
      * Processes a selected image: decodes, resizes to fit [TARGET_SIZE_PX],
      * and saves it as a WebP file. Returns the absolute path.

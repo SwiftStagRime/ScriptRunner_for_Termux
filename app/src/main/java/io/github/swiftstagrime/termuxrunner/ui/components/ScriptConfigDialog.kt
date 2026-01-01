@@ -4,6 +4,11 @@ import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -21,15 +26,20 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.OpenInNew
 import androidx.compose.material.icons.automirrored.filled.ShortText
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AddPhotoAlternate
+import androidx.compose.material.icons.filled.BatteryAlert
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DataObject
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.icons.filled.Terminal
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CardDefaults
@@ -55,9 +65,13 @@ import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import coil3.compose.AsyncImage
@@ -74,6 +88,9 @@ fun ScriptConfigDialog(
     script: Script,
     onDismiss: () -> Unit,
     onSave: (Script) -> Unit,
+    isBatteryUnrestricted: Boolean,
+    onRequestBatteryUnrestricted: () -> Unit,
+    onHeartbeatToggle: (Boolean) -> Unit,
     onProcessImage: suspend (Uri) -> String?
 ) {
     val scope = rememberCoroutineScope()
@@ -87,6 +104,9 @@ fun ScriptConfigDialog(
     var fileExtension by remember { mutableStateOf(script.fileExtension) }
     var commandPrefix by remember { mutableStateOf(script.commandPrefix) }
     var currentIconPath by remember { mutableStateOf(script.iconPath) }
+    var useHeartbeat by remember { mutableStateOf(script.useHeartbeat) }
+    var heartbeatTimeoutStr by remember { mutableStateOf((script.heartbeatTimeout / 1000).toString()) }
+    var heartbeatIntervalStr by remember { mutableStateOf((script.heartbeatInterval / 1000).toString()) }
 
     val envVarsList = remember {
         script.envVars.entries.map { it.key to it.value }.toMutableStateList()
@@ -140,7 +160,11 @@ fun ScriptConfigDialog(
                                     runInBackground = runInBackground,
                                     keepSessionOpen = keepOpen,
                                     iconPath = currentIconPath,
-                                    envVars = envVarsList.toMap()
+                                    envVars = envVarsList.toMap(),
+                                    useHeartbeat = useHeartbeat,
+                                    heartbeatTimeout = heartbeatTimeoutStr.toLong() * 1000,
+                                    heartbeatInterval = heartbeatIntervalStr.toLong() * 1000
+
                                 )
                                 onSave(updated)
                             }
@@ -333,6 +357,164 @@ fun ScriptConfigDialog(
                     }
                 }
 
+                //Hack to try and monitor service
+                item {
+                    ConfigSection(title = stringResource(R.string.reliability_monitoring)) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(bottom = 16.dp)
+                                .background(
+                                    color = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.7f),
+                                    shape = RoundedCornerShape(12.dp)
+                                )
+                                .padding(12.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Warning,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.error,
+                                modifier = Modifier.size(20.dp)
+                            )
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Text(
+                                text = stringResource(R.string.experimental_warning),
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onErrorContainer,
+                                fontWeight = FontWeight.Medium
+                            )
+                        }
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = stringResource(R.string.auto_restart_lazarus),
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                                Text(
+                                    text = stringResource(R.string.restarts_script_if_termux_is_killed_by_system),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                            Switch(
+                                checked = useHeartbeat,
+                                onCheckedChange = {
+                                    useHeartbeat = it
+                                    onHeartbeatToggle(it)
+                                },
+                                colors = SwitchDefaults.colors(
+                                    checkedThumbColor = MaterialTheme.colorScheme.primary,
+                                    checkedTrackColor = MaterialTheme.colorScheme.primaryContainer
+                                )
+                            )
+                        }
+
+                        HorizontalDivider(
+                            modifier = Modifier.padding(vertical = 12.dp),
+                            color = MaterialTheme.colorScheme.outlineVariant
+                        )
+
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(8.dp))
+                                .clickable(enabled = !isBatteryUnrestricted) { onRequestBatteryUnrestricted() }
+                                .padding(vertical = 4.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                imageVector = if (isBatteryUnrestricted) Icons.Default.CheckCircle else Icons.Default.BatteryAlert,
+                                contentDescription = null,
+                                tint = if (isBatteryUnrestricted) Color(0xFF4CAF50) else MaterialTheme.colorScheme.error,
+                                modifier = Modifier.size(24.dp)
+                            )
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = if (isBatteryUnrestricted) "Battery: Unrestricted" else "Battery: Optimized (Restricted)",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = if (isBatteryUnrestricted) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.error
+                                )
+                                if (!isBatteryUnrestricted) {
+                                    Text(
+                                        text = "Tap to allow background activity for better stability",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                            }
+                            if (!isBatteryUnrestricted) {
+                                Icon(
+                                    Icons.AutoMirrored.Filled.OpenInNew,
+                                    null,
+                                    modifier = Modifier.size(16.dp),
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
+
+                        AnimatedVisibility(
+                            visible = useHeartbeat,
+                            enter = expandVertically() + fadeIn(),
+                            exit = shrinkVertically() + fadeOut()
+                        ) {
+                            Column(modifier = Modifier.padding(top = 12.dp)) {
+                                HorizontalDivider(
+                                    modifier = Modifier.padding(bottom = 12.dp),
+                                    color = MaterialTheme.colorScheme.outlineVariant
+                                )
+
+                                Text(
+                                    text = stringResource(R.string.advanced_timings),
+                                    style = MaterialTheme.typography.labelMedium,
+                                    color = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.padding(bottom = 8.dp)
+                                )
+
+                                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                    StyledTextField(
+                                        value = heartbeatIntervalStr,
+                                        onValueChange = {
+                                            if (it.all { char -> char.isDigit() }) heartbeatIntervalStr =
+                                                it
+                                        },
+                                        label = stringResource(R.string.pulse_interval_s),
+                                        placeholder = { Text("10") },
+                                        modifier = Modifier.weight(1f),
+                                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                                    )
+
+                                    StyledTextField(
+                                        value = heartbeatTimeoutStr,
+                                        onValueChange = {
+                                            if (it.all { char -> char.isDigit() }) heartbeatTimeoutStr =
+                                                it
+                                        },
+                                        label = stringResource(R.string.timeout_limit_s),
+                                        placeholder = { Text("30") },
+                                        modifier = Modifier.weight(1f),
+                                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                                    )
+                                }
+                                Text(
+                                    text = stringResource(R.string.pulse_how_often_the_script_signals_it_is_alive_timeout_restart_if_no_signal_received_after_this_time),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                                    modifier = Modifier.padding(top = 8.dp, start = 4.dp),
+                                    lineHeight = 16.sp
+                                )
+                            }
+                        }
+                    }
+                }
+
                 item {
                     ConfigSection(title = stringResource(R.string.section_env_vars)) {
                         if (envVarsList.isEmpty()) {
@@ -431,7 +613,10 @@ private fun PreviewConfigDialogLight() {
             script = configSampleScript,
             onDismiss = {},
             onSave = {},
-            onProcessImage = { null }
+            onProcessImage = { null },
+            onHeartbeatToggle = {},
+            isBatteryUnrestricted = false,
+            onRequestBatteryUnrestricted = {}
         )
     }
 }

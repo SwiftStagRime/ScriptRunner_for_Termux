@@ -4,6 +4,7 @@ import android.util.Base64
 import androidx.lifecycle.SavedStateHandle
 import io.github.swiftstagrime.termuxrunner.data.repository.TermuxPermissionException
 import io.github.swiftstagrime.termuxrunner.domain.model.Script
+import io.github.swiftstagrime.termuxrunner.domain.repository.MonitoringRepository
 import io.github.swiftstagrime.termuxrunner.domain.repository.ScriptFileRepository
 import io.github.swiftstagrime.termuxrunner.domain.repository.ScriptRepository
 import io.github.swiftstagrime.termuxrunner.domain.repository.TermuxRepository
@@ -39,6 +40,9 @@ class ScriptRunnerTest {
 
     @MockK
     lateinit var scriptFileRepository: ScriptFileRepository
+
+    @MockK
+    lateinit var monitoringRepository: MonitoringRepository
 
     @MockK
     lateinit var scriptRepository: ScriptRepository
@@ -85,7 +89,7 @@ class ScriptRunnerTest {
         val commandSlot = slot<String>()
         every { termuxRepository.runCommand(capture(commandSlot), any(), any()) } returns Unit
 
-        val useCase = RunScriptUseCase(termuxRepository, scriptFileRepository)
+        val useCase = RunScriptUseCase(termuxRepository, scriptFileRepository, monitoringRepository)
 
         useCase(script)
 
@@ -114,7 +118,8 @@ class ScriptRunnerTest {
 
         val useCase = RunScriptUseCase(
             termuxRepository,
-            scriptFileRepository
+            scriptFileRepository,
+            monitoringRepository
         )
         val viewModel = ScriptRunnerViewModel(scriptRepository, useCase, savedStateHandle)
 
@@ -142,7 +147,7 @@ class ScriptRunnerTest {
             )
         } throws TermuxPermissionException()
 
-        val useCase = RunScriptUseCase(termuxRepository, scriptFileRepository)
+        val useCase = RunScriptUseCase(termuxRepository, scriptFileRepository, monitoringRepository)
         val viewModel = ScriptRunnerViewModel(scriptRepository, useCase, savedStateHandle)
 
         testDispatcher.scheduler.advanceUntilIdle()

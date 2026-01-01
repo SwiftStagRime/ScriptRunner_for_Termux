@@ -22,6 +22,7 @@ import io.github.swiftstagrime.termuxrunner.ui.features.runner.ScriptRunnerActiv
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
+
 /**
  * Handles the creation of home screen shortcuts for quick script execution.
  */

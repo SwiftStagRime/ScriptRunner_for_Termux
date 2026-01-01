@@ -8,6 +8,12 @@
     <uses-permission
         android:name="android.permission.WRITE_EXTERNAL_STORAGE"
         android:maxSdkVersion="28" />
+    <uses-permission
+        android:name="android.permission.FOREGROUND_SERVICE"
+        tools:ignore="ForegroundServicesPolicy" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
 
     <queries>
         <package android:name="com.termux" />
@@ -41,6 +47,12 @@
             android:exported="true"
             android:taskAffinity=""
             android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+
+        <service
+            android:name=".data.service.HeartbeatService"
+            android:exported="false"
+            android:foregroundServiceType="dataSync"
+            android:process=":monitor" />
     </application>
 
 </manifest>

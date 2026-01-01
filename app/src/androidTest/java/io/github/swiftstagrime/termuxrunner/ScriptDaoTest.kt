@@ -42,12 +42,17 @@ class ScriptDaoTest {
             name = "Test Script",
             code = "ls -la",
             interpreter = "bash",
+            fileExtension = "sh",
+            commandPrefix = "",
             runInBackground = true,
             openNewSession = false,
             executionParams = "",
             iconPath = null,
             envVars = mapOf("TEST" to "1"),
-            keepSessionOpen = true
+            keepSessionOpen = true,
+            useHeartbeat = false,
+            heartbeatTimeout = 30000,
+            heartbeatInterval = 10000
         )
 
         dao.insertScript(script)
@@ -67,12 +72,17 @@ class ScriptDaoTest {
             name = "To Delete",
             code = "",
             interpreter = "bash",
+            fileExtension = "sh",
+            commandPrefix = "",
             runInBackground = false,
             openNewSession = false,
             executionParams = "",
             iconPath = null,
             envVars = emptyMap(),
-            keepSessionOpen = false
+            keepSessionOpen = false,
+            useHeartbeat = false,
+            heartbeatTimeout = 30000,
+            heartbeatInterval = 10000
         )
 
         dao.insertScript(script)
