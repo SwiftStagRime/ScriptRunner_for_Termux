@@ -57,7 +57,7 @@ class RunScriptUseCase @Inject constructor(
         termuxRepository.runCommand(
             command = finalCommand,
             runInBackground = script.runInBackground,
-            sessionAction = "0"
+            sessionAction = "1"
         )
 
         // Manage Heartbeat Service
@@ -88,8 +88,9 @@ class RunScriptUseCase @Inject constructor(
         val finalRunBlock = if (script.useHeartbeat) {
             wrapCommandWithHeartbeat(coreExecution, script.heartbeatInterval)
         } else {
-            "($coreExecution)"
+            coreExecution
         }
+
 
         return StringBuilder()
             .append("mkdir -p $tempDir && ")

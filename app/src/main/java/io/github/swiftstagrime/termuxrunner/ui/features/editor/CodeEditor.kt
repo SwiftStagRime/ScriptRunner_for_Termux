@@ -14,11 +14,13 @@ import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -36,12 +38,18 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Comment
+import androidx.compose.material.icons.automirrored.filled.FormatAlignLeft
 import androidx.compose.material.icons.automirrored.filled.Redo
 import androidx.compose.material.icons.automirrored.filled.Undo
+import androidx.compose.material.icons.automirrored.filled.WrapText
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.FormatAlignLeft
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.VerticalAlignBottom
+import androidx.compose.material.icons.filled.VerticalAlignTop
+import androidx.compose.material.icons.filled.WrapText
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -55,6 +63,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -63,7 +72,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
@@ -80,6 +91,7 @@ import io.github.swiftstagrime.termuxrunner.ui.extensions.insert
 import io.github.swiftstagrime.termuxrunner.ui.extensions.toggleComment
 import io.github.swiftstagrime.termuxrunner.ui.preview.DevicePreviews
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @Composable
 fun CodeEditor(
@@ -90,6 +102,7 @@ fun CodeEditor(
 ) {
     val verticalScrollState = rememberScrollState()
     val focusRequester = remember { FocusRequester() }
+    val coroutineScope = rememberCoroutineScope()
 
     val undoStack = remember { ArrayDeque<TextFieldValue>().apply { add(code) } }
     val redoStack = remember { ArrayDeque<TextFieldValue>() }
@@ -101,6 +114,11 @@ fun CodeEditor(
 
     var isAccessoryVisible by remember { mutableStateOf(true) }
     val toolbarHeight = 50.dp
+    val extraLines = 5
+    val bottomBuffer = toolbarHeight + with(LocalDensity.current) { (extraLines * 20).sp.toDp() }
+
+    var isWrappingEnabled by remember { mutableStateOf(false) }
+    var textLayoutResult by remember { mutableStateOf<TextLayoutResult?>(null) }
 
     val currentCode by rememberUpdatedState(code)
     val currentOnCodeChange by rememberUpdatedState(onCodeChange)
@@ -260,6 +278,16 @@ fun CodeEditor(
         }
     }
 
+    LaunchedEffect(currentMatchIndex) {
+        if (currentMatchIndex != -1 && textLayoutResult != null) {
+            val matchRange = searchMatches[currentMatchIndex]
+            val line = textLayoutResult!!.getLineForOffset(matchRange.first)
+            val yOffset = textLayoutResult!!.getLineTop(line).toInt()
+            verticalScrollState.animateScrollTo(yOffset)
+        }
+    }
+
+
     fun addToUndo(newValue: TextFieldValue) {
         if (undoStack.isEmpty() || undoStack.last().text != newValue.text) {
             undoStack.addLast(newValue)
@@ -389,38 +417,72 @@ fun CodeEditor(
             ) {
                 LineNumberGutter(
                     text = code.text,
+                    layoutResult = textLayoutResult,
                     scrollState = verticalScrollState,
-                    contentPadding = PaddingValues(bottom = toolbarHeight)
+                    extraLines = extraLines,
+                    bottomBuffer = bottomBuffer // Pass the buffer here
                 )
 
-                BasicTextField(
-                    value = code,
-                    onValueChange = { handleCodeChange(it) },
-                    textStyle = TextStyle(
-                        fontFamily = FontFamily.Monospace,
-                        fontSize = 14.sp,
-                        lineHeight = 20.sp,
-                        color = MaterialTheme.colorScheme.onSurface
-                    ),
-                    cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
-                    visualTransformation = searchTransformation,
+                Box(
                     modifier = Modifier
                         .weight(1f)
                         .fillMaxHeight()
-                        .padding(horizontal = 8.dp)
                         .verticalScroll(verticalScrollState)
-                        .horizontalScroll(rememberScrollState())
-                        .focusRequester(focusRequester),
-                    decorationBox = { inner ->
-                        Box(modifier = Modifier.padding(bottom = toolbarHeight)) {
-                            if (code.text.isEmpty()) Text(
-                                stringResource(R.string.editor_placeholder),
-                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
-                            )
-                            inner()
+                        .then(
+                            if (isWrappingEnabled) Modifier
+                            else Modifier.horizontalScroll(rememberScrollState())
+                        )
+                ) {
+                    BasicTextField(
+                        value = code,
+                        onValueChange = { handleCodeChange(it) },
+                        onTextLayout = { textLayoutResult = it },
+                        textStyle = TextStyle(
+                            fontFamily = FontFamily.Monospace,
+                            fontSize = 14.sp,
+                            lineHeight = 20.sp,
+                            color = MaterialTheme.colorScheme.onSurface
+                        ),
+                        cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+                        visualTransformation = searchTransformation,
+                        modifier = Modifier
+                            .then(if (isWrappingEnabled) Modifier.fillMaxWidth() else Modifier)
+                            .padding(horizontal = 8.dp)
+                            .focusRequester(focusRequester),
+                        decorationBox = { inner ->
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(bottom = toolbarHeight + 100.dp)
+                            ) {
+                                Box {
+                                    if (code.text.isEmpty()) {
+                                        Text(
+                                            stringResource(R.string.editor_placeholder),
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(
+                                                alpha = 0.5f
+                                            )
+                                        )
+                                    }
+                                    inner()
+                                }
+
+                                Spacer(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(bottomBuffer)
+                                        .clickable(
+                                            interactionSource = remember { MutableInteractionSource() },
+                                            indication = null
+                                        ) {
+                                            onCodeChange(code.copy(selection = TextRange(code.text.length)))
+                                            focusRequester.requestFocus()
+                                        }
+                                )
+                            }
                         }
-                    }
-                )
+                    )
+                }
             }
         }
 
@@ -461,7 +523,15 @@ fun CodeEditor(
                     onToggleComment = handleToggleComment,
                     onHide = { isAccessoryVisible = false },
                     onInsertSymbol = handleInsertSymbol,
-                    interpreter = interpreter
+                    interpreter = interpreter,
+                    onToggleWrap = { isWrappingEnabled = !isWrappingEnabled },
+                    isWrappingEnabled = isWrappingEnabled,
+                    onScrollTop = {
+                        coroutineScope.launch { verticalScrollState.animateScrollTo(0) }
+                    },
+                    onScrollBottom = {
+                        coroutineScope.launch { verticalScrollState.animateScrollTo(verticalScrollState.maxValue) }
+                    }
                 )
             } else {
                 Surface(
@@ -520,38 +590,77 @@ fun AccessoryKey(
 @Composable
 private fun LineNumberGutter(
     text: String,
+    layoutResult: TextLayoutResult?,
     scrollState: ScrollState,
-    contentPadding: PaddingValues,
+    extraLines: Int,
+    bottomBuffer: Dp,
     modifier: Modifier = Modifier
 ) {
-    val lineCount by remember(text) {
-        derivedStateOf { text.count { it == '\n' } + 1 }
-    }
-
-    val lineNumbersString by remember(lineCount) {
-        derivedStateOf { (1..lineCount).joinToString("\n") }
-    }
+    val fontSize = 14.sp
+    val lineHeight = 20.sp
 
     Column(
         modifier = modifier
-            .width(42.dp)
+            .width(48.dp)
             .fillMaxHeight()
             .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
-            .verticalScroll(scrollState)
-            .padding(contentPadding),
+            .verticalScroll(scrollState),
         horizontalAlignment = Alignment.End
     ) {
-        Text(
-            text = lineNumbersString,
-            style = TextStyle(
-                fontFamily = FontFamily.Monospace,
-                fontSize = 14.sp,
-                lineHeight = 20.sp,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                textAlign = TextAlign.End
-            ),
-            modifier = Modifier.padding(horizontal = 4.dp)
-        )
+        if (layoutResult != null) {
+            val lineStarts = remember(text) {
+                val starts = mutableSetOf<Int>()
+                starts.add(0)
+                text.forEachIndexed { index, char ->
+                    if (char == '\n') starts.add(index + 1)
+                }
+                starts
+            }
+
+            var lastDrawnLine = -1
+            for (i in 0 until layoutResult.lineCount) {
+                val startOffset = layoutResult.getLineStart(i)
+                val isNewPhysicalLine = lineStarts.contains(startOffset)
+
+                Box(modifier = Modifier.height(with(LocalDensity.current) {
+                    (layoutResult.getLineBottom(i) - layoutResult.getLineTop(i)).toDp()
+                })) {
+                    if (isNewPhysicalLine) {
+                        lastDrawnLine++
+                        Text(
+                            text = (lastDrawnLine + 1).toString(),
+                            style = TextStyle(
+                                fontFamily = FontFamily.Monospace,
+                                fontSize = fontSize,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                textAlign = TextAlign.End
+                            ),
+                            modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp)
+                        )
+                    }
+                }
+            }
+
+            val currentPhysicalLineCount = text.count { it == '\n' } + 1
+            repeat(extraLines) { i ->
+                Text(
+                    text = (currentPhysicalLineCount + i + 1).toString(),
+                    style = TextStyle(
+                        fontFamily = FontFamily.Monospace,
+                        fontSize = fontSize,
+                        lineHeight = lineHeight,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f),
+                        textAlign = TextAlign.End
+                    ),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(with(LocalDensity.current) { lineHeight.toDp() })
+                        .padding(horizontal = 4.dp)
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(bottomBuffer))
     }
 }
 
@@ -565,6 +674,10 @@ private fun EditorAccessoryToolbar(
     onToggleComment: () -> Unit,
     onHide: () -> Unit,
     onInsertSymbol: (String) -> Unit,
+    onToggleWrap: () -> Unit,
+    onScrollTop: () -> Unit,    
+    onScrollBottom: () -> Unit,
+    isWrappingEnabled: Boolean,
     interpreter: String
 ) {
     val snippets = remember(interpreter) {
@@ -633,11 +746,24 @@ private fun EditorAccessoryToolbar(
                                 tint = MaterialTheme.colorScheme.primary
                             )
                         }
+                        IconButton(onClick = onScrollTop) {
+                            Icon(Icons.Default.VerticalAlignTop, "Top", tint = MaterialTheme.colorScheme.secondary)
+                        }
+                        IconButton(onClick = onScrollBottom) {
+                            Icon(Icons.Default.VerticalAlignBottom, "Bottom", tint = MaterialTheme.colorScheme.secondary)
+                        }
                         IconButton(onClick = onToggleComment) {
                             Icon(
                                 Icons.AutoMirrored.Filled.Comment,
                                 stringResource(R.string.cd_comment),
                                 tint = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                        IconButton(onClick = onToggleWrap) {
+                            Icon(
+                                if (isWrappingEnabled) Icons.AutoMirrored.Filled.WrapText else Icons.AutoMirrored.Filled.FormatAlignLeft,
+                                contentDescription = "Toggle Wrap",
+                                tint = if (isWrappingEnabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
                             )
                         }
                     }
