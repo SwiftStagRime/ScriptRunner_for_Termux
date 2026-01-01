@@ -43,13 +43,11 @@ import androidx.compose.material.icons.automirrored.filled.Redo
 import androidx.compose.material.icons.automirrored.filled.Undo
 import androidx.compose.material.icons.automirrored.filled.WrapText
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.FormatAlignLeft
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.VerticalAlignBottom
 import androidx.compose.material.icons.filled.VerticalAlignTop
-import androidx.compose.material.icons.filled.WrapText
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -420,7 +418,7 @@ fun CodeEditor(
                     layoutResult = textLayoutResult,
                     scrollState = verticalScrollState,
                     extraLines = extraLines,
-                    bottomBuffer = bottomBuffer // Pass the buffer here
+                    bottomBuffer = bottomBuffer
                 )
 
                 Box(
@@ -475,7 +473,29 @@ fun CodeEditor(
                                             interactionSource = remember { MutableInteractionSource() },
                                             indication = null
                                         ) {
-                                            onCodeChange(code.copy(selection = TextRange(code.text.length)))
+                                            // Limited to one time to not cause accidental spam
+                                            val currentText = code.text
+                                            if (currentText.isNotEmpty() && !currentText.endsWith("\n")) {
+                                                val indentation = getIndentationForNewLine(
+                                                    currentText,
+                                                    currentText.length
+                                                )
+                                                val newText = currentText + "\n" + indentation
+                                                onCodeChange(
+                                                    code.copy(
+                                                        text = newText,
+                                                        selection = TextRange(newText.length)
+                                                    )
+                                                )
+                                            } else {
+                                                onCodeChange(
+                                                    code.copy(
+                                                        selection = TextRange(
+                                                            currentText.length
+                                                        )
+                                                    )
+                                                )
+                                            }
                                             focusRequester.requestFocus()
                                         }
                                 )
@@ -530,7 +550,11 @@ fun CodeEditor(
                         coroutineScope.launch { verticalScrollState.animateScrollTo(0) }
                     },
                     onScrollBottom = {
-                        coroutineScope.launch { verticalScrollState.animateScrollTo(verticalScrollState.maxValue) }
+                        coroutineScope.launch {
+                            verticalScrollState.animateScrollTo(
+                                verticalScrollState.maxValue
+                            )
+                        }
                     }
                 )
             } else {
@@ -635,7 +659,9 @@ private fun LineNumberGutter(
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 textAlign = TextAlign.End
                             ),
-                            modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp)
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 4.dp)
                         )
                     }
                 }
@@ -675,7 +701,7 @@ private fun EditorAccessoryToolbar(
     onHide: () -> Unit,
     onInsertSymbol: (String) -> Unit,
     onToggleWrap: () -> Unit,
-    onScrollTop: () -> Unit,    
+    onScrollTop: () -> Unit,
     onScrollBottom: () -> Unit,
     isWrappingEnabled: Boolean,
     interpreter: String
@@ -747,10 +773,18 @@ private fun EditorAccessoryToolbar(
                             )
                         }
                         IconButton(onClick = onScrollTop) {
-                            Icon(Icons.Default.VerticalAlignTop, "Top", tint = MaterialTheme.colorScheme.secondary)
+                            Icon(
+                                Icons.Default.VerticalAlignTop,
+                                "Top",
+                                tint = MaterialTheme.colorScheme.secondary
+                            )
                         }
                         IconButton(onClick = onScrollBottom) {
-                            Icon(Icons.Default.VerticalAlignBottom, "Bottom", tint = MaterialTheme.colorScheme.secondary)
+                            Icon(
+                                Icons.Default.VerticalAlignBottom,
+                                "Bottom",
+                                tint = MaterialTheme.colorScheme.secondary
+                            )
                         }
                         IconButton(onClick = onToggleComment) {
                             Icon(
