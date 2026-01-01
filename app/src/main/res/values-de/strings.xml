@@ -84,6 +84,9 @@
     <string name="error_script_not_found">Skript nicht gefunden.</string>
     <string name="error_loading_failed">Laden des Skripts aus der Datenbank fehlgeschlagen.</string>
     <string name="error_save_failed">Speichern des Skripts fehlgeschlagen.</string>
+    <string name="toggle_wrap">Zeilenumbruch umschalten</string>
+    <string name="top">Anfang</string>
+    <string name="bottom">Ende</string>
 
     <!-- Config -->
     <string name="config_dialog_title">Skript-Konfiguration</string>

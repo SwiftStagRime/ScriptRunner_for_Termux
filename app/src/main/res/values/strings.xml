@@ -88,6 +88,9 @@
     <string name="error_save_failed">Failed to save script.</string>
     <string name="key_home">Home</string>
     <string name="key_end">End</string>
+    <string name="toggle_wrap">Toggle Wrap</string>
+    <string name="top">Top</string>
+    <string name="bottom">Bottom</string>
 
     <!-- Config -->
     <string name="config_dialog_title">Script Configuration</string>

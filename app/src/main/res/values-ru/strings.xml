@@ -84,6 +84,9 @@
     <string name="error_script_not_found">Скрипт не найден.</string>
     <string name="error_loading_failed">Не удалось загрузить скрипт из базы данных.</string>
     <string name="error_save_failed">Не удалось сохранить скрипт.</string>
+    <string name="toggle_wrap">Перенос строк</string>
+    <string name="top">В начало</string>
+    <string name="bottom">В конец</string>
 
     <!-- Config -->
     <string name="config_dialog_title">Настройки скрипта</string>

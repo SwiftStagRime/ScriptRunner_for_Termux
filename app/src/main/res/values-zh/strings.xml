@@ -84,6 +84,9 @@
     <string name="error_script_not_found">未找到脚本。</string>
     <string name="error_loading_failed">从数据库加载脚本失败。</string>
     <string name="error_save_failed">保存脚本失败。</string>
+    <string name="toggle_wrap">自动换行</string>
+    <string name="top">顶部</string>
+    <string name="bottom">底部</string>
 
     <!-- Config -->
     <string name="config_dialog_title">脚本配置</string>

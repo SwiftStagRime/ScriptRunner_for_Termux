@@ -775,14 +775,14 @@ private fun EditorAccessoryToolbar(
                         IconButton(onClick = onScrollTop) {
                             Icon(
                                 Icons.Default.VerticalAlignTop,
-                                "Top",
+                                stringResource(R.string.top),
                                 tint = MaterialTheme.colorScheme.secondary
                             )
                         }
                         IconButton(onClick = onScrollBottom) {
                             Icon(
                                 Icons.Default.VerticalAlignBottom,
-                                "Bottom",
+                                stringResource(R.string.bottom),
                                 tint = MaterialTheme.colorScheme.secondary
                             )
                         }
@@ -796,7 +796,7 @@ private fun EditorAccessoryToolbar(
                         IconButton(onClick = onToggleWrap) {
                             Icon(
                                 if (isWrappingEnabled) Icons.AutoMirrored.Filled.WrapText else Icons.AutoMirrored.Filled.FormatAlignLeft,
-                                contentDescription = "Toggle Wrap",
+                                contentDescription = stringResource(R.string.toggle_wrap),
                                 tint = if (isWrappingEnabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
                             )
                         }

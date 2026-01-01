@@ -84,6 +84,9 @@
     <string name="error_script_not_found">Script non trouvé.</string>
     <string name="error_loading_failed">Échec du chargement du script depuis la base de données.</string>
     <string name="error_save_failed">Échec de l\'enregistrement du script.</string>
+    <string name="toggle_wrap">Retour à la ligne</string>
+    <string name="top">Haut</string>
+    <string name="bottom">Bas</string>
 
     <!-- Config -->
     <string name="config_dialog_title">Configuration du script</string>
