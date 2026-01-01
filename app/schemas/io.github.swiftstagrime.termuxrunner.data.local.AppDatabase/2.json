@@ -1,0 +1,117 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 2,
+    "identityHash": "e1f8528510f18150e6602eeeafbea762",
+    "entities": [
+      {
+        "tableName": "scripts",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL, `code` TEXT NOT NULL, `interpreter` TEXT NOT NULL, `fileExtension` TEXT NOT NULL, `commandPrefix` TEXT NOT NULL, `runInBackground` INTEGER NOT NULL, `openNewSession` INTEGER NOT NULL, `executionParams` TEXT NOT NULL, `iconPath` TEXT, `envVars` TEXT NOT NULL, `keepSessionOpen` INTEGER NOT NULL, `useHeartbeat` INTEGER NOT NULL DEFAULT 0, `heartbeatTimeout` INTEGER NOT NULL DEFAULT 30000, `heartbeatInterval` INTEGER NOT NULL DEFAULT 10000)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "code",
+            "columnName": "code",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "interpreter",
+            "columnName": "interpreter",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fileExtension",
+            "columnName": "fileExtension",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "commandPrefix",
+            "columnName": "commandPrefix",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "runInBackground",
+            "columnName": "runInBackground",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "openNewSession",
+            "columnName": "openNewSession",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "executionParams",
+            "columnName": "executionParams",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "iconPath",
+            "columnName": "iconPath",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "envVars",
+            "columnName": "envVars",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "keepSessionOpen",
+            "columnName": "keepSessionOpen",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "useHeartbeat",
+            "columnName": "useHeartbeat",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
+          },
+          {
+            "fieldPath": "heartbeatTimeout",
+            "columnName": "heartbeatTimeout",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "30000"
+          },
+          {
+            "fieldPath": "heartbeatInterval",
+            "columnName": "heartbeatInterval",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "10000"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        }
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'e1f8528510f18150e6602eeeafbea762')"
+    ]
+  }
+}

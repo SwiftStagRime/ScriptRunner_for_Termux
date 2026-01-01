@@ -81,6 +81,9 @@
     <string name="cd_next_match">Siguiente</string>
     <string name="key_home">Inicio</string>
     <string name="key_end">Fin</string>
+    <string name="error_script_not_found">Script no encontrado.</string>
+    <string name="error_loading_failed">Error al cargar el script desde la base de datos.</string>
+    <string name="error_save_failed">Error al guardar el script.</string>
 
     <!-- Config -->
     <string name="config_dialog_title">Configuración del script</string>
@@ -106,14 +109,21 @@
     <string name="label_value">Valor</string>
     <string name="placeholder_value">12345</string>
     <string name="cd_remove">Eliminar</string>
+    <string name="reliability_monitoring">Fiabilidad y Monitoreo</string>
+    <string name="auto_restart_lazarus">Reinicio Automático (Lazarus)</string>
+    <string name="restarts_script_if_termux_is_killed_by_system">Reinicia el script si el sistema detiene Termux</string>
+    <string name="advanced_timings">Tiempos Avanzados</string>
+    <string name="pulse_interval_s">Intervalo de Pulso (s)</string>
+    <string name="timeout_limit_s">Límite de Tiempo (s)</string>
+    <string name="pulse_how_often_the_script_signals_it_is_alive_timeout_restart_if_no_signal_received_after_this_time">Pulso: Con qué frecuencia el script señala que está vivo.\nLímite: Reiniciar si no se recibe señal después de este tiempo.</string>
+    <string name="experimental_warning">¡Advertencia! Experimental - puede afectar al script o gastar batería y CPU.</string>
     <string name="btn_add_variable">Añadir variable</string>
     <string name="open_termux_settings">Abrir ajustes de Termux</string>
     <string name="finish_setup_label">He terminado la configuración</string>
     <string name="copy_clipboard_description">Copiar al portapapeles</string>
     <string name="done_description">Hecho</string>
     <string name="error_description">Error</string>
-
-    <!-- Config Errors -->
+    <string name="msg_notification_needed_for_heartbeat">Se requiere permiso de notificación para el monitoreo (heartbeat)</string>
     <string name="error_empty_name">El nombre del script no puede estar vacío</string>
 
     <!-- Repo errors -->

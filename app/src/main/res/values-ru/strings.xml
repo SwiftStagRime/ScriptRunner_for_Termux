@@ -81,6 +81,9 @@
     <string name="cd_next_match">След. совпадение</string>
     <string name="key_home">Home</string>
     <string name="key_end">End</string>
+    <string name="error_script_not_found">Скрипт не найден.</string>
+    <string name="error_loading_failed">Не удалось загрузить скрипт из базы данных.</string>
+    <string name="error_save_failed">Не удалось сохранить скрипт.</string>
 
     <!-- Config -->
     <string name="config_dialog_title">Настройки скрипта</string>
@@ -106,14 +109,21 @@
     <string name="label_value">Значение</string>
     <string name="placeholder_value">12345</string>
     <string name="cd_remove">Удалить</string>
+    <string name="reliability_monitoring">Надежность и Мониторинг</string>
+    <string name="auto_restart_lazarus">Автоперезапуск (Lazarus)</string>
+    <string name="restarts_script_if_termux_is_killed_by_system">Перезапускает скрипт, если система закрыла Termux</string>
+    <string name="advanced_timings">Настройки времени</string>
+    <string name="pulse_interval_s">Интервал пульса (с)</string>
+    <string name="timeout_limit_s">Лимит таймаута (с)</string>
+    <string name="pulse_how_often_the_script_signals_it_is_alive_timeout_restart_if_no_signal_received_after_this_time">Пульс: Как часто скрипт сообщает, что он работает.\nТаймаут: Перезапуск, если сигнал не получен за это время.</string>
+    <string name="experimental_warning">Внимание! Экспериментально — может нарушить работу скрипта или расходовать батарею и нагружать систему.</string>
     <string name="btn_add_variable">Добавить переменную</string>
     <string name="open_termux_settings">Открыть настройки Termux</string>
     <string name="finish_setup_label">Я закончил настройку</string>
     <string name="copy_clipboard_description">Копировать в буфер</string>
     <string name="done_description">Готово</string>
     <string name="error_description">Ошибка</string>
-
-    <!-- Config Errors -->
+    <string name="msg_notification_needed_for_heartbeat">Для мониторинга требуется разрешение на уведомления</string>
     <string name="error_empty_name">Имя скрипта не может быть пустым</string>
 
     <!-- Repo errors -->
@@ -126,4 +136,3 @@
     <string name="error_import_input">Не удалось открыть поток для импорта.</string>
     <string name="error_create_bridge_dir">Не удалось создать директорию моста</string>
 </resources>
-

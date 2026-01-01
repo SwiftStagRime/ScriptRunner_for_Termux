@@ -15,6 +15,9 @@ data class ScriptExportDto(
     val executionParams: String,
     val envVars: Map<String, String>,
     val keepSessionOpen: Boolean,
+    val useHeartbeat: Boolean = false,
+    val heartbeatTimeout: Long = 30000,
+    val heartbeatInterval: Long = 10000,
     val iconBase64: String? = null
 )
 
@@ -30,6 +33,9 @@ fun Script.toExportDto(base64Icon: String?): ScriptExportDto {
         executionParams = executionParams,
         envVars = envVars,
         keepSessionOpen = keepSessionOpen,
+        useHeartbeat = useHeartbeat,
+        heartbeatTimeout = heartbeatTimeout,
+        heartbeatInterval = heartbeatInterval,
         iconBase64 = base64Icon
     )
 }

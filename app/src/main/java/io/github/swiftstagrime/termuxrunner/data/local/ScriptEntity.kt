@@ -1,5 +1,6 @@
 package io.github.swiftstagrime.termuxrunner.data.local
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import io.github.swiftstagrime.termuxrunner.domain.model.Script
@@ -18,6 +19,12 @@ data class ScriptEntity(
     val iconPath: String?,
     val envVars: Map<String, String>,
     val keepSessionOpen: Boolean,
+    @ColumnInfo(defaultValue = "0")
+    val useHeartbeat: Boolean = false,
+    @ColumnInfo(defaultValue = "30000")
+    val heartbeatTimeout: Long = 30000,
+    @ColumnInfo(defaultValue = "10000")
+    val heartbeatInterval: Long = 10000
 ) {
     fun toDomain(): Script {
         return Script(
@@ -32,7 +39,10 @@ data class ScriptEntity(
             executionParams = executionParams,
             envVars = envVars,
             keepSessionOpen = keepSessionOpen,
-            iconPath = iconPath
+            iconPath = iconPath,
+            useHeartbeat = useHeartbeat,
+            heartbeatTimeout = heartbeatTimeout,
+            heartbeatInterval = heartbeatInterval
         )
     }
 }
@@ -50,6 +60,9 @@ fun Script.toEntity(): ScriptEntity {
         executionParams = executionParams,
         keepSessionOpen = keepSessionOpen,
         envVars = envVars,
-        iconPath = iconPath
+        iconPath = iconPath,
+        useHeartbeat = useHeartbeat,
+        heartbeatTimeout = heartbeatTimeout,
+        heartbeatInterval = heartbeatInterval
     )
 }

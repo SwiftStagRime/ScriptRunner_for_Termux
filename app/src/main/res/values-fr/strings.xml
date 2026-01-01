@@ -81,6 +81,9 @@
     <string name="cd_next_match">Suivant</string>
     <string name="key_home">Début</string>
     <string name="key_end">Fin</string>
+    <string name="error_script_not_found">Script non trouvé.</string>
+    <string name="error_loading_failed">Échec du chargement du script depuis la base de données.</string>
+    <string name="error_save_failed">Échec de l\'enregistrement du script.</string>
 
     <!-- Config -->
     <string name="config_dialog_title">Configuration du script</string>
@@ -106,14 +109,21 @@
     <string name="label_value">Valeur</string>
     <string name="placeholder_value">12345</string>
     <string name="cd_remove">Retirer</string>
+    <string name="reliability_monitoring">Fiabilité &amp; Surveillance</string>
+    <string name="auto_restart_lazarus">Redémarrage Auto (Lazarus)</string>
+    <string name="restarts_script_if_termux_is_killed_by_system">Redémarre le script si Termux est arrêté par le système</string>
+    <string name="advanced_timings">Délais avancés</string>
+    <string name="pulse_interval_s">Intervalle de pulsation (s)</string>
+    <string name="timeout_limit_s">Délai d\'expiration (s)</string>
+    <string name="pulse_how_often_the_script_signals_it_is_alive_timeout_restart_if_no_signal_received_after_this_time">Pulsation : Fréquence du signal d\'activité du script.\nDélai : Redémarrage si aucun signal après ce temps.</string>
+    <string name="experimental_warning">Attention ! Expérimental - peut perturber le script ou user la batterie et le CPU.</string>
     <string name="btn_add_variable">Ajouter une variable</string>
     <string name="open_termux_settings">Ouvrir les paramètres Termux</string>
     <string name="finish_setup_label">J\'ai terminé la configuration</string>
     <string name="copy_clipboard_description">Copier dans le presse-papier</string>
     <string name="done_description">Terminé</string>
     <string name="error_description">Erreur</string>
-
-    <!-- Config Errors -->
+    <string name="msg_notification_needed_for_heartbeat">L\'autorisation de notification est requise pour le signal d\'activité (heartbeat)</string>
     <string name="error_empty_name">Le nom du script ne peut pas être vide</string>
 
     <!-- Repo errors -->
@@ -126,4 +136,3 @@
     <string name="error_import_input">Impossible d\'ouvrir le flux d\'entrée pour l\'importation.</string>
     <string name="error_create_bridge_dir">Impossible de créer le dossier pont</string>
 </resources>
-

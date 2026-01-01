@@ -4,10 +4,12 @@ import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.github.swiftstagrime.termuxrunner.R
 import io.github.swiftstagrime.termuxrunner.domain.model.Script
 import io.github.swiftstagrime.termuxrunner.domain.repository.IconRepository
 import io.github.swiftstagrime.termuxrunner.domain.repository.ScriptRepository
 import io.github.swiftstagrime.termuxrunner.domain.usecase.UpdateScriptUseCase
+import io.github.swiftstagrime.termuxrunner.ui.extensions.UiText
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -38,24 +40,54 @@ class EditorViewModel @Inject constructor(
             )
         } else {
             viewModelScope.launch {
-                val script = scriptRepository.getScriptById(id)
-                _currentScript.value = script
+                try {
+                    val script = scriptRepository.getScriptById(id)
+                    if (script != null) {
+                        _currentScript.value = script
+                    } else {
+                        _uiEvent.send(
+                            EditorUiEvent.ShowSnackbar(
+                                UiText.StringResource(R.string.error_script_not_found)
+                            )
+                        )
+                    }
+                } catch (_: Exception) {
+                    _uiEvent.send(
+                        EditorUiEvent.ShowSnackbar(
+                            UiText.StringResource(R.string.error_loading_failed)
+                        )
+                    )
+                }
             }
         }
     }
 
     fun saveScript(script: Script) {
         viewModelScope.launch {
-            updateScriptUseCase(script)
-            _uiEvent.send(EditorUiEvent.SaveSuccess)
+            try {
+                updateScriptUseCase(script)
+
+                _uiEvent.send(EditorUiEvent.SaveSuccess)
+            } catch (_: Exception) {
+                _uiEvent.send(
+                    EditorUiEvent.ShowSnackbar(
+                        UiText.StringResource(R.string.error_save_failed)
+                    )
+                )
+            }
         }
     }
 
     suspend fun processSelectedImage(uri: Uri): String? {
-        return iconRepository.saveIcon(uri.toString())
+        return try {
+            iconRepository.saveIcon(uri.toString())
+        } catch (_: Exception) {
+            null
+        }
     }
 }
 
-sealed class EditorUiEvent {
-    object SaveSuccess : EditorUiEvent()
+sealed interface EditorUiEvent {
+    data object SaveSuccess : EditorUiEvent
+    data class ShowSnackbar(val message: UiText) : EditorUiEvent
 }

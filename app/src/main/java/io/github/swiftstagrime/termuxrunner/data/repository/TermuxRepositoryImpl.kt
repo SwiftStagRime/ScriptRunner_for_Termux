@@ -15,6 +15,7 @@ import io.github.swiftstagrime.termuxrunner.R
 import io.github.swiftstagrime.termuxrunner.domain.repository.TermuxRepository
 import io.github.swiftstagrime.termuxrunner.ui.extensions.UiText
 import javax.inject.Inject
+
 /**
  * Custom exceptions mapping Termux-specific integration failures to user-friendly strings.
  */

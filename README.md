@@ -21,6 +21,9 @@ Features
 
     Data Portability: Full support for importing and exporting your script library.
 
+    Experimental !!! Support for script monitoring for auto-restarting them if they were killed by system.
+    They are not restarted if they finished themself.
+
 |                     Home                      |                     Editor                     |                     Config                      |                     Shortcut                      |
 |:---------------------------------------------:|:----------------------------------------------:|:-----------------------------------------------:|:-------------------------------------------------:|
 | <img src="screenshots/home.webp" width="200"> | <img src="screenshots/editor.jpg" width="200"> | <img src="screenshots/config.webp" width="200"> | <img src="screenshots/shortcut.webp" width="350"> |

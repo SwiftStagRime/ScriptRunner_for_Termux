@@ -16,4 +16,7 @@ data class Script(
     val runInBackground: Boolean = false, // If true, shows notification only
     val openNewSession: Boolean = true,   // If true, opens Termux window
     val keepSessionOpen: Boolean = true,  // If true, adds a hack to keep the screen open, don't really rely on it
+    val useHeartbeat: Boolean = false,   // Experimental hack to monitor script execution
+    val heartbeatTimeout: Long = 30000,
+    val heartbeatInterval: Long = 10000
 )
