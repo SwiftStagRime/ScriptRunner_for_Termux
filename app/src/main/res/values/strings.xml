@@ -147,4 +147,25 @@
     <string name="error_export_output">Could not open output stream for export.</string>
     <string name="error_import_input">Could not open input stream for import.</string>
     <string name="error_create_bridge_dir">Could not create bridge directory</string>
+    <string name="error_export_stream">Could not open output stream for export</string>
+    <string name="error_import_stream">Could not open input stream for import</string>
+
+    <!-- Categories -->
+    <string name="scripts_in_will_be_moved_to_uncategorized_this_cannot_be_undone">Scripts in \'%1$s\' will be moved to \'Uncategorized\'. This cannot be undone.</string>
+    <string name="delete_category">Delete Category?</string>
+    <string name="manual_grouped">Manual (Grouped)</string>
+    <string name="name_a_z">Name (A-Z)</string>
+    <string name="date_flat_list">Date (Flat List)</string>
+    <string name="sort">Sort</string>
+    <string name="more">More</string>
+    <string name="uncategorized">Uncategorized</string>
+    <string name="cancel">Cancel</string>
+    <string name="delete">Delete</string>
+    <string name="manual">Manual</string>
+    <string name="a_z">A-Z</string>
+    <string name="newest_by_date">Newest by Date</string>
+    <string name="new_category">New Category</string>
+    <string name="category_name">Category Name</string>
+    <string name="create">Create</string>
+    <string name="add_new_category">Add New Category</string>
 </resources>

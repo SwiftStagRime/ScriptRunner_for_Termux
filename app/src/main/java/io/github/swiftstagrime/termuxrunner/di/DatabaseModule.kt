@@ -8,7 +8,8 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import io.github.swiftstagrime.termuxrunner.data.local.AppDatabase
-import io.github.swiftstagrime.termuxrunner.data.local.ScriptDao
+import io.github.swiftstagrime.termuxrunner.data.local.dao.CategoryDao
+import io.github.swiftstagrime.termuxrunner.data.local.dao.ScriptDao
 import javax.inject.Singleton
 
 @Module
@@ -36,5 +37,11 @@ object DatabaseModule {
     @Singleton
     fun provideScriptDao(db: AppDatabase): ScriptDao {
         return db.scriptDao()
+    }
+
+    @Provides
+    @Singleton
+    fun provideCategoryDao(db: AppDatabase): CategoryDao {
+        return db.categoryDao()
     }
 }

@@ -7,7 +7,9 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import io.github.swiftstagrime.termuxrunner.data.local.ImageStorageManager
-import io.github.swiftstagrime.termuxrunner.data.local.ScriptDao
+import io.github.swiftstagrime.termuxrunner.data.local.dao.CategoryDao
+import io.github.swiftstagrime.termuxrunner.data.local.dao.ScriptDao
+import io.github.swiftstagrime.termuxrunner.data.repository.CategoryRepositoryImpl
 import io.github.swiftstagrime.termuxrunner.data.repository.IconRepositoryImpl
 import io.github.swiftstagrime.termuxrunner.data.repository.MonitoringRepositoryImpl
 import io.github.swiftstagrime.termuxrunner.data.repository.ScriptFileRepositoryImpl
@@ -15,6 +17,7 @@ import io.github.swiftstagrime.termuxrunner.data.repository.ScriptRepositoryImpl
 import io.github.swiftstagrime.termuxrunner.data.repository.ShortcutRepositoryImpl
 import io.github.swiftstagrime.termuxrunner.data.repository.TermuxRepositoryImpl
 import io.github.swiftstagrime.termuxrunner.data.repository.UserPreferencesRepositoryImpl
+import io.github.swiftstagrime.termuxrunner.domain.repository.CategoryRepository
 import io.github.swiftstagrime.termuxrunner.domain.repository.IconRepository
 import io.github.swiftstagrime.termuxrunner.domain.repository.MonitoringRepository
 import io.github.swiftstagrime.termuxrunner.domain.repository.ScriptFileRepository
@@ -76,9 +79,17 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun bindMonitoringRepository(
+    fun provideMonitoringRepository(
         @ApplicationContext context: Context
     ): MonitoringRepository {
         return MonitoringRepositoryImpl(context)
+    }
+
+    @Provides
+    @Singleton
+    fun provideCategoryRepository(
+        categoryDao: CategoryDao
+    ): CategoryRepository {
+        return CategoryRepositoryImpl(categoryDao)
     }
 }

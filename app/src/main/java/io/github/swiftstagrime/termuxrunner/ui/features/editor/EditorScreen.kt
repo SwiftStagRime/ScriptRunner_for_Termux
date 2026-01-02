@@ -26,6 +26,7 @@ import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextOverflow
 import io.github.swiftstagrime.termuxrunner.R
+import io.github.swiftstagrime.termuxrunner.domain.model.Category
 import io.github.swiftstagrime.termuxrunner.domain.model.Script
 import io.github.swiftstagrime.termuxrunner.ui.components.ScriptConfigDialog
 import io.github.swiftstagrime.termuxrunner.ui.preview.DevicePreviews
@@ -38,6 +39,8 @@ fun EditorScreen(
     snackbarHostState: SnackbarHostState,
     onBack: () -> Unit,
     onSave: (Script) -> Unit,
+    categories: List<Category>,
+    onAddNewCategory: (String) -> Unit,
     isBatteryUnrestricted: Boolean,
     onRequestBatteryUnrestricted: () -> Unit,
     onHeartbeatToggle: (Boolean) -> Unit,
@@ -105,6 +108,8 @@ fun EditorScreen(
         if (showConfigDialog) {
             ScriptConfigDialog(
                 script = currentScriptObj.copy(code = codeState.text),
+                categories = categories,
+                onAddNewCategory = onAddNewCategory,
                 onDismiss = { showConfigDialog = false },
                 onSave = { configuredScript ->
                     currentScriptObj = configuredScript
@@ -142,7 +147,9 @@ private fun PreviewEditorNewRaw() {
             onHeartbeatToggle = {},
             snackbarHostState = SnackbarHostState(),
             isBatteryUnrestricted = false,
-            onRequestBatteryUnrestricted = {}
+            onRequestBatteryUnrestricted = {},
+            categories = emptyList(),
+            onAddNewCategory = {}
         )
     }
 }

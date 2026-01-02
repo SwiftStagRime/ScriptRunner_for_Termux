@@ -1,4 +1,4 @@
-package io.github.swiftstagrime.termuxrunner.data.local
+package io.github.swiftstagrime.termuxrunner.data.local.entity
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
@@ -24,9 +24,13 @@ data class ScriptEntity(
     @ColumnInfo(defaultValue = "30000")
     val heartbeatTimeout: Long = 30000,
     @ColumnInfo(defaultValue = "10000")
-    val heartbeatInterval: Long = 10000
+    val heartbeatInterval: Long = 10000,
+    @ColumnInfo(defaultValue = "NULL")
+    val categoryId: Int? = null,
+    @ColumnInfo(defaultValue = "0")
+    val orderIndex: Int = 0
 ) {
-    fun toDomain(): Script {
+    fun toScriptDomain(): Script {
         return Script(
             id = id,
             name = name,
@@ -42,12 +46,14 @@ data class ScriptEntity(
             iconPath = iconPath,
             useHeartbeat = useHeartbeat,
             heartbeatTimeout = heartbeatTimeout,
-            heartbeatInterval = heartbeatInterval
+            heartbeatInterval = heartbeatInterval,
+            categoryId = categoryId,
+            orderIndex = orderIndex
         )
     }
 }
 
-fun Script.toEntity(): ScriptEntity {
+fun Script.toScriptEntity(): ScriptEntity {
     return ScriptEntity(
         id = id,
         name = name,
@@ -63,6 +69,8 @@ fun Script.toEntity(): ScriptEntity {
         iconPath = iconPath,
         useHeartbeat = useHeartbeat,
         heartbeatTimeout = heartbeatTimeout,
-        heartbeatInterval = heartbeatInterval
+        heartbeatInterval = heartbeatInterval,
+        categoryId = categoryId,
+        orderIndex = orderIndex
     )
 }

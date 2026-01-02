@@ -138,4 +138,25 @@
     <string name="error_export_output">无法打开导出输出流。</string>
     <string name="error_import_input">无法打开导入输入流。</string>
     <string name="error_create_bridge_dir">无法创建 Bridge 目录</string>
+
+    <!-- Categories -->
+    <string name="error_export_stream">无法打开用于导出的输出流</string>
+    <string name="error_import_stream">无法打开用于导入的输入流</string>
+    <string name="scripts_in_will_be_moved_to_uncategorized_this_cannot_be_undone">\'%1$s\' 中的脚本将被移至“未分类”。此操作不可撤销。</string>
+    <string name="delete_category">删除分类？</string>
+    <string name="manual_grouped">手动（分组）</string>
+    <string name="name_a_z">名称 (A-Z)</string>
+    <string name="date_flat_list">日期（列表）</string>
+    <string name="sort">排序</string>
+    <string name="more">更多</string>
+    <string name="uncategorized">未分类</string>
+    <string name="cancel">取消</string>
+    <string name="delete">删除</string>
+    <string name="manual">手动</string>
+    <string name="a_z">A-Z</string>
+    <string name="newest_by_date">按日期（最新）</string>
+    <string name="new_category">新分类</string>
+    <string name="category_name">分类名称</string>
+    <string name="create">创建</string>
+    <string name="add_new_category">添加新分类</string>
 </resources>

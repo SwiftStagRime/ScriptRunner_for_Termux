@@ -4,10 +4,10 @@ import android.content.Context
 import android.net.Uri
 import android.util.Base64
 import dagger.hilt.android.qualifiers.ApplicationContext
-import io.github.swiftstagrime.termuxrunner.data.local.ScriptDao
-import io.github.swiftstagrime.termuxrunner.data.local.ScriptEntity
 import io.github.swiftstagrime.termuxrunner.data.local.ScriptExportDto
-import io.github.swiftstagrime.termuxrunner.data.local.toEntity
+import io.github.swiftstagrime.termuxrunner.data.local.dao.ScriptDao
+import io.github.swiftstagrime.termuxrunner.data.local.entity.ScriptEntity
+import io.github.swiftstagrime.termuxrunner.data.local.entity.toScriptEntity
 import io.github.swiftstagrime.termuxrunner.data.local.toExportDto
 import io.github.swiftstagrime.termuxrunner.domain.model.Script
 import io.github.swiftstagrime.termuxrunner.domain.repository.ScriptRepository
@@ -23,13 +23,21 @@ import java.io.InputStreamReader
 import java.util.UUID
 import javax.inject.Inject
 
+sealed class ScriptException() : Exception()
+
+class ExportStreamException : ScriptException(
+)
+
+class ImportStreamException : ScriptException(
+)
+
 /**
  * Repository implementation for managing scripts, handling database operations
  * and script portability (import/export).
  */
 class ScriptRepositoryImpl @Inject constructor(
     private val dao: ScriptDao,
-    @ApplicationContext private val context: Context
+    @ApplicationContext private val context: Context,
 ) : ScriptRepository {
 
     private val json = Json {
@@ -43,7 +51,7 @@ class ScriptRepositoryImpl @Inject constructor(
             val entities = dao.getAllScriptsOneShot()
 
             val exportDtos = entities.map { entity ->
-                val script = entity.toDomain()
+                val script = entity.toScriptDomain()
                 var base64Icon: String? = null
 
                 // Convert local icon file to Base64 string for JSON portability
@@ -62,7 +70,7 @@ class ScriptRepositoryImpl @Inject constructor(
 
             context.contentResolver.openOutputStream(uri)?.use { outputStream ->
                 outputStream.write(jsonString.toByteArray())
-            } ?: throw IllegalStateException("Could not open output stream")
+            } ?: throw ExportStreamException()
         }
     }
 
@@ -70,7 +78,7 @@ class ScriptRepositoryImpl @Inject constructor(
         withContext(Dispatchers.IO) {
             val jsonString = context.contentResolver.openInputStream(uri)?.use { inputStream ->
                 BufferedReader(InputStreamReader(inputStream)).readText()
-            } ?: throw IllegalStateException("Could not open input stream")
+            } ?: throw ImportStreamException()
 
             val exportDtos = json.decodeFromString<List<ScriptExportDto>>(jsonString)
 
@@ -122,19 +130,23 @@ class ScriptRepositoryImpl @Inject constructor(
 
     override fun getAllScripts(): Flow<List<Script>> {
         return dao.getAllScripts().map { entities ->
-            entities.map { it.toDomain() }
+            entities.map { it.toScriptDomain() }
         }
     }
 
     override suspend fun getScriptById(id: Int): Script? {
-        return dao.getScriptById(id)?.toDomain()
+        return dao.getScriptById(id)?.toScriptDomain()
     }
 
     override suspend fun insertScript(script: Script) {
-        dao.insertScript(script.toEntity())
+        dao.insertScript(script.toScriptEntity())
     }
 
     override suspend fun deleteScript(script: Script) {
-        dao.deleteScript(script.toEntity())
+        dao.deleteScript(script.toScriptEntity())
+    }
+
+    override suspend fun updateScriptsOrder(orders: List<Pair<Int, Int>>) {
+        dao.updateScriptsOrder(orders)
     }
 }

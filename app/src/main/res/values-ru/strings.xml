@@ -138,4 +138,25 @@
     <string name="error_export_output">Не удалось открыть поток для экспорта.</string>
     <string name="error_import_input">Не удалось открыть поток для импорта.</string>
     <string name="error_create_bridge_dir">Не удалось создать директорию моста</string>
+
+    <!-- Categories -->
+    <string name="error_export_stream">Не удалось открыть поток вывода для экспорта</string>
+    <string name="error_import_stream">Не удалось открыть входной поток для импорта</string>
+    <string name="scripts_in_will_be_moved_to_uncategorized_this_cannot_be_undone">Скрипты из \'%1$s\' будут перемещены в раздел \'Без категории\'. Это действие нельзя отменить.</string>
+    <string name="delete_category">Удалить категорию?</string>
+    <string name="manual_grouped">Вручную (сгруппировано)</string>
+    <string name="name_a_z">Имя (А-Я)</string>
+    <string name="date_flat_list">Дата (списком)</string>
+    <string name="sort">Сортировка</string>
+    <string name="more">Еще</string>
+    <string name="uncategorized">Без категории</string>
+    <string name="cancel">Отмена</string>
+    <string name="delete">Удалить</string>
+    <string name="manual">Вручную</string>
+    <string name="a_z">А-Я</string>
+    <string name="newest_by_date">Сначала новые</string>
+    <string name="new_category">Новая категория</string>
+    <string name="category_name">Название категории</string>
+    <string name="create">Создать</string>
+    <string name="add_new_category">Добавить новую категорию</string>
 </resources>

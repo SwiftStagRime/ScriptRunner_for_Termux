@@ -138,4 +138,25 @@
     <string name="error_export_output">Não foi possível abrir o fluxo de saída para exportação.</string>
     <string name="error_import_input">Não foi possível abrir o fluxo de entrada para importação.</string>
     <string name="error_create_bridge_dir">Não foi possível criar o diretório de ponte</string>
+
+    <!-- Categories -->
+    <string name="error_export_stream">Não foi possível abrir o fluxo de saída para exportação</string>
+    <string name="error_import_stream">Não foi possível abrir o fluxo de entrada para importação</string>
+    <string name="scripts_in_will_be_moved_to_uncategorized_this_cannot_be_undone">Os scripts em \'%1$s\' serão movidos para \'Sem categoria\'. Isso não pode ser desfeito.</string>
+    <string name="delete_category">Excluir categoria?</string>
+    <string name="manual_grouped">Manual (Agrupado)</string>
+    <string name="name_a_z">Nome (A-Z)</string>
+    <string name="date_flat_list">Data (Lista simples)</string>
+    <string name="sort">Ordenar</string>
+    <string name="more">Mais</string>
+    <string name="uncategorized">Sem categoria</string>
+    <string name="cancel">Cancelar</string>
+    <string name="delete">Excluir</string>
+    <string name="manual">Manual</string>
+    <string name="a_z">A-Z</string>
+    <string name="newest_by_date">Mais recentes por data</string>
+    <string name="new_category">Nova categoria</string>
+    <string name="category_name">Nome da categoria</string>
+    <string name="create">Criar</string>
+    <string name="add_new_category">Adicionar nova categoria</string>
 </resources>

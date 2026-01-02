@@ -5,8 +5,8 @@ import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import io.github.swiftstagrime.termuxrunner.data.local.AppDatabase
-import io.github.swiftstagrime.termuxrunner.data.local.ScriptDao
-import io.github.swiftstagrime.termuxrunner.data.local.ScriptEntity
+import io.github.swiftstagrime.termuxrunner.data.local.dao.ScriptDao
+import io.github.swiftstagrime.termuxrunner.data.local.entity.ScriptEntity
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertTrue
 import kotlinx.coroutines.flow.first

@@ -8,7 +8,9 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.swiftstagrime.termuxrunner.R
 import io.github.swiftstagrime.termuxrunner.data.repository.TermuxException
 import io.github.swiftstagrime.termuxrunner.data.repository.TermuxPermissionException
+import io.github.swiftstagrime.termuxrunner.domain.model.Category
 import io.github.swiftstagrime.termuxrunner.domain.model.Script
+import io.github.swiftstagrime.termuxrunner.domain.repository.CategoryRepository
 import io.github.swiftstagrime.termuxrunner.domain.repository.IconRepository
 import io.github.swiftstagrime.termuxrunner.domain.repository.ScriptRepository
 import io.github.swiftstagrime.termuxrunner.domain.repository.ShortcutRepository
@@ -30,7 +32,10 @@ import javax.inject.Inject
 
 sealed interface HomeUiState {
     data object Loading : HomeUiState
-    data class Success(val scripts: List<Script>) : HomeUiState
+    data class Success(
+        val scripts: List<Script>,
+        val categories: List<Category>
+    ) : HomeUiState
 }
 
 sealed interface HomeUiEvent {
@@ -39,32 +44,71 @@ sealed interface HomeUiEvent {
     data class CreateShortcut(val shortcutInfo: ShortcutInfoCompat) : HomeUiEvent
 }
 
+enum class SortOption {
+    NAME_ASC,
+    NAME_DESC,
+    DATE_NEWEST,
+    DATE_OLDEST,
+    MANUAL
+}
+
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    scriptRepository: ScriptRepository,
     private val runScriptUseCase: RunScriptUseCase,
     private val deleteScriptUseCase: DeleteScriptUseCase,
     private val updateScriptUseCase: UpdateScriptUseCase,
     private val shortcutRepository: ShortcutRepository,
-    private val iconRepository: IconRepository
+    private val iconRepository: IconRepository,
+    private val categoryRepository: CategoryRepository,
+    private val scriptRepository: ScriptRepository
 ) : ViewModel() {
 
     private val _searchQuery = MutableStateFlow("")
     val searchQuery = _searchQuery.asStateFlow()
 
+    private val _uiEvent = Channel<HomeUiEvent>()
+    val uiEvent = _uiEvent.receiveAsFlow()
+    private var pendingScript: Script? = null
+
+    private val _selectedCategoryId = MutableStateFlow<Int?>(null)
+    private val _sortOption = MutableStateFlow(SortOption.NAME_ASC)
+
+    val selectedCategoryId = _selectedCategoryId.asStateFlow()
+    val sortOption = _sortOption.asStateFlow()
+
     val homeUiState: StateFlow<HomeUiState> = combine(
         scriptRepository.getAllScripts(),
-        _searchQuery
-    ) { scripts, query ->
-        if (query.isBlank()) {
-            HomeUiState.Success(scripts)
+        categoryRepository.getAllCategories(),
+        _searchQuery,
+        _selectedCategoryId,
+        _sortOption
+    ) { scripts, categories, query, selCatId, sort ->
+
+        var filteredList = if (selCatId != null) {
+            scripts.filter { it.categoryId == selCatId }
         } else {
-            val filtered = scripts.filter {
+            scripts
+        }
+
+        if (query.isNotBlank()) {
+            filteredList = filteredList.filter {
                 it.name.contains(query, ignoreCase = true) ||
                         it.code.contains(query, ignoreCase = true)
             }
-            HomeUiState.Success(filtered)
-        } as HomeUiState
+        }
+
+        val sortedList = when (sort) {
+            SortOption.NAME_ASC -> filteredList.sortedBy { it.name.lowercase() }
+            SortOption.NAME_DESC -> filteredList.sortedByDescending { it.name.lowercase() }
+            SortOption.DATE_NEWEST -> filteredList.sortedByDescending { it.id }
+            SortOption.DATE_OLDEST -> filteredList.sortedBy { it.id }
+            SortOption.MANUAL -> filteredList.sortedBy { it.orderIndex }
+        }
+
+        HomeUiState.Success(
+            scripts = sortedList,
+            categories = categories
+        ) as HomeUiState
     }
         .onStart { emit(HomeUiState.Loading) }
         .stateIn(
@@ -73,9 +117,6 @@ class HomeViewModel @Inject constructor(
             initialValue = HomeUiState.Loading
         )
 
-    private val _uiEvent = Channel<HomeUiEvent>()
-    val uiEvent = _uiEvent.receiveAsFlow()
-    private var pendingScript: Script? = null
 
     fun onSearchQueryChange(newQuery: String) {
         _searchQuery.value = newQuery
@@ -149,7 +190,55 @@ class HomeViewModel @Inject constructor(
         }
     }
 
+    fun selectCategory(categoryId: Int?) {
+        _selectedCategoryId.value = categoryId
+    }
+
+    fun setSortOption(option: SortOption) {
+        _sortOption.value = option
+    }
+
     private fun sendEvent(event: HomeUiEvent) {
         viewModelScope.launch { _uiEvent.send(event) }
+    }
+
+    fun moveScript(fromIndex: Int, toIndex: Int) {
+        val currentState = homeUiState.value
+        if (currentState !is HomeUiState.Success) return
+
+        viewModelScope.launch {
+            val list = currentState.scripts.toMutableList()
+            val item = list.removeAt(fromIndex)
+            list.add(toIndex, item)
+
+            val updates = list.mapIndexed { index, script ->
+                script.id to index
+            }
+
+            scriptRepository.updateScriptsOrder(updates)
+        }
+    }
+
+    fun addCategory(name: String) {
+        viewModelScope.launch {
+            categoryRepository.upsertCategory(Category(name = name))
+        }
+    }
+
+    fun deleteCategory(category: Category) {
+        viewModelScope.launch {
+            val currentScripts = (homeUiState.value as? HomeUiState.Success)?.scripts ?: emptyList()
+            val scriptsToNullify = currentScripts.filter { it.categoryId == category.id }
+
+            scriptsToNullify.forEach { script ->
+                updateScriptUseCase(script.copy(categoryId = null))
+            }
+
+            categoryRepository.deleteCategory(category)
+
+            if (_selectedCategoryId.value == category.id) {
+                _selectedCategoryId.value = null
+            }
+        }
     }
 }

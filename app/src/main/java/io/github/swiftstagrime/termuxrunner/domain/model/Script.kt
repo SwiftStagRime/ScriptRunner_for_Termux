@@ -18,5 +18,7 @@ data class Script(
     val keepSessionOpen: Boolean = true,  // If true, adds a hack to keep the screen open, don't really rely on it
     val useHeartbeat: Boolean = false,   // Experimental hack to monitor script execution
     val heartbeatTimeout: Long = 30000,
-    val heartbeatInterval: Long = 10000
+    val heartbeatInterval: Long = 10000,
+    val categoryId: Int? = null,
+    val orderIndex: Int = 0
 )

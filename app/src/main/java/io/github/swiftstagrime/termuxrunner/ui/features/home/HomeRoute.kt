@@ -43,6 +43,9 @@ fun HomeRoute(
     val uiState by viewModel.homeUiState.collectAsStateWithLifecycle()
     val searchQuery by viewModel.searchQuery.collectAsStateWithLifecycle()
 
+    val selectedCategoryId by viewModel.selectedCategoryId.collectAsStateWithLifecycle()
+    val sortOption by viewModel.sortOption.collectAsStateWithLifecycle()
+
     val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
@@ -174,7 +177,14 @@ fun HomeRoute(
         },
         onHeartbeatToggle = { enabled ->
             notificationPermissionCheck(enabled, notificationPermissionLauncher, context)
-        }
+        },
+        selectedCategoryId = selectedCategoryId,
+        sortOption = sortOption,
+        onCategorySelect = viewModel::selectCategory,
+        onSortOptionChange = viewModel::setSortOption,
+        onAddNewCategory = viewModel::addCategory,
+        onDeleteCategory = viewModel::deleteCategory,
+        onMove = viewModel::moveScript
     )
 }
 

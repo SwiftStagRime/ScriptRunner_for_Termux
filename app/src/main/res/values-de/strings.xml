@@ -138,4 +138,26 @@
     <string name="error_export_output">Ausgabestrom für Export konnte nicht geöffnet werden.</string>
     <string name="error_import_input">Eingabestrom für Import konnte nicht geöffnet werden.</string>
     <string name="error_create_bridge_dir">Bridge-Verzeichnis konnte nicht erstellt werden</string>
+    <string name="error_export_stream">Ausgabestream für Export konnte nicht geöffnet werden</string>
+    <string name="error_import_stream">Eingabestream für Import konnte nicht geöffnet werden</string>
+
+    <!-- Categories -->
+    <string name="scripts_in_will_be_moved_to_uncategorized_this_cannot_be_undone">Skripte in \'%1$s\' werden nach \'Nicht kategorisiert\' verschoben. Dies kann nicht rückgängig gemacht werden.</string>
+    <string name="delete_category">Kategorie löschen?</string>
+    <string name="manual_grouped">Manuell (Gruppiert)</string>
+    <string name="name_a_z">Name (A-Z)</string>
+    <string name="date_flat_list">Datum (Flache Liste)</string>
+    <string name="sort">Sortieren</string>
+    <string name="more">Mehr</string>
+    <string name="uncategorized">Nicht kategorisiert</string>
+    <string name="cancel">Abbrechen</string>
+    <string name="delete">Löschen</string>
+    <string name="manual">Manuell</string>
+    <string name="a_z">A-Z</string>
+    <string name="newest_by_date">Neueste nach Datum</string>
+    <string name="new_category">Neue Kategorie</string>
+    <string name="category_name">Kategoriename</string>
+    <string name="create">Erstellen</string>
+    <string name="add_new_category">Neue Kategorie hinzufügen</string>
+
 </resources>

@@ -5,27 +5,44 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.swiftstagrime.termuxrunner.R
+import io.github.swiftstagrime.termuxrunner.domain.model.Category
 import io.github.swiftstagrime.termuxrunner.domain.model.Script
+import io.github.swiftstagrime.termuxrunner.domain.repository.CategoryRepository
 import io.github.swiftstagrime.termuxrunner.domain.repository.IconRepository
 import io.github.swiftstagrime.termuxrunner.domain.repository.ScriptRepository
 import io.github.swiftstagrime.termuxrunner.domain.usecase.UpdateScriptUseCase
 import io.github.swiftstagrime.termuxrunner.ui.extensions.UiText
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+
+sealed interface EditorUiEvent {
+    data object SaveSuccess : EditorUiEvent
+    data class ShowSnackbar(val message: UiText) : EditorUiEvent
+}
 
 @HiltViewModel
 class EditorViewModel @Inject constructor(
     private val scriptRepository: ScriptRepository,
+    private val categoryRepository: CategoryRepository,
     private val updateScriptUseCase: UpdateScriptUseCase,
     private val iconRepository: IconRepository
 ) : ViewModel() {
 
     private val _currentScript = MutableStateFlow<Script?>(null)
     val currentScript = _currentScript.asStateFlow()
+
+    val categories = categoryRepository.getAllCategories()
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList()
+        )
 
     private val _uiEvent = Channel<EditorUiEvent>()
     val uiEvent = _uiEvent.receiveAsFlow()
@@ -78,6 +95,12 @@ class EditorViewModel @Inject constructor(
         }
     }
 
+    fun addCategory(name: String) {
+        viewModelScope.launch {
+            categoryRepository.upsertCategory(Category(name = name))
+        }
+    }
+
     suspend fun processSelectedImage(uri: Uri): String? {
         return try {
             iconRepository.saveIcon(uri.toString())
@@ -85,9 +108,4 @@ class EditorViewModel @Inject constructor(
             null
         }
     }
-}
-
-sealed interface EditorUiEvent {
-    data object SaveSuccess : EditorUiEvent
-    data class ShowSnackbar(val message: UiText) : EditorUiEvent
 }

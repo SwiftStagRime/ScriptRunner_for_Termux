@@ -5,6 +5,8 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,19 +20,27 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.Sort
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.DragIndicator
+import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.PushPin
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.SortByAlpha
 import androidx.compose.material.icons.filled.Terminal
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -47,13 +57,16 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -61,17 +74,22 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.request.crossfade
 import io.github.swiftstagrime.termuxrunner.R
+import io.github.swiftstagrime.termuxrunner.domain.model.Category
 import io.github.swiftstagrime.termuxrunner.domain.model.Script
 import io.github.swiftstagrime.termuxrunner.ui.components.ScriptConfigDialog
 import io.github.swiftstagrime.termuxrunner.ui.preview.DevicePreviews
@@ -96,12 +114,35 @@ fun HomeScreen(
     isBatteryUnrestricted: Boolean,
     onRequestBatteryUnrestricted: () -> Unit,
     snackbarHostState: SnackbarHostState,
-    onProcessImage: suspend (Uri) -> String?
+    onProcessImage: suspend (Uri) -> String?,
+    selectedCategoryId: Int?,
+    sortOption: SortOption,
+    onCategorySelect: (Int?) -> Unit,
+    onSortOptionChange: (SortOption) -> Unit,
+    onAddNewCategory: (String) -> Unit,
+    onDeleteCategory: (Category) -> Unit,
+    onMove: (Int, Int) -> Unit,
 ) {
     var selectedScriptForConfig by remember { mutableStateOf<Script?>(null) }
     var isSearchActive by remember { mutableStateOf(false) }
     val handleConfigClick: (Script) -> Unit = remember {
         { script -> selectedScriptForConfig = script }
+    }
+    val lazyListState = rememberLazyListState()
+    val isManualSort = sortOption == SortOption.MANUAL
+
+    var draggedItemIndex by remember { mutableStateOf<Int?>(null) }
+    var dragOffset by remember { mutableFloatStateOf(0f) }
+
+    val uncategorizedLabel = stringResource(R.string.uncategorized)
+
+    fun getTargetIndex(offset: Float, startBuffer: Int = 0): Int? {
+        val layoutInfo = lazyListState.layoutInfo
+        val itemInfo = layoutInfo.visibleItemsInfo
+        val currentDraggingItem = itemInfo.find { it.index == draggedItemIndex } ?: return null
+
+        val targetCenter = currentDraggingItem.offset + (currentDraggingItem.size / 2) + offset
+        return itemInfo.find { targetCenter.toInt() in it.offset..(it.offset + it.size) }?.index
     }
 
     BackHandler(enabled = isSearchActive) {
@@ -180,6 +221,10 @@ fun HomeScreen(
                                 contentDescription = stringResource(R.string.cd_search)
                             )
                         }
+                        SortMenu(
+                            currentSort = sortOption,
+                            onSortSelected = onSortOptionChange
+                        )
                         IconButton(onClick = onSettingsClick) {
                             Icon(
                                 Icons.Default.Settings,
@@ -200,75 +245,140 @@ fun HomeScreen(
             }
         }
     ) { padding ->
+        Column(modifier = Modifier.padding(padding)) {
+            if (uiState is HomeUiState.Success) {
+                CategoryTabs(
+                    categories = uiState.categories,
+                    selectedCategoryId = selectedCategoryId,
+                    onCategorySelect = onCategorySelect,
+                    onDeleteCategory = onDeleteCategory
+                )
+            }
 
-        Box(
-            modifier = Modifier
-                .padding(padding)
-                .fillMaxSize()
-        ) {
-            when (uiState) {
-                is HomeUiState.Loading -> {
-                    CircularProgressIndicator(
-                        modifier = Modifier.align(Alignment.Center),
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                }
+            Box(
+                modifier = Modifier.weight(1f)
+            ) {
+                when (uiState) {
+                    is HomeUiState.Loading -> {
+                        CircularProgressIndicator(
+                            modifier = Modifier.align(Alignment.Center),
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
 
-                is HomeUiState.Success -> {
-                    if (uiState.scripts.isEmpty()) {
-                        val emptyText = if (searchQuery.isNotEmpty())
-                            stringResource(R.string.empty_search_results)
-                        else
-                            stringResource(R.string.empty_scripts_list)
-
-                        Box(
-                            modifier = Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = emptyText,
-                                style = MaterialTheme.typography.bodyLarge,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.padding(16.dp)
-                            )
-                        }
-                    } else {
+                    is HomeUiState.Success -> {
                         LazyColumn(
+                            state = lazyListState,
                             contentPadding = PaddingValues(16.dp),
-                            verticalArrangement = Arrangement.spacedBy(12.dp)
-                        ) {
-                            items(
-                                items = uiState.scripts,
-                                key = { it.id }
-                            ) { script ->
-                                ScriptItem(
-                                    script = script,
-                                    onCodeClick = onScriptCodeClick,
-                                    onRunClick = onRunClick,
-                                    onConfigClick = handleConfigClick,
-                                    onDeleteClick = onDeleteScript,
-                                    onCreateShortcutClick = onCreateShortcutClick
+                            verticalArrangement = Arrangement.spacedBy(10.dp),
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .then(
+                                    if (isManualSort) {
+                                        Modifier.pointerInput(Unit) {
+                                            detectDragGesturesAfterLongPress(
+                                                onDragStart = { offset ->
+                                                    lazyListState.layoutInfo.visibleItemsInfo
+                                                        .find { item ->
+                                                            offset.y.toInt() in item.offset..(item.offset + item.size)
+                                                        }?.let { draggedItemIndex = it.index }
+                                                },
+                                                onDrag = { change, dragAmount ->
+                                                    change.consume()
+                                                    dragOffset += dragAmount.y
+
+                                                    val targetIndex = getTargetIndex(dragOffset)
+                                                    if (targetIndex != null && draggedItemIndex != null && targetIndex != draggedItemIndex) {
+                                                        onMove(draggedItemIndex!!, targetIndex)
+                                                        draggedItemIndex = targetIndex
+                                                        dragOffset = 0f
+                                                    }
+                                                },
+                                                onDragEnd = {
+                                                    draggedItemIndex = null
+                                                    dragOffset = 0f
+                                                },
+                                                onDragCancel = {
+                                                    draggedItemIndex = null
+                                                    dragOffset = 0f
+                                                }
+                                            )
+                                        }
+                                    } else Modifier
                                 )
+                        ) {
+                            // Only show headers if NOT in manual sort mode
+                            // (Dragging across headers causes UI glitches without complex math) | but it does glitch anyway ;)
+                            val showHeaders =
+                                selectedCategoryId == null && searchQuery.isEmpty() && !isManualSort
+
+                            if (showHeaders) {
+                                val grouped = uiState.scripts.groupBy { it.categoryId }
+                                grouped.forEach { (catId, scripts) ->
+                                    val catName = uiState.categories.find { it.id == catId }?.name
+                                        ?: uncategorizedLabel
+                                    item(key = "header_$catId") { CategoryHeader(catName) }
+                                    items(items = scripts, key = { it.id }) { script ->
+                                        ScriptItem(
+                                            script = script,
+                                            onCodeClick = onScriptCodeClick,
+                                            onRunClick = onRunClick,
+                                            onConfigClick = handleConfigClick,
+                                            onDeleteClick = onDeleteScript,
+                                            onCreateShortcutClick = onCreateShortcutClick
+                                        )
+                                    }
+                                }
+                            } else {
+                                itemsIndexed(
+                                    items = uiState.scripts,
+                                    key = { _, script -> script.id }
+                                ) { index, script ->
+                                    val isDragging = index == draggedItemIndex
+
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .graphicsLayer {
+                                                translationY = if (isDragging) dragOffset else 0f
+                                                scaleX = if (isDragging) 1.05f else 1.0f
+                                                scaleY = if (isDragging) 1.05f else 1.0f
+                                                alpha = if (isDragging) 0.8f else 1.0f
+                                            }
+                                            .zIndex(if (isDragging) 1f else 0f)
+                                    ) {
+                                        ScriptItem(
+                                            script = script,
+                                            onCodeClick = onScriptCodeClick,
+                                            onRunClick = onRunClick,
+                                            onConfigClick = handleConfigClick,
+                                            onDeleteClick = onDeleteScript,
+                                            onCreateShortcutClick = onCreateShortcutClick
+                                        )
+                                    }
+                                }
                             }
                         }
                     }
                 }
             }
-        }
 
-        selectedScriptForConfig?.let { script ->
-            ScriptConfigDialog(
-                script = script,
-                onDismiss = { selectedScriptForConfig = null },
-                onSave = { updatedScript ->
-                    onUpdateScript(updatedScript)
-                    selectedScriptForConfig = null
-                },
-                onProcessImage = onProcessImage,
-                onHeartbeatToggle = onHeartbeatToggle,
-                isBatteryUnrestricted = isBatteryUnrestricted,
-                onRequestBatteryUnrestricted = onRequestBatteryUnrestricted
-            )
+            selectedScriptForConfig?.let { script ->
+                ScriptConfigDialog(
+                    script = script,
+                    categories = (uiState as? HomeUiState.Success)?.categories ?: emptyList(),
+                    onDismiss = { selectedScriptForConfig = null },
+                    onSave = { updatedScript ->
+                        onUpdateScript(updatedScript)
+                        selectedScriptForConfig = null
+                    },
+                    onProcessImage = onProcessImage,
+                    onHeartbeatToggle = onHeartbeatToggle,
+                    isBatteryUnrestricted = isBatteryUnrestricted,
+                    onRequestBatteryUnrestricted = onRequestBatteryUnrestricted,
+                    onAddNewCategory = onAddNewCategory,
+                )
+            }
         }
     }
 }
@@ -366,7 +476,7 @@ private fun ScriptContextMenu(
         IconButton(onClick = { showMenu = true }) {
             Icon(
                 Icons.Default.MoreVert,
-                contentDescription = "More",
+                contentDescription = stringResource(R.string.more),
                 tint = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
@@ -476,6 +586,194 @@ private fun ScriptIcon(iconPath: String?, modifier: Modifier = Modifier) {
     }
 }
 
+@Composable
+fun SortMenu(
+    currentSort: SortOption,
+    onSortSelected: (SortOption) -> Unit
+) {
+    var showMenu by remember { mutableStateOf(false) }
+
+    Box {
+        IconButton(onClick = { showMenu = true }) {
+            Icon(Icons.AutoMirrored.Filled.Sort, contentDescription = stringResource(R.string.sort))
+        }
+        DropdownMenu(
+            expanded = showMenu,
+            onDismissRequest = { showMenu = false },
+            shape = RoundedCornerShape(12)
+        ) {
+            DropdownMenuItem(
+                text = { Text(stringResource(R.string.manual_grouped)) },
+                onClick = { onSortSelected(SortOption.MANUAL); showMenu = false },
+                leadingIcon = {
+                    if (currentSort == SortOption.MANUAL) Icon(
+                        Icons.Default.DragIndicator,
+                        stringResource(R.string.manual)
+                    )
+                }
+            )
+            DropdownMenuItem(
+                text = { Text(stringResource(R.string.name_a_z)) },
+                onClick = { onSortSelected(SortOption.NAME_ASC); showMenu = false },
+                leadingIcon = {
+                    if (currentSort == SortOption.NAME_ASC) Icon(
+                        Icons.Default.SortByAlpha,
+                        stringResource(R.string.a_z)
+                    )
+                }
+            )
+            DropdownMenuItem(
+                text = { Text(stringResource(R.string.date_flat_list)) },
+                onClick = { onSortSelected(SortOption.DATE_NEWEST); showMenu = false },
+                leadingIcon = {
+                    if (currentSort == SortOption.DATE_NEWEST) Icon(
+                        Icons.Default.History,
+                        stringResource(R.string.newest_by_date)
+                    )
+                }
+            )
+        }
+    }
+}
+
+@Composable
+private fun CategoryHeader(name: String) {
+    Surface(
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+        shape = RoundedCornerShape(8.dp),
+        modifier = Modifier
+            .padding(top = 2.dp, bottom = 2.dp)
+    ) {
+        Text(
+            text = name,
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.primary,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+        )
+    }
+}
+
+@Composable
+fun CategoryTabs(
+    categories: List<Category>,
+    selectedCategoryId: Int?,
+    onCategorySelect: (Int?) -> Unit,
+    onDeleteCategory: (Category) -> Unit
+) {
+    var categoryToEdit by remember { mutableStateOf<Category?>(null) }
+
+    LazyRow(
+        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 0.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        item {
+            CategoryChip(
+                label = "All",
+                isSelected = selectedCategoryId == null,
+                onClick = { onCategorySelect(null) }
+            )
+        }
+
+        items(categories, key = { it.id }) { category ->
+            CategoryChip(
+                label = category.name,
+                isSelected = selectedCategoryId == category.id,
+                onClick = { onCategorySelect(category.id) },
+                onLongClick = { categoryToEdit = category }
+            )
+        }
+    }
+
+    categoryToEdit?.let { cat ->
+        AlertDialog(
+            onDismissRequest = { categoryToEdit = null },
+            title = { Text(stringResource(R.string.delete_category)) },
+            text = {
+                Text(
+                    stringResource(
+                        R.string.scripts_in_will_be_moved_to_uncategorized_this_cannot_be_undone,
+                        cat.name
+                    )
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    onDeleteCategory(cat)
+                    categoryToEdit = null
+                }) {
+                    Text(stringResource(R.string.delete), color = MaterialTheme.colorScheme.error)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = {
+                    categoryToEdit = null
+                }) { Text(stringResource(R.string.cancel)) }
+            },
+            shape = RoundedCornerShape(28.dp)
+        )
+    }
+}
+
+@Composable
+private fun CategoryChip(
+    label: String,
+    isSelected: Boolean,
+    onClick: () -> Unit,
+    onLongClick: (() -> Unit)? = null
+) {
+    var isPressed by remember { mutableStateOf(false) }
+
+    val backgroundColor = when {
+        isSelected -> MaterialTheme.colorScheme.primaryContainer
+        isPressed -> MaterialTheme.colorScheme.surfaceContainerHighest
+        else -> MaterialTheme.colorScheme.surfaceContainer
+    }
+
+    val contentColor = if (isSelected)
+        MaterialTheme.colorScheme.primary
+    else
+        MaterialTheme.colorScheme.onSurfaceVariant
+
+    val borderColor = if (isSelected)
+        MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
+    else
+        MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+
+    Surface(
+        modifier = Modifier
+            .clip(RoundedCornerShape(12.dp))
+            .pointerInput(Unit) {
+                detectTapGestures(
+                    onPress = {
+                        try {
+                            isPressed = true
+                            awaitRelease()
+                        } finally {
+                            isPressed = false
+                        }
+                    },
+                    onTap = { onClick() },
+                    onLongPress = {
+                        isPressed = false
+                        onLongClick?.invoke()
+                    }
+                )
+            },
+        color = backgroundColor,
+        shape = RoundedCornerShape(12.dp),
+        border = BorderStroke(1.dp, borderColor)
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelLarge,
+            color = contentColor,
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+        )
+    }
+}
+
 @DevicePreviews
 @Composable
 private fun PreviewHomeScreen() {
@@ -488,14 +786,21 @@ private fun PreviewHomeScreen() {
             onDeleteScript = {},
             onCreateShortcutClick = {},
             onUpdateScript = {},
-            uiState = HomeUiState.Success(sampleScripts),
+            uiState = HomeUiState.Success(sampleScripts, emptyList()),
             searchQuery = "",
             onSearchQueryChange = {},
             snackbarHostState = SnackbarHostState(),
             onProcessImage = { null },
             onHeartbeatToggle = {},
             isBatteryUnrestricted = false,
-            onRequestBatteryUnrestricted = {}
+            onRequestBatteryUnrestricted = {},
+            onCategorySelect = {},
+            onSortOptionChange = {},
+            sortOption = SortOption.NAME_ASC,
+            selectedCategoryId = null,
+            onAddNewCategory = {},
+            onDeleteCategory = {},
+            onMove = { _, _ -> }
         )
     }
 }
@@ -512,14 +817,21 @@ private fun PreviewEmptyHome() {
             onDeleteScript = {},
             onCreateShortcutClick = {},
             onUpdateScript = {},
-            uiState = HomeUiState.Success(emptyList()),
+            uiState = HomeUiState.Success(emptyList(), emptyList()),
             searchQuery = "",
             onSearchQueryChange = {},
             snackbarHostState = SnackbarHostState(),
             onProcessImage = { null },
             onHeartbeatToggle = {},
             isBatteryUnrestricted = false,
-            onRequestBatteryUnrestricted = {}
+            onRequestBatteryUnrestricted = {},
+            onCategorySelect = {},
+            onSortOptionChange = {},
+            sortOption = SortOption.NAME_ASC,
+            selectedCategoryId = null,
+            onAddNewCategory = {},
+            onDeleteCategory = {},
+            onMove = { _, _ -> }
         )
     }
 }

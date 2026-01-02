@@ -38,6 +38,8 @@ fun EditorRoute(
     viewModel: EditorViewModel = hiltViewModel()
 ) {
     val script by viewModel.currentScript.collectAsStateWithLifecycle()
+    val categories by viewModel.categories.collectAsStateWithLifecycle()
+
     val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
@@ -87,8 +89,10 @@ fun EditorRoute(
     } else {
         EditorScreen(
             script = script!!,
+            categories = categories,
             onBack = onBack,
             onSave = viewModel::saveScript,
+            onAddNewCategory = viewModel::addCategory,
             onProcessImage = viewModel::processSelectedImage,
             onHeartbeatToggle = { enabled ->
                 notificationPermissionCheck(enabled, notificationPermissionLauncher, context)

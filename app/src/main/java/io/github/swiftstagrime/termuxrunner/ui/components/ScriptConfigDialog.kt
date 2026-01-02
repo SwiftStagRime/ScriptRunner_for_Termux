@@ -76,6 +76,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import coil3.compose.AsyncImage
 import io.github.swiftstagrime.termuxrunner.R
+import io.github.swiftstagrime.termuxrunner.domain.model.Category
 import io.github.swiftstagrime.termuxrunner.domain.model.Script
 import io.github.swiftstagrime.termuxrunner.ui.preview.DevicePreviews
 import io.github.swiftstagrime.termuxrunner.ui.preview.configSampleScript
@@ -88,6 +89,8 @@ fun ScriptConfigDialog(
     script: Script,
     onDismiss: () -> Unit,
     onSave: (Script) -> Unit,
+    categories: List<Category>,
+    onAddNewCategory: (String) -> Unit,
     isBatteryUnrestricted: Boolean,
     onRequestBatteryUnrestricted: () -> Unit,
     onHeartbeatToggle: (Boolean) -> Unit,
@@ -105,6 +108,8 @@ fun ScriptConfigDialog(
     var commandPrefix by remember { mutableStateOf(script.commandPrefix) }
     var currentIconPath by remember { mutableStateOf(script.iconPath) }
     var useHeartbeat by remember { mutableStateOf(script.useHeartbeat) }
+    var selectedCategoryId by remember { mutableStateOf(script.categoryId) }
+    var showAddCategoryDialog by remember { mutableStateOf(false) }
     var heartbeatTimeoutStr by remember { mutableStateOf((script.heartbeatTimeout / 1000).toString()) }
     var heartbeatIntervalStr by remember { mutableStateOf((script.heartbeatInterval / 1000).toString()) }
 
@@ -163,8 +168,8 @@ fun ScriptConfigDialog(
                                     envVars = envVarsList.toMap(),
                                     useHeartbeat = useHeartbeat,
                                     heartbeatTimeout = heartbeatTimeoutStr.toLong() * 1000,
-                                    heartbeatInterval = heartbeatIntervalStr.toLong() * 1000
-
+                                    heartbeatInterval = heartbeatIntervalStr.toLong() * 1000,
+                                    categoryId = selectedCategoryId
                                 )
                                 onSave(updated)
                             }
@@ -289,6 +294,15 @@ fun ScriptConfigDialog(
                                     tint = MaterialTheme.colorScheme.primary
                                 )
                             }
+                        )
+
+                        Spacer(modifier = Modifier.height(12.dp))
+
+                        CategorySpinner(
+                            categories = categories,
+                            selectedCategoryId = selectedCategoryId,
+                            onCategorySelected = { selectedCategoryId = it },
+                            onAddNewClick = { showAddCategoryDialog = true }
                         )
                     }
                 }
@@ -578,6 +592,16 @@ fun ScriptConfigDialog(
             }
         }
     }
+
+    if (showAddCategoryDialog) {
+        NewCategoryDialog(
+            onDismiss = { showAddCategoryDialog = false },
+            onConfirm = { newName ->
+                onAddNewCategory(newName)
+                showAddCategoryDialog = false
+            }
+        )
+    }
 }
 
 @Composable
@@ -616,7 +640,9 @@ private fun PreviewConfigDialogLight() {
             onProcessImage = { null },
             onHeartbeatToggle = {},
             isBatteryUnrestricted = false,
-            onRequestBatteryUnrestricted = {}
+            onRequestBatteryUnrestricted = {},
+            categories = emptyList(),
+            onAddNewCategory = {}
         )
     }
 }
