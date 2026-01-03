@@ -15,7 +15,7 @@
     <string name="developed_by">Developed by</string>
     <string name="open_github_description">Open Github</string>
     <string name="export_filename" translatable="false">scripts_backup.json</string>
-
+    <string name="import_script_from_file">Import Script from File</string>
     <string name="exporting">Exporting…</string>
     <string name="export_success">Export Successful</string>
     <string name="export_failed">Export Failed: %1$s</string>

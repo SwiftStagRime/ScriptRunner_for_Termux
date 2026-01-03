@@ -12,7 +12,7 @@
     <string name="export_label">Exportieren</string>
     <string name="developed_by">Entwickelt von</string>
     <string name="open_github_description">Github öffnen</string>
-
+    <string name="import_script_from_file">Skript aus Datei importieren</string>
     <string name="exporting">Exportieren…</string>
     <string name="export_success">Export erfolgreich</string>
     <string name="export_failed">Export fehlgeschlagen: %1$s</string>

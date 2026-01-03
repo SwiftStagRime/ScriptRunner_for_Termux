@@ -1,4 +1,4 @@
-package io.github.swiftstagrime.termuxrunner.data.local
+package io.github.swiftstagrime.termuxrunner.data.local.dto
 
 import io.github.swiftstagrime.termuxrunner.domain.model.Script
 import kotlinx.serialization.Serializable
@@ -7,6 +7,7 @@ import kotlinx.serialization.Serializable
 data class ScriptExportDto(
     val name: String,
     val code: String,
+    val categoryId: Int? = null,
     val interpreter: String,
     val fileExtension: String,
     val commandPrefix: String,
@@ -18,13 +19,15 @@ data class ScriptExportDto(
     val useHeartbeat: Boolean = false,
     val heartbeatTimeout: Long = 30000,
     val heartbeatInterval: Long = 10000,
-    val iconBase64: String? = null
+    val iconBase64: String? = null,
+    val orderIndex: Int = 0
 )
 
 fun Script.toExportDto(base64Icon: String?): ScriptExportDto {
     return ScriptExportDto(
         name = name,
         code = code,
+        categoryId = categoryId,
         interpreter = interpreter,
         fileExtension = fileExtension,
         commandPrefix = commandPrefix,
@@ -36,6 +39,7 @@ fun Script.toExportDto(base64Icon: String?): ScriptExportDto {
         useHeartbeat = useHeartbeat,
         heartbeatTimeout = heartbeatTimeout,
         heartbeatInterval = heartbeatInterval,
-        iconBase64 = base64Icon
+        iconBase64 = base64Icon,
+        orderIndex = orderIndex
     )
 }

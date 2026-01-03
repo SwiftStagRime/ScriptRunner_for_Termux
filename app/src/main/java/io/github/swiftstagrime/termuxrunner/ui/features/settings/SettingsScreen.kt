@@ -16,6 +16,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.OpenInNew
 import androidx.compose.material.icons.filled.Code
+import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Upload
 import androidx.compose.material3.Button
@@ -49,6 +50,7 @@ fun SettingsScreen(
     onDynamicColorChange: (Boolean) -> Unit,
     onTriggerExport: () -> Unit,
     onTriggerImport: () -> Unit,
+    onTriggerScriptImport: () -> Unit,
     onDeveloperClick: () -> Unit,
     onBack: () -> Unit
 ) {
@@ -158,6 +160,15 @@ fun SettingsScreen(
                         Text(stringResource(R.string.export_label))
                     }
                 }
+                Spacer(modifier = Modifier.height(8.dp))
+                Button(
+                    onClick = onTriggerScriptImport,
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp),
+                ) {
+                    Icon(Icons.Default.Description, contentDescription = null)
+                    Text(stringResource(R.string.import_script_from_file))
+                }
             }
 
             Card(
@@ -213,6 +224,7 @@ private fun PreviewSettingsScreen() {
             onTriggerImport = {},
             onDeveloperClick = {},
             onBack = {},
+            onTriggerScriptImport = {}
         )
     }
 }

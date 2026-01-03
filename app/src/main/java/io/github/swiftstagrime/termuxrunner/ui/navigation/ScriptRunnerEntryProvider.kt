@@ -55,7 +55,10 @@ fun rememberEntryProvider(
 
                     is Route.Settings -> {
                         SettingsRoute(
-                            onBack = { mainViewModel.goBack() }
+                            onBack = { mainViewModel.goBack() },
+                            onNavigateToEditor = { scriptId ->
+                                mainViewModel.navigateTo(Route.Editor(scriptId))
+                            }
                         )
                     }
 

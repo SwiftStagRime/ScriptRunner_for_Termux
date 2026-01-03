@@ -18,13 +18,13 @@ interface ScriptDao {
     @Query("SELECT * FROM scripts WHERE id = :id")
     suspend fun getScriptById(id: Int): ScriptEntity?
 
-    @Insert(onConflict = OnConflictStrategy.Companion.REPLACE)
-    suspend fun insertScript(script: ScriptEntity)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertScript(script: ScriptEntity): Long
 
     @Delete
     suspend fun deleteScript(script: ScriptEntity)
 
-    @Insert(onConflict = OnConflictStrategy.Companion.REPLACE)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertScripts(scripts: List<ScriptEntity>)
 
     @Query("SELECT * FROM scripts")

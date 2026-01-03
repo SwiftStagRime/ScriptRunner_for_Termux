@@ -8,9 +8,11 @@ import io.github.swiftstagrime.termuxrunner.R
 import io.github.swiftstagrime.termuxrunner.domain.repository.ScriptRepository
 import io.github.swiftstagrime.termuxrunner.domain.repository.UserPreferencesRepository
 import io.github.swiftstagrime.termuxrunner.ui.extensions.UiText
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -32,6 +34,9 @@ class SettingsViewModel @Inject constructor(
 
     private val _ioState = MutableStateFlow<UiText?>(null)
     val ioState = _ioState.asStateFlow()
+
+    private val _navEvents = Channel<SettingsNavEvent>()
+    val navEvents = _navEvents.receiveAsFlow()
 
     fun exportData(uri: Uri) {
         viewModelScope.launch {
@@ -65,7 +70,24 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
+    fun importSingleScript(uri: Uri) {
+        viewModelScope.launch {
+            scriptRepository.importSingleScript(uri)
+                .onSuccess { parsedScript ->
+                    val newId = scriptRepository.insertScript(parsedScript)
+                    _navEvents.send(SettingsNavEvent.NavigateToEditor(newId))
+                }
+                .onFailure {
+                    _ioState.value = UiText.StringResource(R.string.import_failed, it.message ?: "")
+                }
+        }
+    }
+
     fun clearMessage() {
         _ioState.value = null
     }
+}
+
+sealed class SettingsNavEvent {
+    data class NavigateToEditor(val scriptId: Int) : SettingsNavEvent()
 }

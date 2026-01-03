@@ -2,13 +2,18 @@ package io.github.swiftstagrime.termuxrunner.data.repository
 
 import android.content.Context
 import android.net.Uri
+import android.provider.OpenableColumns
 import android.util.Base64
 import dagger.hilt.android.qualifiers.ApplicationContext
-import io.github.swiftstagrime.termuxrunner.data.local.ScriptExportDto
+import io.github.swiftstagrime.termuxrunner.data.local.dao.CategoryDao
 import io.github.swiftstagrime.termuxrunner.data.local.dao.ScriptDao
+import io.github.swiftstagrime.termuxrunner.data.local.dto.CategoryExportDto
+import io.github.swiftstagrime.termuxrunner.data.local.dto.FullBackupDto
+import io.github.swiftstagrime.termuxrunner.data.local.dto.ScriptExportDto
+import io.github.swiftstagrime.termuxrunner.data.local.dto.toExportDto
+import io.github.swiftstagrime.termuxrunner.data.local.entity.CategoryEntity
 import io.github.swiftstagrime.termuxrunner.data.local.entity.ScriptEntity
 import io.github.swiftstagrime.termuxrunner.data.local.entity.toScriptEntity
-import io.github.swiftstagrime.termuxrunner.data.local.toExportDto
 import io.github.swiftstagrime.termuxrunner.domain.model.Script
 import io.github.swiftstagrime.termuxrunner.domain.repository.ScriptRepository
 import kotlinx.coroutines.Dispatchers
@@ -16,6 +21,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.decodeFromJsonElement
 import java.io.BufferedReader
 import java.io.File
 import java.io.FileOutputStream
@@ -37,6 +44,7 @@ class ImportStreamException : ScriptException(
  */
 class ScriptRepositoryImpl @Inject constructor(
     private val dao: ScriptDao,
+    private val categoryDao: CategoryDao,
     @ApplicationContext private val context: Context,
 ) : ScriptRepository {
 
@@ -44,17 +52,18 @@ class ScriptRepositoryImpl @Inject constructor(
         prettyPrint = true
         ignoreUnknownKeys = true
         encodeDefaults = true
+        coerceInputValues = true
     }
 
     override suspend fun exportScripts(uri: Uri): Result<Unit> = runCatching {
         withContext(Dispatchers.IO) {
-            val entities = dao.getAllScriptsOneShot()
+            val categories = dao.getAllScriptsOneShot().map {
+                CategoryExportDto(it.id, it.name, it.orderIndex)
+            }
 
-            val exportDtos = entities.map { entity ->
+            val scripts = dao.getAllScriptsOneShot().map { entity ->
                 val script = entity.toScriptDomain()
                 var base64Icon: String? = null
-
-                // Convert local icon file to Base64 string for JSON portability
                 if (script.iconPath != null) {
                     val file = File(script.iconPath)
                     if (file.exists()) {
@@ -62,15 +71,15 @@ class ScriptRepositoryImpl @Inject constructor(
                         base64Icon = Base64.encodeToString(bytes, Base64.NO_WRAP)
                     }
                 }
-
                 script.toExportDto(base64Icon)
             }
 
-            val jsonString = json.encodeToString(exportDtos)
+            val backup = FullBackupDto(categories = categories, scripts = scripts)
+            val jsonString = json.encodeToString(backup)
 
-            context.contentResolver.openOutputStream(uri)?.use { outputStream ->
-                outputStream.write(jsonString.toByteArray())
-            } ?: throw ExportStreamException()
+            context.contentResolver.openOutputStream(uri)
+                ?.use { it.write(jsonString.toByteArray()) }
+                ?: throw ExportStreamException()
         }
     }
 
@@ -80,33 +89,33 @@ class ScriptRepositoryImpl @Inject constructor(
                 BufferedReader(InputStreamReader(inputStream)).readText()
             } ?: throw ImportStreamException()
 
-            val exportDtos = json.decodeFromString<List<ScriptExportDto>>(jsonString)
+            val jsonElement = json.parseToJsonElement(jsonString)
 
-            val newEntities = exportDtos.map { dto ->
-                var newIconPath: String? = null
-                // Reconstruct icon file from Base64 if present in the import data
-                if (dto.iconBase64 != null) {
-                    try {
-                        val imageBytes = Base64.decode(dto.iconBase64, Base64.NO_WRAP)
+            val (categoriesDto, scriptsDto) = if (jsonElement is JsonArray) {
+                // Old Format: Just a list of scripts
+                null to json.decodeFromJsonElement<List<ScriptExportDto>>(jsonElement)
+            } else {
+                // New Format: FullBackupDto object
+                val backup = json.decodeFromJsonElement<FullBackupDto>(jsonElement)
+                backup.categories to backup.scripts
+            }
 
-                        val directory = File(context.filesDir, "script_icons")
-                        if (!directory.exists()) directory.mkdirs()
+            val categoryIdMap = mutableMapOf<Int, Int?>()
 
-                        val fileName = "icon_${UUID.randomUUID()}.webp"
-                        val destFile = File(directory, fileName)
+            categoriesDto?.forEach { dto ->
+                val newId = categoryDao.insertCategory(
+                    CategoryEntity(
+                        name = dto.name,
+                        orderIndex = dto.orderIndex
+                    )
+                )
+                categoryIdMap[dto.id] = newId.toInt()
+            }
 
-                        FileOutputStream(destFile).use { out ->
-                            out.write(imageBytes)
-                        }
-
-                        newIconPath = destFile.absolutePath
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                    }
-                }
+            val newEntities = scriptsDto.map { dto ->
+                val newIconPath = saveBase64Icon(dto.iconBase64)
 
                 ScriptEntity(
-                    id = 0, // Ensure Room treats this as a new entry. Thus we are not overriding current scripts, note that this will lead to possible duplicates
                     name = dto.name,
                     code = dto.code,
                     interpreter = dto.interpreter,
@@ -115,16 +124,113 @@ class ScriptRepositoryImpl @Inject constructor(
                     runInBackground = dto.runInBackground,
                     openNewSession = dto.openNewSession,
                     executionParams = dto.executionParams,
+                    envVars = dto.envVars,
                     keepSessionOpen = dto.keepSessionOpen,
                     useHeartbeat = dto.useHeartbeat,
                     heartbeatTimeout = dto.heartbeatTimeout,
                     heartbeatInterval = dto.heartbeatInterval,
-                    envVars = dto.envVars,
-                    iconPath = newIconPath
+                    iconPath = newIconPath,
+                    orderIndex = dto.orderIndex,
+                    categoryId = if (dto.categoryId != null) categoryIdMap[dto.categoryId] else null
                 )
             }
 
             dao.insertScripts(newEntities)
+        }
+    }
+
+    override suspend fun importSingleScript(uri: Uri): Result<Script> = runCatching {
+        withContext(Dispatchers.IO) {
+            val content = context.contentResolver.openInputStream(uri)?.use {
+                BufferedReader(InputStreamReader(it)).readText()
+            } ?: throw ImportStreamException()
+
+            val fileName = getFileName(uri) ?: "Imported Script"
+            val extension = fileName.substringAfterLast('.', "sh")
+
+            // Logic for interpreter and shebang
+            val (finalCode, detectedInterpreter) = processScriptContent(content, extension)
+
+            val newScript = Script(
+                name = fileName.substringBeforeLast('.'),
+                code = finalCode,
+                interpreter = detectedInterpreter,
+                fileExtension = extension,
+                runInBackground = false,
+                openNewSession = true,
+                keepSessionOpen = true
+            )
+
+            // We return the script object so the UI can decide
+            // whether to open it in the editor first or save it directly.
+            newScript
+        }
+    }
+
+    private fun processScriptContent(content: String, extension: String): Pair<String, String> {
+        val ext = extension.lowercase()
+
+        val interpreter = when (ext) {
+            "py", "py3" -> "python"
+            "js", "cjs", "mjs" -> "node"
+            "rb" -> "ruby"
+            "pl" -> "perl"
+            "php" -> "php"
+            "lua" -> "lua"
+            "sh" -> "bash"
+            "zsh" -> "zsh"
+            "fish" -> "fish"
+            "awk" -> "awk"
+            "sed" -> "sed"
+            "exp" -> "expect"
+            "go" -> "go"
+            "ts" -> "ts-node"
+            "c" -> "clang"
+            "cpp", "cc", "cxx" -> "clang++"
+            "rs" -> "rustc"
+            "java" -> "java"
+            "kt", "kts" -> "kotlinc"
+            "cs" -> "csc"
+            "swift" -> "swift"
+            else -> "bash"
+        }
+
+        val hasShebang = content.trimStart().startsWith("#!")
+
+        return if (!hasShebang) {
+            val baseDataDir = context.filesDir.absolutePath.substringBefore(context.packageName)
+            val termuxBinPath = "${baseDataDir}com.termux/files/usr/bin/"
+
+            val shebang = when (interpreter) {
+                "clang", "clang++", "rustc", "kotlinc", "java" -> ""
+                else -> "#!$termuxBinPath$interpreter\n"
+            }
+
+            (shebang + content) to interpreter
+        } else {
+            content to interpreter
+        }
+    }
+
+    private fun getFileName(uri: Uri): String? {
+        var name: String? = null
+        context.contentResolver.query(uri, null, null, null, null)?.use { cursor ->
+            val nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+            if (cursor.moveToFirst()) name = cursor.getString(nameIndex)
+        }
+        return name
+    }
+
+    private fun saveBase64Icon(base64: String?): String? {
+        if (base64 == null) return null
+        return try {
+            val imageBytes = Base64.decode(base64, Base64.NO_WRAP)
+            val directory = File(context.filesDir, "script_icons").apply { if (!exists()) mkdirs() }
+            val file = File(directory, "icon_${UUID.randomUUID()}.webp")
+            FileOutputStream(file).use { it.write(imageBytes) }
+            file.absolutePath
+        } catch (_: Exception) {
+            null
         }
     }
 
@@ -138,8 +244,8 @@ class ScriptRepositoryImpl @Inject constructor(
         return dao.getScriptById(id)?.toScriptDomain()
     }
 
-    override suspend fun insertScript(script: Script) {
-        dao.insertScript(script.toScriptEntity())
+    override suspend fun insertScript(script: Script): Int {
+        return dao.insertScript(script.toScriptEntity()).toInt()
     }
 
     override suspend fun deleteScript(script: Script) {

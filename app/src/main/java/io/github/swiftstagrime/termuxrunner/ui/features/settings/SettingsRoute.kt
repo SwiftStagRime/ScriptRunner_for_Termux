@@ -16,6 +16,7 @@ import io.github.swiftstagrime.termuxrunner.R
 @Composable
 fun SettingsRoute(
     onBack: () -> Unit,
+    onNavigateToEditor: (Int) -> Unit,
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
@@ -31,10 +32,24 @@ fun SettingsRoute(
         uri?.let { viewModel.exportData(it) }
     }
 
-    val importLauncher = rememberLauncherForActivityResult(
+    val importBackupLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.OpenDocument()
     ) { uri ->
         uri?.let { viewModel.importData(it) }
+    }
+
+    val importFileLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.OpenDocument()
+    ) { uri ->
+        uri?.let { viewModel.importSingleScript(it) }
+    }
+
+    LaunchedEffect(Unit) {
+        viewModel.navEvents.collect { event ->
+            when (event) {
+                is SettingsNavEvent.NavigateToEditor -> onNavigateToEditor(event.scriptId)
+            }
+        }
     }
 
     LaunchedEffect(ioMessage) {
@@ -48,7 +63,8 @@ fun SettingsRoute(
         useDynamicColor = useDynamicColor,
         onDynamicColorChange = viewModel::setDynamicColor,
         onTriggerExport = { exportLauncher.launch(exportFilename) },
-        onTriggerImport = { importLauncher.launch(arrayOf("application/json")) },
+        onTriggerImport = { importBackupLauncher.launch(arrayOf("application/json")) },
+        onTriggerScriptImport = { importFileLauncher.launch(arrayOf("*/*")) },
         onDeveloperClick = { uriHandler.openUri(githubUrl) },
         onBack = onBack
     )

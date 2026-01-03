@@ -35,9 +35,10 @@ object AppModule {
     @Singleton
     fun provideScriptRepository(
         dao: ScriptDao,
+        categoryDao: CategoryDao,
         @ApplicationContext context: Context
     ): ScriptRepository {
-        return ScriptRepositoryImpl(dao, context)
+        return ScriptRepositoryImpl(dao, categoryDao, context)
     }
 
     @Provides
