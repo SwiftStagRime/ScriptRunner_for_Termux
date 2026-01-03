@@ -113,6 +113,7 @@ fun HomeScreen(
     onHeartbeatToggle: (Boolean) -> Unit,
     isBatteryUnrestricted: Boolean,
     onRequestBatteryUnrestricted: () -> Unit,
+    onRequestNotificationPermission: () -> Unit,
     snackbarHostState: SnackbarHostState,
     onProcessImage: suspend (Uri) -> String?,
     selectedCategoryId: Int?,
@@ -377,6 +378,7 @@ fun HomeScreen(
                     isBatteryUnrestricted = isBatteryUnrestricted,
                     onRequestBatteryUnrestricted = onRequestBatteryUnrestricted,
                     onAddNewCategory = onAddNewCategory,
+                    onRequestNotificationPermission = onRequestNotificationPermission
                 )
             }
         }
@@ -800,7 +802,8 @@ private fun PreviewHomeScreen() {
             selectedCategoryId = null,
             onAddNewCategory = {},
             onDeleteCategory = {},
-            onMove = { _, _ -> }
+            onMove = { _, _ -> },
+            onRequestNotificationPermission = {}
         )
     }
 }
@@ -831,7 +834,8 @@ private fun PreviewEmptyHome() {
             selectedCategoryId = null,
             onAddNewCategory = {},
             onDeleteCategory = {},
-            onMove = { _, _ -> }
+            onMove = { _, _ -> },
+            onRequestNotificationPermission = {}
         )
     }
 }

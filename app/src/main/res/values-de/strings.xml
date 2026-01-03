@@ -128,6 +128,12 @@
     <string name="error_description">Fehler</string>
     <string name="msg_notification_needed_for_heartbeat">Benachrichtigungsberechtigung ist für den Heartbeat erforderlich</string>
     <string name="error_empty_name">Skriptname darf nicht leer sein</string>
+    <string name="execution_feedback">Ausführungs-Rückmeldung</string>
+    <string name="show_a_notification_with_the_result_success_fail_when_finished">Benachrichtigung mit dem Ergebnis (Erfolg/Fehler) anzeigen, wenn fertig</string>
+    <string name="tap_to_allow_background_activity_for_better_stability">Tippen, um Hintergrundaktivität für bessere Stabilität zu erlauben</string>
+    <string name="battery_unrestricted">Akku: Nicht eingeschränkt</string>
+    <string name="battery_optimized_restricted">Akku: Optimiert (Eingeschränkt)</string>
+    <string name="not_available_in_interactive_mode">Im interaktiven Modus nicht verfügbar</string>
 
     <!-- Repo errors -->
     <string name="error_termux_permission_missing">Termux "Run Command" Berechtigung fehlt.</string>
@@ -160,4 +166,14 @@
     <string name="create">Erstellen</string>
     <string name="add_new_category">Neue Kategorie hinzufügen</string>
 
+    <!-- Notification Channel -->
+    <string name="channel_script_results">Skript-Ergebnisse</string>
+    <string name="channel_script_results_desc">Benachrichtigungen über Skriptausführungsergebnisse</string>
+    <string name="notif_title_unknown">%1$s: Status unbekannt</string>
+    <string name="notif_title_finished">%1$s abgeschlossen</string>
+    <string name="notif_title_failed">%1$s fehlgeschlagen</string>
+    <string name="notif_msg_no_result">Termux hat keinen Ergebniscod zurückgegeben.</string>
+    <string name="notif_msg_error">Fehler: %1$s</string>
+    <string name="notif_msg_success">Skript erfolgreich ausgeführt.</string>
+    <string name="notif_msg_failed_code">Ausführung fehlgeschlagen (Exit-Code: %1$d).</string>
 </resources>

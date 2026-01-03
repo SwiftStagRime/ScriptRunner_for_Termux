@@ -92,6 +92,7 @@ fun ScriptConfigDialog(
     categories: List<Category>,
     onAddNewCategory: (String) -> Unit,
     isBatteryUnrestricted: Boolean,
+    onRequestNotificationPermission: () -> Unit,
     onRequestBatteryUnrestricted: () -> Unit,
     onHeartbeatToggle: (Boolean) -> Unit,
     onProcessImage: suspend (Uri) -> String?
@@ -110,6 +111,7 @@ fun ScriptConfigDialog(
     var useHeartbeat by remember { mutableStateOf(script.useHeartbeat) }
     var selectedCategoryId by remember { mutableStateOf(script.categoryId) }
     var showAddCategoryDialog by remember { mutableStateOf(false) }
+    var notifyOnResult by remember { mutableStateOf(script.notifyOnResult) }
     var heartbeatTimeoutStr by remember { mutableStateOf((script.heartbeatTimeout / 1000).toString()) }
     var heartbeatIntervalStr by remember { mutableStateOf((script.heartbeatInterval / 1000).toString()) }
 
@@ -169,7 +171,8 @@ fun ScriptConfigDialog(
                                     useHeartbeat = useHeartbeat,
                                     heartbeatTimeout = heartbeatTimeoutStr.toLong() * 1000,
                                     heartbeatInterval = heartbeatIntervalStr.toLong() * 1000,
-                                    categoryId = selectedCategoryId
+                                    categoryId = selectedCategoryId,
+                                    notifyOnResult = notifyOnResult
                                 )
                                 onSave(updated)
                             }
@@ -360,7 +363,12 @@ fun ScriptConfigDialog(
                                 }
                                 Switch(
                                     checked = keepOpen,
-                                    onCheckedChange = { keepOpen = it },
+                                    onCheckedChange = { isChecked ->
+                                        keepOpen = isChecked
+                                        if (isChecked) {
+                                            notifyOnResult = false
+                                        }
+                                    },
                                     colors = SwitchDefaults.colors(
                                         checkedThumbColor = MaterialTheme.colorScheme.primary,
                                         checkedTrackColor = MaterialTheme.colorScheme.primaryContainer
@@ -436,6 +444,49 @@ fun ScriptConfigDialog(
                         )
 
                         Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = stringResource(R.string.execution_feedback),
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    color = if (keepOpen) MaterialTheme.colorScheme.onSurface.copy(
+                                        alpha = 0.5f
+                                    ) else MaterialTheme.colorScheme.onSurface
+                                )
+                                Text(
+                                    text = if (keepOpen) stringResource(R.string.not_available_in_interactive_mode) else stringResource(
+                                        R.string.show_a_notification_with_the_result_success_fail_when_finished
+                                    ),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                            Switch(
+                                checked = notifyOnResult,
+                                enabled = !keepOpen,
+                                onCheckedChange = { isChecked ->
+                                    notifyOnResult = isChecked
+                                    if (isChecked) {
+                                        keepOpen = false
+                                        onRequestNotificationPermission()
+                                    }
+                                },
+                                colors = SwitchDefaults.colors(
+                                    checkedThumbColor = MaterialTheme.colorScheme.primary,
+                                    checkedTrackColor = MaterialTheme.colorScheme.primaryContainer
+                                )
+                            )
+                        }
+
+                        HorizontalDivider(
+                            modifier = Modifier.padding(vertical = 12.dp),
+                            color = MaterialTheme.colorScheme.outlineVariant
+                        )
+
+                        Row(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clip(RoundedCornerShape(8.dp))
@@ -452,13 +503,15 @@ fun ScriptConfigDialog(
                             Spacer(modifier = Modifier.width(12.dp))
                             Column(modifier = Modifier.weight(1f)) {
                                 Text(
-                                    text = if (isBatteryUnrestricted) "Battery: Unrestricted" else "Battery: Optimized (Restricted)",
+                                    text = if (isBatteryUnrestricted) stringResource(R.string.battery_unrestricted) else stringResource(
+                                        R.string.battery_optimized_restricted
+                                    ),
                                     style = MaterialTheme.typography.bodyMedium,
                                     color = if (isBatteryUnrestricted) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.error
                                 )
                                 if (!isBatteryUnrestricted) {
                                     Text(
-                                        text = "Tap to allow background activity for better stability",
+                                        text = stringResource(R.string.tap_to_allow_background_activity_for_better_stability),
                                         style = MaterialTheme.typography.bodySmall,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
@@ -642,7 +695,8 @@ private fun PreviewConfigDialogLight() {
             isBatteryUnrestricted = false,
             onRequestBatteryUnrestricted = {},
             categories = emptyList(),
-            onAddNewCategory = {}
+            onAddNewCategory = {},
+            onRequestNotificationPermission = {}
         )
     }
 }

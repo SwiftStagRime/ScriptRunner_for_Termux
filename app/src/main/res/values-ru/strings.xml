@@ -124,10 +124,16 @@
     <string name="open_termux_settings">Открыть настройки Termux</string>
     <string name="finish_setup_label">Я закончил настройку</string>
     <string name="copy_clipboard_description">Копировать в буфер</string>
-    <string name="done_description">Готово</string>
+    <string name="done_description">Успешно выполнено</string>
     <string name="error_description">Ошибка</string>
     <string name="msg_notification_needed_for_heartbeat">Для мониторинга требуется разрешение на уведомления</string>
     <string name="error_empty_name">Имя скрипта не может быть пустым</string>
+    <string name="execution_feedback">Результат выполнения</string>
+    <string name="show_a_notification_with_the_result_success_fail_when_finished">Показывать уведомление с результатом (Успех/Ошибка) по завершении</string>
+    <string name="tap_to_allow_background_activity_for_better_stability">Нажмите, чтобы разрешить фоновую активность для лучшей стабильности</string>
+    <string name="battery_unrestricted">Батарея: Без ограничений</string>
+    <string name="battery_optimized_restricted">Батарея: Оптимизировано (Ограничено)</string>
+    <string name="not_available_in_interactive_mode">Недоступно в интерактивном режиме</string>
 
     <!-- Repo errors -->
     <string name="error_termux_permission_missing">Отсутствует разрешение "Run Command" для Termux.</string>
@@ -159,4 +165,15 @@
     <string name="category_name">Название категории</string>
     <string name="create">Создать</string>
     <string name="add_new_category">Добавить новую категорию</string>
+
+    <!-- Notification Channel -->
+    <string name="channel_script_results">Результаты скриптов</string>
+    <string name="channel_script_results_desc">Уведомления о результатах выполнения скриптов</string>
+    <string name="notif_title_unknown">%1$s: Статус неизвестен</string>
+    <string name="notif_title_finished">%1$s завершен</string>
+    <string name="notif_title_failed">%1$s ошибка</string>
+    <string name="notif_msg_no_result">Termux не вернул код результата.</string>
+    <string name="notif_msg_error">Ошибка: %1$s</string>
+    <string name="notif_msg_success">Скрипт успешно выполнен.</string>
+    <string name="notif_msg_failed_code">Ошибка выполнения (Код выхода: %1$d).</string>
 </resources>

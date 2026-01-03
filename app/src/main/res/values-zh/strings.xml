@@ -128,6 +128,12 @@
     <string name="error_description">错误</string>
     <string name="msg_notification_needed_for_heartbeat">需要通知权限以进行心跳监控</string>
     <string name="error_empty_name">脚本名称不能为空</string>
+    <string name="execution_feedback">执行反馈</string>
+    <string name="show_a_notification_with_the_result_success_fail_when_finished">完成后显示包含结果（成功/失败）的通知</string>
+    <string name="tap_to_allow_background_activity_for_better_stability">点击以允许后台活动，以获得更好的稳定性</string>
+    <string name="battery_unrestricted">电池：无限制</string>
+    <string name="battery_optimized_restricted">电池：已优化（受限）</string>
+    <string name="not_available_in_interactive_mode">交互模式下不可用</string>
 
     <!-- Repo errors -->
     <string name="error_termux_permission_missing">缺少 Termux "Run Command" 权限。</string>
@@ -159,4 +165,15 @@
     <string name="category_name">分类名称</string>
     <string name="create">创建</string>
     <string name="add_new_category">添加新分类</string>
+
+    <!-- Notification Channel -->
+    <string name="channel_script_results">脚本结果</string>
+    <string name="channel_script_results_desc">脚本执行结果的通知</string>
+    <string name="notif_title_unknown">%1$s：状态未知</string>
+    <string name="notif_title_finished">%1$s 已完成</string>
+    <string name="notif_title_failed">%1$s 失败</string>
+    <string name="notif_msg_no_result">Termux 未返回结果代码。</string>
+    <string name="notif_msg_error">错误：%1$s</string>
+    <string name="notif_msg_success">脚本执行成功。</string>
+    <string name="notif_msg_failed_code">执行失败（退出代码：%1$d）。</string>
 </resources>

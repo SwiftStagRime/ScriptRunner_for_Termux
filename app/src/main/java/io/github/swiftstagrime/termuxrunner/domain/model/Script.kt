@@ -20,5 +20,6 @@ data class Script(
     val heartbeatTimeout: Long = 30000,
     val heartbeatInterval: Long = 10000,
     val categoryId: Int? = null,
-    val orderIndex: Int = 0
+    val orderIndex: Int = 0,
+    val notifyOnResult: Boolean = false
 )

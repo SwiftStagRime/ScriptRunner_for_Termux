@@ -137,6 +137,8 @@
     <string name="error_description">Error</string>
     <string name="msg_notification_needed_for_heartbeat">Notification permission is required for heartbeat</string>
     <string name="error_empty_name">Script name cannot be empty</string>
+    <string name="execution_feedback">Execution Feedback</string>
+    <string name="show_a_notification_with_the_result_success_fail_when_finished">Show a notification with the result (Success/Fail) when finished</string>
 
     <!-- Repo errors -->
     <string name="error_termux_permission_missing">Termux Run Command permission is missing.</string>
@@ -168,4 +170,21 @@
     <string name="category_name">Category Name</string>
     <string name="create">Create</string>
     <string name="add_new_category">Add New Category</string>
+    <string name="tap_to_allow_background_activity_for_better_stability">Tap to allow background activity for better stability</string>
+    <string name="battery_unrestricted">Battery: Unrestricted</string>
+    <string name="battery_optimized_restricted">Battery: Optimized (Restricted)</string>
+    <string name="not_available_in_interactive_mode">Not available in Interactive Mode</string>
+
+    <!-- Notification Channel -->
+    <string name="channel_script_results">Script Results</string>
+    <string name="channel_script_results_desc">Notifications for script execution results</string>
+    <string name="notif_title_unknown">%1$s: Status Unknown</string>
+    <string name="notif_title_finished">%1$s Finished</string>
+    <string name="notif_title_failed">%1$s Failed</string>
+    <string name="notif_msg_no_result">Termux did not return a result code.</string>
+    <string name="notif_msg_error">Error: %1$s</string>
+    <string name="notif_msg_success">Script executed successfully.</string>
+    <string name="notif_msg_failed_code">Execution failed (Exit Code: %1$d).</string>
+
+
 </resources>

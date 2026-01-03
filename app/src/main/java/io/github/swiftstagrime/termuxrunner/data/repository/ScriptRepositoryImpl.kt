@@ -131,6 +131,7 @@ class ScriptRepositoryImpl @Inject constructor(
                     heartbeatInterval = dto.heartbeatInterval,
                     iconPath = newIconPath,
                     orderIndex = dto.orderIndex,
+                    notifyOnResult = dto.notifyOnResult,
                     categoryId = if (dto.categoryId != null) categoryIdMap[dto.categoryId] else null
                 )
             }
@@ -157,8 +158,8 @@ class ScriptRepositoryImpl @Inject constructor(
                 interpreter = detectedInterpreter,
                 fileExtension = extension,
                 runInBackground = false,
-                openNewSession = true,
-                keepSessionOpen = true
+                openNewSession = false,
+                keepSessionOpen = false
             )
 
             // We return the script object so the UI can decide

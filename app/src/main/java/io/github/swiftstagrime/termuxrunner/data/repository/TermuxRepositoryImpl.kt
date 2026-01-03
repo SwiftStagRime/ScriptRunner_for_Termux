@@ -1,6 +1,7 @@
 package io.github.swiftstagrime.termuxrunner.data.repository
 
 import android.annotation.SuppressLint
+import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -12,6 +13,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
 import dagger.hilt.android.qualifiers.ApplicationContext
 import io.github.swiftstagrime.termuxrunner.R
+import io.github.swiftstagrime.termuxrunner.data.receiver.TermuxResultReceiver
 import io.github.swiftstagrime.termuxrunner.domain.repository.TermuxRepository
 import io.github.swiftstagrime.termuxrunner.ui.extensions.UiText
 import javax.inject.Inject
@@ -51,6 +53,7 @@ class TermuxRepositoryImpl @Inject constructor(
         const val EXTRA_ARGUMENTS = "com.termux.RUN_COMMAND_ARGUMENTS"
         const val EXTRA_BACKGROUND = "com.termux.RUN_COMMAND_BACKGROUND"
         const val EXTRA_SESSION_ACTION = "com.termux.RUN_COMMAND_SESSION_ACTION"
+        const val EXTRA_PENDING_INTENT = "com.termux.RUN_COMMAND_PENDING_INTENT"
     }
 
     override fun isTermuxInstalled(): Boolean {
@@ -73,23 +76,43 @@ class TermuxRepositoryImpl @Inject constructor(
     override fun runCommand(
         command: String,
         runInBackground: Boolean,
-        sessionAction: String
+        sessionAction: String,
+        scriptId: Int,
+        scriptName: String,
+        notifyOnResult: Boolean
     ) {
-        if (!isTermuxInstalled()) {
-            throw TermuxNotInstalledException()
-        }
+        if (!isTermuxInstalled()) throw TermuxNotInstalledException()
+        if (!isPermissionGranted()) throw TermuxPermissionException()
 
-        if (!isPermissionGranted()) {
-            throw TermuxPermissionException()
-        }
-
-        // We route all commands through bash -c to support complex scripts/pipes
         val intent = Intent(ACTION_RUN_COMMAND).apply {
             setClassName(TERMUX_PACKAGE, "com.termux.app.RunCommandService")
             putExtra(EXTRA_COMMAND_PATH, "/data/data/com.termux/files/usr/bin/bash")
             putExtra(EXTRA_ARGUMENTS, arrayOf("-c", command))
             putExtra(EXTRA_BACKGROUND, runInBackground)
             putExtra(EXTRA_SESSION_ACTION, sessionAction)
+
+            if (notifyOnResult) {
+                val resultIntent = Intent(context, TermuxResultReceiver::class.java).apply {
+                    action = "io.github.swiftstagrime.SCRIPT_RESULT"
+                    putExtra("script_id", scriptId)
+                    putExtra("script_name", scriptName)
+                }
+
+                val flags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
+                } else {
+                    PendingIntent.FLAG_UPDATE_CURRENT
+                }
+
+                val pendingIntent = PendingIntent.getBroadcast(
+                    context,
+                    scriptId,
+                    resultIntent,
+                    flags
+                )
+
+                putExtra(EXTRA_PENDING_INTENT, pendingIntent)
+            }
         }
 
         try {

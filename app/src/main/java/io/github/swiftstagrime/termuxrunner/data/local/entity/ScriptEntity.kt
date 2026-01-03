@@ -28,7 +28,9 @@ data class ScriptEntity(
     @ColumnInfo(defaultValue = "NULL")
     val categoryId: Int? = null,
     @ColumnInfo(defaultValue = "0")
-    val orderIndex: Int = 0
+    val orderIndex: Int = 0,
+    @ColumnInfo(defaultValue = "0")
+    val notifyOnResult: Boolean = false
 ) {
     fun toScriptDomain(): Script {
         return Script(
@@ -48,7 +50,8 @@ data class ScriptEntity(
             heartbeatTimeout = heartbeatTimeout,
             heartbeatInterval = heartbeatInterval,
             categoryId = categoryId,
-            orderIndex = orderIndex
+            orderIndex = orderIndex,
+            notifyOnResult = notifyOnResult
         )
     }
 }
@@ -71,6 +74,7 @@ fun Script.toScriptEntity(): ScriptEntity {
         heartbeatTimeout = heartbeatTimeout,
         heartbeatInterval = heartbeatInterval,
         categoryId = categoryId,
-        orderIndex = orderIndex
+        orderIndex = orderIndex,
+        notifyOnResult = notifyOnResult
     )
 }

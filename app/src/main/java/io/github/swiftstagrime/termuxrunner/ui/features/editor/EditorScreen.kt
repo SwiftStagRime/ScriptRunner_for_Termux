@@ -42,6 +42,7 @@ fun EditorScreen(
     categories: List<Category>,
     onAddNewCategory: (String) -> Unit,
     isBatteryUnrestricted: Boolean,
+    onRequestNotificationPermission: () -> Unit,
     onRequestBatteryUnrestricted: () -> Unit,
     onHeartbeatToggle: (Boolean) -> Unit,
     onProcessImage: suspend (Uri) -> String?
@@ -119,7 +120,8 @@ fun EditorScreen(
                 onProcessImage = onProcessImage,
                 onHeartbeatToggle = onHeartbeatToggle,
                 isBatteryUnrestricted = isBatteryUnrestricted,
-                onRequestBatteryUnrestricted = onRequestBatteryUnrestricted
+                onRequestBatteryUnrestricted = onRequestBatteryUnrestricted,
+                onRequestNotificationPermission = onRequestNotificationPermission
             )
         }
     }
@@ -149,7 +151,8 @@ private fun PreviewEditorNewRaw() {
             isBatteryUnrestricted = false,
             onRequestBatteryUnrestricted = {},
             categories = emptyList(),
-            onAddNewCategory = {}
+            onAddNewCategory = {},
+            onRequestNotificationPermission = {}
         )
     }
 }

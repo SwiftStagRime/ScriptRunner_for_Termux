@@ -9,7 +9,10 @@ interface TermuxRepository {
     fun runCommand(
         command: String,
         runInBackground: Boolean,
-        sessionAction: String
+        sessionAction: String,
+        scriptId: Int,
+        scriptName: String,
+        notifyOnResult: Boolean
     )
 
     fun isTermuxBatteryOptimized(): Boolean

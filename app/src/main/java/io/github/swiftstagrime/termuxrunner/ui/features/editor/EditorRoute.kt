@@ -1,9 +1,7 @@
 package io.github.swiftstagrime.termuxrunner.ui.features.editor
 
-import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
-import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Box
@@ -69,6 +67,20 @@ fun EditorRoute(
             }
         }
     }
+    val requestNotifications = remember {
+        {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                val hasPermission = ContextCompat.checkSelfPermission(
+                    context,
+                    android.Manifest.permission.POST_NOTIFICATIONS
+                ) == PackageManager.PERMISSION_GRANTED
+
+                if (!hasPermission) {
+                    notificationPermissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+                }
+            }
+        }
+    }
     ObserveAsEvents(viewModel.uiEvent) { event ->
         when (event) {
             is EditorUiEvent.SaveSuccess -> onBack()
@@ -95,30 +107,16 @@ fun EditorRoute(
             onAddNewCategory = viewModel::addCategory,
             onProcessImage = viewModel::processSelectedImage,
             onHeartbeatToggle = { enabled ->
-                notificationPermissionCheck(enabled, notificationPermissionLauncher, context)
+                if (enabled) requestNotifications()
             },
             snackbarHostState = snackbarHostState,
             isBatteryUnrestricted = isBatteryUnrestricted,
             onRequestBatteryUnrestricted = {
                 BatteryUtils.requestIgnoreBatteryOptimizations(context)
             },
+            onRequestNotificationPermission = {
+                requestNotifications()
+            }
         )
-    }
-}
-
-private fun notificationPermissionCheck(
-    enabled: Boolean,
-    notificationPermissionLauncher: ManagedActivityResultLauncher<String, Boolean>,
-    context: Context
-) {
-    if (enabled && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-        val hasPermission = ContextCompat.checkSelfPermission(
-            context,
-            android.Manifest.permission.POST_NOTIFICATIONS
-        ) == PackageManager.PERMISSION_GRANTED
-
-        if (!hasPermission) {
-            notificationPermissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
-        }
     }
 }

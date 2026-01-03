@@ -1,12 +1,10 @@
 package io.github.swiftstagrime.termuxrunner.ui.features.home
 
-import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.provider.Settings
-import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.material3.SnackbarDuration
@@ -80,6 +78,21 @@ fun HomeRoute(
                     message = UiText.StringResource(R.string.msg_notification_needed_for_heartbeat)
                         .asString(context)
                 )
+            }
+        }
+    }
+
+    val requestNotifications = remember {
+        {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                val hasPermission = ContextCompat.checkSelfPermission(
+                    context,
+                    android.Manifest.permission.POST_NOTIFICATIONS
+                ) == PackageManager.PERMISSION_GRANTED
+
+                if (!hasPermission) {
+                    notificationPermissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+                }
             }
         }
     }
@@ -176,7 +189,7 @@ fun HomeRoute(
             BatteryUtils.requestIgnoreBatteryOptimizations(context)
         },
         onHeartbeatToggle = { enabled ->
-            notificationPermissionCheck(enabled, notificationPermissionLauncher, context)
+            if (enabled) requestNotifications()
         },
         selectedCategoryId = selectedCategoryId,
         sortOption = sortOption,
@@ -184,23 +197,9 @@ fun HomeRoute(
         onSortOptionChange = viewModel::setSortOption,
         onAddNewCategory = viewModel::addCategory,
         onDeleteCategory = viewModel::deleteCategory,
-        onMove = viewModel::moveScript
-    )
-}
-
-private fun notificationPermissionCheck(
-    enabled: Boolean,
-    notificationPermissionLauncher: ManagedActivityResultLauncher<String, Boolean>,
-    context: Context
-) {
-    if (enabled && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-        val hasPermission = ContextCompat.checkSelfPermission(
-            context,
-            android.Manifest.permission.POST_NOTIFICATIONS
-        ) == PackageManager.PERMISSION_GRANTED
-
-        if (!hasPermission) {
-            notificationPermissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+        onMove = viewModel::moveScript,
+        onRequestNotificationPermission = {
+            requestNotifications()
         }
-    }
+    )
 }

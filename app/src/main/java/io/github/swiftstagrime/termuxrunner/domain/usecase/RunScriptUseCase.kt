@@ -57,7 +57,10 @@ class RunScriptUseCase @Inject constructor(
         termuxRepository.runCommand(
             command = finalCommand,
             runInBackground = script.runInBackground,
-            sessionAction = "1"
+            sessionAction = "1",
+            scriptId = script.id,
+            scriptName = script.name,
+            notifyOnResult = script.notifyOnResult
         )
 
         // Manage Heartbeat Service
@@ -75,7 +78,6 @@ class RunScriptUseCase @Inject constructor(
         val fullPath = "$tempDir/$fileName"
         val encodedCode = Base64.encodeToString(script.code.toByteArray(), Base64.NO_WRAP)
 
-        // Construct the core execution line: [EnvVars] [Prefix] [Interpreter] [Path] [Args]
         val coreExecution = StringBuilder().apply {
             append(envVars)
             if (script.commandPrefix.isNotBlank()) append("${script.commandPrefix} ")
@@ -85,19 +87,20 @@ class RunScriptUseCase @Inject constructor(
         }.toString()
 
         // Wrap with heartbeat if enabled
-        val finalRunBlock = if (script.useHeartbeat) {
+        val runBlock = if (script.useHeartbeat) {
             wrapCommandWithHeartbeat(coreExecution, script.heartbeatInterval)
         } else {
             coreExecution
         }
 
-
         return StringBuilder()
             .append("mkdir -p $tempDir && ")
             .append("echo '$encodedCode' | base64 -d > $fullPath && ")
             .append("chmod +x $fullPath && ")
-            .append(finalRunBlock)
-            .append("; rm -f $fullPath")
+            .append("bash -c \"")
+            .append("trap 'rm -f $fullPath' EXIT; ")
+            .append(runBlock.replace("\"", "\\\""))
+            .append("\"")
             .apply {
                 if (script.keepSessionOpen) {
                     append($$"; echo; echo '--- Finished (Press Enter) ---'; read; exec $SHELL")
@@ -111,13 +114,11 @@ class RunScriptUseCase @Inject constructor(
         fileName: String,
         envVars: String
     ): String {
-        // Save script to a bridge directory that Termux can access via 'termux-setup-storage'
         val termuxSourcePath = try {
             scriptFileRepository.saveToBridge(fileName, script.code)
         } catch (_: Exception) {
             return "echo 'Error: Could not save script to device storage.'"
         }
-
         val termuxDestPath = "~/scriptrunner_for_termux/$fileName"
 
         val coreExecution = StringBuilder().apply {
@@ -128,7 +129,8 @@ class RunScriptUseCase @Inject constructor(
             append(script.executionParams)
         }.toString()
 
-        val finalRunBlock = if (script.useHeartbeat) {
+        // Wrap with heartbeat if enabled
+        val runBlock = if (script.useHeartbeat) {
             wrapCommandWithHeartbeat(coreExecution, script.heartbeatInterval)
         } else {
             "($coreExecution)"
@@ -138,8 +140,10 @@ class RunScriptUseCase @Inject constructor(
             .append("mkdir -p ~/scriptrunner_for_termux && ")
             .append("cp -f $termuxSourcePath $termuxDestPath && ")
             .append("chmod +x $termuxDestPath && ")
-            .append(finalRunBlock)
-            .append("; rm -f $termuxDestPath")
+            .append("bash -c \"")
+            .append("trap 'rm -f $termuxDestPath' EXIT; ")
+            .append(runBlock.replace("\"", "\\\""))
+            .append("\"")
             .apply {
                 if (script.keepSessionOpen) {
                     append($$"; echo; echo '--- Finished (Press Enter) ---'; read; exec $SHELL")

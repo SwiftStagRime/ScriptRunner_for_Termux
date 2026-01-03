@@ -20,7 +20,8 @@ data class ScriptExportDto(
     val heartbeatTimeout: Long = 30000,
     val heartbeatInterval: Long = 10000,
     val iconBase64: String? = null,
-    val orderIndex: Int = 0
+    val orderIndex: Int = 0,
+    val notifyOnResult: Boolean = false
 )
 
 fun Script.toExportDto(base64Icon: String?): ScriptExportDto {
@@ -40,6 +41,7 @@ fun Script.toExportDto(base64Icon: String?): ScriptExportDto {
         heartbeatTimeout = heartbeatTimeout,
         heartbeatInterval = heartbeatInterval,
         iconBase64 = base64Icon,
-        orderIndex = orderIndex
+        orderIndex = orderIndex,
+        notifyOnResult = notifyOnResult
     )
 }
