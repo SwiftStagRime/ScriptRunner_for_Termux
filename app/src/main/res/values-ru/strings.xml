@@ -134,6 +134,18 @@
     <string name="battery_unrestricted">Батарея: Без ограничений</string>
     <string name="battery_optimized_restricted">Батарея: Оптимизировано (Ограничено)</string>
     <string name="not_available_in_interactive_mode">Недоступно в интерактивном режиме</string>
+    <string name="section_interactivity">Интерактивность и пресеты</string>
+    <string name="label_interaction_mode">Режим взаимодействия</string>
+    <string name="interaction_none">Нет (Мгновенно)</string>
+    <string name="interaction_text">Текстовый ввод</string>
+    <string name="interaction_single">Одиночный выбор</string>
+    <string name="interaction_multi">Множественный выбор</string>
+    <string name="label_argument_presets">Пресеты аргументов</string>
+    <string name="label_prefix_presets">Пресеты префиксов</string>
+    <string name="label_preset_value">Значение пресета</string>
+    <string name="label_prefix_value">Значение префикса</string>
+    <string name="btn_add_preset">Добавить пресет</string>
+    <string name="placeholder_prefix_example">напр. sudo</string>
 
     <!-- Repo errors -->
     <string name="error_termux_permission_missing">Отсутствует разрешение "Run Command" для Termux.</string>
@@ -176,4 +188,13 @@
     <string name="notif_msg_error">Ошибка: %1$s</string>
     <string name="notif_msg_success">Скрипт успешно выполнен.</string>
     <string name="notif_msg_failed_code">Ошибка выполнения (Код выхода: %1$d).</string>
+
+    <!-- Run dialog -->
+    <string name="title_run_options">Опции запуска: %s</string>
+    <string name="btn_run">Запустить</string>
+    <string name="label_choose_prefix">Префикс</string>
+    <string name="label_enter_arguments">Аргументы</string>
+    <string name="label_select_options">Выбрать опции</string>
+    <string name="label_runtime_env_vars">Переменные окружения</string>
+    <string name="label_env_key">Значение переменной окружения</string>
 </resources>

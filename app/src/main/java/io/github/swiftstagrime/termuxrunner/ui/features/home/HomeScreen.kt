@@ -257,7 +257,9 @@ fun HomeScreen(
             }
 
             Box(
-                modifier = Modifier.weight(1f)
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth()
             ) {
                 when (uiState) {
                     is HomeUiState.Loading -> {

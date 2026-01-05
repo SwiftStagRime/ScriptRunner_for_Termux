@@ -3,6 +3,7 @@ package io.github.swiftstagrime.termuxrunner.data.local.entity
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import io.github.swiftstagrime.termuxrunner.domain.model.InteractionMode
 import io.github.swiftstagrime.termuxrunner.domain.model.Script
 
 @Entity(tableName = "scripts")
@@ -30,7 +31,15 @@ data class ScriptEntity(
     @ColumnInfo(defaultValue = "0")
     val orderIndex: Int = 0,
     @ColumnInfo(defaultValue = "0")
-    val notifyOnResult: Boolean = false
+    val notifyOnResult: Boolean = false,
+    @ColumnInfo(defaultValue = "NONE")
+    val interactionMode: InteractionMode = InteractionMode.NONE,
+    @ColumnInfo(defaultValue = "")
+    val argumentPresets: List<String> = emptyList(),
+    @ColumnInfo(defaultValue = "")
+    val prefixPresets: List<String> = emptyList(),
+    @ColumnInfo(defaultValue = "")
+    val envVarPresets: List<String> = emptyList()
 ) {
     fun toScriptDomain(): Script {
         return Script(
@@ -51,7 +60,11 @@ data class ScriptEntity(
             heartbeatInterval = heartbeatInterval,
             categoryId = categoryId,
             orderIndex = orderIndex,
-            notifyOnResult = notifyOnResult
+            notifyOnResult = notifyOnResult,
+            interactionMode = interactionMode,
+            argumentPresets = argumentPresets,
+            prefixPresets = prefixPresets,
+            envVarPresets = envVarPresets
         )
     }
 }
@@ -75,6 +88,10 @@ fun Script.toScriptEntity(): ScriptEntity {
         heartbeatInterval = heartbeatInterval,
         categoryId = categoryId,
         orderIndex = orderIndex,
-        notifyOnResult = notifyOnResult
+        notifyOnResult = notifyOnResult,
+        interactionMode = interactionMode,
+        argumentPresets = argumentPresets,
+        prefixPresets = prefixPresets,
+        envVarPresets = envVarPresets
     )
 }

@@ -26,8 +26,11 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.swiftstagrime.termuxrunner.R
+import io.github.swiftstagrime.termuxrunner.domain.model.InteractionMode
+import io.github.swiftstagrime.termuxrunner.domain.model.Script
 import io.github.swiftstagrime.termuxrunner.domain.util.BatteryUtils
 import io.github.swiftstagrime.termuxrunner.domain.util.MiuiUtils
+import io.github.swiftstagrime.termuxrunner.ui.components.ScriptRuntimePromptDialog
 import io.github.swiftstagrime.termuxrunner.ui.extensions.ObserveAsEvents
 import io.github.swiftstagrime.termuxrunner.ui.extensions.UiText
 import kotlinx.coroutines.launch
@@ -53,6 +56,17 @@ fun HomeRoute(
     ) { isGranted ->
         viewModel.onPermissionResult(isGranted)
     }
+
+    var scriptToPrompt by remember { mutableStateOf<Script?>(null) }
+
+    val onRunClick: (Script) -> Unit = { script ->
+        if (script.interactionMode == InteractionMode.NONE) {
+            viewModel.runScript(script)
+        } else {
+            scriptToPrompt = script
+        }
+    }
+
 
     var isBatteryUnrestricted by remember {
         mutableStateOf(BatteryUtils.isIgnoringBatteryOptimizations(context))
@@ -96,6 +110,7 @@ fun HomeRoute(
             }
         }
     }
+
 
     ObserveAsEvents(viewModel.uiEvent) { event ->
         when (event) {
@@ -177,7 +192,7 @@ fun HomeRoute(
         onSearchQueryChange = viewModel::onSearchQueryChange,
         snackbarHostState = snackbarHostState,
         onScriptCodeClick = { script -> onNavigateToEditor(script.id) },
-        onRunClick = viewModel::runScript,
+        onRunClick = onRunClick,
         onUpdateScript = viewModel::updateScript,
         onDeleteScript = viewModel::deleteScript,
         onCreateShortcutClick = viewModel::createShortcut,
@@ -202,4 +217,20 @@ fun HomeRoute(
             requestNotifications()
         }
     )
+
+    scriptToPrompt?.let { script ->
+        ScriptRuntimePromptDialog(
+            script = script,
+            onDismiss = { scriptToPrompt = null },
+            onConfirm = { args, prefix, env ->
+                viewModel.runScript(
+                    script,
+                    runtimeArgs = args,
+                    runtimePrefix = prefix,
+                    runtimeEnv = env
+                )
+                scriptToPrompt = null
+            }
+        )
+    }
 }

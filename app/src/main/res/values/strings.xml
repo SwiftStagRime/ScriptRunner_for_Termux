@@ -139,6 +139,19 @@
     <string name="error_empty_name">Script name cannot be empty</string>
     <string name="execution_feedback">Execution Feedback</string>
     <string name="show_a_notification_with_the_result_success_fail_when_finished">Show a notification with the result (Success/Fail) when finished</string>
+    <string name="section_interactivity">Interactivity &amp; Presets</string>
+    <string name="label_interaction_mode">Interaction Mode</string>
+    <string name="interaction_none">None (Instant)</string>
+    <string name="interaction_text">Text Input</string>
+    <string name="interaction_single">Single Choice</string>
+    <string name="interaction_multi">Multi Choice</string>
+    <string name="label_argument_presets">Argument Presets</string>
+    <string name="label_prefix_presets">Prefix Presets</string>
+    <string name="label_preset_value">Preset Value</string>
+    <string name="label_prefix_value">Prefix Value</string>
+    <string name="btn_add_preset">Add Preset</string>
+    <string name="placeholder_prefix_example">e.g. sudo</string>
+
 
     <!-- Repo errors -->
     <string name="error_termux_permission_missing">Termux Run Command permission is missing.</string>
@@ -186,5 +199,13 @@
     <string name="notif_msg_success">Script executed successfully.</string>
     <string name="notif_msg_failed_code">Execution failed (Exit Code: %1$d).</string>
 
+    <!-- Run dialog -->
+    <string name="title_run_options">Run Options: %s</string>
+    <string name="btn_run">Run</string>
+    <string name="label_choose_prefix">Prefix</string>
+    <string name="label_enter_arguments">Arguments</string>
+    <string name="label_select_options">Select Options</string>
+    <string name="label_runtime_env_vars">Runtime Env Keys</string>
+    <string name="label_env_key">Environment Variable Key</string>
 
 </resources>

@@ -43,8 +43,12 @@ import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuAnchorType
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -53,6 +57,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -61,6 +66,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -77,6 +83,7 @@ import androidx.compose.ui.window.DialogProperties
 import coil3.compose.AsyncImage
 import io.github.swiftstagrime.termuxrunner.R
 import io.github.swiftstagrime.termuxrunner.domain.model.Category
+import io.github.swiftstagrime.termuxrunner.domain.model.InteractionMode
 import io.github.swiftstagrime.termuxrunner.domain.model.Script
 import io.github.swiftstagrime.termuxrunner.ui.preview.DevicePreviews
 import io.github.swiftstagrime.termuxrunner.ui.preview.configSampleScript
@@ -114,6 +121,10 @@ fun ScriptConfigDialog(
     var notifyOnResult by remember { mutableStateOf(script.notifyOnResult) }
     var heartbeatTimeoutStr by remember { mutableStateOf((script.heartbeatTimeout / 1000).toString()) }
     var heartbeatIntervalStr by remember { mutableStateOf((script.heartbeatInterval / 1000).toString()) }
+    var interactionMode by remember { mutableStateOf(script.interactionMode) }
+    val argPresetsList = remember { script.argumentPresets.toMutableStateList() }
+    val prefixPresetsList = remember { script.prefixPresets.toMutableStateList() }
+    val envVarPresets = remember { script.envVarPresets.toMutableStateList() }
 
     val envVarsList = remember {
         script.envVars.entries.map { it.key to it.value }.toMutableStateList()
@@ -172,7 +183,10 @@ fun ScriptConfigDialog(
                                     heartbeatTimeout = heartbeatTimeoutStr.toLong() * 1000,
                                     heartbeatInterval = heartbeatIntervalStr.toLong() * 1000,
                                     categoryId = selectedCategoryId,
-                                    notifyOnResult = notifyOnResult
+                                    notifyOnResult = notifyOnResult,
+                                    interactionMode = interactionMode,
+                                    argumentPresets = argPresetsList.toList(),
+                                    prefixPresets = prefixPresetsList.toList(),
                                 )
                                 onSave(updated)
                             }
@@ -307,6 +321,52 @@ fun ScriptConfigDialog(
                             onCategorySelected = { selectedCategoryId = it },
                             onAddNewClick = { showAddCategoryDialog = true }
                         )
+                    }
+                }
+
+                item {
+                    ConfigSection(title = stringResource(R.string.section_interactivity)) {
+                        InteractionModeSpinner(
+                            selectedMode = interactionMode,
+                            onModeSelected = { interactionMode = it }
+                        )
+
+                        if (
+                            interactionMode == InteractionMode.MULTI_CHOICE) {
+
+                            Spacer(modifier = Modifier.height(16.dp))
+                            PresetListManager(
+                                title = stringResource(R.string.label_argument_presets),
+                                textFieldLabel = stringResource(R.string.label_argument_presets),
+                                presets = argPresetsList,
+                                onAdd = { argPresetsList.add("") },
+                                onRemove = { argPresetsList.removeAt(it) },
+                                onUpdate = { index, value -> argPresetsList[index] = value }
+                            )
+
+                            HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp))
+
+                            PresetListManager(
+                                title = stringResource(R.string.label_prefix_presets),
+                                textFieldLabel = stringResource(R.string.label_prefix_presets),
+                                presets = prefixPresetsList,
+                                onAdd = { prefixPresetsList.add("") },
+                                onRemove = { prefixPresetsList.removeAt(it) },
+                                onUpdate = { index, value -> prefixPresetsList[index] = value },
+                                placeholder = "e.g. sudo"
+                            )
+
+                            HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp))
+                            PresetListManager(
+                                title = stringResource(R.string.label_runtime_env_vars),
+                                textFieldLabel = stringResource(R.string.label_env_key),
+                                presets = envVarPresets,
+                                onAdd = { envVarPresets.add("") },
+                                onRemove = { envVarPresets.removeAt(it) },
+                                onUpdate = { index, value -> envVarPresets[index] = value },
+                                placeholder = "e.g. API_KEY"
+                            )
+                        }
                     }
                 }
 
@@ -678,6 +738,109 @@ fun ConfigSection(title: String, content: @Composable ColumnScope.() -> Unit) {
                 modifier = Modifier.padding(16.dp),
                 content = content
             )
+        }
+    }
+}
+
+@Composable
+fun PresetListManager(
+    title: String,
+    textFieldLabel: String,
+    presets: SnapshotStateList<String>,
+    onAdd: () -> Unit,
+    onRemove: (Int) -> Unit,
+    onUpdate: (Int, String) -> Unit,
+    placeholder: String = ""
+) {
+    Column {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.padding(bottom = 8.dp)
+        )
+        presets.forEachIndexed { index, value ->
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                StyledTextField(
+                    value = value,
+                    onValueChange = { onUpdate(index, it) },
+                    label = textFieldLabel,
+                    placeholder = { Text(placeholder) },
+                    modifier = Modifier.weight(1f)
+                )
+                IconButton(onClick = { onRemove(index) }) {
+                    Icon(Icons.Default.Delete, null, tint = MaterialTheme.colorScheme.error)
+                }
+            }
+        }
+        TextButton(
+            onClick = onAdd,
+            modifier = Modifier.align(Alignment.Start)
+        ) {
+            Icon(Icons.Default.Add, null, modifier = Modifier.size(18.dp))
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(stringResource(R.string.btn_add_preset))
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun InteractionModeSpinner(
+    selectedMode: InteractionMode,
+    onModeSelected: (InteractionMode) -> Unit
+) {
+    var expanded by remember { mutableStateOf(false) }
+    val modes = InteractionMode.entries
+
+    val modeLabel = when (selectedMode) {
+        InteractionMode.NONE -> stringResource(R.string.interaction_none)
+        InteractionMode.TEXT_INPUT -> stringResource(R.string.interaction_text)
+        InteractionMode.MULTI_CHOICE -> stringResource(R.string.interaction_multi)
+    }
+
+    ExposedDropdownMenuBox(
+        expanded = expanded,
+        onExpandedChange = { expanded = !expanded }
+    ) {
+        StyledTextField(
+            value = modeLabel,
+            onValueChange = {},
+            readOnly = true,
+            label = stringResource(R.string.label_interaction_mode),
+            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+            modifier = Modifier
+                .menuAnchor(type = ExposedDropdownMenuAnchorType.PrimaryNotEditable,
+                    enabled = true)
+                .fillMaxWidth()
+        )
+
+        ExposedDropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
+        ) {
+            modes.forEach { mode ->
+                DropdownMenuItem(
+                    text = {
+                        Text(
+                            when (mode) {
+                                InteractionMode.NONE -> stringResource(R.string.interaction_none)
+                                InteractionMode.TEXT_INPUT -> stringResource(R.string.interaction_text)
+                                InteractionMode.MULTI_CHOICE -> stringResource(R.string.interaction_multi)
+                            }
+                        )
+                    },
+                    onClick = {
+                        onModeSelected(mode)
+                        expanded = false
+                    }
+                )
+            }
         }
     }
 }

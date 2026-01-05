@@ -76,6 +76,11 @@ class HomeViewModel @Inject constructor(
     val selectedCategoryId = _selectedCategoryId.asStateFlow()
     val sortOption = _sortOption.asStateFlow()
 
+    private var pendingArgs: String? = null
+    private var pendingPrefix: String? = null
+    private var pendingEnv: Map<String, String>? = null
+
+
     val homeUiState: StateFlow<HomeUiState> = combine(
         scriptRepository.getAllScripts(),
         categoryRepository.getAllCategories(),
@@ -126,31 +131,43 @@ class HomeViewModel @Inject constructor(
         return iconRepository.saveIcon(uri.toString())
     }
 
-    fun runScript(script: Script) {
+    fun runScript(
+        script: Script,
+        runtimeArgs: String? = null,
+        runtimePrefix: String? = null,
+        runtimeEnv: Map<String, String>? = null
+    ) {
         viewModelScope.launch {
             try {
-                runScriptUseCase(script)
+                runScriptUseCase(
+                    script = script,
+                    runtimeArgs = runtimeArgs,
+                    runtimePrefix = runtimePrefix,
+                    runtimeEnv = runtimeEnv
+                )
                 sendEvent(
                     HomeUiEvent.ShowSnackbar(
                         UiText.StringResource(R.string.msg_running_script, script.name)
                     )
                 )
                 pendingScript = null
+                pendingArgs = null
+                pendingPrefix = null
+                pendingEnv = null
             } catch (_: TermuxPermissionException) {
                 pendingScript = script
+                pendingArgs = runtimeArgs
+                pendingPrefix = runtimePrefix
+                pendingEnv = runtimeEnv
                 sendEvent(HomeUiEvent.RequestTermuxPermission)
             } catch (e: TermuxException) {
                 sendEvent(HomeUiEvent.ShowSnackbar(e.uiText))
             } catch (e: Exception) {
-                e.printStackTrace()
-                sendEvent(
-                    HomeUiEvent.ShowSnackbar(
-                        UiText.DynamicString(e.message ?: "Unknown Error")
-                    )
-                )
+                sendEvent(HomeUiEvent.ShowSnackbar(UiText.DynamicString(e.message ?: "Error")))
             }
         }
     }
+
 
     fun deleteScript(script: Script) {
         viewModelScope.launch {
@@ -168,10 +185,13 @@ class HomeViewModel @Inject constructor(
 
     fun onPermissionResult(isGranted: Boolean) {
         if (isGranted) {
-            pendingScript?.let { runScript(it) }
+            pendingScript?.let { runScript(it, pendingArgs, pendingPrefix) }
         } else {
             sendEvent(HomeUiEvent.ShowSnackbar(UiText.StringResource(R.string.msg_permission_denied)))
             pendingScript = null
+            pendingArgs = null
+            pendingPrefix = null
+            pendingEnv = null
         }
     }
 

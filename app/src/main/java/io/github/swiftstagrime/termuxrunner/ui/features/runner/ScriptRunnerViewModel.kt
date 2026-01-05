@@ -5,9 +5,13 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.swiftstagrime.termuxrunner.data.repository.TermuxPermissionException
+import io.github.swiftstagrime.termuxrunner.domain.model.InteractionMode
+import io.github.swiftstagrime.termuxrunner.domain.model.Script
 import io.github.swiftstagrime.termuxrunner.domain.repository.ScriptRepository
 import io.github.swiftstagrime.termuxrunner.domain.usecase.RunScriptUseCase
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -24,31 +28,72 @@ class ScriptRunnerViewModel @Inject constructor(
     private val _events = Channel<ScriptRunnerEvent>()
     val events = _events.receiveAsFlow()
 
+    private val _scriptToPrompt = MutableStateFlow<Script?>(null)
+    val scriptToPrompt = _scriptToPrompt.asStateFlow()
+
+    private var pendingArgs: String? = null
+    private var pendingPrefix: String? = null
+    private var pendingEnv: Map<String, String>? = null
+
+
     init {
         if (scriptId != -1) {
-            executeScript()
+            checkScriptAndExecute()
         } else {
             sendEvent(ScriptRunnerEvent.Finish)
         }
     }
 
-    fun executeScript() {
+    private fun checkScriptAndExecute() {
+        viewModelScope.launch {
+            val script = scriptRepository.getScriptById(scriptId)
+            if (script == null) {
+                sendEvent(ScriptRunnerEvent.Finish)
+                return@launch
+            }
+
+            if (script.interactionMode == InteractionMode.NONE) {
+                executeScript(script)
+            } else {
+                _scriptToPrompt.value = script
+            }
+        }
+    }
+
+    fun executeScript(
+        script: Script,
+        runtimeArgs: String? = null,
+        runtimePrefix: String? = null,
+        runtimeEnv: Map<String, String>? = null
+    ) {
         viewModelScope.launch {
             try {
-                val script = scriptRepository.getScriptById(scriptId)
-                if (script != null) {
-                    runScriptUseCase(script)
-                    sendEvent(ScriptRunnerEvent.Finish)
-                } else {
-                    sendEvent(ScriptRunnerEvent.Finish)
-                }
+                runScriptUseCase(
+                    script = script,
+                    runtimeArgs = runtimeArgs,
+                    runtimePrefix = runtimePrefix,
+                    runtimeEnv = runtimeEnv
+                )
+                sendEvent(ScriptRunnerEvent.Finish)
             } catch (_: TermuxPermissionException) {
+                pendingArgs = runtimeArgs
+                pendingPrefix = runtimePrefix
+                pendingEnv = runtimeEnv
                 sendEvent(ScriptRunnerEvent.RequestPermission)
             } catch (e: Exception) {
                 sendEvent(ScriptRunnerEvent.ShowError("Error: ${e.message}"))
                 sendEvent(ScriptRunnerEvent.Finish)
             }
         }
+    }
+
+    fun onPermissionGranted() {
+        val script = _scriptToPrompt.value ?: return
+        executeScript(script, pendingArgs, pendingPrefix, pendingEnv)
+    }
+
+    fun dismissPrompt() {
+        sendEvent(ScriptRunnerEvent.Finish)
     }
 
     private fun sendEvent(event: ScriptRunnerEvent) {

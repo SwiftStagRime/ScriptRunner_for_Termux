@@ -134,6 +134,18 @@
     <string name="battery_unrestricted">电池：无限制</string>
     <string name="battery_optimized_restricted">电池：已优化（受限）</string>
     <string name="not_available_in_interactive_mode">交互模式下不可用</string>
+    <string name="section_interactivity">交互与预设</string>
+    <string name="label_interaction_mode">交互模式</string>
+    <string name="interaction_none">无 (立即运行)</string>
+    <string name="interaction_text">文本输入</string>
+    <string name="interaction_single">单选</string>
+    <string name="interaction_multi">多选</string>
+    <string name="label_argument_presets">参数预设</string>
+    <string name="label_prefix_presets">前缀预设</string>
+    <string name="label_preset_value">预设值</string>
+    <string name="label_prefix_value">前缀值</string>
+    <string name="btn_add_preset">添加预设</string>
+    <string name="placeholder_prefix_example">例如: sudo</string>
 
     <!-- Repo errors -->
     <string name="error_termux_permission_missing">缺少 Termux "Run Command" 权限。</string>
@@ -176,4 +188,13 @@
     <string name="notif_msg_error">错误：%1$s</string>
     <string name="notif_msg_success">脚本执行成功。</string>
     <string name="notif_msg_failed_code">执行失败（退出代码：%1$d）。</string>
+
+    <!-- Run dialog -->
+    <string name="title_run_options">运行选项: %s</string>
+    <string name="btn_run">运行</string>
+    <string name="label_choose_prefix">前缀</string>
+    <string name="label_enter_arguments">参数</string>
+    <string name="label_select_options">选择选项</string>
+    <string name="label_runtime_env_vars">运行时环境变量键</string>
+    <string name="label_env_key">环境变量键</string>
 </resources>

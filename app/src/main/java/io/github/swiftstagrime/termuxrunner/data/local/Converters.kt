@@ -1,6 +1,7 @@
 package io.github.swiftstagrime.termuxrunner.data.local
 
 import androidx.room.TypeConverter
+import io.github.swiftstagrime.termuxrunner.domain.model.InteractionMode
 import kotlinx.serialization.json.Json
 
 class Converters {
@@ -23,6 +24,36 @@ class Converters {
         } catch (e: Exception) {
             e.printStackTrace()
             emptyMap()
+        }
+    }
+
+    @TypeConverter
+    fun fromInteractionMode(mode: InteractionMode): String {
+        return mode.name
+    }
+
+    @TypeConverter
+    fun toInteractionMode(data: String): InteractionMode {
+        return try {
+            InteractionMode.valueOf(data)
+        } catch (e: Exception) {
+            InteractionMode.NONE
+        }
+    }
+
+    @TypeConverter
+    fun fromStringList(list: List<String>): String {
+        return json.encodeToString(list)
+    }
+
+    @TypeConverter
+    fun toStringList(data: String): List<String> {
+        if (data.isBlank()) return emptyList()
+        return try {
+            json.decodeFromString(data)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            emptyList()
         }
     }
 }

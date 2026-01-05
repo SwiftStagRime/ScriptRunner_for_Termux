@@ -3,6 +3,13 @@ package io.github.swiftstagrime.termuxrunner.domain.model
 import kotlinx.serialization.Serializable
 
 @Serializable
+enum class InteractionMode {
+    NONE,
+    TEXT_INPUT,
+    MULTI_CHOICE
+}
+
+@Serializable
 data class Script(
     val id: Int = 0,
     val name: String,
@@ -21,5 +28,10 @@ data class Script(
     val heartbeatInterval: Long = 10000,
     val categoryId: Int? = null,
     val orderIndex: Int = 0,
-    val notifyOnResult: Boolean = false
+    val notifyOnResult: Boolean = false,
+    val interactionMode: InteractionMode = InteractionMode.NONE,
+    val argumentPresets: List<String> = emptyList(),
+    val prefixPresets: List<String> = emptyList(),
+    val envVarPresets: List<String> = emptyList()
 )
+

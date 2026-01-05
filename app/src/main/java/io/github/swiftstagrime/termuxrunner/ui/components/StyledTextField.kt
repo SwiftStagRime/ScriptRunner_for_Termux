@@ -18,6 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 
 @Composable
@@ -28,10 +29,13 @@ fun StyledTextField(
     modifier: Modifier = Modifier,
     singleLine: Boolean = true,
     isError: Boolean = false,
+    readOnly: Boolean = false,
     supportingText: @Composable (() -> Unit)? = null,
     leadingIcon: @Composable (() -> Unit)? = null,
+    trailingIcon: @Composable (() -> Unit)? = null,
     placeholder: @Composable (() -> Unit)? = null,
-    keyboardOptions: KeyboardOptions = KeyboardOptions.Default
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
+    visualTransformation: VisualTransformation = VisualTransformation.None
 ) {
     var isFocused by remember { mutableStateOf(false) }
     val isFloating = isFocused || value.isNotEmpty()
@@ -61,6 +65,7 @@ fun StyledTextField(
         modifier = modifier
             .onFocusChanged { isFocused = it.isFocused },
         isError = isError,
+        readOnly = readOnly,
         supportingText = supportingText,
         label = {
             Text(
@@ -80,9 +85,11 @@ fun StyledTextField(
             )
         },
         leadingIcon = leadingIcon,
+        trailingIcon = trailingIcon,
         placeholder = placeholder,
         singleLine = singleLine,
         keyboardOptions = keyboardOptions,
+        visualTransformation = visualTransformation,
         shape = RoundedCornerShape(12.dp),
         colors = OutlinedTextFieldDefaults.colors(
             unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainerLow,

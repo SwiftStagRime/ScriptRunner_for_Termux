@@ -2,11 +2,11 @@
   "formatVersion": 1,
   "database": {
     "version": 3,
-    "identityHash": "c282a4dcc003a5fa5a4839cae787350f",
+    "identityHash": "6928fe4389f7f36906e6f2590d33bc22",
     "entities": [
       {
         "tableName": "scripts",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL, `code` TEXT NOT NULL, `interpreter` TEXT NOT NULL, `fileExtension` TEXT NOT NULL, `commandPrefix` TEXT NOT NULL, `runInBackground` INTEGER NOT NULL, `openNewSession` INTEGER NOT NULL, `executionParams` TEXT NOT NULL, `iconPath` TEXT, `envVars` TEXT NOT NULL, `keepSessionOpen` INTEGER NOT NULL, `useHeartbeat` INTEGER NOT NULL DEFAULT 0, `heartbeatTimeout` INTEGER NOT NULL DEFAULT 30000, `heartbeatInterval` INTEGER NOT NULL DEFAULT 10000, `categoryId` INTEGER DEFAULT NULL, `orderIndex` INTEGER NOT NULL DEFAULT 0, `notifyOnResult` INTEGER NOT NULL DEFAULT 0)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL, `code` TEXT NOT NULL, `interpreter` TEXT NOT NULL, `fileExtension` TEXT NOT NULL, `commandPrefix` TEXT NOT NULL, `runInBackground` INTEGER NOT NULL, `openNewSession` INTEGER NOT NULL, `executionParams` TEXT NOT NULL, `iconPath` TEXT, `envVars` TEXT NOT NULL, `keepSessionOpen` INTEGER NOT NULL, `useHeartbeat` INTEGER NOT NULL DEFAULT 0, `heartbeatTimeout` INTEGER NOT NULL DEFAULT 30000, `heartbeatInterval` INTEGER NOT NULL DEFAULT 10000, `categoryId` INTEGER DEFAULT NULL, `orderIndex` INTEGER NOT NULL DEFAULT 0, `notifyOnResult` INTEGER NOT NULL DEFAULT 0, `interactionMode` TEXT NOT NULL DEFAULT 'NONE', `argumentPresets` TEXT NOT NULL DEFAULT '', `prefixPresets` TEXT NOT NULL DEFAULT '', `envVarPresets` TEXT NOT NULL DEFAULT '')",
         "fields": [
           {
             "fieldPath": "id",
@@ -119,6 +119,34 @@
             "affinity": "INTEGER",
             "notNull": true,
             "defaultValue": "0"
+          },
+          {
+            "fieldPath": "interactionMode",
+            "columnName": "interactionMode",
+            "affinity": "TEXT",
+            "notNull": true,
+            "defaultValue": "'NONE'"
+          },
+          {
+            "fieldPath": "argumentPresets",
+            "columnName": "argumentPresets",
+            "affinity": "TEXT",
+            "notNull": true,
+            "defaultValue": "''"
+          },
+          {
+            "fieldPath": "prefixPresets",
+            "columnName": "prefixPresets",
+            "affinity": "TEXT",
+            "notNull": true,
+            "defaultValue": "''"
+          },
+          {
+            "fieldPath": "envVarPresets",
+            "columnName": "envVarPresets",
+            "affinity": "TEXT",
+            "notNull": true,
+            "defaultValue": "''"
           }
         ],
         "primaryKey": {
@@ -162,7 +190,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'c282a4dcc003a5fa5a4839cae787350f')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '6928fe4389f7f36906e6f2590d33bc22')"
     ]
   }
 }

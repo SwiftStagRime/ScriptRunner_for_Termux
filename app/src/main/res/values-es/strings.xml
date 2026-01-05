@@ -134,6 +134,18 @@
     <string name="battery_unrestricted">Batería: Sin restricciones</string>
     <string name="battery_optimized_restricted">Batería: Optimizada (Restringida)</string>
     <string name="not_available_in_interactive_mode">No disponible en modo interactivo</string>
+    <string name="section_interactivity">Interactividad y Ajustes</string>
+    <string name="label_interaction_mode">Modo de interacción</string>
+    <string name="interaction_none">Ninguno (Instantáneo)</string>
+    <string name="interaction_text">Entrada de texto</string>
+    <string name="interaction_single">Selección única</string>
+    <string name="interaction_multi">Selección múltiple</string>
+    <string name="label_argument_presets">Ajustes de argumentos</string>
+    <string name="label_prefix_presets">Ajustes de prefijos</string>
+    <string name="label_preset_value">Valor del ajuste</string>
+    <string name="label_prefix_value">Valor del prefijo</string>
+    <string name="btn_add_preset">Añadir ajuste</string>
+    <string name="placeholder_prefix_example">ej. sudo</string>
 
     <!-- Repo errors -->
     <string name="error_termux_permission_missing">Falta el permiso "Run Command" de Termux.</string>
@@ -176,4 +188,13 @@
     <string name="notif_msg_error">Error: %1$s</string>
     <string name="notif_msg_success">Script ejecutado con éxito.</string>
     <string name="notif_msg_failed_code">Error de ejecución (Código de salida: %1$d).</string>
+
+    <!-- Run dialog -->
+    <string name="title_run_options">Opciones de ejecución: %s</string>
+    <string name="btn_run">Ejecutar</string>
+    <string name="label_choose_prefix">Prefijo</string>
+    <string name="label_enter_arguments">Argumentos</string>
+    <string name="label_select_options">Seleccionar opciones</string>
+    <string name="label_runtime_env_vars">Claves de entorno de ejecución</string>
+    <string name="label_env_key">Clave de variable de entorno</string>
 </resources>

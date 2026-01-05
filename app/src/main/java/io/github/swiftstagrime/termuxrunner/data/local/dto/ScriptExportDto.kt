@@ -1,5 +1,6 @@
 package io.github.swiftstagrime.termuxrunner.data.local.dto
 
+import io.github.swiftstagrime.termuxrunner.domain.model.InteractionMode
 import io.github.swiftstagrime.termuxrunner.domain.model.Script
 import kotlinx.serialization.Serializable
 
@@ -21,7 +22,11 @@ data class ScriptExportDto(
     val heartbeatInterval: Long = 10000,
     val iconBase64: String? = null,
     val orderIndex: Int = 0,
-    val notifyOnResult: Boolean = false
+    val notifyOnResult: Boolean = false,
+    val interactionMode: InteractionMode = InteractionMode.NONE,
+    val argumentPresets: List<String> = emptyList(),
+    val prefixPresets: List<String> = emptyList(),
+    val envVarPresets: List<String> = emptyList()
 )
 
 fun Script.toExportDto(base64Icon: String?): ScriptExportDto {
@@ -42,6 +47,10 @@ fun Script.toExportDto(base64Icon: String?): ScriptExportDto {
         heartbeatInterval = heartbeatInterval,
         iconBase64 = base64Icon,
         orderIndex = orderIndex,
-        notifyOnResult = notifyOnResult
+        notifyOnResult = notifyOnResult,
+        interactionMode = interactionMode,
+        argumentPresets = argumentPresets,
+        prefixPresets = prefixPresets,
+        envVarPresets = envVarPresets
     )
 }

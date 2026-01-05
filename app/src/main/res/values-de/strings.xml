@@ -135,6 +135,20 @@
     <string name="battery_optimized_restricted">Akku: Optimiert (Eingeschränkt)</string>
     <string name="not_available_in_interactive_mode">Im interaktiven Modus nicht verfügbar</string>
 
+    <string name="section_interactivity">Interaktivität &amp; Vorlagen</string>
+    <string name="label_interaction_mode">Interaktionsmodus</string>
+    <string name="interaction_none">Keine (Sofort)</string>
+    <string name="interaction_text">Texteingabe</string>
+    <string name="interaction_single">Einzelauswahl</string>
+    <string name="interaction_multi">Mehrfachauswahl</string>
+    <string name="label_argument_presets">Argument-Vorlagen</string>
+    <string name="label_prefix_presets">Präfix-Vorlagen</string>
+    <string name="label_preset_value">Vorlagenwert</string>
+    <string name="label_prefix_value">Präfixwert</string>
+    <string name="btn_add_preset">Vorlage hinzufügen</string>
+    <string name="placeholder_prefix_example">z.B. sudo</string>
+
+
     <!-- Repo errors -->
     <string name="error_termux_permission_missing">Termux "Run Command" Berechtigung fehlt.</string>
     <string name="error_background_restriction">Hintergrundbeschränkung erkannt. Deaktivieren Sie die Akku-Optimierung für Termux/Runner.</string>
@@ -176,4 +190,13 @@
     <string name="notif_msg_error">Fehler: %1$s</string>
     <string name="notif_msg_success">Skript erfolgreich ausgeführt.</string>
     <string name="notif_msg_failed_code">Ausführung fehlgeschlagen (Exit-Code: %1$d).</string>
+
+    <!-- Run dialog -->
+    <string name="title_run_options">Ausführungsoptionen: %s</string>
+    <string name="btn_run">Ausführen</string>
+    <string name="label_choose_prefix">Präfix</string>
+    <string name="label_enter_arguments">Argumente</string>
+    <string name="label_select_options">Optionen auswählen</string>
+    <string name="label_runtime_env_vars">Laufzeit-Umgebungsvariablen</string>
+    <string name="label_env_key">Umgebungsvariablen-Schlüssel</string>
 </resources>

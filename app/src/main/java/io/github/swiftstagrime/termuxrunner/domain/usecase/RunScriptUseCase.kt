@@ -17,15 +17,23 @@ class RunScriptUseCase @Inject constructor(
     private val scriptFileRepository: ScriptFileRepository,
     private val monitoringRepository: MonitoringRepository
 ) {
-    suspend operator fun invoke(script: Script) = withContext(Dispatchers.IO) {
+    suspend operator fun invoke(
+        script: Script,
+        runtimeArgs: String? = null,
+        runtimeEnv: Map<String, String>? = null,
+        runtimePrefix: String? = null
+    ) = withContext(Dispatchers.IO) {
         // Sanitize and format environment variables
+        val combinedEnv = script.envVars + (runtimeEnv ?: emptyMap())
+
         val envVarString = StringBuilder()
-        script.envVars.forEach { (key, value) ->
+        combinedEnv.forEach { (key, value) ->
             if (key.matches(Regex("^[a-zA-Z_][a-zA-Z0-9_]*$"))) {
                 val safeValue = value.replace("'", "'\\''")
                 envVarString.append("export $key='$safeValue'; ")
             }
         }
+
 
         // Determine file extension
         val extension = if (script.fileExtension.isNotBlank()) {
@@ -43,14 +51,32 @@ class RunScriptUseCase @Inject constructor(
         val uniqueId = "${script.id}_${System.currentTimeMillis()}"
         val fileName = "script_$uniqueId.$extension"
 
+        val finalPrefix = (runtimePrefix ?: script.commandPrefix).trim()
+        val finalArgs = listOfNotNull(
+            script.executionParams.takeIf { it.isNotBlank() },
+            runtimeArgs?.trim()?.takeIf { it.isNotBlank() }
+        ).joinToString(" ")
+
         // Use a 4KB threshold to decide between Base64 embedding or external file bridging
         // to avoid Binder transaction size limits in Android Intents.
         val isLargeScript = script.code.length > 4000
 
         val finalCommand = if (isLargeScript) {
-            prepareLargeScriptCommand(script, fileName, envVarString.toString())
+            prepareLargeScriptCommand(
+                script,
+                fileName,
+                envVarString.toString(),
+                finalArgs,
+                finalPrefix
+            )
         } else {
-            prepareSmallScriptCommand(script, fileName, envVarString.toString())
+            prepareSmallScriptCommand(
+                script,
+                fileName,
+                envVarString.toString(),
+                finalArgs,
+                finalPrefix
+            )
         }
 
         // Execute in Termux
@@ -72,7 +98,9 @@ class RunScriptUseCase @Inject constructor(
     private fun prepareSmallScriptCommand(
         script: Script,
         fileName: String,
-        envVars: String
+        envVars: String,
+        combinedArgs: String,
+        actualPrefix: String
     ): String {
         val tempDir = "~/scriptrunner_for_termux"
         val fullPath = "$tempDir/$fileName"
@@ -80,10 +108,10 @@ class RunScriptUseCase @Inject constructor(
 
         val coreExecution = StringBuilder().apply {
             append(envVars)
-            if (script.commandPrefix.isNotBlank()) append("${script.commandPrefix} ")
+            if (actualPrefix.isNotBlank()) append("$actualPrefix ")
             append("${script.interpreter} ")
             append("$fullPath ")
-            append(script.executionParams)
+            append(combinedArgs)
         }.toString()
 
         // Wrap with heartbeat if enabled
@@ -112,7 +140,9 @@ class RunScriptUseCase @Inject constructor(
     private fun prepareLargeScriptCommand(
         script: Script,
         fileName: String,
-        envVars: String
+        envVars: String,
+        combinedArgs: String,
+        actualPrefix: String
     ): String {
         val termuxSourcePath = try {
             scriptFileRepository.saveToBridge(fileName, script.code)
@@ -123,10 +153,10 @@ class RunScriptUseCase @Inject constructor(
 
         val coreExecution = StringBuilder().apply {
             append(envVars)
-            if (script.commandPrefix.isNotBlank()) append("${script.commandPrefix} ")
+            if (actualPrefix.isNotBlank()) append("$actualPrefix ")
             append("${script.interpreter} ")
             append("$termuxDestPath ")
-            append(script.executionParams)
+            append(combinedArgs)
         }.toString()
 
         // Wrap with heartbeat if enabled
