@@ -1,7 +1,5 @@
 package io.github.swiftstagrime.termuxrunner.ui.theme
 
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import io.github.swiftstagrime.termuxrunner.R
 

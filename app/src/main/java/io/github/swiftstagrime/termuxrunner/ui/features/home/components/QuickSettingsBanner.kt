@@ -92,7 +92,9 @@ fun QuickSettingsBanner(
             Spacer(modifier = Modifier.height(12.dp))
 
             Row(
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 0.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 8.dp, vertical = 0.dp),
                 verticalAlignment = Alignment.Top
             ) {
                 Row(

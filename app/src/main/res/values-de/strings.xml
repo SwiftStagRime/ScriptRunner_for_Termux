@@ -199,7 +199,7 @@
     <string name="label_select_options">Optionen auswählen</string>
     <string name="label_runtime_env_vars">Laufzeit-Umgebungsvariablen</string>
     <string name="label_env_key">Umgebungsvariablen-Schlüssel</string>
-    
+
     <!-- Tiles -->
     <string name="title_tile_settings">Schnelleinstellungen-Kacheln</string>
     <string name="tile_slot_label">Kachel %1$d</string>

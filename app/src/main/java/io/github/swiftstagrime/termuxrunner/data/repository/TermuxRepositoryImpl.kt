@@ -1,6 +1,5 @@
 package io.github.swiftstagrime.termuxrunner.data.repository
 
-import android.annotation.SuppressLint
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
@@ -72,7 +71,6 @@ class TermuxRepositoryImpl @Inject constructor(
         ) == PackageManager.PERMISSION_GRANTED
     }
 
-    @SuppressLint("SdCardPath")
     override fun runCommand(
         command: String,
         runInBackground: Boolean,
@@ -84,9 +82,12 @@ class TermuxRepositoryImpl @Inject constructor(
         if (!isTermuxInstalled()) throw TermuxNotInstalledException()
         if (!isPermissionGranted()) throw TermuxPermissionException()
 
+        val dataDirPrefix = context.filesDir.absolutePath.split("/" + context.packageName).first()
+        val termuxBashPath = "$dataDirPrefix/$TERMUX_PACKAGE/files/usr/bin/bash"
+
         val intent = Intent(ACTION_RUN_COMMAND).apply {
             setClassName(TERMUX_PACKAGE, "com.termux.app.RunCommandService")
-            putExtra(EXTRA_COMMAND_PATH, "/data/data/com.termux/files/usr/bin/bash")
+            putExtra(EXTRA_COMMAND_PATH, termuxBashPath)
             putExtra(EXTRA_ARGUMENTS, arrayOf("-c", command))
             putExtra(EXTRA_BACKGROUND, runInBackground)
             putExtra(EXTRA_SESSION_ACTION, sessionAction)
@@ -94,6 +95,8 @@ class TermuxRepositoryImpl @Inject constructor(
             if (notifyOnResult) {
                 val resultIntent = Intent(context, TermuxResultReceiver::class.java).apply {
                     action = "io.github.swiftstagrime.SCRIPT_RESULT"
+                    data = "script://result/$scriptId".toUri()
+
                     putExtra("script_id", scriptId)
                     putExtra("script_name", scriptName)
                 }

@@ -1,15 +1,11 @@
 package io.github.swiftstagrime.termuxrunner.ui.features.settings
 
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -43,15 +39,12 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -122,7 +115,10 @@ fun SettingsScreen(
                     LanguageSelectorButton()
                 }
                 Spacer(modifier = Modifier.height(12.dp))
-                Text(stringResource(R.string.accent_color_label), style = MaterialTheme.typography.labelLarge)
+                Text(
+                    stringResource(R.string.accent_color_label),
+                    style = MaterialTheme.typography.labelLarge
+                )
                 LazyRow(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                     items(AppTheme.entries) { accent ->
                         ThemeSelectorItem(
@@ -135,13 +131,19 @@ fun SettingsScreen(
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                Text(stringResource(R.string.display_mode_label), style = MaterialTheme.typography.labelLarge)
+                Text(
+                    stringResource(R.string.display_mode_label),
+                    style = MaterialTheme.typography.labelLarge
+                )
                 SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
                     ThemeMode.entries.forEachIndexed { index, mode ->
                         SegmentedButton(
                             selected = selectedMode == mode,
                             onClick = { onModeChange(mode) },
-                            shape = SegmentedButtonDefaults.itemShape(index = index, count = ThemeMode.entries.size)
+                            shape = SegmentedButtonDefaults.itemShape(
+                                index = index,
+                                count = ThemeMode.entries.size
+                            )
                         ) {
                             Text(stringResource(mode.labelRes))
                         }
@@ -289,7 +291,10 @@ fun ThemeSelectorItem(
                     imageVector = Icons.Default.AutoAwesome,
                     contentDescription = null,
                     tint = Color.White.copy(alpha = 0.6f),
-                    modifier = Modifier.size(16.dp).align(Alignment.BottomEnd).padding(bottom = 8.dp, end = 8.dp)
+                    modifier = Modifier
+                        .size(16.dp)
+                        .align(Alignment.BottomEnd)
+                        .padding(bottom = 8.dp, end = 8.dp)
                 )
             }
         }

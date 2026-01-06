@@ -50,7 +50,7 @@
 
         <receiver
             android:name=".data.receiver.TermuxResultReceiver"
-            android:exported="true" />
+            android:exported="false" />
 
         <service
             android:name=".data.service.HeartbeatService"

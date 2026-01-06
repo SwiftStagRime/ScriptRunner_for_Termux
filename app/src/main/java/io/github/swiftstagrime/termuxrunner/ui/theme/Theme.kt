@@ -12,7 +12,6 @@ import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
@@ -360,6 +359,7 @@ fun ScriptRunnerForTermuxTheme(
                 if (isDark) DarkGreenColorScheme else LightGreenColorScheme
             }
         }
+
         AppTheme.GREEN -> if (isDark) DarkGreenColorScheme else LightGreenColorScheme
         AppTheme.BLUE -> if (isDark) DarkBlueColorScheme else LightBlueColorScheme
         AppTheme.RED -> if (isDark) DarkRedColorScheme else LightRedColorScheme
