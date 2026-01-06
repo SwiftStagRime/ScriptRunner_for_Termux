@@ -208,4 +208,40 @@
     <string name="label_runtime_env_vars">Runtime Env Keys</string>
     <string name="label_env_key">Environment Variable Key</string>
 
+    <!-- Tiles -->
+    <string name="title_tile_settings">Quick Settings Tiles</string>
+    <string name="tile_slot_label">Tile %1$d</string>
+    <string name="tile_unassigned">Unassigned (Tap to set)</string>
+    <string name="tile_assigned_format">%1$s</string>
+    <string name="tile_deleted_script">Deleted Script</string>
+    <string name="tile_label_1">Script 1</string>
+    <string name="tile_label_2">Script 2</string>
+    <string name="tile_label_3">Script 3</string>
+    <string name="tile_label_4">Script 4</string>
+    <string name="tile_label_5">Script 5</string>
+    <string name="msg_script_executed">Executed: %1$s</string>
+    <string name="msg_tile_updated">Tile updated</string>
+    <string name="clear">Clear</string>
+    <string name="back">Back</string>
+
+    <!-- Script Picker Dialog -->
+    <string name="title_select_script">Select Script</string>
+    <string name="no_scripts_available">No scripts available</string>
+    <string name="assign_scripts_to_these_slots_you_can_then_trigger_them_directly_from_your_phone_s_quick_settings_panel">Assign scripts to these slots. You can then trigger them directly from your phone\'s Quick Settings panel.</string>
+    <string name="configure_tiles">Configure Tiles</string>
+    <string name="empty">Empty</string>
+
+    <!-- Theme -->
+    <string name="accent_color_label">Accent Color</string>
+    <string name="display_mode_label">Display Mode</string>
+    <string name="mode_system">System</string>
+    <string name="mode_light">Light</string>
+    <string name="mode_dark">Dark</string>
+    <string name="theme_dynamic">Dynamic</string>
+    <string name="theme_green">Green</string>
+    <string name="theme_blue">Blue</string>
+    <string name="theme_red">Red</string>
+    <string name="theme_purple">Purple</string>
+    <string name="theme_amoled">AMOLED</string>
+    <string name="theme_cyber">Cyber</string>
 </resources>

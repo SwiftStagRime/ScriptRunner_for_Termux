@@ -198,4 +198,41 @@
     <string name="label_select_options">Selecionar opções</string>
     <string name="label_runtime_env_vars">Chaves de env. de execução</string>
     <string name="label_env_key">Chave de variável de ambiente</string>
+
+    <!-- Tiles -->
+    <string name="title_tile_settings">Blocos de configurações rápidas</string>
+    <string name="tile_slot_label">Bloco %1$d</string>
+    <string name="tile_unassigned">Não atribuído (Toque para definir)</string>
+    <string name="tile_assigned_format">%1$s</string>
+    <string name="tile_deleted_script">Script excluído</string>
+    <string name="tile_label_1">Script 1</string>
+    <string name="tile_label_2">Script 2</string>
+    <string name="tile_label_3">Script 3</string>
+    <string name="tile_label_4">Script 4</string>
+    <string name="tile_label_5">Script 5</string>
+    <string name="msg_script_executed">Executado: %1$s</string>
+    <string name="msg_tile_updated">Bloco atualizado</string>
+    <string name="clear">Limpar</string>
+    <string name="back">Voltar</string>
+
+    <!-- Script Picker Dialog -->
+    <string name="title_select_script">Selecionar script</string>
+    <string name="no_scripts_available">Nenhum script disponível</string>
+    <string name="assign_scripts_to_these_slots_you_can_then_trigger_them_directly_from_your_phone_s_quick_settings_panel">Atribua scripts a esses slots. Você poderá então acioná-los diretamente do painel de configurações rápidas do seu telefone.</string>
+    <string name="configure_tiles">Configurar blocos</string>
+    <string name="empty">Vazio</string>
+
+    <!-- Themes -->
+    <string name="accent_color_label">Cor de destaque</string>
+    <string name="display_mode_label">Modo de exibição</string>
+    <string name="mode_system">Sistema</string>
+    <string name="mode_light">Claro</string>
+    <string name="mode_dark">Escuro</string>
+    <string name="theme_dynamic">Dinâmico</string>
+    <string name="theme_green">Verde</string>
+    <string name="theme_blue">Azul</string>
+    <string name="theme_red">Vermelho</string>
+    <string name="theme_purple">Roxo</string>
+    <string name="theme_amoled">AMOLED</string>
+    <string name="theme_cyber">Cyber</string>
 </resources>

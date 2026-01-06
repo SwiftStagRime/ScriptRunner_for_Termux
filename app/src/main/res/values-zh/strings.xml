@@ -197,4 +197,41 @@
     <string name="label_select_options">选择选项</string>
     <string name="label_runtime_env_vars">运行时环境变量键</string>
     <string name="label_env_key">环境变量键</string>
+
+    <!-- Tiles -->
+    <string name="title_tile_settings">快捷设置磁贴</string>
+    <string name="tile_slot_label">磁贴 %1$d</string>
+    <string name="tile_unassigned">未分配（点击设置）</string>
+    <string name="tile_assigned_format">%1$s</string>
+    <string name="tile_deleted_script">已删除的脚本</string>
+    <string name="tile_label_1">脚本 1</string>
+    <string name="tile_label_2">脚本 2</string>
+    <string name="tile_label_3">脚本 3</string>
+    <string name="tile_label_4">脚本 4</string>
+    <string name="tile_label_5">脚本 5</string>
+    <string name="msg_script_executed">已执行：%1$s</string>
+    <string name="msg_tile_updated">磁贴已更新</string>
+    <string name="clear">清除</string>
+    <string name="back">返回</string>
+
+    <!-- Script Picker Dialog -->
+    <string name="title_select_script">选择脚本</string>
+    <string name="no_scripts_available">无可用脚本</string>
+    <string name="assign_scripts_to_these_slots_you_can_then_trigger_them_directly_from_your_phone_s_quick_settings_panel">将脚本分配到这些槽位。之后您可以直接从手机的快捷设置面板触发它们。</string>
+    <string name="configure_tiles">配置磁贴</string>
+    <string name="empty">空白</string>
+
+    <!-- Themes -->
+    <string name="accent_color_label">强调色</string>
+    <string name="display_mode_label">显示模式</string>
+    <string name="mode_system">系统默认</string>
+    <string name="mode_light">浅色模式</string>
+    <string name="mode_dark">深色模式</string>
+    <string name="theme_dynamic">动态配色</string>
+    <string name="theme_green">森林绿</string>
+    <string name="theme_blue">海洋蓝</string>
+    <string name="theme_red">宝石红</string>
+    <string name="theme_purple">优雅紫</string>
+    <string name="theme_amoled">纯黑 (AMOLED)</string>
+    <string name="theme_cyber">赛博霓虹</string>
 </resources>

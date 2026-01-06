@@ -6,6 +6,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -14,6 +15,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import dagger.hilt.android.AndroidEntryPoint
 import io.github.swiftstagrime.termuxrunner.R
 import io.github.swiftstagrime.termuxrunner.ui.components.ScriptRuntimePromptDialog
+import io.github.swiftstagrime.termuxrunner.ui.theme.ScriptRunnerForTermuxTheme
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
@@ -40,24 +42,27 @@ class ScriptRunnerActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         setContent {
+            val accent by viewModel.selectedAccent.collectAsStateWithLifecycle()
+            val mode by viewModel.selectedMode.collectAsStateWithLifecycle()
             val scriptToPrompt by viewModel.scriptToPrompt.collectAsStateWithLifecycle()
 
-            scriptToPrompt?.let { script ->
-                ScriptRuntimePromptDialog(
-                    script = script,
-                    onDismiss = { viewModel.dismissPrompt() },
-                    onConfirm = { args, prefix, env ->
-                        viewModel.executeScript(
-                            script,
-                            runtimeArgs = args,
-                            runtimePrefix = prefix,
-                            runtimeEnv = env
-                        )
-                    }
-                )
+            ScriptRunnerForTermuxTheme(accent = accent, mode = mode) {
+                scriptToPrompt?.let { script ->
+                    ScriptRuntimePromptDialog(
+                        script = script,
+                        onDismiss = { viewModel.dismissPrompt() },
+                        onConfirm = { args, prefix, env ->
+                            viewModel.executeScript(
+                                script,
+                                runtimeArgs = args,
+                                runtimePrefix = prefix,
+                                runtimeEnv = env
+                            )
+                        }
+                    )
+                }
             }
         }
-
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.events.collect { handleEvent(it) }

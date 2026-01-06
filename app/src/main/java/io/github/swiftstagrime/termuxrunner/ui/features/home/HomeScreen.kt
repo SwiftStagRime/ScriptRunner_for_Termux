@@ -92,6 +92,7 @@ import io.github.swiftstagrime.termuxrunner.R
 import io.github.swiftstagrime.termuxrunner.domain.model.Category
 import io.github.swiftstagrime.termuxrunner.domain.model.Script
 import io.github.swiftstagrime.termuxrunner.ui.components.ScriptConfigDialog
+import io.github.swiftstagrime.termuxrunner.ui.features.home.components.QuickSettingsBanner
 import io.github.swiftstagrime.termuxrunner.ui.preview.DevicePreviews
 import io.github.swiftstagrime.termuxrunner.ui.preview.sampleScripts
 import io.github.swiftstagrime.termuxrunner.ui.theme.ScriptRunnerForTermuxTheme
@@ -123,6 +124,7 @@ fun HomeScreen(
     onAddNewCategory: (String) -> Unit,
     onDeleteCategory: (Category) -> Unit,
     onMove: (Int, Int) -> Unit,
+    onTileSettingsClick: () -> Unit,
 ) {
     var selectedScriptForConfig by remember { mutableStateOf<Script?>(null) }
     var isSearchActive by remember { mutableStateOf(false) }
@@ -248,6 +250,17 @@ fun HomeScreen(
     ) { padding ->
         Column(modifier = Modifier.padding(padding)) {
             if (uiState is HomeUiState.Success) {
+                if (!isSearchActive) {
+                    QuickSettingsBanner(
+                        tileMappings = uiState.tileMappings,
+                        onTileClick = onScriptCodeClick,
+                        onEmptyTileClick = onTileSettingsClick,
+                        onSettingsClick = onTileSettingsClick
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
                 CategoryTabs(
                     categories = uiState.categories,
                     selectedCategoryId = selectedCategoryId,
@@ -790,7 +803,7 @@ private fun PreviewHomeScreen() {
             onDeleteScript = {},
             onCreateShortcutClick = {},
             onUpdateScript = {},
-            uiState = HomeUiState.Success(sampleScripts, emptyList()),
+            uiState = HomeUiState.Success(sampleScripts, emptyList(), emptyMap()),
             searchQuery = "",
             onSearchQueryChange = {},
             snackbarHostState = SnackbarHostState(),
@@ -805,7 +818,8 @@ private fun PreviewHomeScreen() {
             onAddNewCategory = {},
             onDeleteCategory = {},
             onMove = { _, _ -> },
-            onRequestNotificationPermission = {}
+            onRequestNotificationPermission = {},
+            onTileSettingsClick = {}
         )
     }
 }
@@ -822,7 +836,7 @@ private fun PreviewEmptyHome() {
             onDeleteScript = {},
             onCreateShortcutClick = {},
             onUpdateScript = {},
-            uiState = HomeUiState.Success(emptyList(), emptyList()),
+            uiState = HomeUiState.Success(emptyList(), emptyList(), emptyMap()),
             searchQuery = "",
             onSearchQueryChange = {},
             snackbarHostState = SnackbarHostState(),
@@ -837,7 +851,8 @@ private fun PreviewEmptyHome() {
             onAddNewCategory = {},
             onDeleteCategory = {},
             onMove = { _, _ -> },
-            onRequestNotificationPermission = {}
+            onRequestNotificationPermission = {},
+            onTileSettingsClick = {}
         )
     }
 }

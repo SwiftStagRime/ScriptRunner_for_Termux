@@ -8,6 +8,8 @@ import io.github.swiftstagrime.termuxrunner.R
 import io.github.swiftstagrime.termuxrunner.domain.repository.ScriptRepository
 import io.github.swiftstagrime.termuxrunner.domain.repository.UserPreferencesRepository
 import io.github.swiftstagrime.termuxrunner.ui.extensions.UiText
+import io.github.swiftstagrime.termuxrunner.ui.theme.AppTheme
+import io.github.swiftstagrime.termuxrunner.ui.theme.ThemeMode
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -23,13 +25,18 @@ class SettingsViewModel @Inject constructor(
     private val scriptRepository: ScriptRepository
 ) : ViewModel() {
 
-    val useDynamicColors = userPreferencesRepository.useDynamicColors
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
+    val selectedAccent = userPreferencesRepository.selectedAccent
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), AppTheme.GREEN)
 
-    fun setDynamicColor(enabled: Boolean) {
-        viewModelScope.launch {
-            userPreferencesRepository.setDynamicColors(enabled)
-        }
+    val selectedMode = userPreferencesRepository.selectedMode
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), ThemeMode.SYSTEM)
+
+    fun setAccent(accent: AppTheme) {
+        viewModelScope.launch { userPreferencesRepository.setAccent(accent) }
+    }
+
+    fun setMode(mode: ThemeMode) {
+        viewModelScope.launch { userPreferencesRepository.setMode(mode) }
     }
 
     private val _ioState = MutableStateFlow<UiText?>(null)

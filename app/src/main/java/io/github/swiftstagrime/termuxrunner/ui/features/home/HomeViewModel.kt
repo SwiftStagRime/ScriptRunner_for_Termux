@@ -14,16 +14,19 @@ import io.github.swiftstagrime.termuxrunner.domain.repository.CategoryRepository
 import io.github.swiftstagrime.termuxrunner.domain.repository.IconRepository
 import io.github.swiftstagrime.termuxrunner.domain.repository.ScriptRepository
 import io.github.swiftstagrime.termuxrunner.domain.repository.ShortcutRepository
+import io.github.swiftstagrime.termuxrunner.domain.repository.UserPreferencesRepository
 import io.github.swiftstagrime.termuxrunner.domain.usecase.DeleteScriptUseCase
 import io.github.swiftstagrime.termuxrunner.domain.usecase.RunScriptUseCase
 import io.github.swiftstagrime.termuxrunner.domain.usecase.UpdateScriptUseCase
 import io.github.swiftstagrime.termuxrunner.ui.extensions.UiText
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
@@ -34,7 +37,8 @@ sealed interface HomeUiState {
     data object Loading : HomeUiState
     data class Success(
         val scripts: List<Script>,
-        val categories: List<Category>
+        val categories: List<Category>,
+        val tileMappings: Map<Int, Script?>
     ) : HomeUiState
 }
 
@@ -60,7 +64,8 @@ class HomeViewModel @Inject constructor(
     private val shortcutRepository: ShortcutRepository,
     private val iconRepository: IconRepository,
     private val categoryRepository: CategoryRepository,
-    private val scriptRepository: ScriptRepository
+    private val scriptRepository: ScriptRepository,
+    private val userPreferencesRepository: UserPreferencesRepository
 ) : ViewModel() {
 
     private val _searchQuery = MutableStateFlow("")
@@ -75,20 +80,30 @@ class HomeViewModel @Inject constructor(
 
     val selectedCategoryId = _selectedCategoryId.asStateFlow()
     val sortOption = _sortOption.asStateFlow()
-
     private var pendingArgs: String? = null
     private var pendingPrefix: String? = null
     private var pendingEnv: Map<String, String>? = null
 
+    private val tileIdMappings: Flow<Map<Int, Int?>> = combine(
+        (1..5).map { index ->
+            userPreferencesRepository.getScriptIdForTile(index).map { index to it }
+        }
+    ) { pairs -> pairs.toMap() }
+
+    private val filterState = combine(
+        _searchQuery,
+        _selectedCategoryId,
+        _sortOption
+    ) { query, categoryId, sort ->
+        Triple(query, categoryId, sort)
+    }
 
     val homeUiState: StateFlow<HomeUiState> = combine(
         scriptRepository.getAllScripts(),
         categoryRepository.getAllCategories(),
-        _searchQuery,
-        _selectedCategoryId,
-        _sortOption
-    ) { scripts, categories, query, selCatId, sort ->
-
+        tileIdMappings,
+        filterState
+    ) { scripts, categories, tileIds, (query, selCatId, sort) ->
         var filteredList = if (selCatId != null) {
             scripts.filter { it.categoryId == selCatId }
         } else {
@@ -110,9 +125,14 @@ class HomeViewModel @Inject constructor(
             SortOption.MANUAL -> filteredList.sortedBy { it.orderIndex }
         }
 
+        val finalTileMap = tileIds.mapValues { (_, id) ->
+            if (id != null) scripts.find { it.id == id } else null
+        }
+
         HomeUiState.Success(
             scripts = sortedList,
-            categories = categories
+            categories = categories,
+            tileMappings = finalTileMap
         ) as HomeUiState
     }
         .onStart { emit(HomeUiState.Loading) }
@@ -121,7 +141,6 @@ class HomeViewModel @Inject constructor(
             started = SharingStarted.WhileSubscribed(5000),
             initialValue = HomeUiState.Loading
         )
-
 
     fun onSearchQueryChange(newQuery: String) {
         _searchQuery.value = newQuery

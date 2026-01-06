@@ -199,4 +199,44 @@
     <string name="label_select_options">Optionen auswählen</string>
     <string name="label_runtime_env_vars">Laufzeit-Umgebungsvariablen</string>
     <string name="label_env_key">Umgebungsvariablen-Schlüssel</string>
+    
+    <!-- Tiles -->
+    <string name="title_tile_settings">Schnelleinstellungen-Kacheln</string>
+    <string name="tile_slot_label">Kachel %1$d</string>
+    <string name="tile_unassigned">Nicht zugewiesen (Zum Festlegen tippen)</string>
+    <string name="tile_assigned_format">%1$s</string>
+    <string name="tile_deleted_script">Gelöschtes Skript</string>
+    <string name="tile_label_1">Skript 1</string>
+    <string name="tile_label_2">Skript 2</string>
+    <string name="tile_label_3">Skript 3</string>
+    <string name="tile_label_4">Skript 4</string>
+    <string name="tile_label_5">Skript 5</string>
+    <string name="msg_script_executed">Ausgeführt: %1$s</string>
+    <string name="msg_tile_updated">Kachel aktualisiert</string>
+    <string name="clear">Leeren</string>
+    <string name="back">Zurück</string>
+
+    <!-- Script Picker Dialog -->
+    <string name="title_select_script">Skript auswählen</string>
+    <string name="no_scripts_available">Keine Skripte verfügbar</string>
+    <string name="assign_scripts_to_these_slots_you_can_then_trigger_them_directly_from_your_phone_s_quick_settings_panel">Weisen Sie diesen Steckplätzen Skripte zu. Sie können diese dann direkt über das Schnelleinstellungsmenü Ihres Telefons auslösen.</string>
+    <string name="configure_tiles">Kacheln konfigurieren</string>
+    <string name="empty">Leer</string>
+
+
+    <!-- Themes -->
+    <string name="accent_color_label">Akzentfarbe</string>
+    <string name="display_mode_label">Anzeigemodus</string>
+    <string name="mode_system">System</string>
+    <string name="mode_light">Hell</string>
+    <string name="mode_dark">Dunkel</string>
+    <string name="theme_dynamic">Dynamisch</string>
+    <string name="theme_green">Grün</string>
+    <string name="theme_blue">Blau</string>
+    <string name="theme_red">Rot</string>
+    <string name="theme_purple">Violett</string>
+    <string name="theme_amoled">AMOLED</string>
+    <string name="theme_cyber">Cyber</string>
+
+
 </resources>

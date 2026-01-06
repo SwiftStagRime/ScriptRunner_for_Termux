@@ -39,6 +39,7 @@ import kotlinx.coroutines.launch
 fun HomeRoute(
     onNavigateToEditor: (scriptId: Int) -> Unit,
     onNavigateToSettings: () -> Unit,
+    onNavigateToTileSettings: () -> Unit,
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.homeUiState.collectAsStateWithLifecycle()
@@ -215,7 +216,8 @@ fun HomeRoute(
         onMove = viewModel::moveScript,
         onRequestNotificationPermission = {
             requestNotifications()
-        }
+        },
+        onTileSettingsClick = onNavigateToTileSettings
     )
 
     scriptToPrompt?.let { script ->

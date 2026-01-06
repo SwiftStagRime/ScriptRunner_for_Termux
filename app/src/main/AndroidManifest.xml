@@ -51,11 +51,68 @@
         <receiver
             android:name=".data.receiver.TermuxResultReceiver"
             android:exported="true" />
+
         <service
             android:name=".data.service.HeartbeatService"
             android:exported="false"
             android:foregroundServiceType="dataSync"
             android:process=":monitor" />
+
+        <service
+            android:name=".data.service.ScriptTileService1"
+            android:exported="true"
+            android:icon="@drawable/ic_terminal_tile"
+            android:label="@string/tile_label_1"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE" />
+            </intent-filter>
+        </service>
+
+        <service
+            android:name=".data.service.ScriptTileService2"
+            android:exported="true"
+            android:icon="@drawable/ic_terminal_tile"
+            android:label="@string/tile_label_2"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE" />
+            </intent-filter>
+        </service>
+
+        <service
+            android:name=".data.service.ScriptTileService3"
+            android:exported="true"
+            android:icon="@drawable/ic_terminal_tile"
+            android:label="@string/tile_label_3"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE" />
+            </intent-filter>
+        </service>
+
+        <service
+            android:name=".data.service.ScriptTileService4"
+            android:exported="true"
+            android:icon="@drawable/ic_terminal_tile"
+            android:label="@string/tile_label_4"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE" />
+            </intent-filter>
+        </service>
+
+        <service
+            android:name=".data.service.ScriptTileService5"
+            android:exported="true"
+            android:icon="@drawable/ic_terminal_tile"
+            android:label="@string/tile_label_5"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE" />
+            </intent-filter>
+        </service>
+
     </application>
 
 </manifest>

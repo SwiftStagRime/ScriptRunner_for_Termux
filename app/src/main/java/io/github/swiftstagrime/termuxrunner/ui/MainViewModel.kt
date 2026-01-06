@@ -6,6 +6,8 @@ import androidx.navigation3.runtime.NavKey
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.swiftstagrime.termuxrunner.domain.repository.UserPreferencesRepository
 import io.github.swiftstagrime.termuxrunner.ui.navigation.Route
+import io.github.swiftstagrime.termuxrunner.ui.theme.AppTheme
+import io.github.swiftstagrime.termuxrunner.ui.theme.ThemeMode
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
@@ -14,7 +16,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class MainViewModel @Inject constructor(
-    userPreferencesRepository: UserPreferencesRepository
+    private val userPreferencesRepository: UserPreferencesRepository
 ) : ViewModel() {
 
     private val _backStack = mutableListOf<NavKey>()
@@ -31,8 +33,11 @@ class MainViewModel @Inject constructor(
         }
     }
 
-    val useDynamicColors = userPreferencesRepository.useDynamicColors
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
+    val selectedAccent = userPreferencesRepository.selectedAccent
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), AppTheme.GREEN)
+
+    val selectedMode = userPreferencesRepository.selectedMode
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), ThemeMode.SYSTEM)
 
     fun navigateTo(key: NavKey) {
         val current = _backStack.toMutableList()

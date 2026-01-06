@@ -5,6 +5,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -30,10 +31,11 @@ class MainActivity : AppCompatActivity() {
         enableEdgeToEdge()
 
         setContent {
-            val useDynamicColors by mainViewModel.useDynamicColors.collectAsStateWithLifecycle()
+            val accent by mainViewModel.selectedAccent.collectAsStateWithLifecycle()
+            val mode by mainViewModel.selectedMode.collectAsStateWithLifecycle()
             val backStack by mainViewModel.backStack.collectAsStateWithLifecycle()
 
-            ScriptRunnerForTermuxTheme(dynamicColor = useDynamicColors) {
+            ScriptRunnerForTermuxTheme(accent = accent, mode = mode) {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background

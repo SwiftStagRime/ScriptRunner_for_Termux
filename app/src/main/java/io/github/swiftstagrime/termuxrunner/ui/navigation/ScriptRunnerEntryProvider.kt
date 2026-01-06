@@ -12,6 +12,7 @@ import io.github.swiftstagrime.termuxrunner.ui.features.editor.EditorViewModel
 import io.github.swiftstagrime.termuxrunner.ui.features.home.HomeRoute
 import io.github.swiftstagrime.termuxrunner.ui.features.onboarding.OnboardingRoute
 import io.github.swiftstagrime.termuxrunner.ui.features.settings.SettingsRoute
+import io.github.swiftstagrime.termuxrunner.ui.features.tiles.TileSettingsRoute
 
 
 @Composable
@@ -35,6 +36,9 @@ fun rememberEntryProvider(
                             },
                             onNavigateToSettings = {
                                 mainViewModel.navigateTo(Route.Settings)
+                            },
+                            onNavigateToTileSettings = {
+                                mainViewModel.navigateTo(Route.TileSettings)
                             }
                         )
                     }
@@ -61,6 +65,13 @@ fun rememberEntryProvider(
                             }
                         )
                     }
+
+                    is Route.TileSettings -> {
+                        TileSettingsRoute(
+                            onBack = { mainViewModel.goBack() }
+                        )
+                    }
+
 
                     else -> {
                     }

@@ -16,4 +16,7 @@ sealed interface Route : NavKey {
 
     @Serializable
     data class Editor(val scriptId: Int) : Route
+
+    @Serializable
+    data object TileSettings : Route
 }

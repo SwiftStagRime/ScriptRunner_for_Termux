@@ -197,4 +197,41 @@
     <string name="label_select_options">Выбрать опции</string>
     <string name="label_runtime_env_vars">Переменные окружения</string>
     <string name="label_env_key">Значение переменной окружения</string>
+
+    <!-- Tiles -->
+    <string name="title_tile_settings">Плитки быстрых настроек</string>
+    <string name="tile_slot_label">Плитка %1$d</string>
+    <string name="tile_unassigned">Не назначено (Нажмите для выбора)</string>
+    <string name="tile_assigned_format">%1$s</string>
+    <string name="tile_deleted_script">Удаленный скрипт</string>
+    <string name="tile_label_1">Скрипт 1</string>
+    <string name="tile_label_2">Скрипт 2</string>
+    <string name="tile_label_3">Скрипт 3</string>
+    <string name="tile_label_4">Скрипт 4</string>
+    <string name="tile_label_5">Скрипт 5</string>
+    <string name="msg_script_executed">Выполнено: %1$s</string>
+    <string name="msg_tile_updated">Плитка обновлена</string>
+    <string name="clear">Очистить</string>
+    <string name="back">Назад</string>
+
+    <!-- Script Picker Dialog -->
+    <string name="title_select_script">Выбрать скрипт</string>
+    <string name="no_scripts_available">Нет доступных скриптов</string>
+    <string name="assign_scripts_to_these_slots_you_can_then_trigger_them_directly_from_your_phone_s_quick_settings_panel">Назначьте скрипты в эти слоты. Затем вы сможете запускать их прямо из панели быстрых настроек вашего телефона.</string>
+    <string name="configure_tiles">Настроить плитки</string>
+    <string name="empty">Пусто</string>
+
+    <!-- Themes -->
+    <string name="accent_color_label">Акцентный цвет</string>
+    <string name="display_mode_label">Режим отображения</string>
+    <string name="mode_system">Системный</string>
+    <string name="mode_light">Светлый</string>
+    <string name="mode_dark">Темный</string>
+    <string name="theme_dynamic">Динамический</string>
+    <string name="theme_green">Зеленый</string>
+    <string name="theme_blue">Синий</string>
+    <string name="theme_red">Красный</string>
+    <string name="theme_purple">Фиолетовый</string>
+    <string name="theme_amoled">AMOLED</string>
+    <string name="theme_cyber">Киберпанк</string>
 </resources>

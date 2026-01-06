@@ -21,7 +21,8 @@ fun SettingsRoute(
 ) {
     val context = LocalContext.current
     val uriHandler = LocalUriHandler.current
-    val useDynamicColor by viewModel.useDynamicColors.collectAsStateWithLifecycle()
+    val selectedAccent by viewModel.selectedAccent.collectAsStateWithLifecycle()
+    val selectedMode by viewModel.selectedMode.collectAsStateWithLifecycle()
     val ioMessage by viewModel.ioState.collectAsStateWithLifecycle()
     val githubUrl = "https://github.com/SwiftStagRime/ScriptRunner_for_Termux"
     val exportFilename = stringResource(R.string.export_filename)
@@ -60,8 +61,10 @@ fun SettingsRoute(
     }
 
     SettingsScreen(
-        useDynamicColor = useDynamicColor,
-        onDynamicColorChange = viewModel::setDynamicColor,
+        selectedAccent = selectedAccent,
+        selectedMode = selectedMode,
+        onAccentChange = viewModel::setAccent,
+        onModeChange = viewModel::setMode,
         onTriggerExport = { exportLauncher.launch(exportFilename) },
         onTriggerImport = { importBackupLauncher.launch(arrayOf("application/json")) },
         onTriggerScriptImport = { importFileLauncher.launch(arrayOf("*/*")) },

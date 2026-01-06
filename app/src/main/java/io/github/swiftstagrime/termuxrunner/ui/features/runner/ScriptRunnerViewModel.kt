@@ -8,11 +8,16 @@ import io.github.swiftstagrime.termuxrunner.data.repository.TermuxPermissionExce
 import io.github.swiftstagrime.termuxrunner.domain.model.InteractionMode
 import io.github.swiftstagrime.termuxrunner.domain.model.Script
 import io.github.swiftstagrime.termuxrunner.domain.repository.ScriptRepository
+import io.github.swiftstagrime.termuxrunner.domain.repository.UserPreferencesRepository
 import io.github.swiftstagrime.termuxrunner.domain.usecase.RunScriptUseCase
+import io.github.swiftstagrime.termuxrunner.ui.theme.AppTheme
+import io.github.swiftstagrime.termuxrunner.ui.theme.ThemeMode
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -20,6 +25,7 @@ import javax.inject.Inject
 class ScriptRunnerViewModel @Inject constructor(
     private val scriptRepository: ScriptRepository,
     private val runScriptUseCase: RunScriptUseCase,
+    private val userPreferencesRepository: UserPreferencesRepository,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
@@ -30,6 +36,12 @@ class ScriptRunnerViewModel @Inject constructor(
 
     private val _scriptToPrompt = MutableStateFlow<Script?>(null)
     val scriptToPrompt = _scriptToPrompt.asStateFlow()
+
+    val selectedAccent = userPreferencesRepository.selectedAccent
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), AppTheme.GREEN)
+
+    val selectedMode = userPreferencesRepository.selectedMode
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), ThemeMode.SYSTEM)
 
     private var pendingArgs: String? = null
     private var pendingPrefix: String? = null
