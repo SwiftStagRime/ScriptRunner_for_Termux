@@ -235,4 +235,19 @@
     <string name="theme_purple">Roxo</string>
     <string name="theme_amoled">AMOLED</string>
     <string name="theme_cyber">Cyber</string>
+
+    <!-- Heartbeat service -->
+    <string name="notif_status_active">Ativo</string>
+    <string name="notif_status_watching">Procurando por falhas…</string>
+    <string name="notif_status_monitoring">Monitorando</string>
+    <string name="notif_status_failed_unstable">Falha: Script instável</string>
+    <string name="notif_status_resurrecting">Reiniciando (%1$d/%2$d)…</string>
+    <string name="notif_finished_success">Finalizado com sucesso</string>
+    <string name="notif_finished_error">Finalizado com erro (Código: %1$d)</string>
+    <string name="notif_restart_count"> • Reinicializações: %1$d</string>
+    <string name="notif_details_format">Estado: %1$s%2$s\nAtivo: %3$dm • Último sinal: há %4$ds</string>
+    <string name="notif_monitoring_title">Monitorando: %1$s</string>
+    <string name="notif_stop_monitoring">Parar monitoramento</string>
+    <string name="channel_monitor_name">Monitor de scripts</string>
+    <string name="channel_monitor_desc">Mostra o status dos scripts com proteção contra falhas</string>
 </resources>

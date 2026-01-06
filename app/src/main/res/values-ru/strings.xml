@@ -234,4 +234,19 @@
     <string name="theme_purple">Фиолетовый</string>
     <string name="theme_amoled">AMOLED</string>
     <string name="theme_cyber">Киберпанк</string>
+
+    <!-- Heartbeat service -->
+    <string name="notif_status_active">Активен</string>
+    <string name="notif_status_watching">Поиск сбоев…</string>
+    <string name="notif_status_monitoring">Мониторинг</string>
+    <string name="notif_status_failed_unstable">Ошибка: Скрипт нестабилен</string>
+    <string name="notif_status_resurrecting">Восстановление (%1$d/%2$d)…</string>
+    <string name="notif_finished_success">Успешно завершено</string>
+    <string name="notif_finished_error">Завершено с ошибкой (Код: %1$d)</string>
+    <string name="notif_restart_count"> • Перезапуски: %1$d</string>
+    <string name="notif_details_format">Статус: %1$s%2$s\nВ сети: %3$дм • Сигнал: %4$дс назад</string>
+    <string name="notif_monitoring_title">Мониторинг: %1$s</string>
+    <string name="notif_stop_monitoring">Остановить мониторинг</string>
+    <string name="channel_monitor_name">Монитор скриптов</string>
+    <string name="channel_monitor_desc">Отображает статус скриптов с защитой от сбоев</string>
 </resources>

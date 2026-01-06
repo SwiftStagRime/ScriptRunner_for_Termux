@@ -234,4 +234,19 @@
     <string name="theme_purple">Púrpura</string>
     <string name="theme_amoled">AMOLED</string>
     <string name="theme_cyber">Cyber</string>
+
+    <!-- Heartbeat service -->
+    <string name="notif_status_active">Activo</string>
+    <string name="notif_status_watching">Buscando fallos…</string>
+    <string name="notif_status_monitoring">Monitoreando</string>
+    <string name="notif_status_failed_unstable">Error: Script inestable</string>
+    <string name="notif_status_resurrecting">Resucitando (%1$d/%2$d)…</string>
+    <string name="notif_finished_success">Finalizado con éxito</string>
+    <string name="notif_finished_error">Finalizado con error (Código: %1$d)</string>
+    <string name="notif_restart_count"> • Reinicios: %1$d</string>
+    <string name="notif_details_format">Estado: %1$s%2$s\nActivo: %3$dm • Último pulso: hace %4$ds</string>
+    <string name="notif_monitoring_title">Monitoreando: %1$s</string>
+    <string name="notif_stop_monitoring">Detener monitoreo</string>
+    <string name="channel_monitor_name">Monitor de scripts</string>
+    <string name="channel_monitor_desc">Muestra el estado de los scripts con protección contra fallos</string>
 </resources>

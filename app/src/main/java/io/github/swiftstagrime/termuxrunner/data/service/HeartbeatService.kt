@@ -18,6 +18,7 @@ import io.github.swiftstagrime.termuxrunner.R
 import io.github.swiftstagrime.termuxrunner.domain.repository.ScriptRepository
 import io.github.swiftstagrime.termuxrunner.domain.usecase.RunScriptUseCase
 import io.github.swiftstagrime.termuxrunner.ui.MainActivity
+import io.github.swiftstagrime.termuxrunner.ui.extensions.UiText
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -67,6 +68,7 @@ class HeartbeatService : Service() {
 
     // --- Monitoring State ---
     private var lastHeartbeatTime = 0L // Timestamp of the last received heartbeat
+    private var serviceStartTime = 0L // When the monitoring actually started
     private var isMonitoring = false // Flag to indicate if the service is actively monitoring
     private var currentScriptId = -1 // ID of the script being monitored
     private var currentScriptName = "" // Name of the script for notifications
@@ -75,12 +77,32 @@ class HeartbeatService : Service() {
 
     /**
      * Listens for heartbeat signals from the script and for script finish signals.
+     * Now captures exit_code to report accurate final status.
      */
     private val heartbeatReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             when (intent?.action) {
-                ACTION_HEARTBEAT -> lastHeartbeatTime = System.currentTimeMillis()
-                ACTION_SCRIPT_FINISHED -> stopSelf() // Stop monitoring if script finishes cleanly
+                ACTION_HEARTBEAT -> {
+                    lastHeartbeatTime = System.currentTimeMillis()
+                    updateStatusNotification(UiText.StringResource(R.string.notif_status_active))
+                }
+                ACTION_SCRIPT_FINISHED -> {
+                    val exitCode = intent.getIntExtra("exit_code", 0)
+                    isMonitoring = false
+
+                    val finalMsg = if (exitCode == 0) {
+                        UiText.StringResource(R.string.notif_finished_success)
+                    } else {
+                        UiText.StringResource(R.string.notif_finished_error, exitCode)
+                    }
+
+                    showFinalNotification(finalMsg)
+
+                    serviceScope.launch {
+                        delay(2000) // Brief delay so user can see the status before service closes
+                        stopSelf()
+                    }
+                }
             }
         }
     }
@@ -106,19 +128,14 @@ class HeartbeatService : Service() {
 
         // Acquire a wakelock to ensure the service can run even when the screen is off
         val powerManager = getSystemService(POWER_SERVICE) as PowerManager
-        wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, WAKELOCK_TAG).apply {
-            acquire(10 * 60 * 1000L) // Acquire for 10 minutes
-        }
+        wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, WAKELOCK_TAG)
     }
 
     /**
      * Handles service start commands.
      */
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        showInitialNotification()
-
         if (intent == null) {
-            // If service is restarted and we don't have script info, stop.
             if (currentScriptId == -1) stopSelf()
             return START_STICKY
         }
@@ -129,6 +146,10 @@ class HeartbeatService : Service() {
                 currentScriptName = intent.getStringExtra(EXTRA_SCRIPT_NAME) ?: "Unknown"
                 timeoutLimit = intent.getLongExtra(EXTRA_TIMEOUT_MS, DEFAULT_TIMEOUT_MS)
                 restartCount = 0
+                serviceStartTime = System.currentTimeMillis()
+
+                if (wakeLock?.isHeld == false) wakeLock?.acquire()
+
                 startMonitoring()
             }
 
@@ -144,12 +165,14 @@ class HeartbeatService : Service() {
         if (isMonitoring) return
         isMonitoring = true
         lastHeartbeatTime = System.currentTimeMillis()
-        showNotification("Watching for crashes...")
+        updateStatusNotification(UiText.StringResource(R.string.notif_status_watching))
 
         serviceScope.launch {
             while (isMonitoring) {
                 delay(CHECK_INTERVAL_MS)
                 checkHealth()
+                // Periodic update to refresh "time since pulse" in notification
+                if (isMonitoring) updateStatusNotification(UiText.StringResource(R.string.notif_status_monitoring))
             }
         }
     }
@@ -169,15 +192,15 @@ class HeartbeatService : Service() {
      */
     private fun attemptRestart() {
         if (restartCount >= MAX_RETRY_COUNT) {
-            showNotification("Script unstable. Monitoring stopped.")
+            updateStatusNotification(UiText.StringResource(R.string.notif_status_failed_unstable))
+            isMonitoring = false
             stopSelf()
             return
         }
         restartCount++
-        showNotification("Resurrecting script ($restartCount/$MAX_RETRY_COUNT)...")
-        lastHeartbeatTime = System.currentTimeMillis() // Reset timer to avoid immediate re-trigger
+        updateStatusNotification(UiText.StringResource(R.string.notif_status_resurrecting, restartCount, MAX_RETRY_COUNT))
+        lastHeartbeatTime = System.currentTimeMillis()
 
-        // Relaunch the script
         serviceScope.launch {
             val script = scriptRepository.getScriptById(currentScriptId)
             script?.let { runScriptUseCase(it) } ?: stopSelf()
@@ -199,40 +222,24 @@ class HeartbeatService : Service() {
     }
 
     /**
-     * Shows the initial foreground notification.
+     * Builds and updates the foreground notification with detailed status.
      */
-    private fun showInitialNotification() {
-        val stopIntent = Intent(this, HeartbeatService::class.java).apply {
-            action = ACTION_STOP
-        }
-        val stopPendingIntent = PendingIntent.getService(
-            this,
-            1,
-            stopIntent,
-            PendingIntent.FLAG_IMMUTABLE
-        )
+    private fun updateStatusNotification(status: UiText) {
+        val uptimeMins = (System.currentTimeMillis() - serviceStartTime) / 60_000
+        val secondsSincePulse = (System.currentTimeMillis() - lastHeartbeatTime) / 1000
 
-        val notification = NotificationCompat.Builder(this, CHANNEL_ID)
-            .setContentTitle("Script Monitor")
-            .setContentText("Initializing...")
-            .setSmallIcon(R.drawable.ic_launcher_foreground)
-            .setOngoing(true)
-            .setPriority(NotificationCompat.PRIORITY_LOW)
-            .addAction(
-                0,
-                "Stop Monitoring",
-                stopPendingIntent
-            )
-            .setForegroundServiceBehavior(NotificationCompat.FOREGROUND_SERVICE_IMMEDIATE)
-            .build()
+        val restartText = if (restartCount > 0) {
+            UiText.StringResource(R.string.notif_restart_count, restartCount).asString(this)
+        } else ""
 
-        startForeground(NOTIFICATION_ID, notification)
-    }
+        val contentText = UiText.StringResource(
+            R.string.notif_details_format,
+            status.asString(this),
+            restartText,
+            uptimeMins,
+            secondsSincePulse
+        ).asString(this)
 
-    /**
-     * Updates the foreground notification with a given status text.
-     */
-    private fun showNotification(text: String) {
         val contentIntent = PendingIntent.getActivity(
             this, 0,
             Intent(this, MainActivity::class.java),
@@ -248,21 +255,38 @@ class HeartbeatService : Service() {
             stopIntent,
             PendingIntent.FLAG_IMMUTABLE
         )
+
         val notification = NotificationCompat.Builder(this, CHANNEL_ID)
-            .setContentTitle("Monitoring: $currentScriptName")
-            .setContentText(text)
+            .setContentTitle(UiText.StringResource(R.string.notif_monitoring_title, currentScriptName).asString(this))
+            .setContentText(status.asString(this))
             .setSmallIcon(R.drawable.ic_launcher_foreground)
             .setOngoing(true)
             .setOnlyAlertOnce(true)
             .setContentIntent(contentIntent)
             .addAction(
                 android.R.drawable.ic_menu_close_clear_cancel,
-                "Stop Monitoring",
+                UiText.StringResource(R.string.notif_stop_monitoring).asString(this),
                 stopPendingIntent
             )
-            .setStyle(NotificationCompat.BigTextStyle().bigText(text))
+            .setStyle(NotificationCompat.BigTextStyle().bigText(contentText))
+            .setPriority(NotificationCompat.PRIORITY_LOW)
+            .setForegroundServiceBehavior(NotificationCompat.FOREGROUND_SERVICE_IMMEDIATE)
             .build()
 
+        startForeground(NOTIFICATION_ID, notification)
+    }
+
+    /**
+     * Shows a non-ongoing notification when the script finishes.
+     */
+    private fun showFinalNotification(text: UiText) {
+        val notification = NotificationCompat.Builder(this, CHANNEL_ID)
+            .setContentTitle(currentScriptName)
+            .setContentText(text.asString(this))
+            .setSmallIcon(R.drawable.ic_launcher_foreground)
+            .setOngoing(false)
+            .setAutoCancel(true)
+            .build()
 
         val manager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
         manager.notify(NOTIFICATION_ID, notification)
@@ -275,9 +299,11 @@ class HeartbeatService : Service() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
                 CHANNEL_ID,
-                "Script Monitor",
+                UiText.StringResource(R.string.channel_monitor_name).asString(this),
                 NotificationManager.IMPORTANCE_LOW
-            )
+            ).apply {
+                description = UiText.StringResource(R.string.channel_monitor_desc).asString(this@HeartbeatService)
+            }
             val manager = getSystemService(NotificationManager::class.java)
             manager.createNotificationChannel(channel)
         }

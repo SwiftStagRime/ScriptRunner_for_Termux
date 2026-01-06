@@ -234,4 +234,19 @@
     <string name="theme_purple">优雅紫</string>
     <string name="theme_amoled">纯黑 (AMOLED)</string>
     <string name="theme_cyber">赛博霓虹</string>
+
+    <!-- Heartbeat service -->
+    <string name="notif_status_active">活跃</string>
+    <string name="notif_status_watching">正在监测异常…</string>
+    <string name="notif_status_monitoring">正在监控</string>
+    <string name="notif_status_failed_unstable">失败：脚本运行不稳定</string>
+    <string name="notif_status_resurrecting">正在尝试重启 (%1$d/%2$d)…</string>
+    <string name="notif_finished_success">已成功完成</string>
+    <string name="notif_finished_error">完成但出错 (代码: %1$d)</string>
+    <string name="notif_restart_count"> • 重启次数: %1$d</string>
+    <string name="notif_details_format">状态: %1$s%2$s\n运行时长: %3$d分 • 上次心跳: %4$d秒前</string>
+    <string name="notif_monitoring_title">正在监控: %1$s</string>
+    <string name="notif_stop_monitoring">停止监控</string>
+    <string name="channel_monitor_name">脚本监控器</string>
+    <string name="channel_monitor_desc">显示带有崩溃保护的脚本运行状态</string>
 </resources>

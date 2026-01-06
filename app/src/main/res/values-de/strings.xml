@@ -238,5 +238,18 @@
     <string name="theme_amoled">AMOLED</string>
     <string name="theme_cyber">Cyber</string>
 
-
+    <!-- Heartbeat service -->
+    <string name="notif_status_active">Aktiv</string>
+    <string name="notif_status_watching">Suche nach Abstürzen…</string>
+    <string name="notif_status_monitoring">Überwachung läuft</string>
+    <string name="notif_status_failed_unstable">Fehlgeschlagen: Skript instabil</string>
+    <string name="notif_status_resurrecting">Wiederbelebung (%1$d/%2$d)…</string>
+    <string name="notif_finished_success">Erfolgreich beendet</string>
+    <string name="notif_finished_error">Mit Fehler beendet (Code: %1$d)</string>
+    <string name="notif_restart_count"> • Neustarts: %1$d</string>
+    <string name="notif_details_format">Status: %1$s%2$s\nLaufzeit: %3$dm • Letztes Signal: vor %4$ds</string>
+    <string name="notif_monitoring_title">Überwachung: %1$s</string>
+    <string name="notif_stop_monitoring">Überwachung stoppen</string>
+    <string name="channel_monitor_name">Skript-Monitor</string>
+    <string name="channel_monitor_desc">Zeigt den Status von Skripten mit Absturzschutz an</string>
 </resources>
