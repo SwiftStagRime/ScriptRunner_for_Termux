@@ -240,7 +240,7 @@
 
     <!-- Heartbeat service -->
     <string name="notif_status_active">Aktiv</string>
-    <string name="notif_status_watching">Suche nach Abstürzen…</string>
+    <string name="notif_status_watching">Überwache auf Prozessende…</string>
     <string name="notif_status_monitoring">Überwachung läuft</string>
     <string name="notif_status_failed_unstable">Fehlgeschlagen: Skript instabil</string>
     <string name="notif_status_resurrecting">Wiederbelebung (%1$d/%2$d)…</string>
@@ -252,4 +252,7 @@
     <string name="notif_stop_monitoring">Überwachung stoppen</string>
     <string name="channel_monitor_name">Skript-Monitor</string>
     <string name="channel_monitor_desc">Zeigt den Status von Skripten mit Absturzschutz an</string>
+    <string name="notif_summary_title">Überwache %1$d Skripte</string>
+    <string name="notif_summary_desc">Aktiv: %1$s</string>
+    <string name="notif_stop_all">Alle stoppen</string>
 </resources>

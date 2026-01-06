@@ -116,7 +116,7 @@ class RunScriptUseCase @Inject constructor(
 
         // Wrap with heartbeat if enabled
         val runBlock = if (script.useHeartbeat) {
-            wrapCommandWithHeartbeat(coreExecution, script.heartbeatInterval)
+            wrapCommandWithHeartbeat(coreExecution, script.heartbeatInterval, script.id)
         } else {
             coreExecution
         }
@@ -161,7 +161,7 @@ class RunScriptUseCase @Inject constructor(
 
         // Wrap with heartbeat if enabled
         val runBlock = if (script.useHeartbeat) {
-            wrapCommandWithHeartbeat(coreExecution, script.heartbeatInterval)
+            wrapCommandWithHeartbeat(coreExecution, script.heartbeatInterval, script.id)
         } else {
             "($coreExecution)"
         }
@@ -169,6 +169,7 @@ class RunScriptUseCase @Inject constructor(
         return StringBuilder()
             .append("mkdir -p ~/scriptrunner_for_termux && ")
             .append("cp -f $termuxSourcePath $termuxDestPath && ")
+            .append("{ rm -f \"$termuxSourcePath\" || true; } && ")
             .append("chmod +x $termuxDestPath && ")
             .append("bash -c \"")
             .append("trap 'rm -f $termuxDestPath' EXIT; ")
@@ -184,32 +185,34 @@ class RunScriptUseCase @Inject constructor(
 
     // Another trick to try and force required behaviour, I do hope that passing as a wrapper will work
     // Does just fine with adb killing the process
-    private fun wrapCommandWithHeartbeat(commandToRun: String, intervalMs: Long): String {
+    private fun wrapCommandWithHeartbeat(commandToRun: String, intervalMs: Long, scriptId: Int): String {
         val heartbeatAction = "io.github.swiftstagrime.HEARTBEAT"
         val finishedAction = "io.github.swiftstagrime.SCRIPT_FINISHED"
-        val intervalSeconds = (intervalMs / 1000).coerceAtLeast(1)
+        val intervalSeconds = (intervalMs / 1000).coerceAtLeast(5)
 
         return $$"""
-        (
-          (
-            while true; do
-              am broadcast -a $$heartbeatAction > /dev/null 2>&1
-              sleep $$intervalSeconds
-            done
-          ) &
-          HEARTBEAT_PID=$!
-          
-          cleanup_heartbeat() {
-            kill $HEARTBEAT_PID > /dev/null 2>&1
-          }
-          trap cleanup_heartbeat EXIT
-          
-          ( $$commandToRun )
-          EXIT_CODE=$?
-          
-          cleanup_heartbeat
-          am broadcast -a $$finishedAction --ei exit_code $EXIT_CODE > /dev/null 2>&1
-        )
-        """.trimIndent()
+    (
+      (
+        while true; do
+          # ADDED: --ei script_id to identify which script is pulsing
+          am broadcast -a $$heartbeatAction --ei script_id $$scriptId > /dev/null 2>&1
+          sleep $$intervalSeconds
+        done
+      ) &
+      HEARTBEAT_PID=$!
+      
+      cleanup_heartbeat() {
+        kill $HEARTBEAT_PID > /dev/null 2>&1
+      }
+      trap cleanup_heartbeat EXIT
+      
+      ( $$commandToRun )
+      EXIT_CODE=$?
+      
+      cleanup_heartbeat
+      # ADDED: --ei script_id here as well so the service knows which one finished
+      am broadcast -a $$finishedAction --ei exit_code $EXIT_CODE --ei script_id $$scriptId > /dev/null 2>&1
+    )
+    """.trimIndent()
     }
 }

@@ -39,21 +39,22 @@ class HeartbeatService : Service() {
     companion object {
         // Intent actions
         const val ACTION_START = "ACTION_START_MONITORING"
-        const val ACTION_STOP = "ACTION_STOP_MONITORING"
+        const val ACTION_STOP = "ACTION_STOP_MONITORING" // Stops specific script if ID provided, or all
+        const val ACTION_STOP_ALL = "ACTION_STOP_ALL_MONITORING" // Explicit stop all
         const val ACTION_HEARTBEAT = "io.github.swiftstagrime.HEARTBEAT"
         const val ACTION_SCRIPT_FINISHED = "io.github.swiftstagrime.SCRIPT_FINISHED"
 
         // Intent extras
-        const val EXTRA_SCRIPT_ID = "EXTRA_SCRIPT_ID"
+        const val EXTRA_SCRIPT_ID = "EXTRA_SCRIPT_ID" // Used in broadcasts and start commands
         const val EXTRA_SCRIPT_NAME = "EXTRA_SCRIPT_NAME"
         const val EXTRA_TIMEOUT_MS = "EXTRA_TIMEOUT_MS"
+        const val EXTRA_EXIT_CODE = "exit_code" // From Bash wrapper
 
         // Service constants
         private const val NOTIFICATION_ID = 999
         private const val CHANNEL_ID = "termux_monitor_channel"
-        private const val DEFAULT_TIMEOUT_MS = 30_000L // Default time to wait for a heartbeat
-        private const val CHECK_INTERVAL_MS = 10_000L // How often to check for a heartbeat
-        private const val MAX_RETRY_COUNT = 3 // Max number of restart attempts
+        private const val DEFAULT_TIMEOUT_MS = 30_000L
+        private const val CHECK_INTERVAL_MS = 10_000L
         private const val WAKELOCK_TAG = "TermuxRunner:HeartbeatWakeLock"
     }
 
@@ -67,41 +68,37 @@ class HeartbeatService : Service() {
     private var wakeLock: PowerManager.WakeLock? = null
 
     // --- Monitoring State ---
-    private var lastHeartbeatTime = 0L // Timestamp of the last received heartbeat
-    private var serviceStartTime = 0L // When the monitoring actually started
-    private var isMonitoring = false // Flag to indicate if the service is actively monitoring
-    private var currentScriptId = -1 // ID of the script being monitored
-    private var currentScriptName = "" // Name of the script for notifications
-    private var timeoutLimit = DEFAULT_TIMEOUT_MS // Custom timeout for the heartbeat
-    private var restartCount = 0 // Counter for restart attempts
+    // Key: Script ID, Value: State Object
+    private val monitoredScripts = mutableMapOf<Int, ScriptMonitorState>()
+    private var isServiceRunning = false
+
+    data class ScriptMonitorState(
+        val id: Int,
+        val name: String,
+        val timeoutLimit: Long,
+        var lastHeartbeatTime: Long = System.currentTimeMillis(),
+        var serviceStartTime: Long = System.currentTimeMillis(),
+        var restartCount: Int = 0,
+        var status: UiText = UiText.StringResource(R.string.notif_status_watching)
+    )
 
     /**
-     * Listens for heartbeat signals from the script and for script finish signals.
-     * Now captures exit_code to report accurate final status.
+     * Listens for heartbeat signals and finish signals.
+     * Expects 'script_id' extra in the broadcast to identify the script.
      */
     private val heartbeatReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
-            when (intent?.action) {
+            val scriptId = intent?.getIntExtra("script_id", -1) ?: return
+
+            when (intent.action) {
                 ACTION_HEARTBEAT -> {
-                    lastHeartbeatTime = System.currentTimeMillis()
-                    updateStatusNotification(UiText.StringResource(R.string.notif_status_active))
+                    val state = monitoredScripts[scriptId] ?: return
+                    state.lastHeartbeatTime = System.currentTimeMillis()
+                    state.status = UiText.StringResource(R.string.notif_status_active)
                 }
                 ACTION_SCRIPT_FINISHED -> {
-                    val exitCode = intent.getIntExtra("exit_code", 0)
-                    isMonitoring = false
-
-                    val finalMsg = if (exitCode == 0) {
-                        UiText.StringResource(R.string.notif_finished_success)
-                    } else {
-                        UiText.StringResource(R.string.notif_finished_error, exitCode)
-                    }
-
-                    showFinalNotification(finalMsg)
-
-                    serviceScope.launch {
-                        delay(2000) // Brief delay so user can see the status before service closes
-                        stopSelf()
-                    }
+                    val exitCode = intent.getIntExtra(EXTRA_EXIT_CODE, 0)
+                    handleScriptFinished(scriptId, exitCode)
                 }
             }
         }
@@ -136,24 +133,43 @@ class HeartbeatService : Service() {
      */
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         if (intent == null) {
-            if (currentScriptId == -1) stopSelf()
+            // Service restarted by system. If we have no data, stop.
+            if (monitoredScripts.isEmpty()) stopSelf()
             return START_STICKY
         }
 
         when (intent.action) {
             ACTION_START -> {
-                currentScriptId = intent.getIntExtra(EXTRA_SCRIPT_ID, -1)
-                currentScriptName = intent.getStringExtra(EXTRA_SCRIPT_NAME) ?: "Unknown"
-                timeoutLimit = intent.getLongExtra(EXTRA_TIMEOUT_MS, DEFAULT_TIMEOUT_MS)
-                restartCount = 0
-                serviceStartTime = System.currentTimeMillis()
+                val id = intent.getIntExtra(EXTRA_SCRIPT_ID, -1)
+                val name = intent.getStringExtra(EXTRA_SCRIPT_NAME) ?: "Unknown"
+                val timeout = intent.getLongExtra(EXTRA_TIMEOUT_MS, DEFAULT_TIMEOUT_MS)
 
-                if (wakeLock?.isHeld == false) wakeLock?.acquire()
-
-                startMonitoring()
+                if (id != -1) {
+                    val newState = ScriptMonitorState(
+                        id = id,
+                        name = name,
+                        timeoutLimit = timeout
+                    )
+                    monitoredScripts[id] = newState
+                    startServiceLoopIfNeeded()
+                    updateNotification()
+                }
             }
 
-            ACTION_STOP -> stopSelf()
+            ACTION_STOP -> {
+                val id = intent.getIntExtra(EXTRA_SCRIPT_ID, -1)
+                if (id != -1) {
+                    // Stop specific script
+                    monitoredScripts.remove(id)
+                    updateNotification()
+                    if (monitoredScripts.isEmpty()) stopAll()
+                } else {
+                    // No ID provided? Stop everything.
+                    stopAll()
+                }
+            }
+
+            ACTION_STOP_ALL -> stopAll()
         }
         return START_STICKY
     }
@@ -161,93 +177,149 @@ class HeartbeatService : Service() {
     /**
      * Starts the monitoring loop.
      */
-    private fun startMonitoring() {
-        if (isMonitoring) return
-        isMonitoring = true
-        lastHeartbeatTime = System.currentTimeMillis()
-        updateStatusNotification(UiText.StringResource(R.string.notif_status_watching))
+    private fun startServiceLoopIfNeeded() {
+        if (isServiceRunning) return
+        isServiceRunning = true
+
+        if (wakeLock?.isHeld == false) wakeLock?.acquire()
 
         serviceScope.launch {
-            while (isMonitoring) {
+            while (isServiceRunning) {
                 delay(CHECK_INTERVAL_MS)
                 checkHealth()
-                // Periodic update to refresh "time since pulse" in notification
-                if (isMonitoring) updateStatusNotification(UiText.StringResource(R.string.notif_status_monitoring))
+                if (isServiceRunning) updateNotification()
             }
         }
     }
 
     /**
-     * Checks if the script has timed out.
+     * Iterates through all monitored scripts to check for timeouts.
      */
     private fun checkHealth() {
-        val timeSincePulse = System.currentTimeMillis() - lastHeartbeatTime
-        if (timeSincePulse > timeoutLimit) {
-            attemptRestart()
+        val currentTime = System.currentTimeMillis()
+        // Iterate over a copy of the keys to avoid concurrent modification issues
+        val scriptIds = monitoredScripts.keys.toList()
+
+        for (id in scriptIds) {
+            val state = monitoredScripts[id] ?: continue
+            val timeSincePulse = currentTime - state.lastHeartbeatTime
+
+            if (timeSincePulse > state.timeoutLimit) {
+                attemptRestart(state)
+            } else {
+                state.status = UiText.StringResource(R.string.notif_status_monitoring)
+            }
         }
     }
 
-    /**
-     * Restarts the script if retry limit is not exceeded.
-     */
-    private fun attemptRestart() {
-        if (restartCount >= MAX_RETRY_COUNT) {
-            updateStatusNotification(UiText.StringResource(R.string.notif_status_failed_unstable))
-            isMonitoring = false
-            stopSelf()
-            return
-        }
-        restartCount++
-        updateStatusNotification(UiText.StringResource(R.string.notif_status_resurrecting, restartCount, MAX_RETRY_COUNT))
-        lastHeartbeatTime = System.currentTimeMillis()
+    private fun attemptRestart(state: ScriptMonitorState) {
+            state.restartCount++
+            state.status = UiText.StringResource(R.string.notif_status_resurrecting, state.restartCount)
+            state.lastHeartbeatTime = System.currentTimeMillis()
 
-        serviceScope.launch {
-            val script = scriptRepository.getScriptById(currentScriptId)
-            script?.let { runScriptUseCase(it) } ?: stopSelf()
-        }
+            // Relaunch
+            serviceScope.launch {
+                val script = scriptRepository.getScriptById(state.id)
+                if (script != null) {
+                    runScriptUseCase(script)
+                } else {
+                    monitoredScripts.remove(state.id)
+                }
+            }
+        updateNotification()
     }
 
-    /**
-     * Cleans up resources when the service is destroyed.
-     */
+    private fun handleScriptFinished(scriptId: Int, exitCode: Int) {
+        val state = monitoredScripts.remove(scriptId) ?: return
+
+        val finalMsg = if (exitCode == 0) {
+            UiText.StringResource(R.string.notif_finished_success)
+        } else {
+            UiText.StringResource(R.string.notif_finished_error, exitCode)
+        }
+
+        showFinalNotification(state.name, finalMsg)
+
+        updateNotification()
+        if (monitoredScripts.isEmpty()) stopAll()
+    }
+
+    private fun stopAll() {
+        isServiceRunning = false
+        monitoredScripts.clear()
+        if (wakeLock?.isHeld == true) wakeLock?.release()
+        stopForeground(STOP_FOREGROUND_REMOVE)
+        stopSelf()
+    }
+
     override fun onDestroy() {
         super.onDestroy()
-        isMonitoring = false
+        isServiceRunning = false
         if (wakeLock?.isHeld == true) wakeLock?.release()
         serviceScope.cancel()
         try {
             unregisterReceiver(heartbeatReceiver)
-        } catch (_: Exception) {
-        }
+        } catch (_: Exception) { }
     }
 
     /**
-     * Builds and updates the foreground notification with detailed status.
+     * intelligently updates the notification based on how many scripts are running.
      */
-    private fun updateStatusNotification(status: UiText) {
-        val uptimeMins = (System.currentTimeMillis() - serviceStartTime) / 60_000
-        val secondsSincePulse = (System.currentTimeMillis() - lastHeartbeatTime) / 1000
+    private fun updateNotification() {
+        if (monitoredScripts.isEmpty()) return
 
-        val restartText = if (restartCount > 0) {
-            UiText.StringResource(R.string.notif_restart_count, restartCount).asString(this)
+        if (monitoredScripts.size == 1) {
+            // --- Single Script Mode (Detailed) ---
+            val state = monitoredScripts.values.first()
+            showSingleScriptNotification(state)
+        } else {
+            // --- Multi Script Mode (Summary) ---
+            showSummaryNotification()
+        }
+    }
+
+    private fun showSingleScriptNotification(state: ScriptMonitorState) {
+        val uptimeMins = (System.currentTimeMillis() - state.serviceStartTime) / 60_000
+        val secondsSincePulse = (System.currentTimeMillis() - state.lastHeartbeatTime) / 1000
+
+        val restartText = if (state.restartCount > 0) {
+            UiText.StringResource(R.string.notif_restart_count, state.restartCount).asString(this)
         } else ""
 
         val contentText = UiText.StringResource(
             R.string.notif_details_format,
-            status.asString(this),
+            state.status.asString(this),
             restartText,
             uptimeMins,
             secondsSincePulse
         ).asString(this)
 
+        buildAndNotify(
+            title = UiText.StringResource(R.string.notif_monitoring_title, state.name).asString(this),
+            text = contentText
+        )
+    }
+
+    private fun showSummaryNotification() {
+        val count = monitoredScripts.size
+        val scriptNames = monitoredScripts.values.joinToString(", ") { it.name }
+
+        buildAndNotify(
+            title = UiText.StringResource(R.string.notif_summary_title, count).asString(this),
+            text = UiText.StringResource(R.string.notif_summary_desc, scriptNames).asString(this)
+        )
+    }
+
+    private fun buildAndNotify(title: String, text: String) {
         val contentIntent = PendingIntent.getActivity(
             this, 0,
             Intent(this, MainActivity::class.java),
             PendingIntent.FLAG_IMMUTABLE
         )
 
+        // "Stop All" action
         val stopIntent = Intent(this, HeartbeatService::class.java).apply {
-            action = ACTION_STOP
+            action = ACTION_STOP_ALL
         }
         val stopPendingIntent = PendingIntent.getService(
             this,
@@ -257,18 +329,18 @@ class HeartbeatService : Service() {
         )
 
         val notification = NotificationCompat.Builder(this, CHANNEL_ID)
-            .setContentTitle(UiText.StringResource(R.string.notif_monitoring_title, currentScriptName).asString(this))
-            .setContentText(status.asString(this))
+            .setContentTitle(title)
+            .setContentText(text)
             .setSmallIcon(R.drawable.ic_launcher_foreground)
             .setOngoing(true)
             .setOnlyAlertOnce(true)
             .setContentIntent(contentIntent)
             .addAction(
                 android.R.drawable.ic_menu_close_clear_cancel,
-                UiText.StringResource(R.string.notif_stop_monitoring).asString(this),
+                UiText.StringResource(R.string.notif_stop_all).asString(this),
                 stopPendingIntent
             )
-            .setStyle(NotificationCompat.BigTextStyle().bigText(contentText))
+            .setStyle(NotificationCompat.BigTextStyle().bigText(text))
             .setPriority(NotificationCompat.PRIORITY_LOW)
             .setForegroundServiceBehavior(NotificationCompat.FOREGROUND_SERVICE_IMMEDIATE)
             .build()
@@ -279,9 +351,12 @@ class HeartbeatService : Service() {
     /**
      * Shows a non-ongoing notification when the script finishes.
      */
-    private fun showFinalNotification(text: UiText) {
+    private fun showFinalNotification(name: String, text: UiText) {
+        // We use a unique ID based on name hash to prevent overwriting if multiple finish at once
+        val notifId = name.hashCode()
+
         val notification = NotificationCompat.Builder(this, CHANNEL_ID)
-            .setContentTitle(currentScriptName)
+            .setContentTitle(name)
             .setContentText(text.asString(this))
             .setSmallIcon(R.drawable.ic_launcher_foreground)
             .setOngoing(false)
@@ -289,7 +364,7 @@ class HeartbeatService : Service() {
             .build()
 
         val manager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
-        manager.notify(NOTIFICATION_ID, notification)
+        manager.notify(notifId, notification)
     }
 
     /**

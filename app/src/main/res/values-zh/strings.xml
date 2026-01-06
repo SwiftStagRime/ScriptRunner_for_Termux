@@ -237,7 +237,7 @@
 
     <!-- Heartbeat service -->
     <string name="notif_status_active">活跃</string>
-    <string name="notif_status_watching">正在监测异常…</string>
+    <string name="notif_status_watching">正在监视进程终止…</string>
     <string name="notif_status_monitoring">正在监控</string>
     <string name="notif_status_failed_unstable">失败：脚本运行不稳定</string>
     <string name="notif_status_resurrecting">正在尝试重启 (%1$d/%2$d)…</string>
@@ -249,4 +249,7 @@
     <string name="notif_stop_monitoring">停止监控</string>
     <string name="channel_monitor_name">脚本监控器</string>
     <string name="channel_monitor_desc">显示带有崩溃保护的脚本运行状态</string>
+    <string name="notif_summary_title">正在监控 %1$d 个脚本</string>
+    <string name="notif_summary_desc">活跃: %1$s</string>
+    <string name="notif_stop_all">全部停止</string>
 </resources>

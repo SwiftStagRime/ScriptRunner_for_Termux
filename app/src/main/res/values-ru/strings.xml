@@ -237,7 +237,7 @@
 
     <!-- Heartbeat service -->
     <string name="notif_status_active">Активен</string>
-    <string name="notif_status_watching">Поиск сбоев…</string>
+    <string name="notif_status_watching">Ожидание смерти процесса…</string>
     <string name="notif_status_monitoring">Мониторинг</string>
     <string name="notif_status_failed_unstable">Ошибка: Скрипт нестабилен</string>
     <string name="notif_status_resurrecting">Восстановление (%1$d/%2$d)…</string>
@@ -249,4 +249,7 @@
     <string name="notif_stop_monitoring">Остановить мониторинг</string>
     <string name="channel_monitor_name">Монитор скриптов</string>
     <string name="channel_monitor_desc">Отображает статус скриптов с защитой от сбоев</string>
+    <string name="notif_summary_title">Мониторинг %1$d скриптов</string>
+    <string name="notif_summary_desc">Активно: %1$s</string>
+    <string name="notif_stop_all">Остановить все</string>
 </resources>

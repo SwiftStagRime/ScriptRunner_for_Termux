@@ -238,7 +238,7 @@
 
     <!-- Heartbeat service -->
     <string name="notif_status_active">Actif</string>
-    <string name="notif_status_watching">Recherche de plantages…</string>
+    <string name="notif_status_watching">Surveillance de l\'arrêt du processus…</string>
     <string name="notif_status_monitoring">Surveillance en cours</string>
     <string name="notif_status_failed_unstable">Échec : Script instable</string>
     <string name="notif_status_resurrecting">Restauration (%1$d/%2$d)…</string>
@@ -250,4 +250,7 @@
     <string name="notif_stop_monitoring">Arrêter la surveillance</string>
     <string name="channel_monitor_name">Moniteur de scripts</string>
     <string name="channel_monitor_desc">Affiche l\'état des scripts avec protection contre les plantages</string>
+    <string name="notif_summary_title">Surveillance de %1$d scripts</string>
+    <string name="notif_summary_desc">Actifs : %1$s</string>
+    <string name="notif_stop_all">Tout arrêter</string>
 </resources>

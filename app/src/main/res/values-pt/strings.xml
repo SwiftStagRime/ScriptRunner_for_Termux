@@ -238,7 +238,7 @@
 
     <!-- Heartbeat service -->
     <string name="notif_status_active">Ativo</string>
-    <string name="notif_status_watching">Procurando por falhas…</string>
+    <string name="notif_status_watching">Monitorando encerramento do processo…</string>
     <string name="notif_status_monitoring">Monitorando</string>
     <string name="notif_status_failed_unstable">Falha: Script instável</string>
     <string name="notif_status_resurrecting">Reiniciando (%1$d/%2$d)…</string>
@@ -250,4 +250,7 @@
     <string name="notif_stop_monitoring">Parar monitoramento</string>
     <string name="channel_monitor_name">Monitor de scripts</string>
     <string name="channel_monitor_desc">Mostra o status dos scripts com proteção contra falhas</string>
+    <string name="notif_summary_title">Monitorando %1$d scripts</string>
+    <string name="notif_summary_desc">Ativos: %1$s</string>
+    <string name="notif_stop_all">Parar todos</string>c
 </resources>
