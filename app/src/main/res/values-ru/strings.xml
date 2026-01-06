@@ -8,8 +8,8 @@
     <string name="dynamic_color_title">Динамический цвет</string>
     <string name="dynamic_color_subtitle">Использовать цвета обоев</string>
     <string name="data_management_label">Управление данными</string>
-    <string name="import_label">Импорт</string>
-    <string name="export_label">Экспорт</string>
+    <string name="import_label">Импорт (json)</string>
+    <string name="export_label">Экспорт (json)</string>
     <string name="developed_by">Разработано</string>
     <string name="open_github_description">Открыть Github</string>
     <string name="import_script_from_file">Импортировать скрипт из файла</string>

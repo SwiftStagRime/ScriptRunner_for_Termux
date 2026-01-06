@@ -10,8 +10,8 @@
     <string name="dynamic_color_title">Dynamic Color</string>
     <string name="dynamic_color_subtitle">Use system wallpaper colors</string>
     <string name="data_management_label">Data Management</string>
-    <string name="import_label">Import</string>
-    <string name="export_label">Export</string>
+    <string name="import_label">Import (json)</string>
+    <string name="export_label">Export (json)</string>
     <string name="developed_by">Developed by</string>
     <string name="open_github_description">Open Github</string>
     <string name="export_filename" translatable="false">scripts_backup.json</string>

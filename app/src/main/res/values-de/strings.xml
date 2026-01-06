@@ -8,8 +8,8 @@
     <string name="dynamic_color_title">Dynamische Farben</string>
     <string name="dynamic_color_subtitle">Hintergrundfarben verwenden</string>
     <string name="data_management_label">Datenverwaltung</string>
-    <string name="import_label">Importieren</string>
-    <string name="export_label">Exportieren</string>
+    <string name="import_label">Importieren (json)</string>
+    <string name="export_label">Exportieren (json)</string>
     <string name="developed_by">Entwickelt von</string>
     <string name="open_github_description">Github öffnen</string>
     <string name="import_script_from_file">Skript aus Datei importieren</string>
