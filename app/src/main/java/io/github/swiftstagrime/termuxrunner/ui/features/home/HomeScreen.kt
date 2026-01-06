@@ -253,7 +253,7 @@ fun HomeScreen(
                 if (!isSearchActive) {
                     QuickSettingsBanner(
                         tileMappings = uiState.tileMappings,
-                        onTileClick = onScriptCodeClick,
+                        onTileClick = onRunClick,
                         onEmptyTileClick = onTileSettingsClick,
                         onSettingsClick = onTileSettingsClick
                     )
