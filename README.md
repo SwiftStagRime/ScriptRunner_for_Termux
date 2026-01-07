@@ -16,17 +16,39 @@ Features
         Custom prefix commands and arguments.
 
         Environment variable management.
+        
+        Up to 5 tiles for ease of access.
+
+        Addition of runtime parameters, either with text, or you own presets
 
     Customization: Personalize your script shortcuts with custom icons.
 
-    Data Portability: Full support for importing and exporting your script library.
+    Data Portability: Full support for importing and exporting your script library(now with sripts themself
+    and not just my json DTOs parsing) 
 
     Experimental !!! Support for script monitoring for auto-restarting them if they were killed by system.
     They are not restarted if they finished themself.
 
-|                     Home                      |                     Editor                     |                     Config                      |                     Shortcut                      |
-|:---------------------------------------------:|:----------------------------------------------:|:-----------------------------------------------:|:-------------------------------------------------:|
-| <img src="screenshots/home.webp" width="200"> | <img src="screenshots/editor.jpg" width="200"> | <img src="screenshots/config.webp" width="200"> | <img src="screenshots/shortcut.webp" width="350"> |
+### App Showcase
+
+| Home | Editor | Config & Monitoring | Quick Settings Tiles |
+| :---: | :---: | :---: | :---: |
+| <img src="screenshots/home.webp" width="200"> | <img src="screenshots/editor.webp" width="200"> | <img src="screenshots/config.webp" width="200"> <br><br> <img src="screenshots/config_2.webp" width="200"> | <img src="screenshots/tiles.webp" width="200"> <br><br> <img src="screenshots/tiles_2.webp" width="200"> |
+
+<br>
+
+| Shortcut Management | Runtime Arguments | Settings |
+| :---: | :---: | :---: |
+| <img src="screenshots/shortcut.webp" width="350"> | <img src="screenshots/runtime_args.webp" width="200"> | <img src="screenshots/settings.webp" width="200"> |
+
+<br>
+
+### Live Demo
+<p align="center">
+  <img src="screenshots/recording.webp" width="300" alt="App Recording">
+  <br>
+  <i>Watch the app in action: Running scripts, monitoring heartbeats, and terminal interaction.</i>
+</p>
 
 Security First
 
@@ -39,13 +61,14 @@ Setup & Onboarding
 
 Small onboarding is present for easier setup.
 
-    Note on Permissions: During setup, you will be asked to grant the com.termux.permission.RUN_COMMAND permission. While the system warning may look intimidating, this is the standard and necessary way for third-party apps to securely send commands to Termux.
+    Note on Permissions: During setup, you will be asked to grant the com.termux.permission.RUN_COMMAND permission. 
+    While the system warning may look intimidating, this is the standard and necessary way for third-party apps to securely send commands to Termux.
 
 Compatibility
 
     Minimum SDK: 24 (Android 7.0)
 
-    Target SDK: 36 (Android 16/Preview)
+    Target SDK: 36 (Android 16)
 
     Xiaomi / MIUI / HyperOS: Specific fixes are included to handle the unique way these systems manage shortcut permissions.
 
@@ -60,7 +83,8 @@ This project is currently in early development.
     Documentation: Detailed code description is currently under construction.
 
     Translation: En and Ru are made by me, everything else is AI. You can always switch in settings or during onboarding
-    Stability: While functional, you may encounter edge cases. I recommend keeping backups of vital scripts using the built-in export feature. Also, BasicTextField starts lagging while typing at around 177K characters on Snapdragon 7s gen2, Snapdragon 8 gen3 does not have the same expirence. I have tested and linenumbergutter has no effect on perfomance, so it might be the internal implementation. I don't want to move to other ways of displaying stuff, because I will loose stylo support on my tablet 
+    Stability: While functional, you may encounter edge cases. I recommend keeping backups of vital scripts using the built-in export feature. 
+    Also, BasicTextField starts lagging while typing at around 177K characters on Snapdragon 7s gen2, Snapdragon 8 gen3 does not have the same expirence. I have tested and linenumbergutter has no effect on perfomance, so it might be the internal implementation. I don't want to move to other ways of displaying stuff, because I will loose stylo support on my tablet 
 
 Contributing
 
