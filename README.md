@@ -33,7 +33,7 @@ Features
 
 | Home | Editor | Config & Monitoring | Quick Settings Tiles |
 | :---: | :---: | :---: | :---: |
-| <img src="screenshots/home.webp" width="200"> | <img src="screenshots/editor.webp" width="200"> | <img src="screenshots/config.webp" width="200"> <br><br> <img src="screenshots/config_2.webp" width="200"> | <img src="screenshots/tiles.webp" width="200"> <br><br> <img src="screenshots/tiles_2.webp" width="200"> |
+| <img src="screenshots/home.webp?v=1" width="200"> | <img src="screenshots/editor.webp?v=1" width="200"> | <img src="screenshots/config.webp?v=1" width="200"> <br><br> <img src="screenshots/config_2.webp?v=1" width="200"> | <img src="screenshots/tiles.webp?v=1" width="200"> <br><br> <img src="screenshots/tiles_2.webp?v=1" width="200"> |
 
 <br>
 
