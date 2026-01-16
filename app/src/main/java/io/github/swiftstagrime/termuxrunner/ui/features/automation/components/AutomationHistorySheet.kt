@@ -1,4 +1,4 @@
-package io.github.swiftstagrime.termuxrunner.ui.features.automation
+package io.github.swiftstagrime.termuxrunner.ui.features.automation.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement

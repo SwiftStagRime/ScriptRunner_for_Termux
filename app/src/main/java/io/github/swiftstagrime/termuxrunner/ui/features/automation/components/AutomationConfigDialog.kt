@@ -1,4 +1,4 @@
-package io.github.swiftstagrime.termuxrunner.ui.features.automation
+package io.github.swiftstagrime.termuxrunner.ui.features.automation.components
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background

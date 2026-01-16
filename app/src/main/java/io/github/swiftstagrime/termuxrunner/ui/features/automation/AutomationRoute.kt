@@ -32,6 +32,8 @@ import io.github.swiftstagrime.termuxrunner.domain.model.ScriptRuntimeParams
 import io.github.swiftstagrime.termuxrunner.domain.util.AutomationFormatter
 import io.github.swiftstagrime.termuxrunner.ui.components.ScriptPickerDialog
 import io.github.swiftstagrime.termuxrunner.ui.components.ScriptRuntimePromptDialog
+import io.github.swiftstagrime.termuxrunner.ui.features.automation.components.AutomationConfigDialog
+import io.github.swiftstagrime.termuxrunner.ui.features.automation.components.AutomationHistorySheet
 import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
