@@ -4,7 +4,8 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class FullBackupDto(
-    val version: Int = 2,
+    val version: Int = 3,
     val categories: List<CategoryExportDto>,
-    val scripts: List<ScriptExportDto>
+    val scripts: List<ScriptExportDto>,
+    val automations: List<AutomationExportDto> = emptyList()
 )

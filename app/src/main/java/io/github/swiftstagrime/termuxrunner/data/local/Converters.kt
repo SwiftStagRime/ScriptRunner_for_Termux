@@ -1,6 +1,7 @@
 package io.github.swiftstagrime.termuxrunner.data.local
 
 import androidx.room.TypeConverter
+import io.github.swiftstagrime.termuxrunner.domain.model.AutomationType
 import io.github.swiftstagrime.termuxrunner.domain.model.InteractionMode
 import kotlinx.serialization.json.Json
 
@@ -48,6 +49,28 @@ class Converters {
 
     @TypeConverter
     fun toStringList(data: String): List<String> {
+        if (data.isBlank()) return emptyList()
+        return try {
+            json.decodeFromString(data)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            emptyList()
+        }
+    }
+
+    @TypeConverter
+    fun fromAutomationType(value: AutomationType) = value.name
+
+    @TypeConverter
+    fun toAutomationType(value: String) = AutomationType.valueOf(value)
+
+    @TypeConverter
+    fun fromIntList(list: List<Int>): String {
+        return json.encodeToString(list)
+    }
+
+    @TypeConverter
+    fun toIntList(data: String): List<Int> {
         if (data.isBlank()) return emptyList()
         return try {
             json.decodeFromString(data)

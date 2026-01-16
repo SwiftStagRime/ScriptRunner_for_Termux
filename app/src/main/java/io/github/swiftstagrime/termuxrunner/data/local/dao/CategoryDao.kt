@@ -14,7 +14,7 @@ interface CategoryDao {
     @Query("SELECT * FROM categories ORDER BY orderIndex ASC")
     fun getAllCategories(): Flow<List<CategoryEntity>>
 
-    @Insert(onConflict = OnConflictStrategy.Companion.REPLACE)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertCategory(category: CategoryEntity): Long
 
     @Update
@@ -25,4 +25,7 @@ interface CategoryDao {
 
     @Query("SELECT * FROM categories WHERE id = :id")
     suspend fun getCategoryById(id: Int): CategoryEntity?
+
+    @Query("SELECT * FROM categories")
+    suspend fun getAllCategoriesOneShot(): List<CategoryEntity>
 }

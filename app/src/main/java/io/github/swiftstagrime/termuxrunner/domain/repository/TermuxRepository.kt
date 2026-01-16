@@ -12,7 +12,8 @@ interface TermuxRepository {
         sessionAction: String,
         scriptId: Int,
         scriptName: String,
-        notifyOnResult: Boolean
+        notifyOnResult: Boolean,
+        automationId: Int? = null
     )
 
     fun isTermuxBatteryOptimized(): Boolean

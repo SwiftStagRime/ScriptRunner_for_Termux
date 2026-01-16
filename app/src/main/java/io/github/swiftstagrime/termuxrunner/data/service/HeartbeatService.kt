@@ -39,7 +39,8 @@ class HeartbeatService : Service() {
     companion object {
         // Intent actions
         const val ACTION_START = "ACTION_START_MONITORING"
-        const val ACTION_STOP = "ACTION_STOP_MONITORING" // Stops specific script if ID provided, or all
+        const val ACTION_STOP =
+            "ACTION_STOP_MONITORING" // Stops specific script if ID provided, or all
         const val ACTION_STOP_ALL = "ACTION_STOP_ALL_MONITORING" // Explicit stop all
         const val ACTION_HEARTBEAT = "io.github.swiftstagrime.HEARTBEAT"
         const val ACTION_SCRIPT_FINISHED = "io.github.swiftstagrime.SCRIPT_FINISHED"
@@ -96,6 +97,7 @@ class HeartbeatService : Service() {
                     state.lastHeartbeatTime = System.currentTimeMillis()
                     state.status = UiText.StringResource(R.string.notif_status_active)
                 }
+
                 ACTION_SCRIPT_FINISHED -> {
                     val exitCode = intent.getIntExtra(EXTRA_EXIT_CODE, 0)
                     handleScriptFinished(scriptId, exitCode)
@@ -213,19 +215,19 @@ class HeartbeatService : Service() {
     }
 
     private fun attemptRestart(state: ScriptMonitorState) {
-            state.restartCount++
-            state.status = UiText.StringResource(R.string.notif_status_resurrecting, state.restartCount)
-            state.lastHeartbeatTime = System.currentTimeMillis()
+        state.restartCount++
+        state.status = UiText.StringResource(R.string.notif_status_resurrecting, state.restartCount)
+        state.lastHeartbeatTime = System.currentTimeMillis()
 
-            // Relaunch
-            serviceScope.launch {
-                val script = scriptRepository.getScriptById(state.id)
-                if (script != null) {
-                    runScriptUseCase(script)
-                } else {
-                    monitoredScripts.remove(state.id)
-                }
+        // Relaunch
+        serviceScope.launch {
+            val script = scriptRepository.getScriptById(state.id)
+            if (script != null) {
+                runScriptUseCase(script)
+            } else {
+                monitoredScripts.remove(state.id)
             }
+        }
         updateNotification()
     }
 
@@ -259,7 +261,8 @@ class HeartbeatService : Service() {
         serviceScope.cancel()
         try {
             unregisterReceiver(heartbeatReceiver)
-        } catch (_: Exception) { }
+        } catch (_: Exception) {
+        }
     }
 
     /**
@@ -295,7 +298,8 @@ class HeartbeatService : Service() {
         ).asString(this)
 
         buildAndNotify(
-            title = UiText.StringResource(R.string.notif_monitoring_title, state.name).asString(this),
+            title = UiText.StringResource(R.string.notif_monitoring_title, state.name)
+                .asString(this),
             text = contentText
         )
     }
@@ -377,7 +381,8 @@ class HeartbeatService : Service() {
                 UiText.StringResource(R.string.channel_monitor_name).asString(this),
                 NotificationManager.IMPORTANCE_LOW
             ).apply {
-                description = UiText.StringResource(R.string.channel_monitor_desc).asString(this@HeartbeatService)
+                description = UiText.StringResource(R.string.channel_monitor_desc)
+                    .asString(this@HeartbeatService)
             }
             val manager = getSystemService(NotificationManager::class.java)
             manager.createNotificationChannel(channel)

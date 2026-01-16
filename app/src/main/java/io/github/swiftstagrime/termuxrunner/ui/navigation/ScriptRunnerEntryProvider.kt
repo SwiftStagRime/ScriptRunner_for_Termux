@@ -7,6 +7,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.NavKey
 import io.github.swiftstagrime.termuxrunner.ui.MainViewModel
+import io.github.swiftstagrime.termuxrunner.ui.features.automation.AutomationRoute
 import io.github.swiftstagrime.termuxrunner.ui.features.editor.EditorRoute
 import io.github.swiftstagrime.termuxrunner.ui.features.editor.EditorViewModel
 import io.github.swiftstagrime.termuxrunner.ui.features.home.HomeRoute
@@ -39,6 +40,9 @@ fun rememberEntryProvider(
                             },
                             onNavigateToTileSettings = {
                                 mainViewModel.navigateTo(Route.TileSettings)
+                            },
+                            onNavigateToAutomation = {
+                                mainViewModel.navigateTo(Route.Automation)
                             }
                         )
                     }
@@ -72,8 +76,14 @@ fun rememberEntryProvider(
                         )
                     }
 
+                    is Route.Automation -> {
+                        AutomationRoute(
+                            onBackClick = { mainViewModel.goBack() }
+                        )
+                    }
 
                     else -> {
+
                     }
                 }
             }

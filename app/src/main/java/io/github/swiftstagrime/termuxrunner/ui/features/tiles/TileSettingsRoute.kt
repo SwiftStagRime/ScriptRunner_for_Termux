@@ -16,6 +16,7 @@ fun TileSettingsRoute(
 ) {
     val tileMappings by viewModel.tileMappings.collectAsStateWithLifecycle()
     val allScripts by viewModel.allScripts.collectAsStateWithLifecycle()
+    val allCategories by viewModel.allCategories.collectAsStateWithLifecycle()
     var activeTileSelectionIndex by remember { mutableStateOf<Int?>(null) }
 
     TileSettingsScreen(
@@ -28,6 +29,7 @@ fun TileSettingsRoute(
     if (activeTileSelectionIndex != null) {
         ScriptPickerDialog(
             scripts = allScripts,
+            categories = allCategories,
             onDismiss = { activeTileSelectionIndex = null },
             onScriptSelected = { script ->
                 viewModel.assignScript(activeTileSelectionIndex!!, script.id)

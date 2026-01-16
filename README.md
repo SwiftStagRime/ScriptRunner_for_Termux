@@ -31,19 +31,20 @@ Features
 
 ### App Showcase
 
-|                      Home                      |                      Editor                      |                                             Config & Monitoring                                              | Quick Settings Tiles |
-|:----------------------------------------------:|:------------------------------------------------:|:------------------------------------------------------------------------------------------------------------:| :---: |
+|                      Home                      |                      Editor                      |                                             Config & Monitoring                                              |                                               Quick Settings Tiles                                               |
+|:----------------------------------------------:|:------------------------------------------------:|:------------------------------------------------------------------------------------------------------------:|:----------------------------------------------------------------------------------------------------------------:|
 | <img src="screenshots/home.webp?" width="200"> | <img src="screenshots/editor.webp?" width="200"> | <img src="screenshots/config.webp?" width="200"> <br><br> <img src="screenshots/config_2.webp?" width="200"> | <img src="screenshots/tiles.webp?v=1" width="200"> <br><br> <img src="screenshots/tiles_2.webp?v=1" width="200"> |
 
 <br>
 
-| Shortcut Management | Runtime Arguments | Settings |
-| :---: | :---: | :---: |
+|                Shortcut Management                |                   Runtime Arguments                   |                     Settings                      |
+|:-------------------------------------------------:|:-----------------------------------------------------:|:-------------------------------------------------:|
 | <img src="screenshots/shortcut.webp" width="350"> | <img src="screenshots/runtime_args.webp" width="200"> | <img src="screenshots/settings.webp" width="200"> |
 
 <br>
 
 ### Live Demo
+
 <p align="center">
   <img src="screenshots/recording.webp" width="300" alt="App Recording">
   <br>

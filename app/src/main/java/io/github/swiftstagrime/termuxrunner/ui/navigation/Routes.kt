@@ -19,4 +19,7 @@ sealed interface Route : NavKey {
 
     @Serializable
     data object TileSettings : Route
+
+    @Serializable
+    data object Automation : Route
 }

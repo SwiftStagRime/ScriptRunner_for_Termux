@@ -3,7 +3,6 @@ package io.github.swiftstagrime.termuxrunner.ui.features.home
 import android.net.Uri
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -36,10 +35,10 @@ import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.PushPin
+import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.SortByAlpha
-import androidx.compose.material.icons.filled.Terminal
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -76,8 +75,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -85,18 +82,15 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
-import coil3.compose.AsyncImage
-import coil3.request.ImageRequest
-import coil3.request.crossfade
 import io.github.swiftstagrime.termuxrunner.R
 import io.github.swiftstagrime.termuxrunner.domain.model.Category
 import io.github.swiftstagrime.termuxrunner.domain.model.Script
 import io.github.swiftstagrime.termuxrunner.ui.components.ScriptConfigDialog
+import io.github.swiftstagrime.termuxrunner.ui.components.ScriptIcon
 import io.github.swiftstagrime.termuxrunner.ui.features.home.components.QuickSettingsBanner
 import io.github.swiftstagrime.termuxrunner.ui.preview.DevicePreviews
 import io.github.swiftstagrime.termuxrunner.ui.preview.sampleScripts
 import io.github.swiftstagrime.termuxrunner.ui.theme.ScriptRunnerForTermuxTheme
-import java.io.File
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -125,6 +119,7 @@ fun HomeScreen(
     onDeleteCategory: (Category) -> Unit,
     onMove: (Int, Int) -> Unit,
     onTileSettingsClick: () -> Unit,
+    onNavigateToAutomation: () -> Unit
 ) {
     var selectedScriptForConfig by remember { mutableStateOf<Script?>(null) }
     var isSearchActive by remember { mutableStateOf(false) }
@@ -224,6 +219,9 @@ fun HomeScreen(
                                 contentDescription = stringResource(R.string.cd_search)
                             )
                         }
+                        IconButton(onClick = onNavigateToAutomation) {
+                            Icon(Icons.Default.Schedule, stringResource(R.string.cd_automation))
+                        }
                         SortMenu(
                             currentSort = sortOption,
                             onSortSelected = onSortOptionChange
@@ -285,10 +283,12 @@ fun HomeScreen(
                     is HomeUiState.Success -> {
                         LazyColumn(
                             state = lazyListState,
-                            contentPadding = PaddingValues(top = 16.dp,
+                            contentPadding = PaddingValues(
+                                top = 16.dp,
                                 start = 16.dp,
                                 end = 16.dp,
-                                bottom = 88.dp ),
+                                bottom = 88.dp
+                            ),
                             verticalArrangement = Arrangement.spacedBy(10.dp),
                             modifier = Modifier
                                 .fillMaxSize()
@@ -576,37 +576,6 @@ private fun ScriptContextMenu(
 }
 
 @Composable
-private fun ScriptIcon(iconPath: String?, modifier: Modifier = Modifier) {
-    if (iconPath != null) {
-        AsyncImage(
-            model = ImageRequest.Builder(LocalContext.current)
-                .data(File(iconPath))
-                .crossfade(true)
-                .build(),
-            contentDescription = stringResource(R.string.cd_script_icon),
-            modifier = modifier
-                .clip(RoundedCornerShape(16.dp))
-                .background(MaterialTheme.colorScheme.surfaceVariant),
-            contentScale = ContentScale.Crop
-        )
-    } else {
-        Box(
-            modifier = modifier
-                .clip(RoundedCornerShape(16.dp))
-                .background(MaterialTheme.colorScheme.secondaryContainer),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(
-                imageVector = Icons.Default.Terminal,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSecondaryContainer,
-                modifier = Modifier.size(24.dp)
-            )
-        }
-    }
-}
-
-@Composable
 fun SortMenu(
     currentSort: SortOption,
     onSortSelected: (SortOption) -> Unit
@@ -822,7 +791,8 @@ private fun PreviewHomeScreen() {
             onDeleteCategory = {},
             onMove = { _, _ -> },
             onRequestNotificationPermission = {},
-            onTileSettingsClick = {}
+            onTileSettingsClick = {},
+            onNavigateToAutomation = {}
         )
     }
 }
@@ -855,7 +825,8 @@ private fun PreviewEmptyHome() {
             onDeleteCategory = {},
             onMove = { _, _ -> },
             onRequestNotificationPermission = {},
-            onTileSettingsClick = {}
+            onTileSettingsClick = {},
+            onNavigateToAutomation = {}
         )
     }
 }

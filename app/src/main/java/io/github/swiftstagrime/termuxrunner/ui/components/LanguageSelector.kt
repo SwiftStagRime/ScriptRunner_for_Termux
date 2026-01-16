@@ -125,7 +125,7 @@ fun LanguageSelectorIcon() {
 private fun PreviewSelector() {
     ScriptRunnerForTermuxTheme {
         LanguageDropdownMenu(
-            false,
+            true,
             {},
             {}
         )

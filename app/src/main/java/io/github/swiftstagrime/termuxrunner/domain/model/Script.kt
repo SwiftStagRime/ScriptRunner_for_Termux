@@ -1,15 +1,22 @@
 package io.github.swiftstagrime.termuxrunner.domain.model
 
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.Serializable
 
+/*
+    I have no idea what I marked this as serializable for
+ */
 @Serializable
-enum class InteractionMode {
+@Parcelize
+enum class InteractionMode : Parcelable {
     NONE,
     TEXT_INPUT,
     MULTI_CHOICE
 }
 
 @Serializable
+@Parcelize
 data class Script(
     val id: Int = 0,
     val name: String,
@@ -33,5 +40,5 @@ data class Script(
     val argumentPresets: List<String> = emptyList(),
     val prefixPresets: List<String> = emptyList(),
     val envVarPresets: List<String> = emptyList()
-)
+) : Parcelable
 

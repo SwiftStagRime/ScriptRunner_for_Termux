@@ -12,7 +12,9 @@ import io.github.swiftstagrime.termuxrunner.data.service.ScriptTileService2
 import io.github.swiftstagrime.termuxrunner.data.service.ScriptTileService3
 import io.github.swiftstagrime.termuxrunner.data.service.ScriptTileService4
 import io.github.swiftstagrime.termuxrunner.data.service.ScriptTileService5
+import io.github.swiftstagrime.termuxrunner.domain.model.Category
 import io.github.swiftstagrime.termuxrunner.domain.model.Script
+import io.github.swiftstagrime.termuxrunner.domain.repository.CategoryRepository
 import io.github.swiftstagrime.termuxrunner.domain.repository.ScriptRepository
 import io.github.swiftstagrime.termuxrunner.domain.repository.UserPreferencesRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -30,11 +32,18 @@ import javax.inject.Inject
 class TileSettingsViewModel @Inject constructor(
     private val prefs: UserPreferencesRepository,
     private val scriptRepo: ScriptRepository,
+    private val categoryRepository: CategoryRepository,
     @ApplicationContext private val context: Context
 ) : ViewModel() {
 
     val allScripts: StateFlow<List<Script>> = scriptRepo.getAllScripts()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    val allCategories: StateFlow<List<Category>> = categoryRepository.getAllCategories().stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = emptyList()
+    )
 
     @OptIn(ExperimentalCoroutinesApi::class)
     val tileMappings = combine(

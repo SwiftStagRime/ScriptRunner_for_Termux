@@ -21,7 +21,8 @@ class RunScriptUseCase @Inject constructor(
         script: Script,
         runtimeArgs: String? = null,
         runtimeEnv: Map<String, String>? = null,
-        runtimePrefix: String? = null
+        runtimePrefix: String? = null,
+        automationId: Int? = null
     ) = withContext(Dispatchers.IO) {
         // Sanitize and format environment variables
         val combinedEnv = script.envVars + (runtimeEnv ?: emptyMap())
@@ -86,7 +87,8 @@ class RunScriptUseCase @Inject constructor(
             sessionAction = "1",
             scriptId = script.id,
             scriptName = script.name,
-            notifyOnResult = script.notifyOnResult
+            notifyOnResult = script.notifyOnResult,
+            automationId = automationId
         )
 
         // Manage Heartbeat Service
@@ -185,7 +187,11 @@ class RunScriptUseCase @Inject constructor(
 
     // Another trick to try and force required behaviour, I do hope that passing as a wrapper will work
     // Does just fine with adb killing the process
-    private fun wrapCommandWithHeartbeat(commandToRun: String, intervalMs: Long, scriptId: Int): String {
+    private fun wrapCommandWithHeartbeat(
+        commandToRun: String,
+        intervalMs: Long,
+        scriptId: Int
+    ): String {
         val heartbeatAction = "io.github.swiftstagrime.HEARTBEAT"
         val finishedAction = "io.github.swiftstagrime.SCRIPT_FINISHED"
         val intervalSeconds = (intervalMs / 1000).coerceAtLeast(5)

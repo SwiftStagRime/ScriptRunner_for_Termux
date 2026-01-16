@@ -6,6 +6,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class ScriptExportDto(
+    val id: Int = 0,
     val name: String,
     val code: String,
     val categoryId: Int? = null,
@@ -31,6 +32,7 @@ data class ScriptExportDto(
 
 fun Script.toExportDto(base64Icon: String?): ScriptExportDto {
     return ScriptExportDto(
+        id = id,
         name = name,
         code = code,
         categoryId = categoryId,

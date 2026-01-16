@@ -40,6 +40,7 @@ fun HomeRoute(
     onNavigateToEditor: (scriptId: Int) -> Unit,
     onNavigateToSettings: () -> Unit,
     onNavigateToTileSettings: () -> Unit,
+    onNavigateToAutomation: () -> Unit,
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.homeUiState.collectAsStateWithLifecycle()
@@ -217,7 +218,8 @@ fun HomeRoute(
         onRequestNotificationPermission = {
             requestNotifications()
         },
-        onTileSettingsClick = onNavigateToTileSettings
+        onTileSettingsClick = onNavigateToTileSettings,
+        onNavigateToAutomation = onNavigateToAutomation
     )
 
     scriptToPrompt?.let { script ->

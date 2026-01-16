@@ -77,7 +77,8 @@ class TermuxRepositoryImpl @Inject constructor(
         sessionAction: String,
         scriptId: Int,
         scriptName: String,
-        notifyOnResult: Boolean
+        notifyOnResult: Boolean,
+        automationId: Int?
     ) {
         if (!isTermuxInstalled()) throw TermuxNotInstalledException()
         if (!isPermissionGranted()) throw TermuxPermissionException()
@@ -99,6 +100,9 @@ class TermuxRepositoryImpl @Inject constructor(
 
                     putExtra("script_id", scriptId)
                     putExtra("script_name", scriptName)
+                    if (automationId != null) {
+                        putExtra("automation_id", automationId)
+                    }
                 }
 
                 val flags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
@@ -107,9 +111,11 @@ class TermuxRepositoryImpl @Inject constructor(
                     PendingIntent.FLAG_UPDATE_CURRENT
                 }
 
+                val requestCode = automationId ?: scriptId
+
                 val pendingIntent = PendingIntent.getBroadcast(
                     context,
-                    scriptId,
+                    requestCode,
                     resultIntent,
                     flags
                 )
@@ -117,7 +123,6 @@ class TermuxRepositoryImpl @Inject constructor(
                 putExtra(EXTRA_PENDING_INTENT, pendingIntent)
             }
         }
-
         try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 context.startForegroundService(intent)

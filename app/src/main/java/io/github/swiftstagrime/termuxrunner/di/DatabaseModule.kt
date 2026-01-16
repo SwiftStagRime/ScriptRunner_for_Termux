@@ -8,6 +8,8 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import io.github.swiftstagrime.termuxrunner.data.local.AppDatabase
+import io.github.swiftstagrime.termuxrunner.data.local.dao.AutomationDao
+import io.github.swiftstagrime.termuxrunner.data.local.dao.AutomationLogDao
 import io.github.swiftstagrime.termuxrunner.data.local.dao.CategoryDao
 import io.github.swiftstagrime.termuxrunner.data.local.dao.ScriptDao
 import javax.inject.Singleton
@@ -43,5 +45,17 @@ object DatabaseModule {
     @Singleton
     fun provideCategoryDao(db: AppDatabase): CategoryDao {
         return db.categoryDao()
+    }
+
+    @Provides
+    @Singleton
+    fun provideAutomationDao(db: AppDatabase): AutomationDao {
+        return db.automationDao()
+    }
+
+    @Provides
+    @Singleton
+    fun provideAutomationLogDao(db: AppDatabase): AutomationLogDao {
+        return db.automationLogDao()
     }
 }

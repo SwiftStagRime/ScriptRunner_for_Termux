@@ -5,6 +5,7 @@ plugins {
     alias(libs.plugins.jetbrains.kotlin.serialization)
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt)
+    alias(libs.plugins.kotlin.parcelize)
 }
 
 android {
@@ -18,7 +19,7 @@ android {
         minSdk = 24
         targetSdk = 36
         versionCode = 1
-        versionName = "1.3"
+        versionName = "1.4"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -85,6 +86,9 @@ dependencies {
     implementation(libs.androidx.room.testing)
     implementation(libs.androidx.compose.ui.text)
     implementation(libs.androidx.compose.foundation.layout)
+    implementation(libs.androidx.work.runtime.ktx)
+    implementation(libs.androidx.hilt.common)
+    implementation(libs.androidx.hilt.work)
     ksp(libs.hilt.compiler)
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.android.database.sqlcipher)
@@ -109,6 +113,8 @@ dependencies {
     implementation(libs.kotlinx.serialization.core)
     implementation(libs.kotlinx.serialization.json)
     ksp(libs.androidx.room.compiler)
+    ksp(libs.hilt.android.compiler)
+    ksp(libs.androidx.hilt.compiler)
     implementation(libs.androidx.room.ktx)
     testImplementation(libs.androidx.room.testing)
     androidTestImplementation(libs.androidx.espresso.intents)

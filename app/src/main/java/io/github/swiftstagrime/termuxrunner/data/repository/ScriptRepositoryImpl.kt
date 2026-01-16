@@ -5,14 +5,17 @@ import android.net.Uri
 import android.provider.OpenableColumns
 import android.util.Base64
 import dagger.hilt.android.qualifiers.ApplicationContext
+import io.github.swiftstagrime.termuxrunner.data.local.dao.AutomationDao
 import io.github.swiftstagrime.termuxrunner.data.local.dao.CategoryDao
 import io.github.swiftstagrime.termuxrunner.data.local.dao.ScriptDao
 import io.github.swiftstagrime.termuxrunner.data.local.dto.CategoryExportDto
 import io.github.swiftstagrime.termuxrunner.data.local.dto.FullBackupDto
 import io.github.swiftstagrime.termuxrunner.data.local.dto.ScriptExportDto
 import io.github.swiftstagrime.termuxrunner.data.local.dto.toExportDto
+import io.github.swiftstagrime.termuxrunner.data.local.entity.AutomationEntity
 import io.github.swiftstagrime.termuxrunner.data.local.entity.CategoryEntity
 import io.github.swiftstagrime.termuxrunner.data.local.entity.ScriptEntity
+import io.github.swiftstagrime.termuxrunner.data.local.entity.toAutomationDomain
 import io.github.swiftstagrime.termuxrunner.data.local.entity.toScriptEntity
 import io.github.swiftstagrime.termuxrunner.domain.model.Script
 import io.github.swiftstagrime.termuxrunner.domain.repository.ScriptRepository
@@ -45,6 +48,7 @@ class ImportStreamException : ScriptException(
 class ScriptRepositoryImpl @Inject constructor(
     private val dao: ScriptDao,
     private val categoryDao: CategoryDao,
+    private val automationDao: AutomationDao,
     @ApplicationContext private val context: Context,
 ) : ScriptRepository {
 
@@ -57,67 +61,86 @@ class ScriptRepositoryImpl @Inject constructor(
 
     override suspend fun exportScripts(uri: Uri): Result<Unit> = runCatching {
         withContext(Dispatchers.IO) {
-            val categories = dao.getAllScriptsOneShot().map {
+            val categories = categoryDao.getAllCategoriesOneShot().map {
                 CategoryExportDto(it.id, it.name, it.orderIndex)
             }
 
             val scripts = dao.getAllScriptsOneShot().map { entity ->
                 val script = entity.toScriptDomain()
                 var base64Icon: String? = null
-                if (script.iconPath != null) {
-                    val file = File(script.iconPath)
+                script.iconPath?.let { path ->
+                    val file = File(path)
                     if (file.exists()) {
                         val bytes = file.readBytes()
                         base64Icon = Base64.encodeToString(bytes, Base64.NO_WRAP)
                     }
                 }
-                script.toExportDto(base64Icon)
+                script.toExportDto(base64Icon).copy(id = entity.id)
             }
 
-            val backup = FullBackupDto(categories = categories, scripts = scripts)
-            val jsonString = json.encodeToString(backup)
+            val automations = automationDao.getAllAutomationsOneShot().map {
+                it.toAutomationDomain().toExportDto()
+            }
 
-            context.contentResolver.openOutputStream(uri)
-                ?.use { it.write(jsonString.toByteArray()) }
-                ?: throw ExportStreamException()
+            val backup = FullBackupDto(
+                version = 3,
+                categories = categories,
+                scripts = scripts,
+                automations = automations
+            )
+
+            context.contentResolver.openOutputStream(uri)?.use { outputStream ->
+                outputStream.write(json.encodeToString(backup).toByteArray())
+            } ?: throw ExportStreamException()
         }
     }
 
     override suspend fun importScripts(uri: Uri): Result<Unit> = runCatching {
         withContext(Dispatchers.IO) {
-            val jsonString = context.contentResolver.openInputStream(uri)?.use { inputStream ->
-                BufferedReader(InputStreamReader(inputStream)).readText()
-            } ?: throw ImportStreamException()
+            val inputStream =
+                context.contentResolver.openInputStream(uri) ?: throw ImportStreamException()
 
-            val jsonElement = json.parseToJsonElement(jsonString)
+            val backup = inputStream.use { stream ->
+                val jsonString = stream.bufferedReader().readText()
+                val jsonElement = json.parseToJsonElement(jsonString)
 
-            val (categoriesDto, scriptsDto) = if (jsonElement is JsonArray) {
-                // Old Format: Just a list of scripts
-                null to json.decodeFromJsonElement<List<ScriptExportDto>>(jsonElement)
-            } else {
-                // New Format: FullBackupDto object
-                val backup = json.decodeFromJsonElement<FullBackupDto>(jsonElement)
-                backup.categories to backup.scripts
+                if (jsonElement is JsonArray) {
+                    FullBackupDto(
+                        categories = emptyList(),
+                        scripts = json.decodeFromJsonElement<List<ScriptExportDto>>(jsonElement),
+                        automations = emptyList()
+                    )
+                } else {
+                    json.decodeFromJsonElement<FullBackupDto>(jsonElement)
+                }
             }
 
+            val existingCategoryMap =
+                categoryDao.getAllCategoriesOneShot().associate { it.name to it.id }
             val categoryIdMap = mutableMapOf<Int, Int?>()
 
-            categoriesDto?.forEach { dto ->
-                val newId = categoryDao.insertCategory(
-                    CategoryEntity(
-                        name = dto.name,
-                        orderIndex = dto.orderIndex
+            backup.categories.forEach { dto ->
+                val existingId = existingCategoryMap[dto.name]
+                if (existingId != null) {
+                    categoryIdMap[dto.id] = existingId
+                } else {
+                    val newId = categoryDao.insertCategory(
+                        CategoryEntity(
+                            name = dto.name,
+                            orderIndex = dto.orderIndex
+                        )
                     )
-                )
-                categoryIdMap[dto.id] = newId.toInt()
+                    categoryIdMap[dto.id] = newId.toInt()
+                }
             }
 
-            val newEntities = scriptsDto.map { dto ->
+            val scriptIdMap = mutableMapOf<Int, Int>()
+            backup.scripts.forEach { dto ->
                 val newIconPath = saveBase64Icon(dto.iconBase64)
-
-                ScriptEntity(
+                val entity = ScriptEntity(
                     name = dto.name,
                     code = dto.code,
+                    interactionMode = dto.interactionMode,
                     interpreter = dto.interpreter,
                     fileExtension = dto.fileExtension,
                     commandPrefix = dto.commandPrefix,
@@ -134,9 +157,35 @@ class ScriptRepositoryImpl @Inject constructor(
                     notifyOnResult = dto.notifyOnResult,
                     categoryId = if (dto.categoryId != null) categoryIdMap[dto.categoryId] else null
                 )
+                val newId = dao.insertScript(entity)
+                scriptIdMap[dto.id] = newId.toInt()
             }
 
-            dao.insertScripts(newEntities)
+            val automationEntities = backup.automations.mapNotNull { dto ->
+                val newScriptId = scriptIdMap[dto.scriptId] ?: return@mapNotNull null
+
+                AutomationEntity(
+                    scriptId = newScriptId,
+                    label = dto.label,
+                    type = dto.type,
+                    scheduledTimestamp = dto.scheduledTimestamp,
+                    intervalMillis = dto.intervalMillis,
+                    daysOfWeek = dto.daysOfWeek,
+                    isEnabled = false,
+                    runIfMissed = dto.runIfMissed,
+                    lastExitCode = dto.lastExitCode,
+                    runtimeArgs = dto.runtimeArgs,
+                    runtimeEnv = dto.runtimeEnv ?: emptyMap(),
+                    runtimePrefix = dto.runtimePrefix,
+                    requireWifi = dto.requireWifi,
+                    requireCharging = dto.requireCharging,
+                    batteryThreshold = dto.batteryThreshold,
+                    lastRunTimestamp = null,
+                    nextRunTimestamp = null
+                )
+            }
+
+            automationEntities.forEach { automationDao.insertAutomation(it) }
         }
     }
 
