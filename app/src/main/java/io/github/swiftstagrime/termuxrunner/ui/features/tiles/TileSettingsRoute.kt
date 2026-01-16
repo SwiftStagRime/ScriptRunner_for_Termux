@@ -12,7 +12,7 @@ import io.github.swiftstagrime.termuxrunner.ui.components.ScriptPickerDialog
 @Composable
 fun TileSettingsRoute(
     onBack: () -> Unit,
-    viewModel: TileSettingsViewModel = hiltViewModel()
+    viewModel: TileSettingsViewModel = hiltViewModel(),
 ) {
     val tileMappings by viewModel.tileMappings.collectAsStateWithLifecycle()
     val allScripts by viewModel.allScripts.collectAsStateWithLifecycle()
@@ -23,7 +23,7 @@ fun TileSettingsRoute(
         tileMappings = tileMappings,
         onBack = onBack,
         onClearTile = viewModel::clearTile,
-        onTileClicked = { index -> activeTileSelectionIndex = index }
+        onTileClicked = { index -> activeTileSelectionIndex = index },
     )
 
     if (activeTileSelectionIndex != null) {
@@ -34,7 +34,7 @@ fun TileSettingsRoute(
             onScriptSelected = { script ->
                 viewModel.assignScript(activeTileSelectionIndex!!, script.id)
                 activeTileSelectionIndex = null
-            }
+            },
         )
     }
 }

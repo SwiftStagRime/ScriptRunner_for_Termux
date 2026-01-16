@@ -8,13 +8,14 @@ import javax.inject.Inject
 /**
  * Simple repo for better testability, saves icon and returns path
  */
-class IconRepositoryImpl @Inject constructor(
-    private val imageStorageManager: ImageStorageManager
-) : IconRepository {
-
-    override suspend fun saveIcon(uriStr: String): String? {
-        val uri = uriStr.toUri()
-        val result = imageStorageManager.saveImageFromUri(uri)
-        return result.getOrNull()
+class IconRepositoryImpl
+    @Inject
+    constructor(
+        private val imageStorageManager: ImageStorageManager,
+    ) : IconRepository {
+        override suspend fun saveIcon(uriStr: String): String? {
+            val uri = uriStr.toUri()
+            val result = imageStorageManager.saveImageFromUri(uri)
+            return result.getOrNull()
+        }
     }
-}

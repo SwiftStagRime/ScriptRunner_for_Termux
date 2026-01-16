@@ -119,13 +119,14 @@ fun HomeScreen(
     onDeleteCategory: (Category) -> Unit,
     onMove: (Int, Int) -> Unit,
     onTileSettingsClick: () -> Unit,
-    onNavigateToAutomation: () -> Unit
+    onNavigateToAutomation: () -> Unit,
 ) {
     var selectedScriptForConfig by remember { mutableStateOf<Script?>(null) }
     var isSearchActive by remember { mutableStateOf(false) }
-    val handleConfigClick: (Script) -> Unit = remember {
-        { script -> selectedScriptForConfig = script }
-    }
+    val handleConfigClick: (Script) -> Unit =
+        remember {
+            { script -> selectedScriptForConfig = script }
+        }
     val lazyListState = rememberLazyListState()
     val isManualSort = sortOption == SortOption.MANUAL
 
@@ -134,7 +135,10 @@ fun HomeScreen(
 
     val uncategorizedLabel = stringResource(R.string.uncategorized)
 
-    fun getTargetIndex(offset: Float, startBuffer: Int = 0): Int? {
+    fun getTargetIndex(
+        offset: Float,
+        startBuffer: Int = 0,
+    ): Int? {
         val layoutInfo = lazyListState.layoutInfo
         val itemInfo = layoutInfo.visibleItemsInfo
         val currentDraggingItem = itemInfo.find { it.index == draggedItemIndex } ?: return null
@@ -154,12 +158,13 @@ fun HomeScreen(
         topBar = {
             if (isSearchActive) {
                 TopAppBar(
-                    colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.background,
-                        titleContentColor = MaterialTheme.colorScheme.onSurface,
-                        navigationIconContentColor = MaterialTheme.colorScheme.onSurface,
-                        actionIconContentColor = MaterialTheme.colorScheme.primary
-                    ),
+                    colors =
+                        TopAppBarDefaults.topAppBarColors(
+                            containerColor = MaterialTheme.colorScheme.background,
+                            titleContentColor = MaterialTheme.colorScheme.onSurface,
+                            navigationIconContentColor = MaterialTheme.colorScheme.onSurface,
+                            actionIconContentColor = MaterialTheme.colorScheme.primary,
+                        ),
                     title = {
                         TextField(
                             value = searchQuery,
@@ -168,21 +173,23 @@ fun HomeScreen(
                                 Text(
                                     stringResource(R.string.search_placeholder),
                                     style = MaterialTheme.typography.bodyLarge,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
                                 )
                             },
                             singleLine = true,
-                            textStyle = MaterialTheme.typography.bodyLarge.copy(
-                                color = MaterialTheme.colorScheme.onSurface
-                            ),
-                            colors = TextFieldDefaults.colors(
-                                focusedContainerColor = Color.Transparent,
-                                unfocusedContainerColor = Color.Transparent,
-                                focusedIndicatorColor = Color.Transparent,
-                                unfocusedIndicatorColor = Color.Transparent,
-                                cursorColor = MaterialTheme.colorScheme.primary
-                            ),
-                            modifier = Modifier.fillMaxWidth()
+                            textStyle =
+                                MaterialTheme.typography.bodyLarge.copy(
+                                    color = MaterialTheme.colorScheme.onSurface,
+                                ),
+                            colors =
+                                TextFieldDefaults.colors(
+                                    focusedContainerColor = Color.Transparent,
+                                    unfocusedContainerColor = Color.Transparent,
+                                    focusedIndicatorColor = Color.Transparent,
+                                    unfocusedIndicatorColor = Color.Transparent,
+                                    cursorColor = MaterialTheme.colorScheme.primary,
+                                ),
+                            modifier = Modifier.fillMaxWidth(),
                         )
                     },
                     navigationIcon = {
@@ -192,7 +199,7 @@ fun HomeScreen(
                         }) {
                             Icon(
                                 Icons.AutoMirrored.Filled.ArrowBack,
-                                stringResource(R.string.cd_close_search)
+                                stringResource(R.string.cd_close_search),
                             )
                         }
                     },
@@ -202,21 +209,22 @@ fun HomeScreen(
                                 Icon(Icons.Default.Close, stringResource(R.string.cd_clear_search))
                             }
                         }
-                    }
+                    },
                 )
             } else {
                 TopAppBar(
-                    colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.background,
-                        titleContentColor = MaterialTheme.colorScheme.onSurface,
-                        actionIconContentColor = MaterialTheme.colorScheme.onSurface
-                    ),
+                    colors =
+                        TopAppBarDefaults.topAppBarColors(
+                            containerColor = MaterialTheme.colorScheme.background,
+                            titleContentColor = MaterialTheme.colorScheme.onSurface,
+                            actionIconContentColor = MaterialTheme.colorScheme.onSurface,
+                        ),
                     title = { Text(stringResource(R.string.home_title)) },
                     actions = {
                         IconButton(onClick = { isSearchActive = true }) {
                             Icon(
                                 Icons.Default.Search,
-                                contentDescription = stringResource(R.string.cd_search)
+                                contentDescription = stringResource(R.string.cd_search),
                             )
                         }
                         IconButton(onClick = onNavigateToAutomation) {
@@ -224,15 +232,15 @@ fun HomeScreen(
                         }
                         SortMenu(
                             currentSort = sortOption,
-                            onSortSelected = onSortOptionChange
+                            onSortSelected = onSortOptionChange,
                         )
                         IconButton(onClick = onSettingsClick) {
                             Icon(
                                 Icons.Default.Settings,
-                                contentDescription = stringResource(R.string.cd_settings)
+                                contentDescription = stringResource(R.string.cd_settings),
                             )
                         }
-                    }
+                    },
                 )
             }
         },
@@ -240,11 +248,11 @@ fun HomeScreen(
             FloatingActionButton(
                 onClick = onAddClick,
                 containerColor = MaterialTheme.colorScheme.primaryContainer,
-                contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
             ) {
                 Icon(Icons.Default.Add, contentDescription = stringResource(R.string.cd_add_script))
             }
-        }
+        },
     ) { padding ->
         Column(modifier = Modifier.padding(padding)) {
             if (uiState is HomeUiState.Success) {
@@ -253,7 +261,7 @@ fun HomeScreen(
                         tileMappings = uiState.tileMappings,
                         onTileClick = onRunClick,
                         onEmptyTileClick = onTileSettingsClick,
-                        onSettingsClick = onTileSettingsClick
+                        onSettingsClick = onTileSettingsClick,
                     )
                 }
 
@@ -263,68 +271,76 @@ fun HomeScreen(
                     categories = uiState.categories,
                     selectedCategoryId = selectedCategoryId,
                     onCategorySelect = onCategorySelect,
-                    onDeleteCategory = onDeleteCategory
+                    onDeleteCategory = onDeleteCategory,
                 )
             }
 
             Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxWidth()
+                modifier =
+                    Modifier
+                        .weight(1f)
+                        .fillMaxWidth(),
             ) {
                 when (uiState) {
                     is HomeUiState.Loading -> {
                         CircularProgressIndicator(
                             modifier = Modifier.align(Alignment.Center),
-                            color = MaterialTheme.colorScheme.primary
+                            color = MaterialTheme.colorScheme.primary,
                         )
                     }
 
                     is HomeUiState.Success -> {
                         LazyColumn(
                             state = lazyListState,
-                            contentPadding = PaddingValues(
-                                top = 16.dp,
-                                start = 16.dp,
-                                end = 16.dp,
-                                bottom = 88.dp
-                            ),
+                            contentPadding =
+                                PaddingValues(
+                                    top = 16.dp,
+                                    start = 16.dp,
+                                    end = 16.dp,
+                                    bottom = 88.dp,
+                                ),
                             verticalArrangement = Arrangement.spacedBy(10.dp),
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .then(
-                                    if (isManualSort) {
-                                        Modifier.pointerInput(Unit) {
-                                            detectDragGesturesAfterLongPress(
-                                                onDragStart = { offset ->
-                                                    lazyListState.layoutInfo.visibleItemsInfo
-                                                        .find { item ->
-                                                            offset.y.toInt() in item.offset..(item.offset + item.size)
-                                                        }?.let { draggedItemIndex = it.index }
-                                                },
-                                                onDrag = { change, dragAmount ->
-                                                    change.consume()
-                                                    dragOffset += dragAmount.y
+                            modifier =
+                                Modifier
+                                    .fillMaxSize()
+                                    .then(
+                                        if (isManualSort) {
+                                            Modifier.pointerInput(Unit) {
+                                                detectDragGesturesAfterLongPress(
+                                                    onDragStart = { offset ->
+                                                        lazyListState.layoutInfo.visibleItemsInfo
+                                                            .find { item ->
+                                                                offset.y.toInt() in item.offset..(item.offset + item.size)
+                                                            }?.let { draggedItemIndex = it.index }
+                                                    },
+                                                    onDrag = { change, dragAmount ->
+                                                        change.consume()
+                                                        dragOffset += dragAmount.y
 
-                                                    val targetIndex = getTargetIndex(dragOffset)
-                                                    if (targetIndex != null && draggedItemIndex != null && targetIndex != draggedItemIndex) {
-                                                        onMove(draggedItemIndex!!, targetIndex)
-                                                        draggedItemIndex = targetIndex
+                                                        val targetIndex = getTargetIndex(dragOffset)
+                                                        if (targetIndex != null &&
+                                                            draggedItemIndex != null &&
+                                                            targetIndex != draggedItemIndex
+                                                        ) {
+                                                            onMove(draggedItemIndex!!, targetIndex)
+                                                            draggedItemIndex = targetIndex
+                                                            dragOffset = 0f
+                                                        }
+                                                    },
+                                                    onDragEnd = {
+                                                        draggedItemIndex = null
                                                         dragOffset = 0f
-                                                    }
-                                                },
-                                                onDragEnd = {
-                                                    draggedItemIndex = null
-                                                    dragOffset = 0f
-                                                },
-                                                onDragCancel = {
-                                                    draggedItemIndex = null
-                                                    dragOffset = 0f
-                                                }
-                                            )
-                                        }
-                                    } else Modifier
-                                )
+                                                    },
+                                                    onDragCancel = {
+                                                        draggedItemIndex = null
+                                                        dragOffset = 0f
+                                                    },
+                                                )
+                                            }
+                                        } else {
+                                            Modifier
+                                        },
+                                    ),
                         ) {
                             // Only show headers if NOT in manual sort mode
                             // (Dragging across headers causes UI glitches without complex math) | but it does glitch anyway ;)
@@ -334,8 +350,9 @@ fun HomeScreen(
                             if (showHeaders) {
                                 val grouped = uiState.scripts.groupBy { it.categoryId }
                                 grouped.forEach { (catId, scripts) ->
-                                    val catName = uiState.categories.find { it.id == catId }?.name
-                                        ?: uncategorizedLabel
+                                    val catName =
+                                        uiState.categories.find { it.id == catId }?.name
+                                            ?: uncategorizedLabel
                                     item(key = "header_$catId") { CategoryHeader(catName) }
                                     items(items = scripts, key = { it.id }) { script ->
                                         ScriptItem(
@@ -344,27 +361,27 @@ fun HomeScreen(
                                             onRunClick = onRunClick,
                                             onConfigClick = handleConfigClick,
                                             onDeleteClick = onDeleteScript,
-                                            onCreateShortcutClick = onCreateShortcutClick
+                                            onCreateShortcutClick = onCreateShortcutClick,
                                         )
                                     }
                                 }
                             } else {
                                 itemsIndexed(
                                     items = uiState.scripts,
-                                    key = { _, script -> script.id }
+                                    key = { _, script -> script.id },
                                 ) { index, script ->
                                     val isDragging = index == draggedItemIndex
 
                                     Box(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .graphicsLayer {
-                                                translationY = if (isDragging) dragOffset else 0f
-                                                scaleX = if (isDragging) 1.05f else 1.0f
-                                                scaleY = if (isDragging) 1.05f else 1.0f
-                                                alpha = if (isDragging) 0.8f else 1.0f
-                                            }
-                                            .zIndex(if (isDragging) 1f else 0f)
+                                        modifier =
+                                            Modifier
+                                                .fillMaxWidth()
+                                                .graphicsLayer {
+                                                    translationY = if (isDragging) dragOffset else 0f
+                                                    scaleX = if (isDragging) 1.05f else 1.0f
+                                                    scaleY = if (isDragging) 1.05f else 1.0f
+                                                    alpha = if (isDragging) 0.8f else 1.0f
+                                                }.zIndex(if (isDragging) 1f else 0f),
                                     ) {
                                         ScriptItem(
                                             script = script,
@@ -372,7 +389,7 @@ fun HomeScreen(
                                             onRunClick = onRunClick,
                                             onConfigClick = handleConfigClick,
                                             onDeleteClick = onDeleteScript,
-                                            onCreateShortcutClick = onCreateShortcutClick
+                                            onCreateShortcutClick = onCreateShortcutClick,
                                         )
                                     }
                                 }
@@ -396,7 +413,7 @@ fun HomeScreen(
                     isBatteryUnrestricted = isBatteryUnrestricted,
                     onRequestBatteryUnrestricted = onRequestBatteryUnrestricted,
                     onAddNewCategory = onAddNewCategory,
-                    onRequestNotificationPermission = onRequestNotificationPermission
+                    onRequestNotificationPermission = onRequestNotificationPermission,
                 )
             }
         }
@@ -410,28 +427,31 @@ private fun ScriptItem(
     onConfigClick: (Script) -> Unit,
     onRunClick: (Script) -> Unit,
     onDeleteClick: (Script) -> Unit,
-    onCreateShortcutClick: (Script) -> Unit
+    onCreateShortcutClick: (Script) -> Unit,
 ) {
     Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable { onCodeClick(script) },
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .clickable { onCodeClick(script) },
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.background,
-            contentColor = MaterialTheme.colorScheme.onBackground
-        ),
+        colors =
+            CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.background,
+                contentColor = MaterialTheme.colorScheme.onBackground,
+            ),
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
     ) {
         Row(
-            modifier = Modifier
-                .padding(12.dp),
-            verticalAlignment = Alignment.CenterVertically
+            modifier =
+                Modifier
+                    .padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             ScriptIcon(
                 iconPath = script.iconPath,
-                modifier = Modifier.size(56.dp)
+                modifier = Modifier.size(56.dp),
             )
 
             Spacer(modifier = Modifier.width(16.dp))
@@ -442,16 +462,20 @@ private fun ScriptItem(
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onSurface,
                     maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
+                    overflow = TextOverflow.Ellipsis,
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = script.code.trim().take(50).replace("\n", " "),
+                    text =
+                        script.code
+                            .trim()
+                            .take(50)
+                            .replace("\n", " "),
                     style = MaterialTheme.typography.bodySmall,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    fontFamily = FontFamily.Monospace
+                    fontFamily = FontFamily.Monospace,
                 )
             }
 
@@ -459,15 +483,16 @@ private fun ScriptItem(
                 FilledIconButton(
                     onClick = { onRunClick(script) },
                     modifier = Modifier.size(40.dp),
-                    colors = IconButtonDefaults.filledIconButtonColors(
-                        containerColor = MaterialTheme.colorScheme.primaryContainer,
-                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                    )
+                    colors =
+                        IconButtonDefaults.filledIconButtonColors(
+                            containerColor = MaterialTheme.colorScheme.primaryContainer,
+                            contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                        ),
                 ) {
                     Icon(
                         Icons.Default.PlayArrow,
                         contentDescription = "Run",
-                        modifier = Modifier.size(20.dp)
+                        modifier = Modifier.size(20.dp),
                     )
                 }
 
@@ -475,7 +500,7 @@ private fun ScriptItem(
                     script = script,
                     onConfigClick = onConfigClick,
                     onCreateShortcutClick = onCreateShortcutClick,
-                    onDeleteClick = onDeleteClick
+                    onDeleteClick = onDeleteClick,
                 )
             }
         }
@@ -488,7 +513,7 @@ private fun ScriptContextMenu(
     onConfigClick: (Script) -> Unit,
     onCreateShortcutClick: (Script) -> Unit,
     onDeleteClick: (Script) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     var showMenu by remember { mutableStateOf(false) }
 
@@ -497,7 +522,7 @@ private fun ScriptContextMenu(
             Icon(
                 Icons.Default.MoreVert,
                 contentDescription = stringResource(R.string.more),
-                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
 
@@ -507,13 +532,13 @@ private fun ScriptContextMenu(
             shape = RoundedCornerShape(16.dp),
             containerColor = MaterialTheme.colorScheme.surfaceContainer,
             tonalElevation = 4.dp,
-            modifier = Modifier.width(180.dp)
+            modifier = Modifier.width(180.dp),
         ) {
             DropdownMenuItem(
                 text = {
                     Text(
                         stringResource(R.string.menu_configuration),
-                        style = MaterialTheme.typography.bodyMedium
+                        style = MaterialTheme.typography.bodyMedium,
                     )
                 },
                 leadingIcon = {
@@ -521,19 +546,19 @@ private fun ScriptContextMenu(
                         Icons.Default.Settings,
                         null,
                         tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(20.dp)
+                        modifier = Modifier.size(20.dp),
                     )
                 },
                 onClick = {
                     showMenu = false
                     onConfigClick(script)
-                }
+                },
             )
             DropdownMenuItem(
                 text = {
                     Text(
                         stringResource(R.string.menu_pin_shortcut),
-                        style = MaterialTheme.typography.bodyMedium
+                        style = MaterialTheme.typography.bodyMedium,
                     )
                 },
                 leadingIcon = {
@@ -541,13 +566,13 @@ private fun ScriptContextMenu(
                         Icons.Default.PushPin,
                         null,
                         tint = MaterialTheme.colorScheme.secondary,
-                        modifier = Modifier.size(20.dp)
+                        modifier = Modifier.size(20.dp),
                     )
                 },
                 onClick = {
                     showMenu = false
                     onCreateShortcutClick(script)
-                }
+                },
             )
             HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
             DropdownMenuItem(
@@ -555,7 +580,7 @@ private fun ScriptContextMenu(
                     Text(
                         stringResource(R.string.menu_delete),
                         color = MaterialTheme.colorScheme.error,
-                        style = MaterialTheme.typography.bodyMedium
+                        style = MaterialTheme.typography.bodyMedium,
                     )
                 },
                 leadingIcon = {
@@ -563,13 +588,13 @@ private fun ScriptContextMenu(
                         Icons.Default.Delete,
                         null,
                         tint = MaterialTheme.colorScheme.error,
-                        modifier = Modifier.size(20.dp)
+                        modifier = Modifier.size(20.dp),
                     )
                 },
                 onClick = {
                     showMenu = false
                     onDeleteClick(script)
-                }
+                },
             )
         }
     }
@@ -578,7 +603,7 @@ private fun ScriptContextMenu(
 @Composable
 fun SortMenu(
     currentSort: SortOption,
-    onSortSelected: (SortOption) -> Unit
+    onSortSelected: (SortOption) -> Unit,
 ) {
     var showMenu by remember { mutableStateOf(false) }
 
@@ -589,37 +614,52 @@ fun SortMenu(
         DropdownMenu(
             expanded = showMenu,
             onDismissRequest = { showMenu = false },
-            shape = RoundedCornerShape(12)
+            shape = RoundedCornerShape(12),
         ) {
             DropdownMenuItem(
                 text = { Text(stringResource(R.string.manual_grouped)) },
-                onClick = { onSortSelected(SortOption.MANUAL); showMenu = false },
+                onClick = {
+                    onSortSelected(SortOption.MANUAL)
+                    showMenu = false
+                },
                 leadingIcon = {
-                    if (currentSort == SortOption.MANUAL) Icon(
-                        Icons.Default.DragIndicator,
-                        stringResource(R.string.manual)
-                    )
-                }
+                    if (currentSort == SortOption.MANUAL) {
+                        Icon(
+                            Icons.Default.DragIndicator,
+                            stringResource(R.string.manual),
+                        )
+                    }
+                },
             )
             DropdownMenuItem(
                 text = { Text(stringResource(R.string.name_a_z)) },
-                onClick = { onSortSelected(SortOption.NAME_ASC); showMenu = false },
+                onClick = {
+                    onSortSelected(SortOption.NAME_ASC)
+                    showMenu = false
+                },
                 leadingIcon = {
-                    if (currentSort == SortOption.NAME_ASC) Icon(
-                        Icons.Default.SortByAlpha,
-                        stringResource(R.string.a_z)
-                    )
-                }
+                    if (currentSort == SortOption.NAME_ASC) {
+                        Icon(
+                            Icons.Default.SortByAlpha,
+                            stringResource(R.string.a_z),
+                        )
+                    }
+                },
             )
             DropdownMenuItem(
                 text = { Text(stringResource(R.string.date_flat_list)) },
-                onClick = { onSortSelected(SortOption.DATE_NEWEST); showMenu = false },
+                onClick = {
+                    onSortSelected(SortOption.DATE_NEWEST)
+                    showMenu = false
+                },
                 leadingIcon = {
-                    if (currentSort == SortOption.DATE_NEWEST) Icon(
-                        Icons.Default.History,
-                        stringResource(R.string.newest_by_date)
-                    )
-                }
+                    if (currentSort == SortOption.DATE_NEWEST) {
+                        Icon(
+                            Icons.Default.History,
+                            stringResource(R.string.newest_by_date),
+                        )
+                    }
+                },
             )
         }
     }
@@ -630,15 +670,16 @@ private fun CategoryHeader(name: String) {
     Surface(
         color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
         shape = RoundedCornerShape(8.dp),
-        modifier = Modifier
-            .padding(top = 2.dp, bottom = 2.dp)
+        modifier =
+            Modifier
+                .padding(top = 2.dp, bottom = 2.dp),
     ) {
         Text(
             text = name,
             style = MaterialTheme.typography.labelLarge,
             color = MaterialTheme.colorScheme.primary,
             fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
         )
     }
 }
@@ -648,20 +689,20 @@ fun CategoryTabs(
     categories: List<Category>,
     selectedCategoryId: Int?,
     onCategorySelect: (Int?) -> Unit,
-    onDeleteCategory: (Category) -> Unit
+    onDeleteCategory: (Category) -> Unit,
 ) {
     var categoryToEdit by remember { mutableStateOf<Category?>(null) }
 
     LazyRow(
         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 0.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         item {
             CategoryChip(
                 label = "All",
                 isSelected = selectedCategoryId == null,
-                onClick = { onCategorySelect(null) }
+                onClick = { onCategorySelect(null) },
             )
         }
 
@@ -670,7 +711,7 @@ fun CategoryTabs(
                 label = category.name,
                 isSelected = selectedCategoryId == category.id,
                 onClick = { onCategorySelect(category.id) },
-                onLongClick = { categoryToEdit = category }
+                onLongClick = { categoryToEdit = category },
             )
         }
     }
@@ -683,8 +724,8 @@ fun CategoryTabs(
                 Text(
                     stringResource(
                         R.string.scripts_in_will_be_moved_to_uncategorized_this_cannot_be_undone,
-                        cat.name
-                    )
+                        cat.name,
+                    ),
                 )
             },
             confirmButton = {
@@ -700,7 +741,7 @@ fun CategoryTabs(
                     categoryToEdit = null
                 }) { Text(stringResource(R.string.cancel)) }
             },
-            shape = RoundedCornerShape(28.dp)
+            shape = RoundedCornerShape(28.dp),
         )
     }
 }
@@ -710,55 +751,61 @@ private fun CategoryChip(
     label: String,
     isSelected: Boolean,
     onClick: () -> Unit,
-    onLongClick: (() -> Unit)? = null
+    onLongClick: (() -> Unit)? = null,
 ) {
     var isPressed by remember { mutableStateOf(false) }
 
-    val backgroundColor = when {
-        isSelected -> MaterialTheme.colorScheme.primaryContainer
-        isPressed -> MaterialTheme.colorScheme.surfaceContainerHighest
-        else -> MaterialTheme.colorScheme.surfaceContainer
-    }
+    val backgroundColor =
+        when {
+            isSelected -> MaterialTheme.colorScheme.primaryContainer
+            isPressed -> MaterialTheme.colorScheme.surfaceContainerHighest
+            else -> MaterialTheme.colorScheme.surfaceContainer
+        }
 
-    val contentColor = if (isSelected)
-        MaterialTheme.colorScheme.primary
-    else
-        MaterialTheme.colorScheme.onSurfaceVariant
+    val contentColor =
+        if (isSelected) {
+            MaterialTheme.colorScheme.primary
+        } else {
+            MaterialTheme.colorScheme.onSurfaceVariant
+        }
 
-    val borderColor = if (isSelected)
-        MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
-    else
-        MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+    val borderColor =
+        if (isSelected) {
+            MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
+        } else {
+            MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+        }
 
     Surface(
-        modifier = Modifier
-            .clip(RoundedCornerShape(12.dp))
-            .pointerInput(Unit) {
-                detectTapGestures(
-                    onPress = {
-                        try {
-                            isPressed = true
-                            awaitRelease()
-                        } finally {
+        modifier =
+            Modifier
+                .clip(RoundedCornerShape(12.dp))
+                .pointerInput(Unit) {
+                    detectTapGestures(
+                        onPress = {
+                            try {
+                                isPressed = true
+                                awaitRelease()
+                            } finally {
+                                isPressed = false
+                            }
+                        },
+                        onTap = { onClick() },
+                        onLongPress = {
                             isPressed = false
-                        }
-                    },
-                    onTap = { onClick() },
-                    onLongPress = {
-                        isPressed = false
-                        onLongClick?.invoke()
-                    }
-                )
-            },
+                            onLongClick?.invoke()
+                        },
+                    )
+                },
         color = backgroundColor,
         shape = RoundedCornerShape(12.dp),
-        border = BorderStroke(1.dp, borderColor)
+        border = BorderStroke(1.dp, borderColor),
     ) {
         Text(
             text = label,
             style = MaterialTheme.typography.labelLarge,
             color = contentColor,
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
         )
     }
 }
@@ -792,7 +839,7 @@ private fun PreviewHomeScreen() {
             onMove = { _, _ -> },
             onRequestNotificationPermission = {},
             onTileSettingsClick = {},
-            onNavigateToAutomation = {}
+            onNavigateToAutomation = {},
         )
     }
 }
@@ -826,7 +873,7 @@ private fun PreviewEmptyHome() {
             onMove = { _, _ -> },
             onRequestNotificationPermission = {},
             onTileSettingsClick = {},
-            onNavigateToAutomation = {}
+            onNavigateToAutomation = {},
         )
     }
 }

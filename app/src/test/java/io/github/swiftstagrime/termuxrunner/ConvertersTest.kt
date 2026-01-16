@@ -5,7 +5,6 @@ import junit.framework.TestCase.assertEquals
 import org.junit.Test
 
 class ConvertersTest {
-
     private val converters = Converters()
 
     @Test

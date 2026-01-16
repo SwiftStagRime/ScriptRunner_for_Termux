@@ -14,10 +14,10 @@ import io.github.swiftstagrime.termuxrunner.domain.model.AutomationType
             entity = ScriptEntity::class,
             parentColumns = ["id"],
             childColumns = ["scriptId"],
-            onDelete = ForeignKey.CASCADE
-        )
+            onDelete = ForeignKey.CASCADE,
+        ),
     ],
-    indices = [Index("scriptId")]
+    indices = [Index("scriptId")],
 )
 data class AutomationEntity(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
@@ -37,47 +37,49 @@ data class AutomationEntity(
     val runtimePrefix: String? = null,
     val requireWifi: Boolean = false,
     val requireCharging: Boolean = false,
-    val batteryThreshold: Int = 0
+    val batteryThreshold: Int = 0,
 )
 
-fun AutomationEntity.toAutomationDomain() = Automation(
-    id = id,
-    scriptId = scriptId,
-    type = type,
-    scheduledTimestamp = scheduledTimestamp,
-    intervalMillis = intervalMillis,
-    daysOfWeek = daysOfWeek,
-    isEnabled = isEnabled,
-    lastRunTimestamp = lastRunTimestamp,
-    runtimeArgs = runtimeArgs,
-    runtimeEnv = runtimeEnv,
-    runtimePrefix = runtimePrefix,
-    label = label,
-    runIfMissed = runIfMissed,
-    lastExitCode = lastExitCode,
-    nextRunTimestamp = nextRunTimestamp,
-    requireWifi = requireWifi,
-    requireCharging = requireCharging,
-    batteryThreshold = batteryThreshold
-)
+fun AutomationEntity.toAutomationDomain() =
+    Automation(
+        id = id,
+        scriptId = scriptId,
+        type = type,
+        scheduledTimestamp = scheduledTimestamp,
+        intervalMillis = intervalMillis,
+        daysOfWeek = daysOfWeek,
+        isEnabled = isEnabled,
+        lastRunTimestamp = lastRunTimestamp,
+        runtimeArgs = runtimeArgs,
+        runtimeEnv = runtimeEnv,
+        runtimePrefix = runtimePrefix,
+        label = label,
+        runIfMissed = runIfMissed,
+        lastExitCode = lastExitCode,
+        nextRunTimestamp = nextRunTimestamp,
+        requireWifi = requireWifi,
+        requireCharging = requireCharging,
+        batteryThreshold = batteryThreshold,
+    )
 
-fun Automation.toEntity() = AutomationEntity(
-    id = id,
-    scriptId = scriptId,
-    type = type,
-    scheduledTimestamp = scheduledTimestamp,
-    intervalMillis = intervalMillis,
-    daysOfWeek = daysOfWeek,
-    isEnabled = isEnabled,
-    lastRunTimestamp = lastRunTimestamp,
-    nextRunTimestamp = nextRunTimestamp,
-    runtimeArgs = runtimeArgs,
-    runtimeEnv = runtimeEnv,
-    runtimePrefix = runtimePrefix,
-    label = label,
-    runIfMissed = runIfMissed,
-    lastExitCode = lastExitCode,
-    requireWifi = requireWifi,
-    requireCharging = requireCharging,
-    batteryThreshold = batteryThreshold
-)
+fun Automation.toEntity() =
+    AutomationEntity(
+        id = id,
+        scriptId = scriptId,
+        type = type,
+        scheduledTimestamp = scheduledTimestamp,
+        intervalMillis = intervalMillis,
+        daysOfWeek = daysOfWeek,
+        isEnabled = isEnabled,
+        lastRunTimestamp = lastRunTimestamp,
+        nextRunTimestamp = nextRunTimestamp,
+        runtimeArgs = runtimeArgs,
+        runtimeEnv = runtimeEnv,
+        runtimePrefix = runtimePrefix,
+        label = label,
+        runIfMissed = runIfMissed,
+        lastExitCode = lastExitCode,
+        requireWifi = requireWifi,
+        requireCharging = requireCharging,
+        batteryThreshold = batteryThreshold,
+    )

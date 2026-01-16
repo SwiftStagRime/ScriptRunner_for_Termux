@@ -15,55 +15,58 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class MainViewModel @Inject constructor(
-    private val userPreferencesRepository: UserPreferencesRepository
-) : ViewModel() {
+class MainViewModel
+    @Inject
+    constructor(
+        private val userPreferencesRepository: UserPreferencesRepository,
+    ) : ViewModel() {
+        private val _backStack = mutableListOf<NavKey>()
+        val backStack = MutableStateFlow<List<NavKey>>(emptyList())
 
-    private val _backStack = mutableListOf<NavKey>()
-    val backStack = MutableStateFlow<List<NavKey>>(emptyList())
-
-    init {
-        viewModelScope.launch {
-            userPreferencesRepository.hasCompletedOnboarding.collect { completed ->
-                if (_backStack.isEmpty()) {
-                    val start = if (completed) Route.Home else Route.Onboarding
-                    setRoot(start)
+        init {
+            viewModelScope.launch {
+                userPreferencesRepository.hasCompletedOnboarding.collect { completed ->
+                    if (_backStack.isEmpty()) {
+                        val start = if (completed) Route.Home else Route.Onboarding
+                        setRoot(start)
+                    }
                 }
             }
         }
-    }
 
-    val selectedAccent = userPreferencesRepository.selectedAccent
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), AppTheme.GREEN)
+        val selectedAccent =
+            userPreferencesRepository.selectedAccent
+                .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), AppTheme.GREEN)
 
-    val selectedMode = userPreferencesRepository.selectedMode
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), ThemeMode.SYSTEM)
+        val selectedMode =
+            userPreferencesRepository.selectedMode
+                .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), ThemeMode.SYSTEM)
 
-    fun navigateTo(key: NavKey) {
-        val current = _backStack.toMutableList()
-        current.add(key)
-        updateStack(current)
-    }
-
-    fun goBack() {
-        val current = _backStack.toMutableList()
-        if (current.size > 1) {
-            current.removeAt(current.lastIndex)
+        fun navigateTo(key: NavKey) {
+            val current = _backStack.toMutableList()
+            current.add(key)
             updateStack(current)
         }
-    }
 
-    fun replaceRoot(key: NavKey) {
-        updateStack(listOf(key))
-    }
+        fun goBack() {
+            val current = _backStack.toMutableList()
+            if (current.size > 1) {
+                current.removeAt(current.lastIndex)
+                updateStack(current)
+            }
+        }
 
-    private fun setRoot(key: NavKey) {
-        updateStack(listOf(key))
-    }
+        fun replaceRoot(key: NavKey) {
+            updateStack(listOf(key))
+        }
 
-    private fun updateStack(newStack: List<NavKey>) {
-        _backStack.clear()
-        _backStack.addAll(newStack)
-        backStack.value = newStack.toList()
+        private fun setRoot(key: NavKey) {
+            updateStack(listOf(key))
+        }
+
+        private fun updateStack(newStack: List<NavKey>) {
+            _backStack.clear()
+            _backStack.addAll(newStack)
+            backStack.value = newStack.toList()
+        }
     }
-}

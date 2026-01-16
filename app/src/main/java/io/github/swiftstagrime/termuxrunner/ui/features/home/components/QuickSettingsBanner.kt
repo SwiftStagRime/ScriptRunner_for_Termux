@@ -47,55 +47,57 @@ import io.github.swiftstagrime.termuxrunner.domain.model.Script
 import io.github.swiftstagrime.termuxrunner.ui.preview.DevicePreviews
 import java.io.File
 
-
 @Composable
 fun QuickSettingsBanner(
     tileMappings: Map<Int, Script?>,
     onTileClick: (Script) -> Unit,
     onEmptyTileClick: () -> Unit,
     onSettingsClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     Card(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 16.dp),
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 16.dp),
         shape = RoundedCornerShape(24.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.tertiaryContainer,
-            contentColor = MaterialTheme.colorScheme.onTertiaryContainer
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+        colors =
+            CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
+            ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
     ) {
         Column(
-            modifier = Modifier.padding(16.dp)
+            modifier = Modifier.padding(16.dp),
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 Icon(
                     imageVector = Icons.Default.Bolt,
                     contentDescription = null,
                     modifier = Modifier.size(18.dp),
-                    tint = MaterialTheme.colorScheme.onTertiaryContainer
+                    tint = MaterialTheme.colorScheme.onTertiaryContainer,
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
                     text = stringResource(R.string.title_tile_settings),
                     style = MaterialTheme.typography.labelLarge,
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onTertiaryContainer
+                    color = MaterialTheme.colorScheme.onTertiaryContainer,
                 )
             }
 
             Spacer(modifier = Modifier.height(12.dp))
 
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 8.dp, vertical = 0.dp),
-                verticalAlignment = Alignment.Top
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 8.dp, vertical = 0.dp),
+                verticalAlignment = Alignment.Top,
             ) {
                 Row(
                     modifier = Modifier.weight(1f),
@@ -108,7 +110,7 @@ fun QuickSettingsBanner(
                             script = script,
                             onClick = {
                                 if (script != null) onTileClick(script) else onEmptyTileClick()
-                            }
+                            },
                         )
                     }
                 }
@@ -117,17 +119,17 @@ fun QuickSettingsBanner(
 
                 Box(
                     modifier = Modifier.height(48.dp),
-                    contentAlignment = Alignment.Center
+                    contentAlignment = Alignment.Center,
                 ) {
                     IconButton(
                         onClick = onSettingsClick,
-                        modifier = Modifier.size(32.dp)
+                        modifier = Modifier.size(32.dp),
                     ) {
                         Icon(
                             imageVector = Icons.Default.Settings,
                             contentDescription = "Configure Tiles",
                             modifier = Modifier.size(22.dp),
-                            tint = MaterialTheme.colorScheme.onTertiaryContainer.copy(alpha = 0.7f)
+                            tint = MaterialTheme.colorScheme.onTertiaryContainer.copy(alpha = 0.7f),
                         )
                     }
                 }
@@ -136,56 +138,62 @@ fun QuickSettingsBanner(
     }
 }
 
-
 @Composable
 fun TileCircleItem(
     index: Int,
     script: Script?,
-    onClick: () -> Unit
+    onClick: () -> Unit,
 ) {
     val isAssigned = script != null
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.width(IntrinsicSize.Min)
+        modifier = Modifier.width(IntrinsicSize.Min),
     ) {
         Box(
-            modifier = Modifier
-                .size(48.dp)
-                .clip(CircleShape)
-                .clickable(onClick = onClick)
-                .background(
-                    if (isAssigned) MaterialTheme.colorScheme.surface
-                    else MaterialTheme.colorScheme.surface.copy(alpha = 0.2f)
-                )
-                .then(
-                    if (!isAssigned) {
-                        Modifier.border(
-                            width = 1.dp,
-                            color = MaterialTheme.colorScheme.onTertiaryContainer.copy(alpha = 0.3f),
-                            shape = CircleShape
-                        )
-                    } else Modifier
-                ),
-            contentAlignment = Alignment.Center
+            modifier =
+                Modifier
+                    .size(48.dp)
+                    .clip(CircleShape)
+                    .clickable(onClick = onClick)
+                    .background(
+                        if (isAssigned) {
+                            MaterialTheme.colorScheme.surface
+                        } else {
+                            MaterialTheme.colorScheme.surface.copy(alpha = 0.2f)
+                        },
+                    ).then(
+                        if (!isAssigned) {
+                            Modifier.border(
+                                width = 1.dp,
+                                color = MaterialTheme.colorScheme.onTertiaryContainer.copy(alpha = 0.3f),
+                                shape = CircleShape,
+                            )
+                        } else {
+                            Modifier
+                        },
+                    ),
+            contentAlignment = Alignment.Center,
         ) {
             if (script != null) {
                 if (script.iconPath != null) {
                     AsyncImage(
-                        model = ImageRequest.Builder(LocalContext.current)
-                            .data(File(script.iconPath))
-                            .crossfade(true)
-                            .build(),
+                        model =
+                            ImageRequest
+                                .Builder(LocalContext.current)
+                                .data(File(script.iconPath))
+                                .crossfade(true)
+                                .build(),
                         contentDescription = null,
                         modifier = Modifier.fillMaxSize(),
-                        contentScale = ContentScale.Crop
+                        contentScale = ContentScale.Crop,
                     )
                 } else {
                     Text(
                         text = index.toString(),
                         style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.primary
+                        color = MaterialTheme.colorScheme.primary,
                     )
                 }
             } else {
@@ -193,7 +201,7 @@ fun TileCircleItem(
                     imageVector = Icons.Default.Add,
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.onTertiaryContainer.copy(alpha = 0.5f),
-                    modifier = Modifier.size(18.dp)
+                    modifier = Modifier.size(18.dp),
                 )
             }
         }
@@ -207,10 +215,9 @@ fun TileCircleItem(
                 overflow = TextOverflow.Ellipsis,
                 textAlign = TextAlign.Center,
                 color = MaterialTheme.colorScheme.onTertiaryContainer,
-                modifier = Modifier.width(52.dp)
+                modifier = Modifier.width(52.dp),
             )
         } else {
-
             Spacer(modifier = Modifier.height(16.dp))
         }
     }
@@ -219,13 +226,14 @@ fun TileCircleItem(
 @DevicePreviews
 @Composable
 fun QuickSettingsBannerPreview() {
-    val mockScripts = mapOf(
-        1 to Script(id = 1, name = "Update System", code = ""),
-        2 to Script(id = 2, name = "Clean Logs", code = ""),
-        3 to null,
-        4 to Script(id = 4, name = "Start Web", code = ""),
-        5 to null
-    )
+    val mockScripts =
+        mapOf(
+            1 to Script(id = 1, name = "Update System", code = ""),
+            2 to Script(id = 2, name = "Clean Logs", code = ""),
+            3 to null,
+            4 to Script(id = 4, name = "Start Web", code = ""),
+            5 to null,
+        )
 
     MaterialTheme {
         Surface(color = MaterialTheme.colorScheme.background) {
@@ -233,7 +241,7 @@ fun QuickSettingsBannerPreview() {
                 tileMappings = mockScripts,
                 onTileClick = {},
                 onEmptyTileClick = {},
-                onSettingsClick = {}
+                onSettingsClick = {},
             )
         }
     }

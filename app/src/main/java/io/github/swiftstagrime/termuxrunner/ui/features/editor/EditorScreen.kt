@@ -45,14 +45,14 @@ fun EditorScreen(
     onRequestNotificationPermission: () -> Unit,
     onRequestBatteryUnrestricted: () -> Unit,
     onHeartbeatToggle: (Boolean) -> Unit,
-    onProcessImage: suspend (Uri) -> String?
+    onProcessImage: suspend (Uri) -> String?,
 ) {
     var codeState by remember(script.id) {
         mutableStateOf(
             TextFieldValue(
                 text = script.code,
-                selection = TextRange(script.code.length)
-            )
+                selection = TextRange(script.code.length),
+            ),
         )
     }
 
@@ -68,12 +68,12 @@ fun EditorScreen(
                         Text(
                             currentScriptObj.name.ifBlank { stringResource(R.string.editor_untitled) },
                             maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
+                            overflow = TextOverflow.Ellipsis,
                         )
                         Text(
                             "${currentScriptObj.interpreter} • ${currentScriptObj.fileExtension}",
                             style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }
                 },
@@ -81,7 +81,7 @@ fun EditorScreen(
                     IconButton(onClick = onBack) {
                         Icon(
                             Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = stringResource(R.string.back_description)
+                            contentDescription = stringResource(R.string.back_description),
                         )
                     }
                 },
@@ -90,21 +90,20 @@ fun EditorScreen(
                         Icon(
                             Icons.Default.Save,
                             contentDescription = stringResource(R.string.cd_save),
-                            tint = MaterialTheme.colorScheme.primary
+                            tint = MaterialTheme.colorScheme.primary,
                         )
                     }
-                }
+                },
             )
-        }
+        },
     ) { padding ->
 
         CodeEditor(
             code = codeState,
             onCodeChange = { codeState = it },
             interpreter = currentScriptObj.interpreter,
-            modifier = Modifier.padding(padding)
+            modifier = Modifier.padding(padding),
         )
-
 
         if (showConfigDialog) {
             ScriptConfigDialog(
@@ -121,7 +120,7 @@ fun EditorScreen(
                 onHeartbeatToggle = onHeartbeatToggle,
                 isBatteryUnrestricted = isBatteryUnrestricted,
                 onRequestBatteryUnrestricted = onRequestBatteryUnrestricted,
-                onRequestNotificationPermission = onRequestNotificationPermission
+                onRequestNotificationPermission = onRequestNotificationPermission,
             )
         }
     }
@@ -132,17 +131,19 @@ fun EditorScreen(
 private fun PreviewEditorNewRaw() {
     ScriptRunnerForTermuxTheme {
         EditorScreen(
-            script = Script(
-                id = 1,
-                name = "Complex Logic",
-                code = """
-                    #!/bin/bash
-                    echo "Hello World"
-                    for i in {1..10}; do
-                       echo "Counting i"
-                    done
-                """.trimIndent()
-            ),
+            script =
+                Script(
+                    id = 1,
+                    name = "Complex Logic",
+                    code =
+                        """
+                        #!/bin/bash
+                        echo "Hello World"
+                        for i in {1..10}; do
+                           echo "Counting i"
+                        done
+                        """.trimIndent(),
+                ),
             onBack = {},
             onSave = {},
             onProcessImage = { null },
@@ -152,7 +153,7 @@ private fun PreviewEditorNewRaw() {
             onRequestBatteryUnrestricted = {},
             categories = emptyList(),
             onAddNewCategory = {},
-            onRequestNotificationPermission = {}
+            onRequestNotificationPermission = {},
         )
     }
 }

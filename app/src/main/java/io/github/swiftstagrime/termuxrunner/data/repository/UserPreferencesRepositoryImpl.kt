@@ -21,57 +21,64 @@ import javax.inject.Inject
  */
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "app_settings")
 
-class UserPreferencesRepositoryImpl @Inject constructor(
-    @ApplicationContext private val context: Context
-) : UserPreferencesRepository {
-
-    private object Keys {
-        val THEME_ACCENT = stringPreferencesKey("theme_accent")
-        val THEME_MODE = stringPreferencesKey("theme_mode")
-        val ONBOARDING_COMPLETED = booleanPreferencesKey("onboarding_completed")
-    }
-
-    override val selectedAccent: Flow<AppTheme> = context.dataStore.data
-        .map { prefs ->
-            val name = prefs[Keys.THEME_ACCENT] ?: AppTheme.GREEN.name
-            AppTheme.valueOf(name)
+class UserPreferencesRepositoryImpl
+    @Inject
+    constructor(
+        @ApplicationContext private val context: Context,
+    ) : UserPreferencesRepository {
+        private object Keys {
+            val THEME_ACCENT = stringPreferencesKey("theme_accent")
+            val THEME_MODE = stringPreferencesKey("theme_mode")
+            val ONBOARDING_COMPLETED = booleanPreferencesKey("onboarding_completed")
         }
 
-    override val selectedMode: Flow<ThemeMode> = context.dataStore.data
-        .map { prefs ->
-            val name = prefs[Keys.THEME_MODE] ?: ThemeMode.SYSTEM.name
-            ThemeMode.valueOf(name)
+        override val selectedAccent: Flow<AppTheme> =
+            context.dataStore.data
+                .map { prefs ->
+                    val name = prefs[Keys.THEME_ACCENT] ?: AppTheme.GREEN.name
+                    AppTheme.valueOf(name)
+                }
+
+        override val selectedMode: Flow<ThemeMode> =
+            context.dataStore.data
+                .map { prefs ->
+                    val name = prefs[Keys.THEME_MODE] ?: ThemeMode.SYSTEM.name
+                    ThemeMode.valueOf(name)
+                }
+
+        override suspend fun setAccent(accent: AppTheme) {
+            context.dataStore.edit { it[Keys.THEME_ACCENT] = accent.name }
         }
 
-    override suspend fun setAccent(accent: AppTheme) {
-        context.dataStore.edit { it[Keys.THEME_ACCENT] = accent.name }
-    }
+        override suspend fun setMode(mode: ThemeMode) {
+            context.dataStore.edit { it[Keys.THEME_MODE] = mode.name }
+        }
 
-    override suspend fun setMode(mode: ThemeMode) {
-        context.dataStore.edit { it[Keys.THEME_MODE] = mode.name }
-    }
+        override val hasCompletedOnboarding: Flow<Boolean> =
+            context.dataStore.data
+                .map { preferences -> preferences[Keys.ONBOARDING_COMPLETED] ?: false }
 
-    override val hasCompletedOnboarding: Flow<Boolean> = context.dataStore.data
-        .map { preferences -> preferences[Keys.ONBOARDING_COMPLETED] ?: false }
+        override suspend fun setOnboardingCompleted(completed: Boolean) {
+            context.dataStore.edit { it[Keys.ONBOARDING_COMPLETED] = completed }
+        }
 
+        private fun getTileKey(index: Int) = intPreferencesKey("qs_tile_${index}_script_id")
 
-    override suspend fun setOnboardingCompleted(completed: Boolean) {
-        context.dataStore.edit { it[Keys.ONBOARDING_COMPLETED] = completed }
-    }
+        override fun getScriptIdForTile(tileIndex: Int): Flow<Int?> =
+            context.dataStore.data
+                .map { preferences -> preferences[getTileKey(tileIndex)] }
 
-    private fun getTileKey(index: Int) = intPreferencesKey("qs_tile_${index}_script_id")
-
-    override fun getScriptIdForTile(tileIndex: Int): Flow<Int?> = context.dataStore.data
-        .map { preferences -> preferences[getTileKey(tileIndex)] }
-
-    override suspend fun setScriptIdForTile(tileIndex: Int, scriptId: Int?) {
-        context.dataStore.edit { preferences ->
-            val key = getTileKey(tileIndex)
-            if (scriptId == null) {
-                preferences.remove(key)
-            } else {
-                preferences[key] = scriptId
+        override suspend fun setScriptIdForTile(
+            tileIndex: Int,
+            scriptId: Int?,
+        ) {
+            context.dataStore.edit { preferences ->
+                val key = getTileKey(tileIndex)
+                if (scriptId == null) {
+                    preferences.remove(key)
+                } else {
+                    preferences[key] = scriptId
+                }
             }
         }
     }
-}

@@ -56,7 +56,7 @@ fun TileSettingsScreen(
     tileMappings: Map<Int, Script?>,
     onBack: () -> Unit,
     onClearTile: (Int) -> Unit,
-    onTileClicked: (Int) -> Unit
+    onTileClicked: (Int) -> Unit,
 ) {
     Scaffold(
         topBar = {
@@ -64,54 +64,60 @@ fun TileSettingsScreen(
                 title = {
                     Text(
                         stringResource(R.string.title_tile_settings),
-                        fontWeight = FontWeight.SemiBold
+                        fontWeight = FontWeight.SemiBold,
                     )
                 },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = stringResource(R.string.back)
+                            contentDescription = stringResource(R.string.back),
                         )
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.background,
-                    scrolledContainerColor = MaterialTheme.colorScheme.background
-                )
+                colors =
+                    TopAppBarDefaults.topAppBarColors(
+                        containerColor = MaterialTheme.colorScheme.background,
+                        scrolledContainerColor = MaterialTheme.colorScheme.background,
+                    ),
             )
         },
-        containerColor = MaterialTheme.colorScheme.background
+        containerColor = MaterialTheme.colorScheme.background,
     ) { padding ->
         LazyColumn(
-            modifier = Modifier
-                .padding(padding)
-                .fillMaxSize(),
+            modifier =
+                Modifier
+                    .padding(padding)
+                    .fillMaxSize(),
             contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             item {
                 Card(
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.6f),
-                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                    ),
+                    colors =
+                        CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.6f),
+                            contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                        ),
                     shape = RoundedCornerShape(16.dp),
-                    modifier = Modifier.padding(bottom = 8.dp)
+                    modifier = Modifier.padding(bottom = 8.dp),
                 ) {
                     Row(
                         modifier = Modifier.padding(16.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                        verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Icon(
                             imageVector = Icons.Default.Info,
                             contentDescription = null,
-                            modifier = Modifier.size(24.dp)
+                            modifier = Modifier.size(24.dp),
                         )
                         Spacer(modifier = Modifier.width(12.dp))
                         Text(
-                            text = stringResource(R.string.assign_scripts_to_these_slots_you_can_then_trigger_them_directly_from_your_phone_s_quick_settings_panel),
-                            style = MaterialTheme.typography.bodyMedium
+                            text =
+                                stringResource(
+                                    R.string.assign_scripts_to_these_slots_you_can_then_trigger_them_directly_from_your_phone_s_quick_settings_panel,
+                                ),
+                            style = MaterialTheme.typography.bodyMedium,
                         )
                     }
                 }
@@ -125,49 +131,62 @@ fun TileSettingsScreen(
                 Card(
                     onClick = { onTileClicked(tileIndex) },
                     shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surface,
-                        contentColor = MaterialTheme.colorScheme.onSurface
-                    ),
+                    colors =
+                        CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.surface,
+                            contentColor = MaterialTheme.colorScheme.onSurface,
+                        ),
                     elevation = CardDefaults.elevatedCardElevation(defaultElevation = 2.dp),
-                    border = BorderStroke(
-                        1.dp,
-                        MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
-                    )
+                    border =
+                        BorderStroke(
+                            1.dp,
+                            MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
+                        ),
                 ) {
                     Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Box(
-                            modifier = Modifier
-                                .size(48.dp)
-                                .clip(CircleShape)
-                                .background(
-                                    if (isAssigned) MaterialTheme.colorScheme.primaryContainer
-                                    else MaterialTheme.colorScheme.surfaceVariant
-                                ),
-                            contentAlignment = Alignment.Center
+                            modifier =
+                                Modifier
+                                    .size(48.dp)
+                                    .clip(CircleShape)
+                                    .background(
+                                        if (isAssigned) {
+                                            MaterialTheme.colorScheme.primaryContainer
+                                        } else {
+                                            MaterialTheme.colorScheme.surfaceVariant
+                                        },
+                                    ),
+                            contentAlignment = Alignment.Center,
                         ) {
                             if (isAssigned && assignedScript.iconPath != null) {
                                 AsyncImage(
-                                    model = ImageRequest.Builder(LocalContext.current)
-                                        .data(File(assignedScript.iconPath))
-                                        .crossfade(true)
-                                        .build(),
+                                    model =
+                                        ImageRequest
+                                            .Builder(LocalContext.current)
+                                            .data(File(assignedScript.iconPath))
+                                            .crossfade(true)
+                                            .build(),
                                     contentDescription = null,
                                     modifier = Modifier.fillMaxSize(),
-                                    contentScale = ContentScale.Crop
+                                    contentScale = ContentScale.Crop,
                                 )
                             } else {
                                 Text(
                                     text = tileIndex.toString(),
                                     style = MaterialTheme.typography.titleLarge,
                                     fontWeight = FontWeight.Bold,
-                                    color = if (isAssigned) MaterialTheme.colorScheme.onPrimaryContainer
-                                    else MaterialTheme.colorScheme.onSurfaceVariant
+                                    color =
+                                        if (isAssigned) {
+                                            MaterialTheme.colorScheme.onPrimaryContainer
+                                        } else {
+                                            MaterialTheme.colorScheme.onSurfaceVariant
+                                        },
                                 )
                             }
                         }
@@ -178,36 +197,42 @@ fun TileSettingsScreen(
                             Text(
                                 text = stringResource(R.string.tile_slot_label, tileIndex),
                                 style = MaterialTheme.typography.labelMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
                             Spacer(modifier = Modifier.height(2.dp))
                             Text(
-                                text = assignedScript?.name
-                                    ?: stringResource(R.string.tile_unassigned),
+                                text =
+                                    assignedScript?.name
+                                        ?: stringResource(R.string.tile_unassigned),
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = if (isAssigned) FontWeight.Bold else FontWeight.Normal,
-                                color = if (isAssigned) MaterialTheme.colorScheme.primary
-                                else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                                color =
+                                    if (isAssigned) {
+                                        MaterialTheme.colorScheme.primary
+                                    } else {
+                                        MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                                    },
                             )
                         }
 
                         if (isAssigned) {
                             IconButton(
                                 onClick = { onClearTile(tileIndex) },
-                                colors = IconButtonDefaults.iconButtonColors(
-                                    contentColor = MaterialTheme.colorScheme.error
-                                )
+                                colors =
+                                    IconButtonDefaults.iconButtonColors(
+                                        contentColor = MaterialTheme.colorScheme.error,
+                                    ),
                             ) {
                                 Icon(
                                     Icons.Default.Close,
-                                    contentDescription = stringResource(R.string.clear)
+                                    contentDescription = stringResource(R.string.clear),
                                 )
                             }
                         } else {
                             Icon(
                                 imageVector = Icons.Default.ChevronRight,
                                 contentDescription = null,
-                                tint = MaterialTheme.colorScheme.outline
+                                tint = MaterialTheme.colorScheme.outline,
                             )
                         }
                     }
@@ -220,20 +245,21 @@ fun TileSettingsScreen(
 @DevicePreviews
 @Composable
 fun TileSettingsScreenPreview() {
-    val mockMappings = mapOf(
-        1 to Script(id = 1, name = "Production Backup", code = ""),
-        2 to null,
-        3 to Script(id = 3, name = "Check Network", code = ""),
-        4 to null,
-        5 to null
-    )
+    val mockMappings =
+        mapOf(
+            1 to Script(id = 1, name = "Production Backup", code = ""),
+            2 to null,
+            3 to Script(id = 3, name = "Check Network", code = ""),
+            4 to null,
+            5 to null,
+        )
 
     MaterialTheme {
         TileSettingsScreen(
             tileMappings = mockMappings,
             onBack = {},
             onClearTile = {},
-            onTileClicked = {}
+            onTileClicked = {},
         )
     }
 }

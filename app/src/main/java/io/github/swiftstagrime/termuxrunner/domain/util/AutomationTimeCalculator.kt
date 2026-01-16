@@ -7,7 +7,7 @@ import java.util.Calendar
 object AutomationTimeCalculator {
     fun calculateNextRun(
         automation: AutomationEntity,
-        fromTime: Long = System.currentTimeMillis()
+        fromTime: Long = System.currentTimeMillis(),
     ): Long? {
         val baseTime = automation.scheduledTimestamp
 
@@ -33,18 +33,19 @@ object AutomationTimeCalculator {
     private fun calculateNextWeeklyTimestamp(
         allowedDays: List<Int>,
         scheduledTime: Long,
-        fromTime: Long
+        fromTime: Long,
     ): Long? {
         if (allowedDays.isEmpty()) return null
 
-        val target = Calendar.getInstance().apply {
-            val calScheduled = Calendar.getInstance().apply { timeInMillis = scheduledTime }
-            timeInMillis = fromTime
-            set(Calendar.HOUR_OF_DAY, calScheduled.get(Calendar.HOUR_OF_DAY))
-            set(Calendar.MINUTE, calScheduled.get(Calendar.MINUTE))
-            set(Calendar.SECOND, calScheduled.get(Calendar.SECOND))
-            set(Calendar.MILLISECOND, 0)
-        }
+        val target =
+            Calendar.getInstance().apply {
+                val calScheduled = Calendar.getInstance().apply { timeInMillis = scheduledTime }
+                timeInMillis = fromTime
+                set(Calendar.HOUR_OF_DAY, calScheduled.get(Calendar.HOUR_OF_DAY))
+                set(Calendar.MINUTE, calScheduled.get(Calendar.MINUTE))
+                set(Calendar.SECOND, calScheduled.get(Calendar.SECOND))
+                set(Calendar.MILLISECOND, 0)
+            }
 
         for (i in 0..14) {
             val currentDayOfWeek = target.get(Calendar.DAY_OF_WEEK)
@@ -56,7 +57,10 @@ object AutomationTimeCalculator {
         return null
     }
 
-    fun getNextRuns(automation: AutomationEntity, count: Int = 3): List<Long> {
+    fun getNextRuns(
+        automation: AutomationEntity,
+        count: Int = 3,
+    ): List<Long> {
         val runs = mutableListOf<Long>()
         var lastFoundTime = System.currentTimeMillis()
 

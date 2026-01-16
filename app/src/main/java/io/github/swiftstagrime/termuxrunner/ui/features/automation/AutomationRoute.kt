@@ -40,7 +40,7 @@ import kotlinx.coroutines.delay
 @Composable
 fun AutomationRoute(
     onBackClick: () -> Unit,
-    viewModel: AutomationViewModel = hiltViewModel()
+    viewModel: AutomationViewModel = hiltViewModel(),
 ) {
     val context = LocalContext.current
     val colorError = MaterialTheme.colorScheme.error.toArgb()
@@ -62,9 +62,12 @@ fun AutomationRoute(
 
     fun checkPermission() {
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        hasExactAlarmPermission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            alarmManager.canScheduleExactAlarms()
-        } else true
+        hasExactAlarmPermission =
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                alarmManager.canScheduleExactAlarms()
+            } else {
+                true
+            }
     }
 
     val timeTicker by produceState(System.currentTimeMillis()) {
@@ -74,31 +77,35 @@ fun AutomationRoute(
         }
     }
 
-    val uiItems = remember(automations, allScripts, timeTicker) {
-        val scriptMap = allScripts.associateBy { it.id }
-        automations.map { automation ->
-            val script = scriptMap[automation.scriptId]
-            AutomationUiItem(
-                automation = automation,
-                scriptName = script?.name ?: "Unknown",
-                scriptIconPath = script?.iconPath,
-                nextRunText = AutomationFormatter.formatNextRun(
-                    context,
-                    automation.nextRunTimestamp
-                ),
-                lastRunText = AutomationFormatter.formatLastRun(
-                    context,
-                    automation.lastRunTimestamp,
-                    automation.lastExitCode
-                ),
-                statusColor = when (automation.lastExitCode) {
-                    0 -> colorSuccess
-                    null -> colorIdle
-                    else -> colorError
-                }
-            )
+    val uiItems =
+        remember(automations, allScripts, timeTicker) {
+            val scriptMap = allScripts.associateBy { it.id }
+            automations.map { automation ->
+                val script = scriptMap[automation.scriptId]
+                AutomationUiItem(
+                    automation = automation,
+                    scriptName = script?.name ?: "Unknown",
+                    scriptIconPath = script?.iconPath,
+                    nextRunText =
+                        AutomationFormatter.formatNextRun(
+                            context,
+                            automation.nextRunTimestamp,
+                        ),
+                    lastRunText =
+                        AutomationFormatter.formatLastRun(
+                            context,
+                            automation.lastRunTimestamp,
+                            automation.lastExitCode,
+                        ),
+                    statusColor =
+                        when (automation.lastExitCode) {
+                            0 -> colorSuccess
+                            null -> colorIdle
+                            else -> colorError
+                        },
+                )
+            }
         }
-    }
 
     val historyLogs by produceState(emptyList(), selectedAutomationForHistory) {
         selectedAutomationForHistory?.let {
@@ -108,9 +115,10 @@ fun AutomationRoute(
 
     val lifecycleOwner = LocalLifecycleOwner.current
     DisposableEffect(lifecycleOwner) {
-        val observer = LifecycleEventObserver { _, event ->
-            if (event == Lifecycle.Event.ON_RESUME) checkPermission()
-        }
+        val observer =
+            LifecycleEventObserver { _, event ->
+                if (event == Lifecycle.Event.ON_RESUME) checkPermission()
+            }
         lifecycleOwner.lifecycle.addObserver(observer)
         onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
@@ -126,14 +134,15 @@ fun AutomationRoute(
                 if (script.interactionMode != InteractionMode.NONE) {
                     showRuntimeDialog = true
                 } else {
-                    capturedRuntimeParams = ScriptRuntimeParams(
-                        arguments = script.executionParams,
-                        prefix = script.commandPrefix,
-                        envVars = script.envVars
-                    )
+                    capturedRuntimeParams =
+                        ScriptRuntimeParams(
+                            arguments = script.executionParams,
+                            prefix = script.commandPrefix,
+                            envVars = script.envVars,
+                        )
                     showScheduleConfig = true
                 }
-            }
+            },
         )
     }
 
@@ -148,7 +157,7 @@ fun AutomationRoute(
                 capturedRuntimeParams = ScriptRuntimeParams(args, prefix, env)
                 showRuntimeDialog = false
                 showScheduleConfig = true
-            }
+            },
         )
     }
 
@@ -163,24 +172,30 @@ fun AutomationRoute(
             onSave = { label, type, time, interval, days, missed, wifi, charging, batteryThreshold ->
                 viewModel.saveAutomation(
                     scriptId = selectedScriptForAutomation!!.id,
-                    label = label, type = type, timestamp = time,
-                    interval = interval, days = days, runIfMissed = missed,
-                    requireWifi = wifi, requireCharging = charging,
+                    label = label,
+                    type = type,
+                    timestamp = time,
+                    interval = interval,
+                    days = days,
+                    runIfMissed = missed,
+                    requireWifi = wifi,
+                    requireCharging = charging,
                     batteryThreshold = batteryThreshold,
-                    runtime = capturedRuntimeParams ?: ScriptRuntimeParams()
+                    runtime = capturedRuntimeParams ?: ScriptRuntimeParams(),
                 )
                 showScheduleConfig = false
                 selectedScriptForAutomation = null
                 capturedRuntimeParams = null
-            }
+            },
         )
     }
 
     AutomationScreen(
-        uiState = AutomationUiState(
-            items = uiItems,
-            isExactAlarmPermissionGranted = hasExactAlarmPermission
-        ),
+        uiState =
+            AutomationUiState(
+                items = uiItems,
+                isExactAlarmPermissionGranted = hasExactAlarmPermission,
+            ),
         onBackClick = onBackClick,
         onToggleAutomation = viewModel::toggleAutomation,
         onDeleteAutomation = viewModel::deleteAutomation,
@@ -189,29 +204,30 @@ fun AutomationRoute(
         onShowHistory = { selectedAutomationForHistory = it },
         onRequestPermission = {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                val intent = try {
-                    Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM).apply {
-                        data = Uri.fromParts("package", context.packageName, null)
+                val intent =
+                    try {
+                        Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM).apply {
+                            data = Uri.fromParts("package", context.packageName, null)
+                        }
+                    } catch (e: Exception) {
+                        Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                            data = Uri.fromParts("package", context.packageName, null)
+                        }
                     }
-                } catch (e: Exception) {
-                    Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
-                        data = Uri.fromParts("package", context.packageName, null)
-                    }
-                }
                 context.startActivity(intent)
             }
-        }
+        },
     )
 
     if (selectedAutomationForHistory != null) {
         ModalBottomSheet(
             onDismissRequest = { selectedAutomationForHistory = null },
             sheetState = rememberModalBottomSheetState(),
-            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
         ) {
             AutomationHistorySheet(
                 automationName = selectedAutomationForHistory?.label ?: "",
-                logs = historyLogs
+                logs = historyLogs,
             )
         }
     }

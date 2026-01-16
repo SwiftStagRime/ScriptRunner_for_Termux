@@ -2,6 +2,7 @@ package io.github.swiftstagrime.termuxrunner.domain.repository
 
 interface TermuxRepository {
     fun isTermuxInstalled(): Boolean
+
     fun isPermissionGranted(): Boolean
 
     fun requestTermuxOverlay()
@@ -13,7 +14,7 @@ interface TermuxRepository {
         scriptId: Int,
         scriptName: String,
         notifyOnResult: Boolean,
-        automationId: Int? = null
+        automationId: Int? = null,
     )
 
     fun isTermuxBatteryOptimized(): Boolean

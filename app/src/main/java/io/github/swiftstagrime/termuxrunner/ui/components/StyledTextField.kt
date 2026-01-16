@@ -35,35 +35,38 @@ fun StyledTextField(
     trailingIcon: @Composable (() -> Unit)? = null,
     placeholder: @Composable (() -> Unit)? = null,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
-    visualTransformation: VisualTransformation = VisualTransformation.None
+    visualTransformation: VisualTransformation = VisualTransformation.None,
 ) {
     var isFocused by remember { mutableStateOf(false) }
     val isFloating = isFocused || value.isNotEmpty()
 
     val labelBgColor by animateColorAsState(
-        targetValue = when {
-            isError && isFloating -> MaterialTheme.colorScheme.error
-            isFloating -> MaterialTheme.colorScheme.primary
-            else -> Color.Transparent
-        },
-        label = "labelBg"
+        targetValue =
+            when {
+                isError && isFloating -> MaterialTheme.colorScheme.error
+                isFloating -> MaterialTheme.colorScheme.primary
+                else -> Color.Transparent
+            },
+        label = "labelBg",
     )
 
     val labelTextColor by animateColorAsState(
-        targetValue = when {
-            isError && isFloating -> MaterialTheme.colorScheme.onError
-            isFloating -> MaterialTheme.colorScheme.onPrimary
-            isError -> MaterialTheme.colorScheme.error
-            else -> MaterialTheme.colorScheme.onSurfaceVariant
-        },
-        label = "labelTx"
+        targetValue =
+            when {
+                isError && isFloating -> MaterialTheme.colorScheme.onError
+                isFloating -> MaterialTheme.colorScheme.onPrimary
+                isError -> MaterialTheme.colorScheme.error
+                else -> MaterialTheme.colorScheme.onSurfaceVariant
+            },
+        label = "labelTx",
     )
 
     OutlinedTextField(
         value = value,
         onValueChange = onValueChange,
-        modifier = modifier
-            .onFocusChanged { isFocused = it.isFocused },
+        modifier =
+            modifier
+                .onFocusChanged { isFocused = it.isFocused },
         isError = isError,
         readOnly = readOnly,
         supportingText = supportingText,
@@ -73,15 +76,15 @@ fun StyledTextField(
                 color = labelTextColor,
                 style = MaterialTheme.typography.bodySmall,
                 fontWeight = if (isFloating) FontWeight.Bold else FontWeight.Normal,
-                modifier = Modifier
-                    .background(
-                        color = labelBgColor,
-                        shape = RoundedCornerShape(4.dp)
-                    )
-                    .padding(
-                        horizontal = if (isFloating) 6.dp else 0.dp,
-                        vertical = if (isFloating) 2.dp else 0.dp
-                    )
+                modifier =
+                    Modifier
+                        .background(
+                            color = labelBgColor,
+                            shape = RoundedCornerShape(4.dp),
+                        ).padding(
+                            horizontal = if (isFloating) 6.dp else 0.dp,
+                            vertical = if (isFloating) 2.dp else 0.dp,
+                        ),
             )
         },
         leadingIcon = leadingIcon,
@@ -91,15 +94,16 @@ fun StyledTextField(
         keyboardOptions = keyboardOptions,
         visualTransformation = visualTransformation,
         shape = RoundedCornerShape(12.dp),
-        colors = OutlinedTextFieldDefaults.colors(
-            unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainerLow,
-            focusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
-            unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
-            focusedBorderColor = MaterialTheme.colorScheme.primary,
-            errorBorderColor = MaterialTheme.colorScheme.error,
-            cursorColor = MaterialTheme.colorScheme.primary,
-            errorCursorColor = MaterialTheme.colorScheme.error,
-            errorSupportingTextColor = MaterialTheme.colorScheme.error
-        )
+        colors =
+            OutlinedTextFieldDefaults.colors(
+                unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+                focusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+                unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
+                focusedBorderColor = MaterialTheme.colorScheme.primary,
+                errorBorderColor = MaterialTheme.colorScheme.error,
+                cursorColor = MaterialTheme.colorScheme.primary,
+                errorCursorColor = MaterialTheme.colorScheme.error,
+                errorSupportingTextColor = MaterialTheme.colorScheme.error,
+            ),
     )
 }

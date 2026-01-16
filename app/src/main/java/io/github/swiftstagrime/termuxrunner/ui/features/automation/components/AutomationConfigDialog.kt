@@ -79,7 +79,17 @@ import java.util.Locale
 fun AutomationConfigDialog(
     script: Script,
     onDismiss: () -> Unit,
-    onSave: (label: String, type: AutomationType, timestamp: Long, interval: Long, days: List<Int>, runIfMissed: Boolean, wifi: Boolean, charging: Boolean, batteryThreshold: Int) -> Unit
+    onSave: (
+        label: String,
+        type: AutomationType,
+        timestamp: Long,
+        interval: Long,
+        days: List<Int>,
+        runIfMissed: Boolean,
+        wifi: Boolean,
+        charging: Boolean,
+        batteryThreshold: Int,
+    ) -> Unit,
 ) {
     var label by rememberSaveable { mutableStateOf(script.name) }
     var type by rememberSaveable { mutableStateOf(AutomationType.ONE_TIME) }
@@ -102,45 +112,49 @@ fun AutomationConfigDialog(
     var requireCharging by rememberSaveable { mutableStateOf(false) }
     var batteryThreshold by rememberSaveable { mutableIntStateOf(0) }
 
-    val upcomingRuns = remember(
-        type,
-        selectedDate,
-        selectedHour,
-        selectedMinute,
-        intervalValue,
-        selectedDays
-    ) {
-        val temp = AutomationEntity(
-            scriptId = script.id,
-            label = "",
-            type = type,
-            scheduledTimestamp = selectedDate,
-            intervalMillis = (intervalValue.toLongOrNull() ?: 60) * 60_000L,
-            daysOfWeek = selectedDays
-        )
-        AutomationTimeCalculator.getNextRuns(temp, 3)
-    }
+    val upcomingRuns =
+        remember(
+            type,
+            selectedDate,
+            selectedHour,
+            selectedMinute,
+            intervalValue,
+            selectedDays,
+        ) {
+            val temp =
+                AutomationEntity(
+                    scriptId = script.id,
+                    label = "",
+                    type = type,
+                    scheduledTimestamp = selectedDate,
+                    intervalMillis = (intervalValue.toLongOrNull() ?: 60) * 60_000L,
+                    daysOfWeek = selectedDays,
+                )
+            AutomationTimeCalculator.getNextRuns(temp, 3)
+        }
 
     Dialog(onDismissRequest = onDismiss) {
         Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 16.dp)
-                .imePadding(),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 16.dp)
+                    .imePadding(),
             shape = RoundedCornerShape(28.dp),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh)
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
         ) {
             Column(
-                modifier = Modifier
-                    .padding(24.dp)
-                    .verticalScroll(rememberScrollState()),
-                verticalArrangement = Arrangement.spacedBy(24.dp)
+                modifier =
+                    Modifier
+                        .padding(24.dp)
+                        .verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(24.dp),
             ) {
                 Text(
                     text = stringResource(R.string.automation_title),
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.primary
+                    color = MaterialTheme.colorScheme.primary,
                 )
 
                 ConfigSection(title = stringResource(R.string.automation_section_general)) {
@@ -150,12 +164,13 @@ fun AutomationConfigDialog(
                         label = { Text(stringResource(R.string.automation_label_hint)) },
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(12.dp),
-                        colors = TextFieldDefaults.colors(
-                            focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
-                            unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
-                            focusedIndicatorColor = Color.Transparent,
-                            unfocusedIndicatorColor = Color.Transparent
-                        )
+                        colors =
+                            TextFieldDefaults.colors(
+                                focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
+                                unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
+                                focusedIndicatorColor = Color.Transparent,
+                                unfocusedIndicatorColor = Color.Transparent,
+                            ),
                     )
                 }
 
@@ -165,18 +180,20 @@ fun AutomationConfigDialog(
                             SegmentedButton(
                                 selected = type == automationType,
                                 onClick = { type = automationType },
-                                shape = SegmentedButtonDefaults.itemShape(
-                                    index,
-                                    AutomationType.entries.size
-                                )
+                                shape =
+                                    SegmentedButtonDefaults.itemShape(
+                                        index,
+                                        AutomationType.entries.size,
+                                    ),
                             ) {
                                 Text(
-                                    text = when (automationType) {
-                                        AutomationType.ONE_TIME -> stringResource(R.string.automation_type_one_time)
-                                        AutomationType.PERIODIC -> stringResource(R.string.automation_type_periodic)
-                                        AutomationType.WEEKLY -> stringResource(R.string.automation_type_weekly)
-                                    },
-                                    style = MaterialTheme.typography.labelSmall
+                                    text =
+                                        when (automationType) {
+                                            AutomationType.ONE_TIME -> stringResource(R.string.automation_type_one_time)
+                                            AutomationType.PERIODIC -> stringResource(R.string.automation_type_periodic)
+                                            AutomationType.WEEKLY -> stringResource(R.string.automation_type_weekly)
+                                        },
+                                    style = MaterialTheme.typography.labelSmall,
                                 )
                             }
                         }
@@ -186,31 +203,33 @@ fun AutomationConfigDialog(
                 ConfigSection(title = stringResource(R.string.automation_section_schedule)) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
                     ) {
                         if (type == AutomationType.ONE_TIME) {
                             DateTimeButton(
                                 icon = Icons.Default.CalendarToday,
-                                text = SimpleDateFormat("MMM dd", Locale.getDefault()).format(
-                                    Date(
-                                        selectedDate
-                                    )
-                                ),
+                                text =
+                                    SimpleDateFormat("MMM dd", Locale.getDefault()).format(
+                                        Date(
+                                            selectedDate,
+                                        ),
+                                    ),
                                 modifier = Modifier.weight(1f),
-                                onClick = { showDatePicker = true }
+                                onClick = { showDatePicker = true },
                             )
                         }
 
                         DateTimeButton(
                             icon = Icons.Default.AccessTime,
-                            text = String.format(
-                                Locale.getDefault(),
-                                "%02d:%02d",
-                                selectedHour,
-                                selectedMinute
-                            ),
+                            text =
+                                String.format(
+                                    Locale.getDefault(),
+                                    "%02d:%02d",
+                                    selectedHour,
+                                    selectedMinute,
+                                ),
                             modifier = Modifier.weight(1f),
-                            onClick = { showTimePicker = true }
+                            onClick = { showTimePicker = true },
                         )
                     }
 
@@ -224,17 +243,18 @@ fun AutomationConfigDialog(
                                 Icon(
                                     Icons.Default.Timer,
                                     null,
-                                    modifier = Modifier.size(20.dp)
+                                    modifier = Modifier.size(20.dp),
                                 )
                             },
                             shape = RoundedCornerShape(12.dp),
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                            colors = TextFieldDefaults.colors(
-                                focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
-                                unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
-                                focusedIndicatorColor = Color.Transparent,
-                                unfocusedIndicatorColor = Color.Transparent
-                            )
+                            colors =
+                                TextFieldDefaults.colors(
+                                    focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
+                                    unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
+                                    focusedIndicatorColor = Color.Transparent,
+                                    unfocusedIndicatorColor = Color.Transparent,
+                                ),
                         )
                     }
 
@@ -242,44 +262,46 @@ fun AutomationConfigDialog(
                         DayOfWeekPicker(
                             selectedDays = selectedDays,
                             onToggleDay = { day ->
-                                selectedDays = if (selectedDays.contains(day)) {
-                                    selectedDays - day
-                                } else {
-                                    selectedDays + day
-                                }
-                            }
+                                selectedDays =
+                                    if (selectedDays.contains(day)) {
+                                        selectedDays - day
+                                    } else {
+                                        selectedDays + day
+                                    }
+                            },
                         )
                     }
                 }
 
                 ConfigSection(title = stringResource(R.string.automation_section_conditions)) {
                     Column(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(16.dp))
-                            .background(MaterialTheme.colorScheme.surfaceContainerLowest)
+                        modifier =
+                            Modifier
+                                .clip(RoundedCornerShape(16.dp))
+                                .background(MaterialTheme.colorScheme.surfaceContainerLowest),
                     ) {
                         AutomationOptionTile(
                             title = stringResource(R.string.automation_run_if_missed),
                             checked = runIfMissed,
-                            onCheckedChange = { runIfMissed = it }
+                            onCheckedChange = { runIfMissed = it },
                         )
                         HorizontalDivider(
                             modifier = Modifier.padding(horizontal = 16.dp),
-                            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)
+                            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f),
                         )
                         AutomationOptionTile(
                             title = stringResource(R.string.automation_condition_wifi),
                             checked = requireWifi,
-                            onCheckedChange = { requireWifi = it }
+                            onCheckedChange = { requireWifi = it },
                         )
                         HorizontalDivider(
                             modifier = Modifier.padding(horizontal = 16.dp),
-                            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)
+                            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f),
                         )
                         AutomationOptionTile(
                             title = stringResource(R.string.automation_condition_charging),
                             checked = requireCharging,
-                            onCheckedChange = { requireCharging = it }
+                            onCheckedChange = { requireCharging = it },
                         )
 
                         Column(modifier = Modifier.padding(16.dp)) {
@@ -287,20 +309,20 @@ fun AutomationConfigDialog(
                                 Text(
                                     text = stringResource(R.string.label_battery_threshold),
                                     style = MaterialTheme.typography.bodyLarge,
-                                    modifier = Modifier.weight(1f)
+                                    modifier = Modifier.weight(1f),
                                 )
                                 Text(
                                     text = "$batteryThreshold%",
                                     style = MaterialTheme.typography.labelLarge,
                                     color = MaterialTheme.colorScheme.primary,
-                                    fontWeight = FontWeight.Bold
+                                    fontWeight = FontWeight.Bold,
                                 )
                             }
                             Slider(
                                 value = batteryThreshold.toFloat(),
                                 onValueChange = { batteryThreshold = it.toInt() },
                                 valueRange = 0f..100f,
-                                steps = 19
+                                steps = 19,
                             )
                         }
                     }
@@ -311,34 +333,37 @@ fun AutomationConfigDialog(
                         Surface(
                             color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.1f),
                             shape = RoundedCornerShape(12.dp),
-                            border = BorderStroke(
-                                1.dp,
-                                MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
-                            )
+                            border =
+                                BorderStroke(
+                                    1.dp,
+                                    MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
+                                ),
                         ) {
                             Column(
-                                modifier = Modifier
-                                    .padding(12.dp)
-                                    .fillMaxWidth()
+                                modifier =
+                                    Modifier
+                                        .padding(12.dp)
+                                        .fillMaxWidth(),
                             ) {
                                 upcomingRuns.forEach { time ->
                                     Row(
                                         modifier = Modifier.padding(vertical = 4.dp),
-                                        verticalAlignment = Alignment.CenterVertically
+                                        verticalAlignment = Alignment.CenterVertically,
                                     ) {
                                         Icon(
                                             Icons.Default.Schedule,
                                             null,
                                             modifier = Modifier.size(14.dp),
-                                            tint = MaterialTheme.colorScheme.primary
+                                            tint = MaterialTheme.colorScheme.primary,
                                         )
                                         Spacer(modifier = Modifier.width(8.dp))
                                         Text(
-                                            text = SimpleDateFormat(
-                                                "MMM dd, HH:mm",
-                                                Locale.getDefault()
-                                            ).format(Date(time)),
-                                            style = MaterialTheme.typography.labelMedium
+                                            text =
+                                                SimpleDateFormat(
+                                                    "MMM dd, HH:mm",
+                                                    Locale.getDefault(),
+                                                ).format(Date(time)),
+                                            style = MaterialTheme.typography.labelMedium,
                                         )
                                     }
                                 }
@@ -353,12 +378,13 @@ fun AutomationConfigDialog(
                     Button(
                         shape = RoundedCornerShape(12.dp),
                         onClick = {
-                            val calendar = Calendar.getInstance().apply {
-                                timeInMillis = selectedDate
-                                set(Calendar.HOUR_OF_DAY, selectedHour)
-                                set(Calendar.MINUTE, selectedMinute)
-                                set(Calendar.SECOND, 0)
-                            }
+                            val calendar =
+                                Calendar.getInstance().apply {
+                                    timeInMillis = selectedDate
+                                    set(Calendar.HOUR_OF_DAY, selectedHour)
+                                    set(Calendar.MINUTE, selectedMinute)
+                                    set(Calendar.SECOND, 0)
+                                }
                             onSave(
                                 label.ifBlank { script.name },
                                 type,
@@ -368,9 +394,9 @@ fun AutomationConfigDialog(
                                 runIfMissed,
                                 requireWifi,
                                 requireCharging,
-                                batteryThreshold
+                                batteryThreshold,
                             )
-                        }
+                        },
                     ) {
                         Text(stringResource(R.string.automation_save_button))
                     }
@@ -388,7 +414,7 @@ fun AutomationConfigDialog(
                     datePickerState.selectedDateMillis?.let { selectedDate = it }
                     showDatePicker = false
                 }) { Text(stringResource(R.string.ok)) }
-            }
+            },
         ) { DatePicker(state = datePickerState) }
     }
 
@@ -404,20 +430,23 @@ fun AutomationConfigDialog(
                     showTimePicker = false
                 }) { Text(stringResource(R.string.ok)) }
             },
-            text = { TimePicker(state = timePickerState) }
+            text = { TimePicker(state = timePickerState) },
         )
     }
 }
 
 @Composable
-private fun ConfigSection(title: String, content: @Composable () -> Unit) {
+private fun ConfigSection(
+    title: String,
+    content: @Composable () -> Unit,
+) {
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Text(
             text = title.uppercase(),
             style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.primary,
             fontWeight = FontWeight.Black,
-            letterSpacing = 1.2.sp
+            letterSpacing = 1.2.sp,
         )
         content()
     }
@@ -428,25 +457,25 @@ private fun DateTimeButton(
     icon: ImageVector,
     text: String,
     modifier: Modifier = Modifier,
-    onClick: () -> Unit
+    onClick: () -> Unit,
 ) {
     Surface(
         onClick = onClick,
         modifier = modifier.height(56.dp),
         shape = RoundedCornerShape(12.dp),
         color = MaterialTheme.colorScheme.surfaceContainerLowest,
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)),
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 16.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Start
+            horizontalArrangement = Arrangement.Start,
         ) {
             Icon(
                 icon,
                 null,
                 modifier = Modifier.size(20.dp),
-                tint = MaterialTheme.colorScheme.primary
+                tint = MaterialTheme.colorScheme.primary,
             )
             Spacer(modifier = Modifier.width(12.dp))
             Text(text, style = MaterialTheme.typography.bodyLarge)
@@ -458,28 +487,29 @@ private fun DateTimeButton(
 private fun AutomationOptionTile(
     title: String,
     checked: Boolean,
-    onCheckedChange: (Boolean) -> Unit
+    onCheckedChange: (Boolean) -> Unit,
 ) {
     Surface(
         onClick = { onCheckedChange(!checked) },
         shape = RoundedCornerShape(16.dp),
-        color = MaterialTheme.colorScheme.surfaceContainerLowest
+        color = MaterialTheme.colorScheme.surfaceContainerLowest,
     ) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             Text(
                 text = title,
                 style = MaterialTheme.typography.bodyLarge,
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(1f),
             )
             Switch(
                 checked = checked,
-                onCheckedChange = onCheckedChange
+                onCheckedChange = onCheckedChange,
             )
         }
     }

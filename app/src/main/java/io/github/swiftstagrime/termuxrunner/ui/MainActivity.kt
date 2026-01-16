@@ -22,7 +22,6 @@ import io.github.swiftstagrime.termuxrunner.ui.theme.ScriptRunnerForTermuxTheme
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
-
     private val mainViewModel: MainViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -37,25 +36,22 @@ class MainActivity : AppCompatActivity() {
             ScriptRunnerForTermuxTheme(accent = accent, mode = mode) {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
+                    color = MaterialTheme.colorScheme.background,
                 ) {
                     val entryProvider = rememberEntryProvider(mainViewModel)
                     val saveableStateHolder = rememberSaveableStateHolder()
                     if (backStack.isNotEmpty()) {
                         NavDisplay(
                             backStack = backStack,
-
                             onBack = { mainViewModel.goBack() },
-
-                            entryDecorators = listOf(
-                                remember(saveableStateHolder) {
-                                    SaveableStateHolderNavEntryDecorator(saveableStateHolder)
-                                },
-
-                                rememberViewModelStoreNavEntryDecorator()
-                            ),
-
-                            entryProvider = entryProvider
+                            entryDecorators =
+                                listOf(
+                                    remember(saveableStateHolder) {
+                                        SaveableStateHolderNavEntryDecorator(saveableStateHolder)
+                                    },
+                                    rememberViewModelStoreNavEntryDecorator(),
+                                ),
+                            entryProvider = entryProvider,
                         )
                     }
                 }

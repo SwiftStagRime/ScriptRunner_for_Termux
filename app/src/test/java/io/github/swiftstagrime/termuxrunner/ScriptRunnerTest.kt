@@ -34,7 +34,6 @@ import org.junit.Test
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class ScriptRunnerTest {
-
     @MockK
     lateinit var termuxRepository: TermuxRepository
 
@@ -59,7 +58,9 @@ class ScriptRunnerTest {
             Base64.encodeToString(any<ByteArray>(), any())
         } answers { call ->
             val bytes = call.invocation.args[0] as ByteArray
-            java.util.Base64.getEncoder().encodeToString(bytes)
+            java.util.Base64
+                .getEncoder()
+                .encodeToString(bytes)
         }
     }
 
@@ -70,89 +71,95 @@ class ScriptRunnerTest {
     }
 
     @Test
-    fun `RunScriptUseCase generates correct bash command for small scripts`() = runTest {
-        val script = Script(
-            id = 1,
-            name = "Test",
-            code = "echo 'Hello'",
-            interpreter = "bash",
-            fileExtension = "sh",
-            commandPrefix = "",
-            runInBackground = true,
-            openNewSession = false,
-            executionParams = "",
-            iconPath = null,
-            envVars = mapOf("API_KEY" to "123"),
-            keepSessionOpen = false
-        )
+    fun `RunScriptUseCase generates correct bash command for small scripts`() =
+        runTest {
+            val script =
+                Script(
+                    id = 1,
+                    name = "Test",
+                    code = "echo 'Hello'",
+                    interpreter = "bash",
+                    fileExtension = "sh",
+                    commandPrefix = "",
+                    runInBackground = true,
+                    openNewSession = false,
+                    executionParams = "",
+                    iconPath = null,
+                    envVars = mapOf("API_KEY" to "123"),
+                    keepSessionOpen = false,
+                )
 
-        val commandSlot = slot<String>()
-        every { termuxRepository.runCommand(capture(commandSlot), any(), any()) } returns Unit
+            val commandSlot = slot<String>()
+            every { termuxRepository.runCommand(capture(commandSlot), any(), any()) } returns Unit
 
-        val useCase = RunScriptUseCase(termuxRepository, scriptFileRepository, monitoringRepository)
+            val useCase = RunScriptUseCase(termuxRepository, scriptFileRepository, monitoringRepository)
 
-        useCase(script)
+            useCase(script)
 
-        val capturedCommand = commandSlot.captured
+            val capturedCommand = commandSlot.captured
 
-        assertTrue(capturedCommand.contains("export API_KEY='123'"))
+            assertTrue(capturedCommand.contains("export API_KEY='123'"))
 
-        assertTrue(capturedCommand.contains("mkdir -p ~/scriptrunner_for_termux"))
+            assertTrue(capturedCommand.contains("mkdir -p ~/scriptrunner_for_termux"))
 
-        assertTrue(capturedCommand.contains("base64 -d"))
+            assertTrue(capturedCommand.contains("base64 -d"))
 
-        assertTrue(capturedCommand.contains("rm -f"))
-    }
-
-    @Test
-    fun `ViewModel executes script and finishes when permission granted`() = runTest {
-        val scriptId = 1
-        val savedStateHandle = SavedStateHandle(mapOf("SCRIPT_ID" to scriptId))
-        val script = mockk<Script>(relaxed = true) {
-            every { code } returns "echo test"
-            every { interpreter } returns "bash"
+            assertTrue(capturedCommand.contains("rm -f"))
         }
 
-        coEvery { scriptRepository.getScriptById(scriptId) } returns script
-        every { termuxRepository.runCommand(any(), any(), any()) } returns Unit
+    @Test
+    fun `ViewModel executes script and finishes when permission granted`() =
+        runTest {
+            val scriptId = 1
+            val savedStateHandle = SavedStateHandle(mapOf("SCRIPT_ID" to scriptId))
+            val script =
+                mockk<Script>(relaxed = true) {
+                    every { code } returns "echo test"
+                    every { interpreter } returns "bash"
+                }
 
-        val useCase = RunScriptUseCase(
-            termuxRepository,
-            scriptFileRepository,
-            monitoringRepository
-        )
-        val viewModel = ScriptRunnerViewModel(scriptRepository, useCase, savedStateHandle)
+            coEvery { scriptRepository.getScriptById(scriptId) } returns script
+            every { termuxRepository.runCommand(any(), any(), any()) } returns Unit
 
-        testDispatcher.scheduler.advanceUntilIdle()
+            val useCase =
+                RunScriptUseCase(
+                    termuxRepository,
+                    scriptFileRepository,
+                    monitoringRepository,
+                )
+            val viewModel = ScriptRunnerViewModel(scriptRepository, useCase, savedStateHandle)
 
-        val event = viewModel.events.first()
-        assertTrue(event is ScriptRunnerEvent.Finish)
+            testDispatcher.scheduler.advanceUntilIdle()
 
-        coVerify { termuxRepository.runCommand(any(), any(), any()) }
-    }
+            val event = viewModel.events.first()
+            assertTrue(event is ScriptRunnerEvent.Finish)
+
+            coVerify { termuxRepository.runCommand(any(), any(), any()) }
+        }
 
     @Test
-    fun `ViewModel emits RequestPermission when permission denied`() = runTest {
-        val scriptId = 1
-        val savedStateHandle = SavedStateHandle(mapOf("SCRIPT_ID" to scriptId))
-        val script = mockk<Script>(relaxed = true)
+    fun `ViewModel emits RequestPermission when permission denied`() =
+        runTest {
+            val scriptId = 1
+            val savedStateHandle = SavedStateHandle(mapOf("SCRIPT_ID" to scriptId))
+            val script = mockk<Script>(relaxed = true)
 
-        coEvery { scriptRepository.getScriptById(scriptId) } returns script
+            coEvery { scriptRepository.getScriptById(scriptId) } returns script
 
-        every {
-            termuxRepository.runCommand(
-                any(),
-                any(),
-                any()
-            )
-        } throws TermuxPermissionException()
+            every {
+                termuxRepository.runCommand(
+                    any(),
+                    any(),
+                    any(),
+                )
+            } throws TermuxPermissionException()
 
-        val useCase = RunScriptUseCase(termuxRepository, scriptFileRepository, monitoringRepository)
-        val viewModel = ScriptRunnerViewModel(scriptRepository, useCase, savedStateHandle)
+            val useCase = RunScriptUseCase(termuxRepository, scriptFileRepository, monitoringRepository)
+            val viewModel = ScriptRunnerViewModel(scriptRepository, useCase, savedStateHandle)
 
-        testDispatcher.scheduler.advanceUntilIdle()
+            testDispatcher.scheduler.advanceUntilIdle()
 
-        val event = viewModel.events.first()
-        assertTrue(event is ScriptRunnerEvent.RequestPermission)
-    }
+            val event = viewModel.events.first()
+            assertTrue(event is ScriptRunnerEvent.RequestPermission)
+        }
 }

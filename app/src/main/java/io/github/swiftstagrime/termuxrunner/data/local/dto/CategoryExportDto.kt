@@ -6,5 +6,5 @@ import kotlinx.serialization.Serializable
 data class CategoryExportDto(
     val id: Int,
     val name: String,
-    val orderIndex: Int
+    val orderIndex: Int,
 )

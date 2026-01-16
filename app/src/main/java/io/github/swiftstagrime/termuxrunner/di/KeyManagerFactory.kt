@@ -6,14 +6,15 @@ import kotlinx.coroutines.runBlocking
 import net.zetetic.database.sqlcipher.SupportOpenHelperFactory
 import javax.inject.Inject
 
-class KeyManagerFactory @Inject constructor(
-    private val keyManager: KeyManager
-) : SupportSQLiteOpenHelper.Factory {
+class KeyManagerFactory
+    @Inject
+    constructor(
+        private val keyManager: KeyManager,
+    ) : SupportSQLiteOpenHelper.Factory {
+        override fun create(configuration: SupportSQLiteOpenHelper.Configuration): SupportSQLiteOpenHelper {
+            val passphrase = runBlocking { keyManager.getRoomPassphrase() }
 
-    override fun create(configuration: SupportSQLiteOpenHelper.Configuration): SupportSQLiteOpenHelper {
-        val passphrase = runBlocking { keyManager.getRoomPassphrase() }
-
-        val actualFactory = SupportOpenHelperFactory(passphrase)
-        return actualFactory.create(configuration)
+            val actualFactory = SupportOpenHelperFactory(passphrase)
+            return actualFactory.create(configuration)
+        }
     }
-}

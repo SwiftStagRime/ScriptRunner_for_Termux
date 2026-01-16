@@ -61,22 +61,24 @@ fun ScriptPickerDialog(
     scripts: List<Script>,
     categories: List<Category>,
     onDismiss: () -> Unit,
-    onScriptSelected: (Script) -> Unit
+    onScriptSelected: (Script) -> Unit,
 ) {
     var searchQuery by rememberSaveable { mutableStateOf("") }
     var selectedCategoryId by rememberSaveable { mutableStateOf<Int?>(null) }
 
     val listState = rememberLazyListState()
 
-    val filteredScripts = remember(searchQuery, selectedCategoryId, scripts) {
-        scripts.filter { script ->
-            val matchesCategory =
-                selectedCategoryId == null || script.categoryId == selectedCategoryId
-            val matchesSearch = script.name.contains(searchQuery, ignoreCase = true) ||
-                    script.interpreter.contains(searchQuery, ignoreCase = true)
-            matchesCategory && matchesSearch
+    val filteredScripts =
+        remember(searchQuery, selectedCategoryId, scripts) {
+            scripts.filter { script ->
+                val matchesCategory =
+                    selectedCategoryId == null || script.categoryId == selectedCategoryId
+                val matchesSearch =
+                    script.name.contains(searchQuery, ignoreCase = true) ||
+                        script.interpreter.contains(searchQuery, ignoreCase = true)
+                matchesCategory && matchesSearch
+            }
         }
-    }
 
     LaunchedEffect(searchQuery, selectedCategoryId) {
         listState.scrollToItem(0)
@@ -84,27 +86,29 @@ fun ScriptPickerDialog(
 
     Dialog(onDismissRequest = onDismiss) {
         Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .heightIn(max = 580.dp)
-                .padding(vertical = 16.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .heightIn(max = 580.dp)
+                    .padding(vertical = 16.dp),
             shape = RoundedCornerShape(28.dp),
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-                contentColor = MaterialTheme.colorScheme.onSurface
-            ),
-            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.2f))
+            colors =
+                CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                    contentColor = MaterialTheme.colorScheme.onSurface,
+                ),
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.2f)),
         ) {
             Column(modifier = Modifier.fillMaxWidth()) {
                 Column(
                     modifier = Modifier.padding(horizontal = 20.dp, vertical = 20.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
                 ) {
                     Text(
                         text = stringResource(R.string.title_select_script),
                         style = MaterialTheme.typography.headlineSmall,
                         fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.primary
+                        color = MaterialTheme.colorScheme.primary,
                     )
 
                     TextField(
@@ -122,35 +126,37 @@ fun ScriptPickerDialog(
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(16.dp),
                         singleLine = true,
-                        colors = TextFieldDefaults.colors(
-                            focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
-                            unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
-                            focusedIndicatorColor = Color.Transparent,
-                            unfocusedIndicatorColor = Color.Transparent
-                        )
+                        colors =
+                            TextFieldDefaults.colors(
+                                focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
+                                unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
+                                focusedIndicatorColor = Color.Transparent,
+                                unfocusedIndicatorColor = Color.Transparent,
+                            ),
                     )
                 }
 
                 LazyRow(
                     contentPadding = PaddingValues(horizontal = 16.dp),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
                 ) {
                     item {
                         FilterChip(
                             selected = selectedCategoryId == null,
                             onClick = { selectedCategoryId = null },
                             label = { Text(stringResource(R.string.label_all)) },
-                            colors = FilterChipDefaults.filterChipColors(
-                                selectedContainerColor = MaterialTheme.colorScheme.primaryContainer
-                            )
+                            colors =
+                                FilterChipDefaults.filterChipColors(
+                                    selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                                ),
                         )
                     }
                     items(categories) { category ->
                         FilterChip(
                             selected = selectedCategoryId == category.id,
                             onClick = { selectedCategoryId = category.id },
-                            label = { Text(category.name) }
+                            label = { Text(category.name) },
                         )
                     }
                 }
@@ -165,12 +171,12 @@ fun ScriptPickerDialog(
                         LazyColumn(
                             state = listState,
                             contentPadding = PaddingValues(horizontal = 12.dp, vertical = 12.dp),
-                            verticalArrangement = Arrangement.spacedBy(4.dp)
+                            verticalArrangement = Arrangement.spacedBy(4.dp),
                         ) {
                             items(filteredScripts, key = { it.id }) { script ->
                                 ScriptPickerItem(
                                     script = script,
-                                    onClick = { onScriptSelected(script) }
+                                    onClick = { onScriptSelected(script) },
                                 )
                             }
                         }
@@ -188,19 +194,19 @@ private fun EmptySearchResults() {
     Column(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Icon(
             imageVector = Icons.Default.SearchOff,
             contentDescription = null,
             modifier = Modifier.size(48.dp),
-            tint = MaterialTheme.colorScheme.outline
+            tint = MaterialTheme.colorScheme.outline,
         )
         Spacer(modifier = Modifier.height(12.dp))
         Text(
             text = stringResource(R.string.empty_scripts),
             style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.outline
+            color = MaterialTheme.colorScheme.outline,
         )
     }
 }
@@ -208,17 +214,17 @@ private fun EmptySearchResults() {
 @Composable
 private fun ScriptPickerItem(
     script: Script,
-    onClick: () -> Unit
+    onClick: () -> Unit,
 ) {
     Surface(
         onClick = onClick,
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
-        color = Color.Transparent
+        color = Color.Transparent,
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             ScriptIcon(script.iconPath, modifier = Modifier.size(44.dp))
 
@@ -229,13 +235,13 @@ private fun ScriptPickerItem(
                     text = script.name,
                     style = MaterialTheme.typography.titleMedium,
                     maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
+                    overflow = TextOverflow.Ellipsis,
                 )
                 Text(
                     text = "${script.interpreter} • .${script.fileExtension}",
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f),
-                    fontFamily = FontFamily.Monospace
+                    fontFamily = FontFamily.Monospace,
                 )
             }
 
@@ -243,7 +249,7 @@ private fun ScriptPickerItem(
                 imageVector = Icons.Filled.ChevronRight,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.outlineVariant,
-                modifier = Modifier.size(24.dp)
+                modifier = Modifier.size(24.dp),
             )
         }
     }

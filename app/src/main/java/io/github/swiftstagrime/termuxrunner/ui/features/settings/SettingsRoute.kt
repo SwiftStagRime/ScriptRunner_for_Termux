@@ -17,7 +17,7 @@ import io.github.swiftstagrime.termuxrunner.R
 fun SettingsRoute(
     onBack: () -> Unit,
     onNavigateToEditor: (Int) -> Unit,
-    viewModel: SettingsViewModel = hiltViewModel()
+    viewModel: SettingsViewModel = hiltViewModel(),
 ) {
     val context = LocalContext.current
     val uriHandler = LocalUriHandler.current
@@ -27,23 +27,26 @@ fun SettingsRoute(
     val githubUrl = "https://github.com/SwiftStagRime/ScriptRunner_for_Termux"
     val exportFilename = stringResource(R.string.export_filename)
 
-    val exportLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.CreateDocument("application/json")
-    ) { uri ->
-        uri?.let { viewModel.exportData(it) }
-    }
+    val exportLauncher =
+        rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.CreateDocument("application/json"),
+        ) { uri ->
+            uri?.let { viewModel.exportData(it) }
+        }
 
-    val importBackupLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.OpenDocument()
-    ) { uri ->
-        uri?.let { viewModel.importData(it) }
-    }
+    val importBackupLauncher =
+        rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.OpenDocument(),
+        ) { uri ->
+            uri?.let { viewModel.importData(it) }
+        }
 
-    val importFileLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.OpenDocument()
-    ) { uri ->
-        uri?.let { viewModel.importSingleScript(it) }
-    }
+    val importFileLauncher =
+        rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.OpenDocument(),
+        ) { uri ->
+            uri?.let { viewModel.importSingleScript(it) }
+        }
 
     LaunchedEffect(Unit) {
         viewModel.navEvents.collect { event ->
@@ -69,6 +72,6 @@ fun SettingsRoute(
         onTriggerImport = { importBackupLauncher.launch(arrayOf("application/json")) },
         onTriggerScriptImport = { importFileLauncher.launch(arrayOf("*/*")) },
         onDeveloperClick = { uriHandler.openUri(githubUrl) },
-        onBack = onBack
+        onBack = onBack,
     )
 }

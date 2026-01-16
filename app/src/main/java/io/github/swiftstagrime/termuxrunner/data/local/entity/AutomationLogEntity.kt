@@ -13,31 +13,33 @@ import io.github.swiftstagrime.termuxrunner.domain.model.AutomationLog
             entity = AutomationEntity::class,
             parentColumns = ["id"],
             childColumns = ["automationId"],
-            onDelete = ForeignKey.CASCADE
-        )
+            onDelete = ForeignKey.CASCADE,
+        ),
     ],
-    indices = [Index("automationId")]
+    indices = [Index("automationId")],
 )
 data class AutomationLogEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val automationId: Int,
     val timestamp: Long,
     val exitCode: Int,
-    val message: String? = null
+    val message: String? = null,
 )
 
-fun AutomationLogEntity.toDomain() = AutomationLog(
-    id = id,
-    automationId = automationId,
-    timestamp = timestamp,
-    exitCode = exitCode,
-    message = message
-)
+fun AutomationLogEntity.toDomain() =
+    AutomationLog(
+        id = id,
+        automationId = automationId,
+        timestamp = timestamp,
+        exitCode = exitCode,
+        message = message,
+    )
 
-fun AutomationLog.toEntity() = AutomationLogEntity(
-    id = id,
-    automationId = automationId,
-    timestamp = timestamp,
-    exitCode = exitCode,
-    message = message
-)
+fun AutomationLog.toEntity() =
+    AutomationLogEntity(
+        id = id,
+        automationId = automationId,
+        timestamp = timestamp,
+        exitCode = exitCode,
+        message = message,
+    )

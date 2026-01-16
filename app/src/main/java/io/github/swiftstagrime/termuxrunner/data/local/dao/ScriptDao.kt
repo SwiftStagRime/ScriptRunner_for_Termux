@@ -11,7 +11,6 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface ScriptDao {
-
     @Query("SELECT * FROM scripts ORDER BY id DESC")
     fun getAllScripts(): Flow<List<ScriptEntity>>
 
@@ -31,7 +30,10 @@ interface ScriptDao {
     suspend fun getAllScriptsOneShot(): List<ScriptEntity>
 
     @Query("UPDATE scripts SET orderIndex = :orderIndex WHERE id = :scriptId")
-    suspend fun updateScriptOrder(scriptId: Int, orderIndex: Int)
+    suspend fun updateScriptOrder(
+        scriptId: Int,
+        orderIndex: Int,
+    )
 
     @Transaction
     suspend fun updateScriptsOrder(orders: List<Pair<Int, Int>>) {

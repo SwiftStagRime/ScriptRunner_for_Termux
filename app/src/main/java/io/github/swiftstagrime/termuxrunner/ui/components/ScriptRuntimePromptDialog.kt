@@ -50,61 +50,65 @@ import io.github.swiftstagrime.termuxrunner.domain.model.Script
 fun ScriptRuntimePromptDialog(
     script: Script,
     onDismiss: () -> Unit,
-    onConfirm: (runtimeArgs: String, runtimePrefix: String, runtimeEnv: Map<String, String>) -> Unit
+    onConfirm: (runtimeArgs: String, runtimePrefix: String, runtimeEnv: Map<String, String>) -> Unit,
 ) {
     var runtimePrefix by remember { mutableStateOf(script.commandPrefix) }
     var runtimeArgs by remember { mutableStateOf(script.executionParams) }
 
     val selectedMultiOptions = remember { mutableStateListOf<String>() }
-    val multiModeEnvMap = remember {
-        mutableStateMapOf<String, String>().apply {
-            script.envVarPresets.forEach { key -> put(key, "") }
+    val multiModeEnvMap =
+        remember {
+            mutableStateMapOf<String, String>().apply {
+                script.envVarPresets.forEach { key -> put(key, "") }
+            }
         }
-    }
 
-    val textModeEnvList = remember {
-        script.envVarPresets.map { it to "" }.toMutableStateList()
-    }
+    val textModeEnvList =
+        remember {
+            script.envVarPresets.map { it to "" }.toMutableStateList()
+        }
 
     Dialog(onDismissRequest = onDismiss) {
         ElevatedCard(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 24.dp)
-                .imePadding(),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 24.dp)
+                    .imePadding(),
             shape = RoundedCornerShape(24.dp),
-            colors = CardDefaults.elevatedCardColors(
-                containerColor = MaterialTheme.colorScheme.surface,
-                contentColor = MaterialTheme.colorScheme.onSurface
-            )
+            colors =
+                CardDefaults.elevatedCardColors(
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    contentColor = MaterialTheme.colorScheme.onSurface,
+                ),
         ) {
             Column(
-                modifier = Modifier
-                    .padding(24.dp)
-                    .verticalScroll(rememberScrollState()),
-                verticalArrangement = Arrangement.spacedBy(20.dp)
+                modifier =
+                    Modifier
+                        .padding(24.dp)
+                        .verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(20.dp),
             ) {
                 Text(
                     text = stringResource(R.string.title_run_options, script.name),
                     style = MaterialTheme.typography.headlineSmall,
                     color = MaterialTheme.colorScheme.primary,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
                 )
 
                 if (script.interactionMode == InteractionMode.TEXT_INPUT) {
-
                     StyledTextField(
                         value = runtimePrefix,
                         onValueChange = { runtimePrefix = it },
                         label = stringResource(R.string.label_choose_prefix),
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
                     )
 
                     StyledTextField(
                         value = runtimeArgs,
                         onValueChange = { runtimeArgs = it },
                         label = stringResource(R.string.label_enter_arguments),
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
                     )
 
                     HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
@@ -112,32 +116,32 @@ fun ScriptRuntimePromptDialog(
                     Text(
                         text = stringResource(R.string.section_env_vars),
                         style = MaterialTheme.typography.labelLarge,
-                        color = MaterialTheme.colorScheme.secondary
+                        color = MaterialTheme.colorScheme.secondary,
                     )
 
                     textModeEnvList.forEachIndexed { index, (key, value) ->
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
                         ) {
                             StyledTextField(
                                 value = key,
                                 onValueChange = { textModeEnvList[index] = it to value },
                                 label = stringResource(R.string.label_key),
-                                modifier = Modifier.weight(1f)
+                                modifier = Modifier.weight(1f),
                             )
                             StyledTextField(
                                 value = value,
                                 onValueChange = { textModeEnvList[index] = key to it },
                                 label = stringResource(R.string.label_value),
-                                modifier = Modifier.weight(1f)
+                                modifier = Modifier.weight(1f),
                             )
                             IconButton(onClick = { textModeEnvList.removeAt(index) }) {
                                 Icon(
                                     Icons.Default.Delete,
                                     null,
-                                    tint = MaterialTheme.colorScheme.error
+                                    tint = MaterialTheme.colorScheme.error,
                                 )
                             }
                         }
@@ -148,20 +152,18 @@ fun ScriptRuntimePromptDialog(
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(stringResource(R.string.btn_add_variable))
                     }
-
                 } else if (script.interactionMode == InteractionMode.MULTI_CHOICE) {
-
                     if (script.prefixPresets.isNotEmpty()) {
                         Text(
                             stringResource(R.string.label_choose_prefix),
-                            style = MaterialTheme.typography.labelLarge
+                            style = MaterialTheme.typography.labelLarge,
                         )
                         FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                             script.prefixPresets.forEach { prefix ->
                                 FilterChip(
                                     selected = runtimePrefix == prefix,
                                     onClick = { runtimePrefix = prefix },
-                                    label = { Text(prefix.ifBlank { "default" }) }
+                                    label = { Text(prefix.ifBlank { "default" }) },
                                 )
                             }
                         }
@@ -169,24 +171,27 @@ fun ScriptRuntimePromptDialog(
 
                     Text(
                         stringResource(R.string.label_select_options),
-                        style = MaterialTheme.typography.labelLarge
+                        style = MaterialTheme.typography.labelLarge,
                     )
                     script.argumentPresets.forEach { option ->
                         Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable {
-                                    if (selectedMultiOptions.contains(option)) selectedMultiOptions.remove(
-                                        option
-                                    )
-                                    else selectedMultiOptions.add(option)
-                                }
-                                .padding(vertical = 4.dp),
-                            verticalAlignment = Alignment.CenterVertically
+                            modifier =
+                                Modifier
+                                    .fillMaxWidth()
+                                    .clickable {
+                                        if (selectedMultiOptions.contains(option)) {
+                                            selectedMultiOptions.remove(
+                                                option,
+                                            )
+                                        } else {
+                                            selectedMultiOptions.add(option)
+                                        }
+                                    }.padding(vertical = 4.dp),
+                            verticalAlignment = Alignment.CenterVertically,
                         ) {
                             Checkbox(
                                 checked = selectedMultiOptions.contains(option),
-                                onCheckedChange = null
+                                onCheckedChange = null,
                             )
                             Spacer(modifier = Modifier.width(12.dp))
                             Text(option)
@@ -197,14 +202,14 @@ fun ScriptRuntimePromptDialog(
                         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
                         Text(
                             stringResource(R.string.section_env_vars),
-                            style = MaterialTheme.typography.labelLarge
+                            style = MaterialTheme.typography.labelLarge,
                         )
                         script.envVarPresets.forEach { key ->
                             StyledTextField(
                                 value = multiModeEnvMap[key] ?: "",
                                 onValueChange = { multiModeEnvMap[key] = it },
                                 label = key,
-                                modifier = Modifier.fillMaxWidth()
+                                modifier = Modifier.fillMaxWidth(),
                             )
                         }
                     }
@@ -212,7 +217,7 @@ fun ScriptRuntimePromptDialog(
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.End
+                    horizontalArrangement = Arrangement.End,
                 ) {
                     TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) }
                     Spacer(modifier = Modifier.width(8.dp))
@@ -234,7 +239,7 @@ fun ScriptRuntimePromptDialog(
 
                             onConfirm(finalArgs, runtimePrefix, finalEnv)
                         },
-                        shape = RoundedCornerShape(12.dp)
+                        shape = RoundedCornerShape(12.dp),
                     ) {
                         Icon(Icons.Default.PlayArrow, null)
                         Spacer(modifier = Modifier.width(8.dp))

@@ -20,23 +20,24 @@ data class AutomationExportDto(
     val lastExitCode: Int?,
     val requireWifi: Boolean,
     val requireCharging: Boolean,
-    val batteryThreshold: Int
+    val batteryThreshold: Int,
 )
 
-fun Automation.toExportDto() = AutomationExportDto(
-    scriptId = scriptId,
-    type = type,
-    scheduledTimestamp = scheduledTimestamp,
-    intervalMillis = intervalMillis,
-    daysOfWeek = daysOfWeek,
-    isEnabled = isEnabled,
-    runtimeArgs = runtimeArgs,
-    runtimeEnv = runtimeEnv,
-    runtimePrefix = runtimePrefix,
-    label = label,
-    runIfMissed = runIfMissed,
-    lastExitCode = lastExitCode,
-    requireWifi = requireWifi,
-    requireCharging = requireCharging,
-    batteryThreshold = batteryThreshold
-)
+fun Automation.toExportDto() =
+    AutomationExportDto(
+        scriptId = scriptId,
+        type = type,
+        scheduledTimestamp = scheduledTimestamp,
+        intervalMillis = intervalMillis,
+        daysOfWeek = daysOfWeek,
+        isEnabled = isEnabled,
+        runtimeArgs = runtimeArgs,
+        runtimeEnv = runtimeEnv,
+        runtimePrefix = runtimePrefix,
+        label = label,
+        runIfMissed = runIfMissed,
+        lastExitCode = lastExitCode,
+        requireWifi = requireWifi,
+        requireCharging = requireCharging,
+        batteryThreshold = batteryThreshold,
+    )

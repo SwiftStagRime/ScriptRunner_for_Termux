@@ -11,7 +11,7 @@ class SearchVisualTransformation(
     private val matches: List<IntRange>,
     private val activeMatchIndex: Int,
     private val activeColor: Color,
-    private val passiveColor: Color
+    private val passiveColor: Color,
 ) : VisualTransformation {
     override fun filter(text: AnnotatedString): TransformedText {
         val builder = AnnotatedString.Builder(text)
@@ -22,7 +22,7 @@ class SearchVisualTransformation(
                 builder.addStyle(
                     style = SpanStyle(background = color),
                     start = range.first,
-                    end = range.last + 1
+                    end = range.last + 1,
                 )
             }
         }

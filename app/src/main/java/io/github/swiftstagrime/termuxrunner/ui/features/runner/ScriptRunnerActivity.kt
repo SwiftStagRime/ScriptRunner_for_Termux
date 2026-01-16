@@ -19,23 +19,24 @@ import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class ScriptRunnerActivity : ComponentActivity() {
-
     private val viewModel: ScriptRunnerViewModel by viewModels()
 
-    private val requestPermissionLauncher = registerForActivityResult(
-        ActivityResultContracts.RequestPermission()
-    ) { isGranted: Boolean ->
-        if (isGranted) {
-            viewModel.onPermissionGranted()
-        } else {
-            Toast.makeText(
-                this,
-                getString(R.string.script_runner_permission_denied),
-                Toast.LENGTH_SHORT
-            ).show()
-            viewModel.dismissPrompt()
+    private val requestPermissionLauncher =
+        registerForActivityResult(
+            ActivityResultContracts.RequestPermission(),
+        ) { isGranted: Boolean ->
+            if (isGranted) {
+                viewModel.onPermissionGranted()
+            } else {
+                Toast
+                    .makeText(
+                        this,
+                        getString(R.string.script_runner_permission_denied),
+                        Toast.LENGTH_SHORT,
+                    ).show()
+                viewModel.dismissPrompt()
+            }
         }
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -55,9 +56,9 @@ class ScriptRunnerActivity : ComponentActivity() {
                                 script,
                                 runtimeArgs = args,
                                 runtimePrefix = prefix,
-                                runtimeEnv = env
+                                runtimeEnv = env,
                             )
-                        }
+                        },
                     )
                 }
             }

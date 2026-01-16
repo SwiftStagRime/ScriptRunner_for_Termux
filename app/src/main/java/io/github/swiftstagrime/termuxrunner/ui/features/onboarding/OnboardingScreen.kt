@@ -66,7 +66,7 @@ fun OnboardingScreen(
     onOpenTermuxSettings: () -> Unit,
     isTermuxInstalled: Boolean,
     isPermissionGranted: Boolean,
-    isBatteryUnrestricted: Boolean
+    isBatteryUnrestricted: Boolean,
 ) {
     Scaffold(
         topBar = {
@@ -74,33 +74,36 @@ fun OnboardingScreen(
                 title = {
                     Text(
                         text = stringResource(R.string.onboarding_setup_title),
-                        fontWeight = FontWeight.SemiBold
+                        fontWeight = FontWeight.SemiBold,
                     )
                 },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.background
-                ),
+                colors =
+                    TopAppBarDefaults.topAppBarColors(
+                        containerColor = MaterialTheme.colorScheme.background,
+                    ),
                 actions = {
                     LanguageSelectorIcon()
-                }
+                },
             )
-        }
+        },
     ) { padding ->
         Column(
-            modifier = Modifier
-                .padding(padding)
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            modifier =
+                Modifier
+                    .padding(padding)
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+                    .padding(horizontal = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             Text(
                 text = stringResource(R.string.onboarding_subtitle),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier
-                    .padding(bottom = 8.dp)
-                    .padding(horizontal = 8.dp)
+                modifier =
+                    Modifier
+                        .padding(bottom = 8.dp)
+                        .padding(horizontal = 8.dp),
             )
 
             // Step 1
@@ -109,7 +112,7 @@ fun OnboardingScreen(
                 title = stringResource(R.string.setup_step_1_title),
                 description = stringResource(R.string.setup_step_1_desc),
                 isDone = isTermuxInstalled,
-                isError = !isTermuxInstalled
+                isError = !isTermuxInstalled,
             )
 
             // Step 2
@@ -117,7 +120,7 @@ fun OnboardingScreen(
                 step = "2",
                 title = stringResource(R.string.setup_step_2_title),
                 description = stringResource(R.string.setup_step_2_desc),
-                isDone = false
+                isDone = false,
             ) {
                 Spacer(modifier = Modifier.height(8.dp))
                 CodeBlock(code = stringResource(R.string.setup_step_2_code))
@@ -130,16 +133,17 @@ fun OnboardingScreen(
                 step = "3",
                 title = stringResource(R.string.setup_step_3_title),
                 description = stringResource(R.string.setup_step_3_desc),
-                isDone = isPermissionGranted
+                isDone = isPermissionGranted,
             ) {
                 if (!isPermissionGranted) {
                     Spacer(modifier = Modifier.height(12.dp))
                     Button(
                         onClick = onPermissionGranted,
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.tertiary
-                        ),
-                        modifier = Modifier.fillMaxWidth()
+                        colors =
+                            ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.tertiary,
+                            ),
+                        modifier = Modifier.fillMaxWidth(),
                     ) {
                         Text(stringResource(R.string.grant_permission_label))
                     }
@@ -151,22 +155,23 @@ fun OnboardingScreen(
                 step = "4",
                 title = stringResource(R.string.setup_step_4_title),
                 description = stringResource(R.string.setup_step_4_desc),
-                isDone = false
+                isDone = false,
             ) {
                 Spacer(modifier = Modifier.height(12.dp))
                 Button(
                     onClick = onOpenTermuxSettings,
                     modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.tertiary
-                    ),
+                    colors =
+                        ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.tertiary,
+                        ),
                 ) {
                     Text(stringResource(R.string.open_termux_settings))
                     Spacer(modifier = Modifier.width(8.dp))
                     Icon(
                         Icons.AutoMirrored.Filled.OpenInNew,
                         contentDescription = null,
-                        modifier = Modifier.size(16.dp)
+                        modifier = Modifier.size(16.dp),
                     )
                 }
             }
@@ -176,31 +181,31 @@ fun OnboardingScreen(
                 step = "5",
                 title = stringResource(R.string.setup_step_5_title),
                 description = stringResource(R.string.setup_step_5_desc),
-                isDone = isBatteryUnrestricted
+                isDone = isBatteryUnrestricted,
             ) {
                 if (!isBatteryUnrestricted) {
                     Spacer(modifier = Modifier.height(8.dp))
 
                     Row(
-                        modifier = Modifier
-                            .background(
-                                MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.5f),
-                                RoundedCornerShape(8.dp)
-                            )
-                            .padding(8.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                        modifier =
+                            Modifier
+                                .background(
+                                    MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.5f),
+                                    RoundedCornerShape(8.dp),
+                                ).padding(8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Icon(
                             Icons.Default.Warning,
                             null,
                             tint = MaterialTheme.colorScheme.error,
-                            modifier = Modifier.size(20.dp)
+                            modifier = Modifier.size(20.dp),
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
                             text = stringResource(R.string.battery_warning_text),
                             style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.error
+                            color = MaterialTheme.colorScheme.error,
                         )
                     }
 
@@ -208,16 +213,17 @@ fun OnboardingScreen(
                     Button(
                         onClick = onOpenTermuxSettings,
                         modifier = Modifier.fillMaxWidth(),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.tertiary
-                        ),
+                        colors =
+                            ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.tertiary,
+                            ),
                     ) {
                         Text(stringResource(R.string.open_termux_settings))
                         Spacer(modifier = Modifier.width(8.dp))
                         Icon(
                             Icons.AutoMirrored.Filled.OpenInNew,
                             contentDescription = null,
-                            modifier = Modifier.size(16.dp)
+                            modifier = Modifier.size(16.dp),
                         )
                     }
                 }
@@ -225,21 +231,21 @@ fun OnboardingScreen(
 
             Button(
                 onClick = onCheckAgain,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(start = 16.dp, end = 16.dp, bottom = 16.dp)
-                    .windowInsetsPadding(WindowInsets.safeDrawing)
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(start = 16.dp, end = 16.dp, bottom = 16.dp)
+                        .windowInsetsPadding(WindowInsets.safeDrawing),
             ) {
                 Text(
                     text = stringResource(R.string.finish_setup_label),
                     modifier = Modifier.padding(8.dp),
-                    style = MaterialTheme.typography.titleMedium
+                    style = MaterialTheme.typography.titleMedium,
                 )
             }
         }
     }
 }
-
 
 @Composable
 fun SetupStepCard(
@@ -248,42 +254,45 @@ fun SetupStepCard(
     description: String,
     isDone: Boolean,
     isError: Boolean = false,
-    content: @Composable () -> Unit = {}
+    content: @Composable () -> Unit = {},
 ) {
-    val borderColor = when {
-        isDone -> MaterialTheme.colorScheme.primary
-        isError -> MaterialTheme.colorScheme.error
-        else -> Color.Transparent
-    }
+    val borderColor =
+        when {
+            isDone -> MaterialTheme.colorScheme.primary
+            isError -> MaterialTheme.colorScheme.error
+            else -> Color.Transparent
+        }
 
-    val containerColor = when {
-        isDone -> MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f)
-        isError -> MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.4f)
-        else -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
-    }
+    val containerColor =
+        when {
+            isDone -> MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f)
+            isError -> MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.4f)
+            else -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+        }
 
     Card(
         colors = CardDefaults.cardColors(containerColor = containerColor),
         shape = RoundedCornerShape(16.dp),
         border = if (isDone || isError) BorderStroke(1.dp, borderColor) else null,
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier.fillMaxWidth(),
     ) {
         Row(
             modifier = Modifier.padding(16.dp),
-            verticalAlignment = Alignment.Top
+            verticalAlignment = Alignment.Top,
         ) {
             Box(
-                modifier = Modifier
-                    .size(32.dp)
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.surface),
-                contentAlignment = Alignment.Center
+                modifier =
+                    Modifier
+                        .size(32.dp)
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.surface),
+                contentAlignment = Alignment.Center,
             ) {
                 Text(
                     text = step,
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurface
+                    color = MaterialTheme.colorScheme.onSurface,
                 )
             }
 
@@ -293,24 +302,24 @@ fun SetupStepCard(
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text(
                         text = title,
                         style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
                     )
                     if (isDone) {
                         Icon(
                             Icons.Default.CheckCircle,
                             contentDescription = stringResource(R.string.done_description),
-                            tint = MaterialTheme.colorScheme.primary
+                            tint = MaterialTheme.colorScheme.primary,
                         )
                     } else if (isError) {
                         Icon(
                             Icons.Default.Warning,
                             contentDescription = stringResource(R.string.error_description),
-                            tint = MaterialTheme.colorScheme.error
+                            tint = MaterialTheme.colorScheme.error,
                         )
                     }
                 }
@@ -320,7 +329,7 @@ fun SetupStepCard(
                 Text(
                     text = description,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
 
                 content()
@@ -332,27 +341,28 @@ fun SetupStepCard(
 @Composable
 fun CodeBlock(
     code: String,
-    onCopy: (String) -> Unit = {}
+    onCopy: (String) -> Unit = {},
 ) {
     val clipboard = LocalClipboard.current
     val scope = rememberCoroutineScope()
 
     Card(
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
-        ),
-        modifier = Modifier.fillMaxWidth()
+        colors =
+            CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+            ),
+        modifier = Modifier.fillMaxWidth(),
     ) {
         Row(
             modifier = Modifier.padding(12.dp),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             SelectionContainer(modifier = Modifier.weight(1f)) {
                 Text(
                     text = code,
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    fontFamily = FontFamily.Monospace
+                    fontFamily = FontFamily.Monospace,
                 )
             }
             IconButton(onClick = {
@@ -365,7 +375,7 @@ fun CodeBlock(
                 Icon(
                     imageVector = Icons.Default.ContentCopy,
                     contentDescription = stringResource(R.string.copy_clipboard_description),
-                    tint = MaterialTheme.colorScheme.primary
+                    tint = MaterialTheme.colorScheme.primary,
                 )
             }
         }
@@ -382,7 +392,7 @@ private fun PreviewOnboardingScreen() {
             isTermuxInstalled = true,
             isPermissionGranted = false,
             onOpenTermuxSettings = {},
-            isBatteryUnrestricted = true
+            isBatteryUnrestricted = true,
         )
     }
 }
@@ -396,14 +406,14 @@ private fun PreviewStepCard() {
                 step = "1",
                 title = "Step Title",
                 description = "This is a description of the step.",
-                isDone = true
+                isDone = true,
             )
             Spacer(modifier = Modifier.height(8.dp))
             SetupStepCard(
                 step = "2",
                 title = "Pending Step",
                 description = "This step is not done yet.",
-                isDone = false
+                isDone = false,
             )
         }
     }

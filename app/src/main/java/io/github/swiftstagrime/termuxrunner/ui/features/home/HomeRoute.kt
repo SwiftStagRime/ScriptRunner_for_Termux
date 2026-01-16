@@ -41,7 +41,7 @@ fun HomeRoute(
     onNavigateToSettings: () -> Unit,
     onNavigateToTileSettings: () -> Unit,
     onNavigateToAutomation: () -> Unit,
-    viewModel: HomeViewModel = hiltViewModel()
+    viewModel: HomeViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.homeUiState.collectAsStateWithLifecycle()
     val searchQuery by viewModel.searchQuery.collectAsStateWithLifecycle()
@@ -53,11 +53,12 @@ fun HomeRoute(
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
 
-    val termuxPermissionLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestPermission()
-    ) { isGranted ->
-        viewModel.onPermissionResult(isGranted)
-    }
+    val termuxPermissionLauncher =
+        rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.RequestPermission(),
+        ) { isGranted ->
+            viewModel.onPermissionResult(isGranted)
+        }
 
     var scriptToPrompt by remember { mutableStateOf<Script?>(null) }
 
@@ -69,57 +70,61 @@ fun HomeRoute(
         }
     }
 
-
     var isBatteryUnrestricted by remember {
         mutableStateOf(BatteryUtils.isIgnoringBatteryOptimizations(context))
     }
 
     val lifecycleOwner = LocalLifecycleOwner.current
     DisposableEffect(lifecycleOwner) {
-        val observer = LifecycleEventObserver { _, event ->
-            if (event == Lifecycle.Event.ON_RESUME) {
-                isBatteryUnrestricted = BatteryUtils.isIgnoringBatteryOptimizations(context)
+        val observer =
+            LifecycleEventObserver { _, event ->
+                if (event == Lifecycle.Event.ON_RESUME) {
+                    isBatteryUnrestricted = BatteryUtils.isIgnoringBatteryOptimizations(context)
+                }
             }
-        }
         lifecycleOwner.lifecycle.addObserver(observer)
         onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
 
-    val notificationPermissionLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestPermission()
-    ) { isGranted ->
-        if (!isGranted) {
-            scope.launch {
-                snackbarHostState.showSnackbar(
-                    message = UiText.StringResource(R.string.msg_notification_needed_for_heartbeat)
-                        .asString(context)
-                )
-            }
-        }
-    }
-
-    val requestNotifications = remember {
-        {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                val hasPermission = ContextCompat.checkSelfPermission(
-                    context,
-                    android.Manifest.permission.POST_NOTIFICATIONS
-                ) == PackageManager.PERMISSION_GRANTED
-
-                if (!hasPermission) {
-                    notificationPermissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+    val notificationPermissionLauncher =
+        rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.RequestPermission(),
+        ) { isGranted ->
+            if (!isGranted) {
+                scope.launch {
+                    snackbarHostState.showSnackbar(
+                        message =
+                            UiText
+                                .StringResource(R.string.msg_notification_needed_for_heartbeat)
+                                .asString(context),
+                    )
                 }
             }
         }
-    }
 
+    val requestNotifications =
+        remember {
+            {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    val hasPermission =
+                        ContextCompat.checkSelfPermission(
+                            context,
+                            android.Manifest.permission.POST_NOTIFICATIONS,
+                        ) == PackageManager.PERMISSION_GRANTED
+
+                    if (!hasPermission) {
+                        notificationPermissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+                    }
+                }
+            }
+        }
 
     ObserveAsEvents(viewModel.uiEvent) { event ->
         when (event) {
             is HomeUiEvent.ShowSnackbar -> {
                 scope.launch {
                     snackbarHostState.showSnackbar(
-                        message = event.message.asString(context)
+                        message = event.message.asString(context),
                     )
                 }
             }
@@ -132,8 +137,10 @@ fun HomeRoute(
                 if (!ShortcutManagerCompat.isRequestPinShortcutSupported(context)) {
                     scope.launch {
                         snackbarHostState.showSnackbar(
-                            message = UiText.StringResource(R.string.error_pinning_not_supported)
-                                .asString(context)
+                            message =
+                                UiText
+                                    .StringResource(R.string.error_pinning_not_supported)
+                                    .asString(context),
                         )
                     }
                     return@ObserveAsEvents
@@ -141,13 +148,18 @@ fun HomeRoute(
 
                 if (!MiuiUtils.hasShortcutPermission(context)) {
                     scope.launch {
-                        val result = snackbarHostState.showSnackbar(
-                            message = UiText.StringResource(R.string.msg_miui_shortcut_permission)
-                                .asString(context),
-                            actionLabel = UiText.StringResource(R.string.action_settings)
-                                .asString(context),
-                            duration = SnackbarDuration.Long
-                        )
+                        val result =
+                            snackbarHostState.showSnackbar(
+                                message =
+                                    UiText
+                                        .StringResource(R.string.msg_miui_shortcut_permission)
+                                        .asString(context),
+                                actionLabel =
+                                    UiText
+                                        .StringResource(R.string.action_settings)
+                                        .asString(context),
+                                duration = SnackbarDuration.Long,
+                            )
                         if (result == SnackbarResult.ActionPerformed) {
                             val intent =
                                 Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
@@ -160,27 +172,32 @@ fun HomeRoute(
                 }
 
                 try {
-                    val pinned = ShortcutManagerCompat.requestPinShortcut(
-                        context,
-                        event.shortcutInfo,
-                        null
-                    )
+                    val pinned =
+                        ShortcutManagerCompat.requestPinShortcut(
+                            context,
+                            event.shortcutInfo,
+                            null,
+                        )
 
                     if (!pinned) {
                         scope.launch {
                             snackbarHostState.showSnackbar(
-                                message = UiText.StringResource(R.string.msg_shortcut_denied_system)
-                                    .asString(context)
+                                message =
+                                    UiText
+                                        .StringResource(R.string.msg_shortcut_denied_system)
+                                        .asString(context),
                             )
                         }
                     }
                 } catch (e: Exception) {
                     scope.launch {
                         snackbarHostState.showSnackbar(
-                            message = UiText.StringResource(
-                                R.string.error_generic,
-                                e.localizedMessage ?: ""
-                            ).asString(context)
+                            message =
+                                UiText
+                                    .StringResource(
+                                        R.string.error_generic,
+                                        e.localizedMessage ?: "",
+                                    ).asString(context),
                         )
                     }
                 }
@@ -219,7 +236,7 @@ fun HomeRoute(
             requestNotifications()
         },
         onTileSettingsClick = onNavigateToTileSettings,
-        onNavigateToAutomation = onNavigateToAutomation
+        onNavigateToAutomation = onNavigateToAutomation,
     )
 
     scriptToPrompt?.let { script ->
@@ -231,10 +248,10 @@ fun HomeRoute(
                     script,
                     runtimeArgs = args,
                     runtimePrefix = prefix,
-                    runtimeEnv = env
+                    runtimeEnv = env,
                 )
                 scriptToPrompt = null
-            }
+            },
         )
     }
 }

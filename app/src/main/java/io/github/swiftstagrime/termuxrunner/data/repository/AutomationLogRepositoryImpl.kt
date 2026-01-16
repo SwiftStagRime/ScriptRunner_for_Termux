@@ -9,25 +9,25 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
-class AutomationLogRepositoryImpl @Inject constructor(
-    private val logDao: AutomationLogDao
-) : AutomationLogRepository {
+class AutomationLogRepositoryImpl
+    @Inject
+    constructor(
+        private val logDao: AutomationLogDao,
+    ) : AutomationLogRepository {
+        override fun getLogsForAutomation(automationId: Int): Flow<List<AutomationLog>> =
+            logDao.getLogsForAutomation(automationId).map { entities ->
+                entities.map { it.toDomain() }
+            }
 
-    override fun getLogsForAutomation(automationId: Int): Flow<List<AutomationLog>> {
-        return logDao.getLogsForAutomation(automationId).map { entities ->
-            entities.map { it.toDomain() }
+        override suspend fun insertLog(log: AutomationLog) {
+            logDao.insertLog(log.toEntity())
+        }
+
+        override suspend fun deleteLogsForAutomation(automationId: Int) {
+            logDao.deleteLogsForAutomation(automationId)
+        }
+
+        override suspend fun deleteOldLogs(threshold: Long) {
+            logDao.deleteOldLogs(threshold)
         }
     }
-
-    override suspend fun insertLog(log: AutomationLog) {
-        logDao.insertLog(log.toEntity())
-    }
-
-    override suspend fun deleteLogsForAutomation(automationId: Int) {
-        logDao.deleteLogsForAutomation(automationId)
-    }
-
-    override suspend fun deleteOldLogs(threshold: Long) {
-        logDao.deleteOldLogs(threshold)
-    }
-}

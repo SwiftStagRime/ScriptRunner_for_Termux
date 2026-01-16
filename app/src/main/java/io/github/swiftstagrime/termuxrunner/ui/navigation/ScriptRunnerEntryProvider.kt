@@ -15,18 +15,15 @@ import io.github.swiftstagrime.termuxrunner.ui.features.onboarding.OnboardingRou
 import io.github.swiftstagrime.termuxrunner.ui.features.settings.SettingsRoute
 import io.github.swiftstagrime.termuxrunner.ui.features.tiles.TileSettingsRoute
 
-
 @Composable
-fun rememberEntryProvider(
-    mainViewModel: MainViewModel
-): (NavKey) -> NavEntry<NavKey> {
-    return remember(mainViewModel) {
+fun rememberEntryProvider(mainViewModel: MainViewModel): (NavKey) -> NavEntry<NavKey> =
+    remember(mainViewModel) {
         { key ->
             NavEntry(key) {
                 when (key) {
                     is Route.Onboarding -> {
                         OnboardingRoute(
-                            onSetupFinished = { mainViewModel.replaceRoot(Route.Home) }
+                            onSetupFinished = { mainViewModel.replaceRoot(Route.Home) },
                         )
                     }
 
@@ -43,12 +40,11 @@ fun rememberEntryProvider(
                             },
                             onNavigateToAutomation = {
                                 mainViewModel.navigateTo(Route.Automation)
-                            }
+                            },
                         )
                     }
 
                     is Route.Editor -> {
-
                         val viewModel: EditorViewModel = hiltViewModel()
 
                         LaunchedEffect(key.scriptId) {
@@ -57,7 +53,7 @@ fun rememberEntryProvider(
 
                         EditorRoute(
                             onBack = { mainViewModel.goBack() },
-                            viewModel = viewModel
+                            viewModel = viewModel,
                         )
                     }
 
@@ -66,27 +62,25 @@ fun rememberEntryProvider(
                             onBack = { mainViewModel.goBack() },
                             onNavigateToEditor = { scriptId ->
                                 mainViewModel.navigateTo(Route.Editor(scriptId))
-                            }
+                            },
                         )
                     }
 
                     is Route.TileSettings -> {
                         TileSettingsRoute(
-                            onBack = { mainViewModel.goBack() }
+                            onBack = { mainViewModel.goBack() },
                         )
                     }
 
                     is Route.Automation -> {
                         AutomationRoute(
-                            onBackClick = { mainViewModel.goBack() }
+                            onBackClick = { mainViewModel.goBack() },
                         )
                     }
 
                     else -> {
-
                     }
                 }
             }
         }
     }
-}

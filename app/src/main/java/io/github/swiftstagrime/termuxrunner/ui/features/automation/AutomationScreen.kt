@@ -75,7 +75,7 @@ fun AutomationScreen(
     onAddAutomationClick: () -> Unit,
     onRunNow: (Automation) -> Unit,
     onShowHistory: (Automation) -> Unit,
-    onRequestPermission: () -> Unit
+    onRequestPermission: () -> Unit,
 ) {
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -86,14 +86,14 @@ fun AutomationScreen(
                     IconButton(onClick = onBackClick) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, null)
                     }
-                }
+                },
             )
         },
         floatingActionButton = {
             FloatingActionButton(onClick = onAddAutomationClick) {
                 Icon(Icons.Default.AddAlarm, null)
             }
-        }
+        },
     ) { padding ->
         Column(modifier = Modifier.padding(padding)) {
             if (!uiState.isExactAlarmPermissionGranted) {
@@ -102,7 +102,7 @@ fun AutomationScreen(
 
             LazyColumn(
                 contentPadding = PaddingValues(16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+                verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 items(uiState.items, key = { it.automation.id }) { item ->
                     AutomationItem(
@@ -110,7 +110,7 @@ fun AutomationScreen(
                         onToggle = { onToggleAutomation(item.automation.id, it) },
                         onDelete = { onDeleteAutomation(item.automation) },
                         onRunNow = { onRunNow(item.automation) },
-                        onShowHistory = { onShowHistory(item.automation) }
+                        onShowHistory = { onShowHistory(item.automation) },
                     )
                 }
             }
@@ -124,29 +124,33 @@ private fun AutomationItem(
     onToggle: (Boolean) -> Unit,
     onRunNow: () -> Unit,
     onDelete: () -> Unit,
-    onShowHistory: () -> Unit
+    onShowHistory: () -> Unit,
 ) {
     Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(20.dp)),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(2.dp)
-        ),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f))
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(20.dp)),
+        colors =
+            CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(2.dp),
+            ),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)),
     ) {
         Row(modifier = Modifier.height(IntrinsicSize.Min)) {
             Box(
-                modifier = Modifier
-                    .fillMaxHeight()
-                    .width(6.dp)
-                    .background(Color(item.statusColor).copy(alpha = 0.8f))
+                modifier =
+                    Modifier
+                        .fillMaxHeight()
+                        .width(6.dp)
+                        .background(Color(item.statusColor).copy(alpha = 0.8f)),
             )
 
             Column(
-                modifier = Modifier
-                    .padding(16.dp)
-                    .fillMaxWidth()
+                modifier =
+                    Modifier
+                        .padding(16.dp)
+                        .fillMaxWidth(),
             ) {
                 Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.Top) {
                     ScriptIcon(item.scriptIconPath, modifier = Modifier.size(44.dp))
@@ -155,31 +159,35 @@ private fun AutomationItem(
                         Text(
                             text = item.automation.label,
                             style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold
+                            fontWeight = FontWeight.Bold,
                         )
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
                         ) {
                             FrequencyBadge(type = item.automation.type)
-                            if (item.automation.requireWifi) Icon(
-                                Icons.Default.Wifi,
-                                null,
-                                modifier = Modifier.size(14.dp),
-                                tint = MaterialTheme.colorScheme.primary
-                            )
-                            if (item.automation.requireCharging) Icon(
-                                Icons.Default.BatteryChargingFull,
-                                null,
-                                modifier = Modifier.size(14.dp),
-                                tint = MaterialTheme.colorScheme.primary
-                            )
+                            if (item.automation.requireWifi) {
+                                Icon(
+                                    Icons.Default.Wifi,
+                                    null,
+                                    modifier = Modifier.size(14.dp),
+                                    tint = MaterialTheme.colorScheme.primary,
+                                )
+                            }
+                            if (item.automation.requireCharging) {
+                                Icon(
+                                    Icons.Default.BatteryChargingFull,
+                                    null,
+                                    modifier = Modifier.size(14.dp),
+                                    tint = MaterialTheme.colorScheme.primary,
+                                )
+                            }
                         }
                     }
                     Switch(
                         checked = item.automation.isEnabled,
                         onCheckedChange = onToggle,
-                        modifier = Modifier.scale(0.8f)
+                        modifier = Modifier.scale(0.8f),
                     )
                 }
 
@@ -188,7 +196,7 @@ private fun AutomationItem(
                 Surface(
                     color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
                     shape = RoundedCornerShape(8.dp),
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
                 ) {
                     Text(
                         text = item.scriptName,
@@ -197,7 +205,7 @@ private fun AutomationItem(
                         color = MaterialTheme.colorScheme.primary,
                         fontFamily = FontFamily.Monospace,
                         maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
+                        overflow = TextOverflow.Ellipsis,
                     )
                 }
 
@@ -205,22 +213,23 @@ private fun AutomationItem(
 
                 Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.Bottom) {
                     Column(
-                        modifier = Modifier
-                            .weight(1f)
-                            .clip(RoundedCornerShape(8.dp))
-                            .clickable { onShowHistory() }
-                            .padding(4.dp)
+                        modifier =
+                            Modifier
+                                .weight(1f)
+                                .clip(RoundedCornerShape(8.dp))
+                                .clickable { onShowHistory() }
+                                .padding(4.dp),
                     ) {
                         MonitoringInfo(
                             icon = Icons.Default.Event,
                             text = item.nextRunText,
-                            contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                            contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                         Spacer(modifier = Modifier.height(4.dp))
                         MonitoringInfo(
                             icon = if (item.automation.lastExitCode == 0) Icons.Default.CheckCircle else Icons.Default.Error,
                             text = item.lastRunText,
-                            contentColor = Color(item.statusColor)
+                            contentColor = Color(item.statusColor),
                         )
                     }
 
@@ -228,7 +237,10 @@ private fun AutomationItem(
                         FilledIconButton(
                             onClick = onRunNow,
                             modifier = Modifier.size(40.dp),
-                            colors = IconButtonDefaults.filledIconButtonColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)
+                            colors =
+                                IconButtonDefaults.filledIconButtonColors(
+                                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                                ),
                         ) {
                             Icon(Icons.Default.PlayArrow, null, modifier = Modifier.size(20.dp))
                         }
@@ -238,13 +250,13 @@ private fun AutomationItem(
                             color = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.15f),
                             contentColor = MaterialTheme.colorScheme.error,
                             shape = RoundedCornerShape(12.dp),
-                            modifier = Modifier.size(40.dp)
+                            modifier = Modifier.size(40.dp),
                         ) {
                             Box(contentAlignment = Alignment.Center) {
                                 Icon(
                                     Icons.Default.DeleteSweep,
                                     null,
-                                    modifier = Modifier.size(20.dp)
+                                    modifier = Modifier.size(20.dp),
                                 )
                             }
                         }
@@ -257,22 +269,23 @@ private fun AutomationItem(
 
 @Composable
 private fun FrequencyBadge(type: AutomationType) {
-    val text = when (type) {
-        AutomationType.ONE_TIME -> stringResource(R.string.automation_type_one_time)
-        AutomationType.PERIODIC -> stringResource(R.string.automation_type_periodic)
-        AutomationType.WEEKLY -> stringResource(R.string.automation_type_weekly)
-    }
+    val text =
+        when (type) {
+            AutomationType.ONE_TIME -> stringResource(R.string.automation_type_one_time)
+            AutomationType.PERIODIC -> stringResource(R.string.automation_type_periodic)
+            AutomationType.WEEKLY -> stringResource(R.string.automation_type_weekly)
+        }
 
     Surface(
         color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.5f),
         contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-        shape = RoundedCornerShape(6.dp)
+        shape = RoundedCornerShape(6.dp),
     ) {
         Text(
             text = text.uppercase(),
             modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
             style = MaterialTheme.typography.labelSmall,
-            fontWeight = FontWeight.Black
+            fontWeight = FontWeight.Black,
         )
     }
 }
@@ -281,20 +294,20 @@ private fun FrequencyBadge(type: AutomationType) {
 private fun MonitoringInfo(
     icon: ImageVector,
     text: String,
-    contentColor: Color
+    contentColor: Color,
 ) {
     Row(verticalAlignment = Alignment.CenterVertically) {
         Icon(
             imageVector = icon,
             contentDescription = null,
             modifier = Modifier.size(14.dp),
-            tint = contentColor.copy(alpha = 0.7f)
+            tint = contentColor.copy(alpha = 0.7f),
         )
         Spacer(modifier = Modifier.width(6.dp))
         Text(
             text = text,
             style = MaterialTheme.typography.labelMedium,
-            color = contentColor
+            color = contentColor,
         )
     }
 }
@@ -304,10 +317,11 @@ private fun PermissionWarningBanner(onClick: () -> Unit) {
     Surface(
         color = MaterialTheme.colorScheme.errorContainer,
         shape = RoundedCornerShape(16.dp),
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 0.dp, horizontal = 16.dp)
-            .clickable { onClick() }
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(vertical = 0.dp, horizontal = 16.dp)
+                .clickable { onClick() },
     ) {
         Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
             Icon(Icons.Default.Warning, null, tint = MaterialTheme.colorScheme.onErrorContainer)
@@ -315,7 +329,7 @@ private fun PermissionWarningBanner(onClick: () -> Unit) {
             Text(
                 text = stringResource(R.string.exact_alarm_permission_required),
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onErrorContainer
+                color = MaterialTheme.colorScheme.onErrorContainer,
             )
         }
     }
@@ -326,17 +340,18 @@ private fun PermissionWarningBanner(onClick: () -> Unit) {
 fun AutomationScreenPreview() {
     MaterialTheme {
         AutomationScreen(
-            uiState = AutomationUiState(
-                items = mockAutomations,
-                isExactAlarmPermissionGranted = true
-            ),
+            uiState =
+                AutomationUiState(
+                    items = mockAutomations,
+                    isExactAlarmPermissionGranted = true,
+                ),
             onBackClick = {},
             onToggleAutomation = { _, _ -> },
             onDeleteAutomation = {},
             onAddAutomationClick = {},
             onRequestPermission = {},
             onRunNow = {},
-            onShowHistory = {}
+            onShowHistory = {},
         )
     }
 }
@@ -346,17 +361,18 @@ fun AutomationScreenPreview() {
 fun AutomationScreenPermissionPreview() {
     MaterialTheme {
         AutomationScreen(
-            uiState = AutomationUiState(
-                items = mockAutomations.take(1),
-                isExactAlarmPermissionGranted = false
-            ),
+            uiState =
+                AutomationUiState(
+                    items = mockAutomations.take(1),
+                    isExactAlarmPermissionGranted = false,
+                ),
             onBackClick = {},
             onToggleAutomation = { _, _ -> },
             onDeleteAutomation = {},
             onAddAutomationClick = {},
             onRequestPermission = {},
             onRunNow = {},
-            onShowHistory = {}
+            onShowHistory = {},
         )
     }
 }

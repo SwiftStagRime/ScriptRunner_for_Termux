@@ -22,5 +22,5 @@ data class Automation(
     val lastExitCode: Int? = null,
     val requireWifi: Boolean = false,
     val requireCharging: Boolean = false,
-    val batteryThreshold: Int = 0
+    val batteryThreshold: Int = 0,
 ) : Parcelable

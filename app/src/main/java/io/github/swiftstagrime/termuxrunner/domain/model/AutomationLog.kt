@@ -5,5 +5,5 @@ data class AutomationLog(
     val automationId: Int,
     val timestamp: Long,
     val exitCode: Int,
-    val message: String? = null
+    val message: String? = null,
 )

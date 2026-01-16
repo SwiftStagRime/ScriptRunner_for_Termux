@@ -6,5 +6,5 @@ import kotlinx.serialization.Serializable
 enum class AutomationType {
     ONE_TIME,
     PERIODIC,
-    WEEKLY
+    WEEKLY,
 }

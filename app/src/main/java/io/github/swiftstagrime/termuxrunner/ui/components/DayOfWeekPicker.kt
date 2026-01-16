@@ -23,47 +23,57 @@ import androidx.compose.ui.unit.dp
 import io.github.swiftstagrime.termuxrunner.R
 
 @Composable
-fun DayOfWeekPicker(selectedDays: List<Int>, onToggleDay: (Int) -> Unit) {
-    val days = listOf(
-        stringResource(R.string.day_sun),
-        stringResource(R.string.day_mon),
-        stringResource(R.string.day_tue),
-        stringResource(R.string.day_wed),
-        stringResource(R.string.day_thu),
-        stringResource(R.string.day_fri),
-        stringResource(R.string.day_sat)
-    )
+fun DayOfWeekPicker(
+    selectedDays: List<Int>,
+    onToggleDay: (Int) -> Unit,
+) {
+    val days =
+        listOf(
+            stringResource(R.string.day_sun),
+            stringResource(R.string.day_mon),
+            stringResource(R.string.day_tue),
+            stringResource(R.string.day_wed),
+            stringResource(R.string.day_thu),
+            stringResource(R.string.day_fri),
+            stringResource(R.string.day_sat),
+        )
 
     LazyRow(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         itemsIndexed(days) { index, day ->
             val dayNum = index + 1
             val isSelected = selectedDays.contains(dayNum)
 
             Box(
-                modifier = Modifier
-                    .size(44.dp)
-                    .clip(CircleShape)
-                    .background(
-                        if (isSelected) MaterialTheme.colorScheme.primary
-                        else MaterialTheme.colorScheme.surfaceContainerLowest
-                    )
-                    .border(
-                        width = 1.dp,
-                        color = if (isSelected) Color.Transparent else MaterialTheme.colorScheme.outlineVariant,
-                        shape = CircleShape
-                    )
-                    .clickable { onToggleDay(dayNum) },
-                contentAlignment = Alignment.Center
+                modifier =
+                    Modifier
+                        .size(44.dp)
+                        .clip(CircleShape)
+                        .background(
+                            if (isSelected) {
+                                MaterialTheme.colorScheme.primary
+                            } else {
+                                MaterialTheme.colorScheme.surfaceContainerLowest
+                            },
+                        ).border(
+                            width = 1.dp,
+                            color = if (isSelected) Color.Transparent else MaterialTheme.colorScheme.outlineVariant,
+                            shape = CircleShape,
+                        ).clickable { onToggleDay(dayNum) },
+                contentAlignment = Alignment.Center,
             ) {
                 Text(
                     text = day,
                     style = MaterialTheme.typography.labelLarge,
                     fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-                    color = if (isSelected) MaterialTheme.colorScheme.onPrimary
-                    else MaterialTheme.colorScheme.onSurface
+                    color =
+                        if (isSelected) {
+                            MaterialTheme.colorScheme.onPrimary
+                        } else {
+                            MaterialTheme.colorScheme.onSurface
+                        },
                 )
             }
         }

@@ -38,7 +38,7 @@ fun CategorySpinner(
     categories: List<Category>,
     selectedCategoryId: Int?,
     onCategorySelected: (Int?) -> Unit,
-    onAddNewClick: () -> Unit
+    onAddNewClick: () -> Unit,
 ) {
     var expanded by remember { mutableStateOf(false) }
     val selectedCategory = categories.find { it.id == selectedCategoryId }
@@ -48,45 +48,50 @@ fun CategorySpinner(
             text = "Category",
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.padding(start = 4.dp, bottom = 4.dp)
+            modifier = Modifier.padding(start = 4.dp, bottom = 4.dp),
         )
 
         ExposedDropdownMenuBox(
             expanded = expanded,
             onExpandedChange = { expanded = !expanded },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
         ) {
-            val fillMaxWidth = Modifier
-                .fillMaxWidth()
+            val fillMaxWidth =
+                Modifier
+                    .fillMaxWidth()
             OutlinedTextField(
                 value = selectedCategory?.name ?: stringResource(R.string.uncategorized),
                 onValueChange = {},
                 readOnly = true,
-                modifier = fillMaxWidth.menuAnchor(
-                    ExposedDropdownMenuAnchorType.PrimaryNotEditable,
-                    true
-                ),
+                modifier =
+                    fillMaxWidth.menuAnchor(
+                        ExposedDropdownMenuAnchorType.PrimaryNotEditable,
+                        true,
+                    ),
                 shape = RoundedCornerShape(12.dp),
                 leadingIcon = {
                     Icon(Icons.Default.Category, null, tint = MaterialTheme.colorScheme.primary)
                 },
                 trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-                colors = TextFieldDefaults.colors(
-                    focusedContainerColor = Color.Transparent,
-                    unfocusedContainerColor = Color.Transparent,
-                    focusedTextColor = MaterialTheme.colorScheme.primary,
-                    unfocusedTextColor = if (selectedCategoryId != null)
-                        MaterialTheme.colorScheme.primary
-                    else
-                        MaterialTheme.colorScheme.onSurface
-                )
+                colors =
+                    TextFieldDefaults.colors(
+                        focusedContainerColor = Color.Transparent,
+                        unfocusedContainerColor = Color.Transparent,
+                        focusedTextColor = MaterialTheme.colorScheme.primary,
+                        unfocusedTextColor =
+                            if (selectedCategoryId != null) {
+                                MaterialTheme.colorScheme.primary
+                            } else {
+                                MaterialTheme.colorScheme.onSurface
+                            },
+                    ),
             )
 
             ExposedDropdownMenu(
                 expanded = expanded,
                 onDismissRequest = { expanded = false },
                 modifier = Modifier.background(MaterialTheme.colorScheme.surfaceContainerHigh),
-                shape = RoundedCornerShape(16.dp)
+                shape = RoundedCornerShape(16.dp),
             ) {
                 DropdownMenuItem(
                     text = { Text(stringResource(R.string.uncategorized)) },
@@ -94,7 +99,7 @@ fun CategorySpinner(
                         onCategorySelected(null)
                         expanded = false
                     },
-                    contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
+                    contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding,
                 )
 
                 categories.forEach { category ->
@@ -102,17 +107,19 @@ fun CategorySpinner(
                         text = {
                             Text(
                                 text = category.name,
-                                color = if (category.id == selectedCategoryId)
-                                    MaterialTheme.colorScheme.primary
-                                else
-                                    MaterialTheme.colorScheme.onSurface
+                                color =
+                                    if (category.id == selectedCategoryId) {
+                                        MaterialTheme.colorScheme.primary
+                                    } else {
+                                        MaterialTheme.colorScheme.onSurface
+                                    },
                             )
                         },
                         onClick = {
                             onCategorySelected(category.id)
                             expanded = false
                         },
-                        contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
+                        contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding,
                     )
                 }
 
@@ -123,7 +130,7 @@ fun CategorySpinner(
                         Text(
                             stringResource(R.string.add_new_category),
                             color = MaterialTheme.colorScheme.secondary,
-                            fontWeight = FontWeight.Bold
+                            fontWeight = FontWeight.Bold,
                         )
                     },
                     leadingIcon = {
@@ -133,7 +140,7 @@ fun CategorySpinner(
                         expanded = false
                         onAddNewClick()
                     },
-                    contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
+                    contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding,
                 )
             }
         }

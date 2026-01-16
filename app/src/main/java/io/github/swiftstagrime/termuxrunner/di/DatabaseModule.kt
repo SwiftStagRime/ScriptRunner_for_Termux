@@ -21,41 +21,31 @@ object DatabaseModule {
     @Singleton
     fun provideAppDatabase(
         @ApplicationContext context: Context,
-        keyManagerFactory: KeyManagerFactory
-    ): AppDatabase {
-
-        return Room.databaseBuilder(
-            context,
-            AppDatabase::class.java,
-            "script_runner_secure.db"
-        )
-            .openHelperFactory(keyManagerFactory)
+        keyManagerFactory: KeyManagerFactory,
+    ): AppDatabase =
+        Room
+            .databaseBuilder(
+                context,
+                AppDatabase::class.java,
+                "script_runner_secure.db",
+            ).openHelperFactory(keyManagerFactory)
             .enableMultiInstanceInvalidation()
             .fallbackToDestructiveMigration(false)
             .build()
-    }
 
     @Provides
     @Singleton
-    fun provideScriptDao(db: AppDatabase): ScriptDao {
-        return db.scriptDao()
-    }
+    fun provideScriptDao(db: AppDatabase): ScriptDao = db.scriptDao()
 
     @Provides
     @Singleton
-    fun provideCategoryDao(db: AppDatabase): CategoryDao {
-        return db.categoryDao()
-    }
+    fun provideCategoryDao(db: AppDatabase): CategoryDao = db.categoryDao()
 
     @Provides
     @Singleton
-    fun provideAutomationDao(db: AppDatabase): AutomationDao {
-        return db.automationDao()
-    }
+    fun provideAutomationDao(db: AppDatabase): AutomationDao = db.automationDao()
 
     @Provides
     @Singleton
-    fun provideAutomationLogDao(db: AppDatabase): AutomationLogDao {
-        return db.automationLogDao()
-    }
+    fun provideAutomationLogDao(db: AppDatabase): AutomationLogDao = db.automationLogDao()
 }

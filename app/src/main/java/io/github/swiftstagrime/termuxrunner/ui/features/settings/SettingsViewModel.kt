@@ -20,81 +20,88 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class SettingsViewModel @Inject constructor(
-    private val userPreferencesRepository: UserPreferencesRepository,
-    private val scriptRepository: ScriptRepository
-) : ViewModel() {
+class SettingsViewModel
+    @Inject
+    constructor(
+        private val userPreferencesRepository: UserPreferencesRepository,
+        private val scriptRepository: ScriptRepository,
+    ) : ViewModel() {
+        val selectedAccent =
+            userPreferencesRepository.selectedAccent
+                .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), AppTheme.GREEN)
 
-    val selectedAccent = userPreferencesRepository.selectedAccent
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), AppTheme.GREEN)
+        val selectedMode =
+            userPreferencesRepository.selectedMode
+                .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), ThemeMode.SYSTEM)
 
-    val selectedMode = userPreferencesRepository.selectedMode
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), ThemeMode.SYSTEM)
+        fun setAccent(accent: AppTheme) {
+            viewModelScope.launch { userPreferencesRepository.setAccent(accent) }
+        }
 
-    fun setAccent(accent: AppTheme) {
-        viewModelScope.launch { userPreferencesRepository.setAccent(accent) }
-    }
+        fun setMode(mode: ThemeMode) {
+            viewModelScope.launch { userPreferencesRepository.setMode(mode) }
+        }
 
-    fun setMode(mode: ThemeMode) {
-        viewModelScope.launch { userPreferencesRepository.setMode(mode) }
-    }
+        private val _ioState = MutableStateFlow<UiText?>(null)
+        val ioState = _ioState.asStateFlow()
 
-    private val _ioState = MutableStateFlow<UiText?>(null)
-    val ioState = _ioState.asStateFlow()
+        private val _navEvents = Channel<SettingsNavEvent>()
+        val navEvents = _navEvents.receiveAsFlow()
 
-    private val _navEvents = Channel<SettingsNavEvent>()
-    val navEvents = _navEvents.receiveAsFlow()
+        fun exportData(uri: Uri) {
+            viewModelScope.launch {
+                _ioState.value = UiText.StringResource(R.string.exporting)
+                scriptRepository
+                    .exportScripts(uri)
+                    .onSuccess {
+                        _ioState.value = UiText.StringResource(R.string.export_success)
+                    }.onFailure {
+                        _ioState.value =
+                            UiText.StringResource(
+                                R.string.export_failed,
+                                it.localizedMessage ?: "Unknown Error",
+                            )
+                    }
+            }
+        }
 
-    fun exportData(uri: Uri) {
-        viewModelScope.launch {
-            _ioState.value = UiText.StringResource(R.string.exporting)
-            scriptRepository.exportScripts(uri)
-                .onSuccess {
-                    _ioState.value = UiText.StringResource(R.string.export_success)
-                }
-                .onFailure {
-                    _ioState.value = UiText.StringResource(
-                        R.string.export_failed,
-                        it.localizedMessage ?: "Unknown Error"
-                    )
-                }
+        fun importData(uri: Uri) {
+            viewModelScope.launch {
+                _ioState.value = UiText.StringResource(R.string.importing)
+                scriptRepository
+                    .importScripts(uri)
+                    .onSuccess {
+                        _ioState.value = UiText.StringResource(R.string.import_success)
+                    }.onFailure {
+                        _ioState.value =
+                            UiText.StringResource(
+                                R.string.import_failed,
+                                it.localizedMessage ?: "Unknown Error",
+                            )
+                    }
+            }
+        }
+
+        fun importSingleScript(uri: Uri) {
+            viewModelScope.launch {
+                scriptRepository
+                    .importSingleScript(uri)
+                    .onSuccess { parsedScript ->
+                        val newId = scriptRepository.insertScript(parsedScript)
+                        _navEvents.send(SettingsNavEvent.NavigateToEditor(newId))
+                    }.onFailure {
+                        _ioState.value = UiText.StringResource(R.string.import_failed, it.message ?: "")
+                    }
+            }
+        }
+
+        fun clearMessage() {
+            _ioState.value = null
         }
     }
-
-    fun importData(uri: Uri) {
-        viewModelScope.launch {
-            _ioState.value = UiText.StringResource(R.string.importing)
-            scriptRepository.importScripts(uri)
-                .onSuccess {
-                    _ioState.value = UiText.StringResource(R.string.import_success)
-                }
-                .onFailure {
-                    _ioState.value = UiText.StringResource(
-                        R.string.import_failed,
-                        it.localizedMessage ?: "Unknown Error"
-                    )
-                }
-        }
-    }
-
-    fun importSingleScript(uri: Uri) {
-        viewModelScope.launch {
-            scriptRepository.importSingleScript(uri)
-                .onSuccess { parsedScript ->
-                    val newId = scriptRepository.insertScript(parsedScript)
-                    _navEvents.send(SettingsNavEvent.NavigateToEditor(newId))
-                }
-                .onFailure {
-                    _ioState.value = UiText.StringResource(R.string.import_failed, it.message ?: "")
-                }
-        }
-    }
-
-    fun clearMessage() {
-        _ioState.value = null
-    }
-}
 
 sealed class SettingsNavEvent {
-    data class NavigateToEditor(val scriptId: Int) : SettingsNavEvent()
+    data class NavigateToEditor(
+        val scriptId: Int,
+    ) : SettingsNavEvent()
 }

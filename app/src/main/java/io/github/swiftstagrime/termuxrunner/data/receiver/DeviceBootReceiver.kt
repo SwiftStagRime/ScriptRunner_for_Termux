@@ -19,7 +19,10 @@ class DeviceBootReceiver : BroadcastReceiver() {
     @Inject
     lateinit var scheduler: AutomationScheduler
 
-    override fun onReceive(context: Context, intent: Intent) {
+    override fun onReceive(
+        context: Context,
+        intent: Intent,
+    ) {
         if (intent.action == Intent.ACTION_BOOT_COMPLETED) {
             CoroutineScope(Dispatchers.IO).launch {
                 val active = automationDao.getEnabledAutomations()

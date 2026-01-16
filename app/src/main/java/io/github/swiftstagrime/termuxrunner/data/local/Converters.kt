@@ -6,16 +6,14 @@ import io.github.swiftstagrime.termuxrunner.domain.model.InteractionMode
 import kotlinx.serialization.json.Json
 
 class Converters {
-
-    private val json = Json {
-        ignoreUnknownKeys = true
-        isLenient = true
-    }
+    private val json =
+        Json {
+            ignoreUnknownKeys = true
+            isLenient = true
+        }
 
     @TypeConverter
-    fun fromEnvMap(map: Map<String, String>): String {
-        return json.encodeToString(map)
-    }
+    fun fromEnvMap(map: Map<String, String>): String = json.encodeToString(map)
 
     @TypeConverter
     fun toEnvMap(data: String): Map<String, String> {
@@ -29,23 +27,18 @@ class Converters {
     }
 
     @TypeConverter
-    fun fromInteractionMode(mode: InteractionMode): String {
-        return mode.name
-    }
+    fun fromInteractionMode(mode: InteractionMode): String = mode.name
 
     @TypeConverter
-    fun toInteractionMode(data: String): InteractionMode {
-        return try {
+    fun toInteractionMode(data: String): InteractionMode =
+        try {
             InteractionMode.valueOf(data)
         } catch (e: Exception) {
             InteractionMode.NONE
         }
-    }
 
     @TypeConverter
-    fun fromStringList(list: List<String>): String {
-        return json.encodeToString(list)
-    }
+    fun fromStringList(list: List<String>): String = json.encodeToString(list)
 
     @TypeConverter
     fun toStringList(data: String): List<String> {
@@ -65,9 +58,7 @@ class Converters {
     fun toAutomationType(value: String) = AutomationType.valueOf(value)
 
     @TypeConverter
-    fun fromIntList(list: List<Int>): String {
-        return json.encodeToString(list)
-    }
+    fun fromIntList(list: List<Int>): String = json.encodeToString(list)
 
     @TypeConverter
     fun toIntList(data: String): List<Int> {

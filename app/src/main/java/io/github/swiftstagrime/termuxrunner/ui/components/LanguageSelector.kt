@@ -37,14 +37,14 @@ import io.github.swiftstagrime.termuxrunner.ui.theme.ScriptRunnerForTermuxTheme
 fun LanguageDropdownMenu(
     expanded: Boolean,
     onDismiss: () -> Unit,
-    onLanguageSelected: (String) -> Unit
+    onLanguageSelected: (String) -> Unit,
 ) {
     val currentLanguage = LocaleManager.getCurrentLanguage()
 
     DropdownMenu(
         expanded = expanded,
         onDismissRequest = onDismiss,
-        modifier = Modifier.background(MaterialTheme.colorScheme.surfaceContainer)
+        modifier = Modifier.background(MaterialTheme.colorScheme.surfaceContainer),
     ) {
         LocaleManager.supportedLanguages.forEach { language ->
             DropdownMenuItem(
@@ -52,7 +52,7 @@ fun LanguageDropdownMenu(
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(
                             text = language.flagEmoji,
-                            style = MaterialTheme.typography.titleMedium
+                            style = MaterialTheme.typography.titleMedium,
                         )
                         Spacer(modifier = Modifier.width(12.dp))
                         Text(text = language.name, style = MaterialTheme.typography.bodyMedium)
@@ -66,7 +66,7 @@ fun LanguageDropdownMenu(
                     if (currentLanguage.code == language.code) {
                         Icon(Icons.Default.Check, null, tint = MaterialTheme.colorScheme.primary)
                     }
-                }
+                },
             )
         }
     }
@@ -81,12 +81,12 @@ fun LanguageSelectorButton(modifier: Modifier = Modifier) {
         OutlinedButton(
             onClick = { expanded = true },
             shape = RoundedCornerShape(12.dp),
-            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp)
+            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
         ) {
             Text(
                 text = "${currentLanguage.flagEmoji} ${currentLanguage.name}",
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurface
+                color = MaterialTheme.colorScheme.onSurface,
             )
             Spacer(modifier = Modifier.width(8.dp))
             Icon(Icons.Default.ArrowDropDown, null, modifier = Modifier.size(20.dp))
@@ -95,7 +95,7 @@ fun LanguageSelectorButton(modifier: Modifier = Modifier) {
         LanguageDropdownMenu(
             expanded = expanded,
             onDismiss = { expanded = false },
-            onLanguageSelected = { LocaleManager.setLocale(it) }
+            onLanguageSelected = { LocaleManager.setLocale(it) },
         )
     }
 }
@@ -108,14 +108,14 @@ fun LanguageSelectorIcon() {
         IconButton(onClick = { expanded = true }) {
             Icon(
                 Icons.Default.Language,
-                contentDescription = stringResource(R.string.language_label)
+                contentDescription = stringResource(R.string.language_label),
             )
         }
 
         LanguageDropdownMenu(
             expanded = expanded,
             onDismiss = { expanded = false },
-            onLanguageSelected = { LocaleManager.setLocale(it) }
+            onLanguageSelected = { LocaleManager.setLocale(it) },
         )
     }
 }
@@ -127,7 +127,7 @@ private fun PreviewSelector() {
         LanguageDropdownMenu(
             true,
             {},
-            {}
+            {},
         )
     }
 }

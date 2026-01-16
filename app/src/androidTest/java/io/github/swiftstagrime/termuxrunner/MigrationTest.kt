@@ -17,24 +17,26 @@ class DatabaseMigrationTest {
     private val TEST_DB = "migration-test"
 
     @get:Rule
-    val helper: MigrationTestHelper = MigrationTestHelper(
-        InstrumentationRegistry.getInstrumentation(),
-        AppDatabase::class.java
-    )
+    val helper: MigrationTestHelper =
+        MigrationTestHelper(
+            InstrumentationRegistry.getInstrumentation(),
+            AppDatabase::class.java,
+        )
 
     @Test
     @Throws(IOException::class)
     fun migrate1To2_addsHeartbeatColumns() {
-        var db = helper.createDatabase(TEST_DB, 1).apply {
-            execSQL(
-                """
-                INSERT INTO scripts (name, code, interpreter, fileExtension, commandPrefix, 
-                runInBackground, openNewSession, executionParams, envVars, keepSessionOpen) 
-                VALUES ('Test Script', 'echo hello', 'bash', '.sh', '', 0, 1, '', '{}', 0)
-            """.trimIndent()
-            )
-            close()
-        }
+        var db =
+            helper.createDatabase(TEST_DB, 1).apply {
+                execSQL(
+                    """
+                    INSERT INTO scripts (name, code, interpreter, fileExtension, commandPrefix, 
+                    runInBackground, openNewSession, executionParams, envVars, keepSessionOpen) 
+                    VALUES ('Test Script', 'echo hello', 'bash', '.sh', '', 0, 1, '', '{}', 0)
+                    """.trimIndent(),
+                )
+                close()
+            }
 
         db = helper.runMigrationsAndValidate(TEST_DB, 2, true)
 
@@ -54,17 +56,18 @@ class DatabaseMigrationTest {
     @Test
     @Throws(IOException::class)
     fun migrate2To3_addsCategoryTableAndColumns() {
-        var db = helper.createDatabase(TEST_DB, 2).apply {
-            execSQL(
-                """
-                INSERT INTO scripts (name, code, interpreter, fileExtension, commandPrefix, 
-                runInBackground, openNewSession, executionParams, envVars, keepSessionOpen,
-                useHeartbeat, heartbeatTimeout, heartbeatInterval) 
-                VALUES ('V2 Script', 'exit', 'sh', '.sh', '', 0, 0, '', '{}', 0, 1, 5000, 1000)
-            """.trimIndent()
-            )
-            close()
-        }
+        var db =
+            helper.createDatabase(TEST_DB, 2).apply {
+                execSQL(
+                    """
+                    INSERT INTO scripts (name, code, interpreter, fileExtension, commandPrefix, 
+                    runInBackground, openNewSession, executionParams, envVars, keepSessionOpen,
+                    useHeartbeat, heartbeatTimeout, heartbeatInterval) 
+                    VALUES ('V2 Script', 'exit', 'sh', '.sh', '', 0, 0, '', '{}', 0, 1, 5000, 1000)
+                    """.trimIndent(),
+                )
+                close()
+            }
 
         db = helper.runMigrationsAndValidate(TEST_DB, 3, true)
 

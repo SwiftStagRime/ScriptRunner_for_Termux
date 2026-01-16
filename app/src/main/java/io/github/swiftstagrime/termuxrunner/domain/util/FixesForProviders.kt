@@ -8,19 +8,21 @@ object MiuiUtils {
     fun hasShortcutPermission(context: Context): Boolean {
         val appOps = context.getSystemService(Context.APP_OPS_SERVICE) as AppOpsManager
         return try {
-            val method = AppOpsManager::class.java.getMethod(
-                "checkOpNoThrow",
-                Int::class.javaPrimitiveType,
-                Int::class.javaPrimitiveType,
-                String::class.java
-            )
+            val method =
+                AppOpsManager::class.java.getMethod(
+                    "checkOpNoThrow",
+                    Int::class.javaPrimitiveType,
+                    Int::class.javaPrimitiveType,
+                    String::class.java,
+                )
             // 10017 is the MIUI internal code for "Install Shortcut"
-            val result = method.invoke(
-                appOps,
-                10017,
-                Binder.getCallingUid(),
-                context.packageName
-            ) as Int
+            val result =
+                method.invoke(
+                    appOps,
+                    10017,
+                    Binder.getCallingUid(),
+                    context.packageName,
+                ) as Int
 
             result == AppOpsManager.MODE_ALLOWED
         } catch (_: Exception) {

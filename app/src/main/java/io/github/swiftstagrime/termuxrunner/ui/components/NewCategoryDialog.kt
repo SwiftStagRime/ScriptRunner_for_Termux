@@ -17,7 +17,7 @@ import io.github.swiftstagrime.termuxrunner.R
 @Composable
 fun NewCategoryDialog(
     onDismiss: () -> Unit,
-    onConfirm: (String) -> Unit
+    onConfirm: (String) -> Unit,
 ) {
     var text by remember { mutableStateOf("") }
 
@@ -30,18 +30,18 @@ fun NewCategoryDialog(
                 onValueChange = { text = it },
                 label = { Text(stringResource(R.string.category_name)) },
                 singleLine = true,
-                shape = RoundedCornerShape(12.dp)
+                shape = RoundedCornerShape(12.dp),
             )
         },
         confirmButton = {
             TextButton(
                 onClick = { if (text.isNotBlank()) onConfirm(text) },
-                enabled = text.isNotBlank()
+                enabled = text.isNotBlank(),
             ) { Text(stringResource(R.string.create)) }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) }
         },
-        shape = RoundedCornerShape(28.dp)
+        shape = RoundedCornerShape(28.dp),
     )
 }

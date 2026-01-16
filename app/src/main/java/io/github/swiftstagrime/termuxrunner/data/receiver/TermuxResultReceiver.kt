@@ -20,14 +20,16 @@ import javax.inject.Inject
 
 @AndroidEntryPoint
 class TermuxResultReceiver : BroadcastReceiver() {
-
     @Inject
     lateinit var automationDao: AutomationDao
 
     @Inject
     lateinit var logRepository: AutomationLogRepository
 
-    override fun onReceive(context: Context, intent: Intent) {
+    override fun onReceive(
+        context: Context,
+        intent: Intent,
+    ) {
         val scriptName = intent.getStringExtra("script_name") ?: "Script"
         val scriptId = intent.getIntExtra("script_id", -1)
         val automationId = intent.getIntExtra("automation_id", -1)
@@ -56,8 +58,8 @@ class TermuxResultReceiver : BroadcastReceiver() {
                         AutomationLog(
                             automationId = automationId,
                             timestamp = timestamp,
-                            exitCode = exitCode
-                        )
+                            exitCode = exitCode,
+                        ),
                     )
                 } finally {
                     pendingResult.finish()
@@ -68,13 +70,12 @@ class TermuxResultReceiver : BroadcastReceiver() {
         showResultNotification(context, scriptId, scriptName, exitCode, internalError)
     }
 
-
     private fun showResultNotification(
         context: Context,
         scriptId: Int,
         name: String,
         exitCode: Int,
-        internalError: String?
+        internalError: String?,
     ) {
         val notificationManager =
             context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -86,41 +87,47 @@ class TermuxResultReceiver : BroadcastReceiver() {
             val channelDesc =
                 UiText.StringResource(R.string.channel_script_results_desc).asString(context)
 
-            val channel = NotificationChannel(
-                channelId,
-                channelName,
-                NotificationManager.IMPORTANCE_HIGH
-            ).apply {
-                description = channelDesc
-            }
+            val channel =
+                NotificationChannel(
+                    channelId,
+                    channelName,
+                    NotificationManager.IMPORTANCE_HIGH,
+                ).apply {
+                    description = channelDesc
+                }
             notificationManager.createNotificationChannel(channel)
         }
 
         val isSuccess = exitCode == 0
 
-        val title = when {
-            exitCode == -1337 -> UiText.StringResource(R.string.notif_title_unknown, name)
-            isSuccess -> UiText.StringResource(R.string.notif_title_finished, name)
-            else -> UiText.StringResource(R.string.notif_title_failed, name)
-        }.asString(context)
+        val title =
+            when {
+                exitCode == -1337 -> UiText.StringResource(R.string.notif_title_unknown, name)
+                isSuccess -> UiText.StringResource(R.string.notif_title_finished, name)
+                else -> UiText.StringResource(R.string.notif_title_failed, name)
+            }.asString(context)
 
-        val content = when {
-            exitCode == -1337 -> UiText.StringResource(R.string.notif_msg_no_result)
-            !internalError.isNullOrBlank() -> UiText.StringResource(
-                R.string.notif_msg_error,
-                internalError
-            )
+        val content =
+            when {
+                exitCode == -1337 -> UiText.StringResource(R.string.notif_msg_no_result)
+                !internalError.isNullOrBlank() ->
+                    UiText.StringResource(
+                        R.string.notif_msg_error,
+                        internalError,
+                    )
 
-            isSuccess -> UiText.StringResource(R.string.notif_msg_success)
-            else -> UiText.StringResource(R.string.notif_msg_failed_code, exitCode)
-        }.asString(context)
+                isSuccess -> UiText.StringResource(R.string.notif_msg_success)
+                else -> UiText.StringResource(R.string.notif_msg_failed_code, exitCode)
+            }.asString(context)
 
-        val builder = NotificationCompat.Builder(context, channelId)
-            .setSmallIcon(R.mipmap.ic_launcher)
-            .setContentTitle(title)
-            .setContentText(content)
-            .setPriority(NotificationCompat.PRIORITY_HIGH)
-            .setAutoCancel(true)
+        val builder =
+            NotificationCompat
+                .Builder(context, channelId)
+                .setSmallIcon(R.mipmap.ic_launcher)
+                .setContentTitle(title)
+                .setContentText(content)
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setAutoCancel(true)
 
         notificationManager.notify(scriptId, builder.build())
     }

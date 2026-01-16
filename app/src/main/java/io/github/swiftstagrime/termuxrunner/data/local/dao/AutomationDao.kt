@@ -33,7 +33,11 @@ interface AutomationDao {
     suspend fun getAutomationsForScript(scriptId: Int): List<AutomationEntity>
 
     @Query("UPDATE automations SET lastExitCode = :exitCode, lastRunTimestamp = :timestamp WHERE id = :automationId")
-    suspend fun updateLastResult(automationId: Int, exitCode: Int, timestamp: Long)
+    suspend fun updateLastResult(
+        automationId: Int,
+        exitCode: Int,
+        timestamp: Long,
+    )
 
     @Query("SELECT * FROM automations")
     suspend fun getAllAutomationsOneShot(): List<AutomationEntity>

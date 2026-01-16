@@ -23,31 +23,38 @@ import io.github.swiftstagrime.termuxrunner.R
 import java.io.File
 
 @Composable
-fun ScriptIcon(iconPath: String?, modifier: Modifier = Modifier) {
+fun ScriptIcon(
+    iconPath: String?,
+    modifier: Modifier = Modifier,
+) {
     if (iconPath != null) {
         AsyncImage(
-            model = ImageRequest.Builder(LocalContext.current)
-                .data(File(iconPath))
-                .crossfade(true)
-                .build(),
+            model =
+                ImageRequest
+                    .Builder(LocalContext.current)
+                    .data(File(iconPath))
+                    .crossfade(true)
+                    .build(),
             contentDescription = stringResource(R.string.cd_script_icon),
-            modifier = modifier
-                .clip(RoundedCornerShape(16.dp))
-                .background(MaterialTheme.colorScheme.surfaceVariant),
-            contentScale = ContentScale.Crop
+            modifier =
+                modifier
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(MaterialTheme.colorScheme.surfaceVariant),
+            contentScale = ContentScale.Crop,
         )
     } else {
         Box(
-            modifier = modifier
-                .clip(RoundedCornerShape(16.dp))
-                .background(MaterialTheme.colorScheme.secondaryContainer),
-            contentAlignment = Alignment.Center
+            modifier =
+                modifier
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(MaterialTheme.colorScheme.secondaryContainer),
+            contentAlignment = Alignment.Center,
         ) {
             Icon(
                 imageVector = Icons.Default.Terminal,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.onSecondaryContainer,
-                modifier = Modifier.size(24.dp)
+                modifier = Modifier.size(24.dp),
             )
         }
     }

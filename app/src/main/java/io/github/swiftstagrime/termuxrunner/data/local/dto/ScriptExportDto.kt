@@ -27,11 +27,11 @@ data class ScriptExportDto(
     val interactionMode: InteractionMode = InteractionMode.NONE,
     val argumentPresets: List<String> = emptyList(),
     val prefixPresets: List<String> = emptyList(),
-    val envVarPresets: List<String> = emptyList()
+    val envVarPresets: List<String> = emptyList(),
 )
 
-fun Script.toExportDto(base64Icon: String?): ScriptExportDto {
-    return ScriptExportDto(
+fun Script.toExportDto(base64Icon: String?): ScriptExportDto =
+    ScriptExportDto(
         id = id,
         name = name,
         code = code,
@@ -53,6 +53,5 @@ fun Script.toExportDto(base64Icon: String?): ScriptExportDto {
         interactionMode = interactionMode,
         argumentPresets = argumentPresets,
         prefixPresets = prefixPresets,
-        envVarPresets = envVarPresets
+        envVarPresets = envVarPresets,
     )
-}

@@ -33,7 +33,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun EditorRoute(
     onBack: () -> Unit,
-    viewModel: EditorViewModel = hiltViewModel()
+    viewModel: EditorViewModel = hiltViewModel(),
 ) {
     val script by viewModel.currentScript.collectAsStateWithLifecycle()
     val categories by viewModel.categories.collectAsStateWithLifecycle()
@@ -47,47 +47,53 @@ fun EditorRoute(
 
     val lifecycleOwner = LocalLifecycleOwner.current
     DisposableEffect(lifecycleOwner) {
-        val observer = LifecycleEventObserver { _, event ->
-            if (event == Lifecycle.Event.ON_RESUME) {
-                isBatteryUnrestricted = BatteryUtils.isIgnoringBatteryOptimizations(context)
+        val observer =
+            LifecycleEventObserver { _, event ->
+                if (event == Lifecycle.Event.ON_RESUME) {
+                    isBatteryUnrestricted = BatteryUtils.isIgnoringBatteryOptimizations(context)
+                }
             }
-        }
         lifecycleOwner.lifecycle.addObserver(observer)
         onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
-    val notificationPermissionLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestPermission()
-    ) { isGranted ->
-        if (!isGranted) {
-            scope.launch {
-                snackbarHostState.showSnackbar(
-                    message = UiText.StringResource(R.string.msg_notification_needed_for_heartbeat)
-                        .asString(context)
-                )
-            }
-        }
-    }
-    val requestNotifications = remember {
-        {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                val hasPermission = ContextCompat.checkSelfPermission(
-                    context,
-                    android.Manifest.permission.POST_NOTIFICATIONS
-                ) == PackageManager.PERMISSION_GRANTED
-
-                if (!hasPermission) {
-                    notificationPermissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+    val notificationPermissionLauncher =
+        rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.RequestPermission(),
+        ) { isGranted ->
+            if (!isGranted) {
+                scope.launch {
+                    snackbarHostState.showSnackbar(
+                        message =
+                            UiText
+                                .StringResource(R.string.msg_notification_needed_for_heartbeat)
+                                .asString(context),
+                    )
                 }
             }
         }
-    }
+    val requestNotifications =
+        remember {
+            {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    val hasPermission =
+                        ContextCompat.checkSelfPermission(
+                            context,
+                            android.Manifest.permission.POST_NOTIFICATIONS,
+                        ) == PackageManager.PERMISSION_GRANTED
+
+                    if (!hasPermission) {
+                        notificationPermissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+                    }
+                }
+            }
+        }
     ObserveAsEvents(viewModel.uiEvent) { event ->
         when (event) {
             is EditorUiEvent.SaveSuccess -> onBack()
             is EditorUiEvent.ShowSnackbar -> {
                 scope.launch {
                     snackbarHostState.showSnackbar(
-                        message = event.message.asString(context)
+                        message = event.message.asString(context),
                     )
                 }
             }
@@ -116,7 +122,7 @@ fun EditorRoute(
             },
             onRequestNotificationPermission = {
                 requestNotifications()
-            }
+            },
         )
     }
 }

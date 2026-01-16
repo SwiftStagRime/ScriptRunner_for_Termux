@@ -29,108 +29,112 @@ private val Context.keyDataStore: DataStore<Preferences> by preferencesDataStore
  */
 
 @Singleton
-class KeyManager @Inject constructor(
-    @ApplicationContext private val context: Context
-) {
+class KeyManager
+    @Inject
+    constructor(
+        @ApplicationContext private val context: Context,
+    ) {
+        companion object {
+            private const val KEYSET_NAME = "master_keyset"
+            private const val PREF_FILE_NAME = "master_key_preference"
+            private const val MASTER_KEY_URI = "android-keystore://master_key"
 
-    companion object {
-        private const val KEYSET_NAME = "master_keyset"
-        private const val PREF_FILE_NAME = "master_key_preference"
-        private const val MASTER_KEY_URI = "android-keystore://master_key"
+            private const val DB_NAME = "script_runner_secure.db"
 
-        private const val DB_NAME = "script_runner_secure.db"
+            private val DB_KEY_PREF = stringPreferencesKey("encrypted_room_passphrase")
 
-        private val DB_KEY_PREF = stringPreferencesKey("encrypted_room_passphrase")
+            init {
+                try {
+                    AeadConfig.register()
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
+
+            private val AEAD_KEY_TEMPLATE = AesGcmKeyManager.aes256GcmTemplate()
+        }
+
+        private var cachedKey: ByteArray? = null
+        private val mutex = Mutex()
 
         init {
-            try {
-                AeadConfig.register()
-            } catch (e: Exception) {
-                e.printStackTrace()
+            AeadConfig.register()
+        }
+
+        suspend fun getRoomPassphrase(): ByteArray =
+            mutex.withLock {
+                cachedKey?.let { return it }
+
+                try {
+                    return loadExistingKey()
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    // If decryption fails (e.g., hardware key lost), wipe everything to start fresh
+                    resetAll()
+                    return generateNewKey()
+                }
             }
+
+        private suspend fun loadExistingKey(): ByteArray {
+            val aead = getMasterKeyOrThrow()
+
+            val preferences = context.keyDataStore.data.first()
+            val encryptedKeyBase64 =
+                preferences[DB_KEY_PREF]
+                    ?: throw GeneralSecurityException("No key found in DataStore, need to generate new")
+
+            val encryptedBytes = Base64.decode(encryptedKeyBase64, Base64.NO_WRAP)
+
+            val decryptedKey = aead.decrypt(encryptedBytes, null)
+
+            cachedKey = decryptedKey
+            return decryptedKey
         }
 
-        private val AEAD_KEY_TEMPLATE = AesGcmKeyManager.aes256GcmTemplate()
-    }
+        private suspend fun generateNewKey(): ByteArray {
+            val aead = getMasterKeyOrThrow()
 
-    private var cachedKey: ByteArray? = null
-    private val mutex = Mutex()
+            val rawKey = ByteArray(32)
+            SecureRandom().nextBytes(rawKey)
 
-    init {
-        AeadConfig.register()
-    }
+            val encryptedBytes = aead.encrypt(rawKey, null)
+            val encryptedBase64 = Base64.encodeToString(encryptedBytes, Base64.NO_WRAP)
 
-    suspend fun getRoomPassphrase(): ByteArray = mutex.withLock {
-        cachedKey?.let { return it }
+            context.keyDataStore.edit { it[DB_KEY_PREF] = encryptedBase64 }
 
-        try {
-            return loadExistingKey()
-        } catch (e: Exception) {
-            e.printStackTrace()
-            // If decryption fails (e.g., hardware key lost), wipe everything to start fresh
-            resetAll()
-            return generateNewKey()
-        }
-    }
-
-    private suspend fun loadExistingKey(): ByteArray {
-        val aead = getMasterKeyOrThrow()
-
-        val preferences = context.keyDataStore.data.first()
-        val encryptedKeyBase64 = preferences[DB_KEY_PREF]
-            ?: throw GeneralSecurityException("No key found in DataStore, need to generate new")
-
-        val encryptedBytes = Base64.decode(encryptedKeyBase64, Base64.NO_WRAP)
-
-        val decryptedKey = aead.decrypt(encryptedBytes, null)
-
-        cachedKey = decryptedKey
-        return decryptedKey
-    }
-
-    private suspend fun generateNewKey(): ByteArray {
-        val aead = getMasterKeyOrThrow()
-
-        val rawKey = ByteArray(32)
-        SecureRandom().nextBytes(rawKey)
-
-        val encryptedBytes = aead.encrypt(rawKey, null)
-        val encryptedBase64 = Base64.encodeToString(encryptedBytes, Base64.NO_WRAP)
-
-        context.keyDataStore.edit { it[DB_KEY_PREF] = encryptedBase64 }
-
-        cachedKey = rawKey
-        return rawKey
-    }
-
-    private fun getMasterKeyOrThrow(): Aead {
-        // Integrates Tink with Android KeyStore for hardware-backed securi
-        return AndroidKeysetManager.Builder()
-            .withSharedPref(context, KEYSET_NAME, PREF_FILE_NAME)
-            .withKeyTemplate(AEAD_KEY_TEMPLATE)
-            .withMasterKeyUri(MASTER_KEY_URI)
-            .build()
-            .keysetHandle
-            .getPrimitive(RegistryConfiguration.get(), Aead::class.java)
-    }
-
-    private suspend fun resetAll() {
-        cachedKey = null
-
-        try {
-            context.keyDataStore.edit { it.clear() }
-        } catch (_: Exception) {
+            cachedKey = rawKey
+            return rawKey
         }
 
-        try {
-            context.deleteSharedPreferences(PREF_FILE_NAME)
-            // Explicitly remove the master key from the Android hardware KeyStore
-            val keyStore = KeyStore.getInstance("AndroidKeyStore")
-            keyStore.load(null)
-            keyStore.deleteEntry("master_key")
-        } catch (_: Exception) {
+        private fun getMasterKeyOrThrow(): Aead {
+            // Integrates Tink with Android KeyStore for hardware-backed securi
+            return AndroidKeysetManager
+                .Builder()
+                .withSharedPref(context, KEYSET_NAME, PREF_FILE_NAME)
+                .withKeyTemplate(AEAD_KEY_TEMPLATE)
+                .withMasterKeyUri(MASTER_KEY_URI)
+                .build()
+                .keysetHandle
+                .getPrimitive(RegistryConfiguration.get(), Aead::class.java)
         }
-        // Delete database as it's unrecoverable without the original key
-        context.deleteDatabase(DB_NAME)
+
+        private suspend fun resetAll() {
+            cachedKey = null
+
+            try {
+                context.keyDataStore.edit { it.clear() }
+            } catch (_: Exception) {
+            }
+
+            try {
+                context.deleteSharedPreferences(PREF_FILE_NAME)
+                // Explicitly remove the master key from the Android hardware KeyStore
+                val keyStore = KeyStore.getInstance("AndroidKeyStore")
+                keyStore.load(null)
+                keyStore.deleteEntry("master_key")
+            } catch (_: Exception) {
+            }
+            // Delete database as it's unrecoverable without the original key
+            context.deleteDatabase(DB_NAME)
+        }
     }
-}

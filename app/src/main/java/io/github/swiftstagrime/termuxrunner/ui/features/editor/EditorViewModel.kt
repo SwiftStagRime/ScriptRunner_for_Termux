@@ -23,89 +23,95 @@ import javax.inject.Inject
 
 sealed interface EditorUiEvent {
     data object SaveSuccess : EditorUiEvent
-    data class ShowSnackbar(val message: UiText) : EditorUiEvent
+
+    data class ShowSnackbar(
+        val message: UiText,
+    ) : EditorUiEvent
 }
 
 @HiltViewModel
-class EditorViewModel @Inject constructor(
-    private val scriptRepository: ScriptRepository,
-    private val categoryRepository: CategoryRepository,
-    private val updateScriptUseCase: UpdateScriptUseCase,
-    private val iconRepository: IconRepository
-) : ViewModel() {
+class EditorViewModel
+    @Inject
+    constructor(
+        private val scriptRepository: ScriptRepository,
+        private val categoryRepository: CategoryRepository,
+        private val updateScriptUseCase: UpdateScriptUseCase,
+        private val iconRepository: IconRepository,
+    ) : ViewModel() {
+        private val _currentScript = MutableStateFlow<Script?>(null)
+        val currentScript = _currentScript.asStateFlow()
 
-    private val _currentScript = MutableStateFlow<Script?>(null)
-    val currentScript = _currentScript.asStateFlow()
+        val categories =
+            categoryRepository
+                .getAllCategories()
+                .stateIn(
+                    scope = viewModelScope,
+                    started = SharingStarted.WhileSubscribed(5000),
+                    initialValue = emptyList(),
+                )
 
-    val categories = categoryRepository.getAllCategories()
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = emptyList()
-        )
+        private val _uiEvent = Channel<EditorUiEvent>()
+        val uiEvent = _uiEvent.receiveAsFlow()
 
-    private val _uiEvent = Channel<EditorUiEvent>()
-    val uiEvent = _uiEvent.receiveAsFlow()
-
-    fun loadScript(id: Int) {
-        if (id == 0) {
-            _currentScript.value = Script(
-                id = 0,
-                name = "",
-                code = "#!/bin/bash\n\n",
-                interpreter = "bash"
-            )
-        } else {
-            viewModelScope.launch {
-                try {
-                    val script = scriptRepository.getScriptById(id)
-                    if (script != null) {
-                        _currentScript.value = script
-                    } else {
+        fun loadScript(id: Int) {
+            if (id == 0) {
+                _currentScript.value =
+                    Script(
+                        id = 0,
+                        name = "",
+                        code = "#!/bin/bash\n\n",
+                        interpreter = "bash",
+                    )
+            } else {
+                viewModelScope.launch {
+                    try {
+                        val script = scriptRepository.getScriptById(id)
+                        if (script != null) {
+                            _currentScript.value = script
+                        } else {
+                            _uiEvent.send(
+                                EditorUiEvent.ShowSnackbar(
+                                    UiText.StringResource(R.string.error_script_not_found),
+                                ),
+                            )
+                        }
+                    } catch (_: Exception) {
                         _uiEvent.send(
                             EditorUiEvent.ShowSnackbar(
-                                UiText.StringResource(R.string.error_script_not_found)
-                            )
+                                UiText.StringResource(R.string.error_loading_failed),
+                            ),
                         )
                     }
+                }
+            }
+        }
+
+        fun saveScript(script: Script) {
+            viewModelScope.launch {
+                try {
+                    updateScriptUseCase(script)
+
+                    _uiEvent.send(EditorUiEvent.SaveSuccess)
                 } catch (_: Exception) {
                     _uiEvent.send(
                         EditorUiEvent.ShowSnackbar(
-                            UiText.StringResource(R.string.error_loading_failed)
-                        )
+                            UiText.StringResource(R.string.error_save_failed),
+                        ),
                     )
                 }
             }
         }
-    }
 
-    fun saveScript(script: Script) {
-        viewModelScope.launch {
-            try {
-                updateScriptUseCase(script)
-
-                _uiEvent.send(EditorUiEvent.SaveSuccess)
-            } catch (_: Exception) {
-                _uiEvent.send(
-                    EditorUiEvent.ShowSnackbar(
-                        UiText.StringResource(R.string.error_save_failed)
-                    )
-                )
+        fun addCategory(name: String) {
+            viewModelScope.launch {
+                categoryRepository.upsertCategory(Category(name = name))
             }
         }
-    }
 
-    fun addCategory(name: String) {
-        viewModelScope.launch {
-            categoryRepository.upsertCategory(Category(name = name))
-        }
+        suspend fun processSelectedImage(uri: Uri): String? =
+            try {
+                iconRepository.saveIcon(uri.toString())
+            } catch (_: Exception) {
+                null
+            }
     }
-
-    suspend fun processSelectedImage(uri: Uri): String? {
-        return try {
-            iconRepository.saveIcon(uri.toString())
-        } catch (_: Exception) {
-            null
-        }
-    }
-}

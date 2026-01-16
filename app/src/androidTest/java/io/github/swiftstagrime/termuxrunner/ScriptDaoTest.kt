@@ -19,7 +19,6 @@ import java.io.IOException
 
 @RunWith(AndroidJUnit4::class)
 class ScriptDaoTest {
-
     private lateinit var db: AppDatabase
     private lateinit var dao: ScriptDao
 
@@ -37,58 +36,62 @@ class ScriptDaoTest {
     }
 
     @Test
-    fun writeUserAndReadInList() = runBlocking {
-        val script = ScriptEntity(
-            name = "Test Script",
-            code = "ls -la",
-            interpreter = "bash",
-            fileExtension = "sh",
-            commandPrefix = "",
-            runInBackground = true,
-            openNewSession = false,
-            executionParams = "",
-            iconPath = null,
-            envVars = mapOf("TEST" to "1"),
-            keepSessionOpen = true,
-            useHeartbeat = false,
-            heartbeatTimeout = 30000,
-            heartbeatInterval = 10000
-        )
+    fun writeUserAndReadInList() =
+        runBlocking {
+            val script =
+                ScriptEntity(
+                    name = "Test Script",
+                    code = "ls -la",
+                    interpreter = "bash",
+                    fileExtension = "sh",
+                    commandPrefix = "",
+                    runInBackground = true,
+                    openNewSession = false,
+                    executionParams = "",
+                    iconPath = null,
+                    envVars = mapOf("TEST" to "1"),
+                    keepSessionOpen = true,
+                    useHeartbeat = false,
+                    heartbeatTimeout = 30000,
+                    heartbeatInterval = 10000,
+                )
 
-        dao.insertScript(script)
+            dao.insertScript(script)
 
-        val scripts = dao.getAllScripts().first()
+            val scripts = dao.getAllScripts().first()
 
-        assertEquals(1, scripts.size)
-        assertEquals("Test Script", scripts[0].name)
-        assertEquals("ls -la", scripts[0].code)
-        assertEquals("1", scripts[0].envVars["TEST"])
-    }
+            assertEquals(1, scripts.size)
+            assertEquals("Test Script", scripts[0].name)
+            assertEquals("ls -la", scripts[0].code)
+            assertEquals("1", scripts[0].envVars["TEST"])
+        }
 
     @Test
-    fun deleteScript() = runBlocking {
-        val script = ScriptEntity(
-            id = 1,
-            name = "To Delete",
-            code = "",
-            interpreter = "bash",
-            fileExtension = "sh",
-            commandPrefix = "",
-            runInBackground = false,
-            openNewSession = false,
-            executionParams = "",
-            iconPath = null,
-            envVars = emptyMap(),
-            keepSessionOpen = false,
-            useHeartbeat = false,
-            heartbeatTimeout = 30000,
-            heartbeatInterval = 10000
-        )
+    fun deleteScript() =
+        runBlocking {
+            val script =
+                ScriptEntity(
+                    id = 1,
+                    name = "To Delete",
+                    code = "",
+                    interpreter = "bash",
+                    fileExtension = "sh",
+                    commandPrefix = "",
+                    runInBackground = false,
+                    openNewSession = false,
+                    executionParams = "",
+                    iconPath = null,
+                    envVars = emptyMap(),
+                    keepSessionOpen = false,
+                    useHeartbeat = false,
+                    heartbeatTimeout = 30000,
+                    heartbeatInterval = 10000,
+                )
 
-        dao.insertScript(script)
-        dao.deleteScript(script)
+            dao.insertScript(script)
+            dao.deleteScript(script)
 
-        val scripts = dao.getAllScripts().first()
-        assertTrue(scripts.isEmpty())
-    }
+            val scripts = dao.getAllScripts().first()
+            assertTrue(scripts.isEmpty())
+        }
 }

@@ -37,97 +37,78 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object AppModule {
-
     @Provides
     @Singleton
     fun provideScriptRepository(
         dao: ScriptDao,
         categoryDao: CategoryDao,
         automationDao: AutomationDao,
-        @ApplicationContext context: Context
-    ): ScriptRepository {
-        return ScriptRepositoryImpl(dao, categoryDao, automationDao, context)
-    }
+        @ApplicationContext context: Context,
+    ): ScriptRepository = ScriptRepositoryImpl(dao, categoryDao, automationDao, context)
 
     @Provides
     @Singleton
-    fun provideTermuxRepository(@ApplicationContext context: Context): TermuxRepository {
-        return TermuxRepositoryImpl(context)
-    }
+    fun provideTermuxRepository(
+        @ApplicationContext context: Context,
+    ): TermuxRepository = TermuxRepositoryImpl(context)
 
     @Provides
     @Singleton
-    fun provideUserPreferencesRepository(@ApplicationContext context: Context): UserPreferencesRepository {
-        return UserPreferencesRepositoryImpl(context)
-    }
+    fun provideUserPreferencesRepository(
+        @ApplicationContext context: Context,
+    ): UserPreferencesRepository = UserPreferencesRepositoryImpl(context)
 
     @Provides
     @Singleton
-    fun provideShortcutRepository(@ApplicationContext context: Context): ShortcutRepository {
-        return ShortcutRepositoryImpl(context)
-    }
+    fun provideShortcutRepository(
+        @ApplicationContext context: Context,
+    ): ShortcutRepository = ShortcutRepositoryImpl(context)
 
     @Provides
     @Singleton
-    fun provideScriptFileRepository(@ApplicationContext context: Context): ScriptFileRepository {
-        return ScriptFileRepositoryImpl(context)
-    }
-
-
-    @Provides
-    @Singleton
-    fun provideImageStorageManager(@ApplicationContext context: Context): ImageStorageManager {
-        return ImageStorageManager(context)
-    }
+    fun provideScriptFileRepository(
+        @ApplicationContext context: Context,
+    ): ScriptFileRepository = ScriptFileRepositoryImpl(context)
 
     @Provides
     @Singleton
-    fun provideIconRepository(imageStorageManager: ImageStorageManager): IconRepository {
-        return IconRepositoryImpl(imageStorageManager)
-    }
+    fun provideImageStorageManager(
+        @ApplicationContext context: Context,
+    ): ImageStorageManager = ImageStorageManager(context)
+
+    @Provides
+    @Singleton
+    fun provideIconRepository(imageStorageManager: ImageStorageManager): IconRepository = IconRepositoryImpl(imageStorageManager)
 
     @Provides
     @Singleton
     fun provideMonitoringRepository(
-        @ApplicationContext context: Context
-    ): MonitoringRepository {
-        return MonitoringRepositoryImpl(context)
-    }
+        @ApplicationContext context: Context,
+    ): MonitoringRepository = MonitoringRepositoryImpl(context)
 
     @Provides
     @Singleton
     fun provideAutomationRepository(
         automationDao: AutomationDao,
-        scheduler: AutomationScheduler
-    ): AutomationRepository {
-        return AutomationRepositoryImpl(
+        scheduler: AutomationScheduler,
+    ): AutomationRepository =
+        AutomationRepositoryImpl(
             automationDao,
-            scheduler = scheduler
+            scheduler = scheduler,
         )
-    }
 
     @Provides
     @Singleton
     fun provideAutomationScheduler(
-        @ApplicationContext context: Context
-    ): AutomationScheduler {
-        return AutomationScheduler(context)
-    }
-
+        @ApplicationContext context: Context,
+    ): AutomationScheduler = AutomationScheduler(context)
 
     @Provides
     @Singleton
-    fun provideCategoryRepository(
-        categoryDao: CategoryDao
-    ): CategoryRepository {
-        return CategoryRepositoryImpl(categoryDao)
-    }
+    fun provideCategoryRepository(categoryDao: CategoryDao): CategoryRepository = CategoryRepositoryImpl(categoryDao)
 
     @Provides
     @Singleton
-    fun provideAutomationLogRepository(
-        automationLogDao: AutomationLogDao
-    ): AutomationLogRepository {
-        return AutomationLogRepositoryImpl(automationLogDao)
-    }
+    fun provideAutomationLogRepository(automationLogDao: AutomationLogDao): AutomationLogRepository =
+        AutomationLogRepositoryImpl(automationLogDao)
 }

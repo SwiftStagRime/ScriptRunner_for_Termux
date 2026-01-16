@@ -39,10 +39,10 @@ data class ScriptEntity(
     @ColumnInfo(defaultValue = "")
     val prefixPresets: List<String> = emptyList(),
     @ColumnInfo(defaultValue = "")
-    val envVarPresets: List<String> = emptyList()
+    val envVarPresets: List<String> = emptyList(),
 ) {
-    fun toScriptDomain(): Script {
-        return Script(
+    fun toScriptDomain(): Script =
+        Script(
             id = id,
             name = name,
             code = code,
@@ -64,13 +64,12 @@ data class ScriptEntity(
             interactionMode = interactionMode,
             argumentPresets = argumentPresets,
             prefixPresets = prefixPresets,
-            envVarPresets = envVarPresets
+            envVarPresets = envVarPresets,
         )
-    }
 }
 
-fun Script.toScriptEntity(): ScriptEntity {
-    return ScriptEntity(
+fun Script.toScriptEntity(): ScriptEntity =
+    ScriptEntity(
         id = id,
         name = name,
         code = code,
@@ -92,6 +91,5 @@ fun Script.toScriptEntity(): ScriptEntity {
         interactionMode = interactionMode,
         argumentPresets = argumentPresets,
         prefixPresets = prefixPresets,
-        envVarPresets = envVarPresets
+        envVarPresets = envVarPresets,
     )
-}

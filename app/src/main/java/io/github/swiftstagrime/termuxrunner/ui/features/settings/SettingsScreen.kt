@@ -67,9 +67,8 @@ fun SettingsScreen(
     onTriggerImport: () -> Unit,
     onTriggerScriptImport: () -> Unit,
     onDeveloperClick: () -> Unit,
-    onBack: () -> Unit
+    onBack: () -> Unit,
 ) {
-
     Scaffold(
         topBar = {
             TopAppBar(
@@ -78,53 +77,55 @@ fun SettingsScreen(
                     IconButton(onClick = onBack) {
                         Icon(
                             Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = stringResource(R.string.back_description)
+                            contentDescription = stringResource(R.string.back_description),
                         )
                     }
-                }
+                },
             )
-        }
+        },
     ) { padding ->
         Column(
-            modifier = Modifier
-                .padding(padding)
-                .fillMaxSize()
-                .padding(16.dp),
-            verticalArrangement = Arrangement.SpaceBetween
+            modifier =
+                Modifier
+                    .padding(padding)
+                    .fillMaxSize()
+                    .padding(16.dp),
+            verticalArrangement = Arrangement.SpaceBetween,
         ) {
             Column {
                 Text(
                     text = stringResource(R.string.appearance_label),
                     style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.primary
+                    color = MaterialTheme.colorScheme.primary,
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
-                        .padding(16.dp),
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
+                            .padding(16.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text(
                         text = stringResource(R.string.language_label),
-                        style = MaterialTheme.typography.titleMedium
+                        style = MaterialTheme.typography.titleMedium,
                     )
                     LanguageSelectorButton()
                 }
                 Spacer(modifier = Modifier.height(12.dp))
                 Text(
                     stringResource(R.string.accent_color_label),
-                    style = MaterialTheme.typography.labelLarge
+                    style = MaterialTheme.typography.labelLarge,
                 )
                 LazyRow(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                     items(AppTheme.entries) { accent ->
                         ThemeSelectorItem(
                             theme = accent,
                             isSelected = selectedAccent == accent,
-                            onClick = { onAccentChange(accent) }
+                            onClick = { onAccentChange(accent) },
                         )
                     }
                 }
@@ -133,17 +134,18 @@ fun SettingsScreen(
 
                 Text(
                     stringResource(R.string.display_mode_label),
-                    style = MaterialTheme.typography.labelLarge
+                    style = MaterialTheme.typography.labelLarge,
                 )
                 SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
                     ThemeMode.entries.forEachIndexed { index, mode ->
                         SegmentedButton(
                             selected = selectedMode == mode,
                             onClick = { onModeChange(mode) },
-                            shape = SegmentedButtonDefaults.itemShape(
-                                index = index,
-                                count = ThemeMode.entries.size
-                            )
+                            shape =
+                                SegmentedButtonDefaults.itemShape(
+                                    index = index,
+                                    count = ThemeMode.entries.size,
+                                ),
                         ) {
                             Text(stringResource(mode.labelRes))
                         }
@@ -155,18 +157,18 @@ fun SettingsScreen(
                 Text(
                     text = stringResource(R.string.data_management_label),
                     style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.primary
+                    color = MaterialTheme.colorScheme.primary,
                 )
                 Spacer(modifier = Modifier.height(8.dp))
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
                 ) {
                     Button(
                         onClick = onTriggerImport,
                         modifier = Modifier.weight(1f),
-                        shape = RoundedCornerShape(12.dp)
+                        shape = RoundedCornerShape(12.dp),
                     ) {
                         Icon(Icons.Default.Download, contentDescription = null)
                         Spacer(modifier = Modifier.width(8.dp))
@@ -177,7 +179,7 @@ fun SettingsScreen(
                         onClick = onTriggerExport,
                         modifier = Modifier.weight(1f),
                         shape = RoundedCornerShape(12.dp),
-                        colors = ButtonDefaults.filledTonalButtonColors()
+                        colors = ButtonDefaults.filledTonalButtonColors(),
                     ) {
                         Icon(Icons.Default.Upload, contentDescription = null)
                         Spacer(modifier = Modifier.width(8.dp))
@@ -197,40 +199,42 @@ fun SettingsScreen(
             }
 
             Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable { onDeveloperClick() },
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.secondaryContainer
-                )
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .clickable { onDeveloperClick() },
+                colors =
+                    CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                    ),
             ) {
                 Row(
                     modifier = Modifier.padding(16.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Icon(
                         imageVector = Icons.Default.Code,
                         contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onSecondaryContainer
+                        tint = MaterialTheme.colorScheme.onSecondaryContainer,
                     )
                     Spacer(modifier = Modifier.width(16.dp))
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
                             text = stringResource(R.string.developed_by),
                             style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.7f)
+                            color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.7f),
                         )
                         Text(
                             text = "SwiftStagRime",
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onSecondaryContainer
+                            color = MaterialTheme.colorScheme.onSecondaryContainer,
                         )
                     }
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.OpenInNew,
                         contentDescription = stringResource(R.string.open_github_description),
-                        tint = MaterialTheme.colorScheme.onSecondaryContainer
+                        tint = MaterialTheme.colorScheme.onSecondaryContainer,
                     )
                 }
             }
@@ -242,46 +246,49 @@ fun SettingsScreen(
 fun ThemeSelectorItem(
     theme: AppTheme,
     isSelected: Boolean,
-    onClick: () -> Unit
+    onClick: () -> Unit,
 ) {
-    val circleColor = if (theme == AppTheme.DYNAMIC) {
-        MaterialTheme.colorScheme.primary
-    } else {
-        theme.primaryColor
-    }
+    val circleColor =
+        if (theme == AppTheme.DYNAMIC) {
+            MaterialTheme.colorScheme.primary
+        } else {
+            theme.primaryColor
+        }
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.width(64.dp)
+        modifier = Modifier.width(64.dp),
     ) {
         Box(
-            modifier = Modifier
-                .size(56.dp)
-                .clip(CircleShape)
-                .background(circleColor)
-                .clickable { onClick() }
-                .border(
-                    width = if (isSelected) 3.dp else 1.dp,
-                    color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant,
-                    shape = CircleShape
-                ),
-            contentAlignment = Alignment.Center
+            modifier =
+                Modifier
+                    .size(56.dp)
+                    .clip(CircleShape)
+                    .background(circleColor)
+                    .clickable { onClick() }
+                    .border(
+                        width = if (isSelected) 3.dp else 1.dp,
+                        color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant,
+                        shape = CircleShape,
+                    ),
+            contentAlignment = Alignment.Center,
         ) {
             if (isSelected) {
                 Box(
-                    modifier = Modifier
-                        .size(28.dp)
-                        .background(
-                            color = Color.Black.copy(alpha = 0.4f),
-                            shape = CircleShape
-                        ),
-                    contentAlignment = Alignment.Center
+                    modifier =
+                        Modifier
+                            .size(28.dp)
+                            .background(
+                                color = Color.Black.copy(alpha = 0.4f),
+                                shape = CircleShape,
+                            ),
+                    contentAlignment = Alignment.Center,
                 ) {
                     Icon(
                         imageVector = Icons.Default.Check,
                         contentDescription = null,
                         tint = Color.White,
-                        modifier = Modifier.size(20.dp)
+                        modifier = Modifier.size(20.dp),
                     )
                 }
             }
@@ -291,10 +298,11 @@ fun ThemeSelectorItem(
                     imageVector = Icons.Default.AutoAwesome,
                     contentDescription = null,
                     tint = Color.White.copy(alpha = 0.6f),
-                    modifier = Modifier
-                        .size(16.dp)
-                        .align(Alignment.BottomEnd)
-                        .padding(bottom = 8.dp, end = 8.dp)
+                    modifier =
+                        Modifier
+                            .size(16.dp)
+                            .align(Alignment.BottomEnd)
+                            .padding(bottom = 8.dp, end = 8.dp),
                 )
             }
         }
@@ -306,7 +314,7 @@ fun ThemeSelectorItem(
             style = MaterialTheme.typography.labelMedium,
             color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
             fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-            maxLines = 1
+            maxLines = 1,
         )
     }
 }
@@ -324,7 +332,7 @@ private fun PreviewSettingsScreen() {
             onDeveloperClick = {},
             onBack = {},
             onTriggerScriptImport = {},
-            onModeChange = {}
+            onModeChange = {},
         )
     }
 }

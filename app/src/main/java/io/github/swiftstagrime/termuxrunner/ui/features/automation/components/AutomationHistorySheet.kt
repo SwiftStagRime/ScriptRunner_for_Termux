@@ -35,22 +35,26 @@ import java.util.Date
 import java.util.Locale
 
 @Composable
-fun AutomationHistorySheet(automationName: String, logs: List<AutomationLog>) {
+fun AutomationHistorySheet(
+    automationName: String,
+    logs: List<AutomationLog>,
+) {
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 20.dp)
-            .navigationBarsPadding()
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp)
+                .navigationBarsPadding(),
     ) {
         Text(
             text = automationName,
             style = MaterialTheme.typography.headlineSmall,
-            fontWeight = FontWeight.Bold
+            fontWeight = FontWeight.Bold,
         )
         Text(
             text = stringResource(R.string.history_title),
             style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.primary
+            color = MaterialTheme.colorScheme.primary,
         )
 
         Spacer(modifier = Modifier.height(20.dp))
@@ -59,43 +63,46 @@ fun AutomationHistorySheet(automationName: String, logs: List<AutomationLog>) {
             Box(
                 Modifier
                     .fillMaxWidth()
-                    .height(200.dp), contentAlignment = Alignment.Center
+                    .height(200.dp),
+                contentAlignment = Alignment.Center,
             ) {
                 Text(
                     text = stringResource(R.string.no_logs_recorded),
-                    color = MaterialTheme.colorScheme.outline
+                    color = MaterialTheme.colorScheme.outline,
                 )
             }
         } else {
             LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 items(logs) { log ->
                     Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(MaterialTheme.colorScheme.surfaceContainerLowest)
-                            .padding(12.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(MaterialTheme.colorScheme.surfaceContainerLowest)
+                                .padding(12.dp),
+                        verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Icon(
                             imageVector = if (log.exitCode == 0) Icons.Default.CheckCircle else Icons.Default.Error,
                             contentDescription = null,
-                            tint = if (log.exitCode == 0) Color(0xFF4CAF50) else Color(0xFFF44336)
+                            tint = if (log.exitCode == 0) Color(0xFF4CAF50) else Color(0xFFF44336),
                         )
                         Spacer(modifier = Modifier.width(16.dp))
                         Column {
                             Text(
-                                text = SimpleDateFormat(
-                                    stringResource(R.string.log_date_format),
-                                    Locale.getDefault()
-                                ).format(Date(log.timestamp)),
+                                text =
+                                    SimpleDateFormat(
+                                        stringResource(R.string.log_date_format),
+                                        Locale.getDefault(),
+                                    ).format(Date(log.timestamp)),
                                 style = MaterialTheme.typography.bodyMedium,
-                                fontWeight = FontWeight.Medium
+                                fontWeight = FontWeight.Medium,
                             )
                             Text(
                                 text = stringResource(R.string.exit_code_label, log.exitCode),
                                 style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
                         }
                     }

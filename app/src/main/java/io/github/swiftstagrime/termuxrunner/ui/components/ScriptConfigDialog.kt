@@ -102,7 +102,7 @@ fun ScriptConfigDialog(
     onRequestNotificationPermission: () -> Unit,
     onRequestBatteryUnrestricted: () -> Unit,
     onHeartbeatToggle: (Boolean) -> Unit,
-    onProcessImage: suspend (Uri) -> String?
+    onProcessImage: suspend (Uri) -> String?,
 ) {
     val scope = rememberCoroutineScope()
 
@@ -126,41 +126,46 @@ fun ScriptConfigDialog(
     val prefixPresetsList = remember { script.prefixPresets.toMutableStateList() }
     val envVarPresets = remember { script.envVarPresets.toMutableStateList() }
 
-    val envVarsList = remember {
-        script.envVars.entries.map { it.key to it.value }.toMutableStateList()
-    }
+    val envVarsList =
+        remember {
+            script.envVars.entries
+                .map { it.key to it.value }
+                .toMutableStateList()
+        }
 
-    val photoPickerLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.PickVisualMedia()
-    ) { uri ->
-        if (uri != null) {
-            scope.launch {
-                val savedPath = onProcessImage(uri)
-                if (savedPath != null) currentIconPath = savedPath
+    val photoPickerLauncher =
+        rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.PickVisualMedia(),
+        ) { uri ->
+            if (uri != null) {
+                scope.launch {
+                    val savedPath = onProcessImage(uri)
+                    if (savedPath != null) currentIconPath = savedPath
+                }
             }
         }
-    }
 
     Dialog(
         onDismissRequest = onDismiss,
-        properties = DialogProperties(usePlatformDefaultWidth = false)
+        properties = DialogProperties(usePlatformDefaultWidth = false),
     ) {
         Scaffold(
             containerColor = MaterialTheme.colorScheme.surface,
             topBar = {
                 TopAppBar(
                     title = { Text(stringResource(R.string.config_dialog_title)) },
-                    colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.surface,
-                        titleContentColor = MaterialTheme.colorScheme.onSurface,
-                        navigationIconContentColor = MaterialTheme.colorScheme.onSurface,
-                        actionIconContentColor = MaterialTheme.colorScheme.primary
-                    ),
+                    colors =
+                        TopAppBarDefaults.topAppBarColors(
+                            containerColor = MaterialTheme.colorScheme.surface,
+                            titleContentColor = MaterialTheme.colorScheme.onSurface,
+                            navigationIconContentColor = MaterialTheme.colorScheme.onSurface,
+                            actionIconContentColor = MaterialTheme.colorScheme.primary,
+                        ),
                     navigationIcon = {
                         IconButton(onClick = onDismiss) {
                             Icon(
                                 Icons.Default.Close,
-                                contentDescription = stringResource(R.string.cd_close)
+                                contentDescription = stringResource(R.string.cd_close),
                             )
                         }
                     },
@@ -169,69 +174,72 @@ fun ScriptConfigDialog(
                             if (name.isBlank()) {
                                 nameError = true
                             } else {
-                                val updated = script.copy(
-                                    name = name,
-                                    interpreter = interpreter,
-                                    executionParams = args,
-                                    fileExtension = fileExtension,
-                                    commandPrefix = commandPrefix,
-                                    runInBackground = runInBackground,
-                                    keepSessionOpen = keepOpen,
-                                    iconPath = currentIconPath,
-                                    envVars = envVarsList.toMap(),
-                                    useHeartbeat = useHeartbeat,
-                                    heartbeatTimeout = heartbeatTimeoutStr.toLong() * 1000,
-                                    heartbeatInterval = heartbeatIntervalStr.toLong() * 1000,
-                                    categoryId = selectedCategoryId,
-                                    notifyOnResult = notifyOnResult,
-                                    interactionMode = interactionMode,
-                                    argumentPresets = argPresetsList.toList(),
-                                    prefixPresets = prefixPresetsList.toList(),
-                                )
+                                val updated =
+                                    script.copy(
+                                        name = name,
+                                        interpreter = interpreter,
+                                        executionParams = args,
+                                        fileExtension = fileExtension,
+                                        commandPrefix = commandPrefix,
+                                        runInBackground = runInBackground,
+                                        keepSessionOpen = keepOpen,
+                                        iconPath = currentIconPath,
+                                        envVars = envVarsList.toMap(),
+                                        useHeartbeat = useHeartbeat,
+                                        heartbeatTimeout = heartbeatTimeoutStr.toLong() * 1000,
+                                        heartbeatInterval = heartbeatIntervalStr.toLong() * 1000,
+                                        categoryId = selectedCategoryId,
+                                        notifyOnResult = notifyOnResult,
+                                        interactionMode = interactionMode,
+                                        argumentPresets = argPresetsList.toList(),
+                                        prefixPresets = prefixPresetsList.toList(),
+                                    )
                                 onSave(updated)
                             }
                         }) {
                             Icon(Icons.Default.Save, stringResource(R.string.cd_save))
                         }
-                    }
+                    },
                 )
-            }
+            },
         ) { padding ->
             LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding)
-                    .padding(horizontal = 16.dp),
+                modifier =
+                    Modifier
+                        .fillMaxSize()
+                        .padding(padding)
+                        .padding(horizontal = 16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp),
-                contentPadding = PaddingValues(bottom = 24.dp)
+                contentPadding = PaddingValues(bottom = 24.dp),
             ) {
                 item {
                     ConfigSection(title = stringResource(R.string.section_identity)) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Box(
-                                modifier = Modifier
-                                    .size(72.dp)
-                                    .clip(RoundedCornerShape(12.dp))
-                                    .background(MaterialTheme.colorScheme.surfaceVariant)
-                                    .clickable {
-                                        photoPickerLauncher.launch(
-                                            PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
-                                        )
-                                    },
-                                contentAlignment = Alignment.Center
+                                modifier =
+                                    Modifier
+                                        .size(72.dp)
+                                        .clip(RoundedCornerShape(12.dp))
+                                        .background(MaterialTheme.colorScheme.surfaceVariant)
+                                        .clickable {
+                                            photoPickerLauncher.launch(
+                                                PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly),
+                                            )
+                                        },
+                                contentAlignment = Alignment.Center,
                             ) {
                                 if (currentIconPath != null) {
                                     AsyncImage(
                                         model = currentIconPath,
                                         contentDescription = null,
                                         contentScale = ContentScale.Crop,
-                                        modifier = Modifier.fillMaxSize()
+                                        modifier = Modifier.fillMaxSize(),
                                     )
                                 } else {
                                     Icon(
                                         Icons.Default.AddPhotoAlternate,
                                         contentDescription = stringResource(R.string.cd_add_icon),
-                                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
                                     )
                                 }
                             }
@@ -247,9 +255,12 @@ fun ScriptConfigDialog(
                                 placeholder = { Text(stringResource(R.string.placeholder_script_name)) },
                                 modifier = Modifier.weight(1f),
                                 isError = nameError,
-                                supportingText = if (nameError) {
-                                    { Text(stringResource(R.string.error_empty_name)) }
-                                } else null
+                                supportingText =
+                                    if (nameError) {
+                                        { Text(stringResource(R.string.error_empty_name)) }
+                                    } else {
+                                        null
+                                    },
                             )
                         }
                     }
@@ -268,16 +279,16 @@ fun ScriptConfigDialog(
                                     Icon(
                                         Icons.Default.Terminal,
                                         null,
-                                        tint = MaterialTheme.colorScheme.primary
+                                        tint = MaterialTheme.colorScheme.primary,
                                     )
-                                }
+                                },
                             )
                             StyledTextField(
                                 value = fileExtension,
                                 onValueChange = { fileExtension = it },
                                 label = stringResource(R.string.label_extension),
                                 placeholder = { Text(stringResource(R.string.placeholder_extension)) },
-                                modifier = Modifier.weight(0.4f)
+                                modifier = Modifier.weight(0.4f),
                             )
                         }
                         Spacer(modifier = Modifier.height(12.dp))
@@ -292,9 +303,9 @@ fun ScriptConfigDialog(
                                 Icon(
                                     Icons.AutoMirrored.Filled.ShortText,
                                     null,
-                                    tint = MaterialTheme.colorScheme.primary
+                                    tint = MaterialTheme.colorScheme.primary,
                                 )
-                            }
+                            },
                         )
                         Spacer(modifier = Modifier.height(12.dp))
 
@@ -308,9 +319,9 @@ fun ScriptConfigDialog(
                                 Icon(
                                     Icons.Default.DataObject,
                                     null,
-                                    tint = MaterialTheme.colorScheme.primary
+                                    tint = MaterialTheme.colorScheme.primary,
                                 )
-                            }
+                            },
                         )
 
                         Spacer(modifier = Modifier.height(12.dp))
@@ -319,7 +330,7 @@ fun ScriptConfigDialog(
                             categories = categories,
                             selectedCategoryId = selectedCategoryId,
                             onCategorySelected = { selectedCategoryId = it },
-                            onAddNewClick = { showAddCategoryDialog = true }
+                            onAddNewClick = { showAddCategoryDialog = true },
                         )
                     }
                 }
@@ -328,12 +339,12 @@ fun ScriptConfigDialog(
                     ConfigSection(title = stringResource(R.string.section_interactivity)) {
                         InteractionModeSpinner(
                             selectedMode = interactionMode,
-                            onModeSelected = { interactionMode = it }
+                            onModeSelected = { interactionMode = it },
                         )
 
                         if (
-                            interactionMode == InteractionMode.MULTI_CHOICE) {
-
+                            interactionMode == InteractionMode.MULTI_CHOICE
+                        ) {
                             Spacer(modifier = Modifier.height(16.dp))
                             PresetListManager(
                                 title = stringResource(R.string.label_argument_presets),
@@ -341,7 +352,7 @@ fun ScriptConfigDialog(
                                 presets = argPresetsList,
                                 onAdd = { argPresetsList.add("") },
                                 onRemove = { argPresetsList.removeAt(it) },
-                                onUpdate = { index, value -> argPresetsList[index] = value }
+                                onUpdate = { index, value -> argPresetsList[index] = value },
                             )
 
                             HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp))
@@ -353,7 +364,7 @@ fun ScriptConfigDialog(
                                 onAdd = { prefixPresetsList.add("") },
                                 onRemove = { prefixPresetsList.removeAt(it) },
                                 onUpdate = { index, value -> prefixPresetsList[index] = value },
-                                placeholder = "e.g. sudo"
+                                placeholder = "e.g. sudo",
                             )
 
                             HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp))
@@ -364,7 +375,7 @@ fun ScriptConfigDialog(
                                 onAdd = { envVarPresets.add("") },
                                 onRemove = { envVarPresets.removeAt(it) },
                                 onUpdate = { index, value -> envVarPresets[index] = value },
-                                placeholder = "e.g. API_KEY"
+                                placeholder = "e.g. API_KEY",
                             )
                         }
                     }
@@ -375,50 +386,51 @@ fun ScriptConfigDialog(
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
+                            verticalAlignment = Alignment.CenterVertically,
                         ) {
                             Column(modifier = Modifier.weight(1f)) {
                                 Text(
                                     text = stringResource(R.string.label_bg_execution),
                                     style = MaterialTheme.typography.bodyLarge,
-                                    color = MaterialTheme.colorScheme.onSurface
+                                    color = MaterialTheme.colorScheme.onSurface,
                                 )
                                 Text(
                                     text = stringResource(R.string.desc_bg_execution),
                                     style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 )
                             }
                             Switch(
                                 checked = runInBackground,
                                 onCheckedChange = { runInBackground = it },
-                                colors = SwitchDefaults.colors(
-                                    checkedThumbColor = MaterialTheme.colorScheme.primary,
-                                    checkedTrackColor = MaterialTheme.colorScheme.primaryContainer
-                                )
+                                colors =
+                                    SwitchDefaults.colors(
+                                        checkedThumbColor = MaterialTheme.colorScheme.primary,
+                                        checkedTrackColor = MaterialTheme.colorScheme.primaryContainer,
+                                    ),
                             )
                         }
 
                         if (!runInBackground) {
                             HorizontalDivider(
                                 modifier = Modifier.padding(vertical = 8.dp),
-                                color = MaterialTheme.colorScheme.outlineVariant
+                                color = MaterialTheme.colorScheme.outlineVariant,
                             )
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
+                                verticalAlignment = Alignment.CenterVertically,
                             ) {
                                 Column(modifier = Modifier.weight(1f)) {
                                     Text(
                                         text = stringResource(R.string.label_interactive_session),
                                         style = MaterialTheme.typography.bodyLarge,
-                                        color = MaterialTheme.colorScheme.onSurface
+                                        color = MaterialTheme.colorScheme.onSurface,
                                     )
                                     Text(
                                         text = stringResource(R.string.desc_interactive_session),
                                         style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     )
                                 }
                                 Switch(
@@ -429,60 +441,61 @@ fun ScriptConfigDialog(
                                             notifyOnResult = false
                                         }
                                     },
-                                    colors = SwitchDefaults.colors(
-                                        checkedThumbColor = MaterialTheme.colorScheme.primary,
-                                        checkedTrackColor = MaterialTheme.colorScheme.primaryContainer
-                                    )
+                                    colors =
+                                        SwitchDefaults.colors(
+                                            checkedThumbColor = MaterialTheme.colorScheme.primary,
+                                            checkedTrackColor = MaterialTheme.colorScheme.primaryContainer,
+                                        ),
                                 )
                             }
                         }
                     }
                 }
 
-                //Hack to try and monitor service
+                // Hack to try and monitor service
                 item {
                     ConfigSection(title = stringResource(R.string.reliability_monitoring)) {
                         Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(bottom = 16.dp)
-                                .background(
-                                    color = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.7f),
-                                    shape = RoundedCornerShape(12.dp)
-                                )
-                                .padding(12.dp),
-                            verticalAlignment = Alignment.CenterVertically
+                            modifier =
+                                Modifier
+                                    .fillMaxWidth()
+                                    .padding(bottom = 16.dp)
+                                    .background(
+                                        color = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.7f),
+                                        shape = RoundedCornerShape(12.dp),
+                                    ).padding(12.dp),
+                            verticalAlignment = Alignment.CenterVertically,
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Warning,
                                 contentDescription = null,
                                 tint = MaterialTheme.colorScheme.error,
-                                modifier = Modifier.size(20.dp)
+                                modifier = Modifier.size(20.dp),
                             )
                             Spacer(modifier = Modifier.width(12.dp))
                             Text(
                                 text = stringResource(R.string.experimental_warning),
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onErrorContainer,
-                                fontWeight = FontWeight.Medium
+                                fontWeight = FontWeight.Medium,
                             )
                         }
 
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
+                            verticalAlignment = Alignment.CenterVertically,
                         ) {
                             Column(modifier = Modifier.weight(1f)) {
                                 Text(
                                     text = stringResource(R.string.auto_restart_lazarus),
                                     style = MaterialTheme.typography.bodyLarge,
-                                    color = MaterialTheme.colorScheme.onSurface
+                                    color = MaterialTheme.colorScheme.onSurface,
                                 )
                                 Text(
                                     text = stringResource(R.string.restarts_script_if_termux_is_killed_by_system),
                                     style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 )
                             }
                             Switch(
@@ -491,37 +504,48 @@ fun ScriptConfigDialog(
                                     useHeartbeat = it
                                     onHeartbeatToggle(it)
                                 },
-                                colors = SwitchDefaults.colors(
-                                    checkedThumbColor = MaterialTheme.colorScheme.primary,
-                                    checkedTrackColor = MaterialTheme.colorScheme.primaryContainer
-                                )
+                                colors =
+                                    SwitchDefaults.colors(
+                                        checkedThumbColor = MaterialTheme.colorScheme.primary,
+                                        checkedTrackColor = MaterialTheme.colorScheme.primaryContainer,
+                                    ),
                             )
                         }
 
                         HorizontalDivider(
                             modifier = Modifier.padding(vertical = 12.dp),
-                            color = MaterialTheme.colorScheme.outlineVariant
+                            color = MaterialTheme.colorScheme.outlineVariant,
                         )
 
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
+                            verticalAlignment = Alignment.CenterVertically,
                         ) {
                             Column(modifier = Modifier.weight(1f)) {
                                 Text(
                                     text = stringResource(R.string.execution_feedback),
                                     style = MaterialTheme.typography.bodyLarge,
-                                    color = if (keepOpen) MaterialTheme.colorScheme.onSurface.copy(
-                                        alpha = 0.5f
-                                    ) else MaterialTheme.colorScheme.onSurface
+                                    color =
+                                        if (keepOpen) {
+                                            MaterialTheme.colorScheme.onSurface.copy(
+                                                alpha = 0.5f,
+                                            )
+                                        } else {
+                                            MaterialTheme.colorScheme.onSurface
+                                        },
                                 )
                                 Text(
-                                    text = if (keepOpen) stringResource(R.string.not_available_in_interactive_mode) else stringResource(
-                                        R.string.show_a_notification_with_the_result_success_fail_when_finished
-                                    ),
+                                    text =
+                                        if (keepOpen) {
+                                            stringResource(R.string.not_available_in_interactive_mode)
+                                        } else {
+                                            stringResource(
+                                                R.string.show_a_notification_with_the_result_success_fail_when_finished,
+                                            )
+                                        },
                                     style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 )
                             }
                             Switch(
@@ -534,46 +558,53 @@ fun ScriptConfigDialog(
                                         onRequestNotificationPermission()
                                     }
                                 },
-                                colors = SwitchDefaults.colors(
-                                    checkedThumbColor = MaterialTheme.colorScheme.primary,
-                                    checkedTrackColor = MaterialTheme.colorScheme.primaryContainer
-                                )
+                                colors =
+                                    SwitchDefaults.colors(
+                                        checkedThumbColor = MaterialTheme.colorScheme.primary,
+                                        checkedTrackColor = MaterialTheme.colorScheme.primaryContainer,
+                                    ),
                             )
                         }
 
                         HorizontalDivider(
                             modifier = Modifier.padding(vertical = 12.dp),
-                            color = MaterialTheme.colorScheme.outlineVariant
+                            color = MaterialTheme.colorScheme.outlineVariant,
                         )
 
                         Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clip(RoundedCornerShape(8.dp))
-                                .clickable(enabled = !isBatteryUnrestricted) { onRequestBatteryUnrestricted() }
-                                .padding(vertical = 4.dp),
-                            verticalAlignment = Alignment.CenterVertically
+                            modifier =
+                                Modifier
+                                    .fillMaxWidth()
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .clickable(enabled = !isBatteryUnrestricted) { onRequestBatteryUnrestricted() }
+                                    .padding(vertical = 4.dp),
+                            verticalAlignment = Alignment.CenterVertically,
                         ) {
                             Icon(
                                 imageVector = if (isBatteryUnrestricted) Icons.Default.CheckCircle else Icons.Default.BatteryAlert,
                                 contentDescription = null,
                                 tint = if (isBatteryUnrestricted) Color(0xFF4CAF50) else MaterialTheme.colorScheme.error,
-                                modifier = Modifier.size(24.dp)
+                                modifier = Modifier.size(24.dp),
                             )
                             Spacer(modifier = Modifier.width(12.dp))
                             Column(modifier = Modifier.weight(1f)) {
                                 Text(
-                                    text = if (isBatteryUnrestricted) stringResource(R.string.battery_unrestricted) else stringResource(
-                                        R.string.battery_optimized_restricted
-                                    ),
+                                    text =
+                                        if (isBatteryUnrestricted) {
+                                            stringResource(R.string.battery_unrestricted)
+                                        } else {
+                                            stringResource(
+                                                R.string.battery_optimized_restricted,
+                                            )
+                                        },
                                     style = MaterialTheme.typography.bodyMedium,
-                                    color = if (isBatteryUnrestricted) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.error
+                                    color = if (isBatteryUnrestricted) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.error,
                                 )
                                 if (!isBatteryUnrestricted) {
                                     Text(
                                         text = stringResource(R.string.tap_to_allow_background_activity_for_better_stability),
                                         style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     )
                                 }
                             }
@@ -582,7 +613,7 @@ fun ScriptConfigDialog(
                                     Icons.AutoMirrored.Filled.OpenInNew,
                                     null,
                                     modifier = Modifier.size(16.dp),
-                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
                                 )
                             }
                         }
@@ -590,52 +621,59 @@ fun ScriptConfigDialog(
                         AnimatedVisibility(
                             visible = useHeartbeat,
                             enter = expandVertically() + fadeIn(),
-                            exit = shrinkVertically() + fadeOut()
+                            exit = shrinkVertically() + fadeOut(),
                         ) {
                             Column(modifier = Modifier.padding(top = 12.dp)) {
                                 HorizontalDivider(
                                     modifier = Modifier.padding(bottom = 12.dp),
-                                    color = MaterialTheme.colorScheme.outlineVariant
+                                    color = MaterialTheme.colorScheme.outlineVariant,
                                 )
 
                                 Text(
                                     text = stringResource(R.string.advanced_timings),
                                     style = MaterialTheme.typography.labelMedium,
                                     color = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.padding(bottom = 8.dp)
+                                    modifier = Modifier.padding(bottom = 8.dp),
                                 )
 
                                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                                     StyledTextField(
                                         value = heartbeatIntervalStr,
                                         onValueChange = {
-                                            if (it.all { char -> char.isDigit() }) heartbeatIntervalStr =
-                                                it
+                                            if (it.all { char -> char.isDigit() }) {
+                                                heartbeatIntervalStr =
+                                                    it
+                                            }
                                         },
                                         label = stringResource(R.string.pulse_interval_s),
                                         placeholder = { Text("10") },
                                         modifier = Modifier.weight(1f),
-                                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                                     )
 
                                     StyledTextField(
                                         value = heartbeatTimeoutStr,
                                         onValueChange = {
-                                            if (it.all { char -> char.isDigit() }) heartbeatTimeoutStr =
-                                                it
+                                            if (it.all { char -> char.isDigit() }) {
+                                                heartbeatTimeoutStr =
+                                                    it
+                                            }
                                         },
                                         label = stringResource(R.string.timeout_limit_s),
                                         placeholder = { Text("30") },
                                         modifier = Modifier.weight(1f),
-                                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                                     )
                                 }
                                 Text(
-                                    text = stringResource(R.string.pulse_how_often_the_script_signals_it_is_alive_timeout_restart_if_no_signal_received_after_this_time),
+                                    text =
+                                        stringResource(
+                                            R.string.pulse_how_often_the_script_signals_it_is_alive_timeout_restart_if_no_signal_received_after_this_time,
+                                        ),
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
                                     modifier = Modifier.padding(top = 8.dp, start = 4.dp),
-                                    lineHeight = 16.sp
+                                    lineHeight = 16.sp,
                                 )
                             }
                         }
@@ -649,41 +687,42 @@ fun ScriptConfigDialog(
                                 text = stringResource(R.string.empty_env_vars),
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
-                                modifier = Modifier.padding(bottom = 8.dp)
+                                modifier = Modifier.padding(bottom = 8.dp),
                             )
                         }
 
                         envVarsList.forEachIndexed { index, pair ->
                             Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(bottom = 8.dp),
-                                verticalAlignment = Alignment.CenterVertically
+                                modifier =
+                                    Modifier
+                                        .fillMaxWidth()
+                                        .padding(bottom = 8.dp),
+                                verticalAlignment = Alignment.CenterVertically,
                             ) {
                                 StyledTextField(
                                     value = pair.first,
                                     onValueChange = { envVarsList[index] = it to pair.second },
                                     label = stringResource(R.string.label_key),
                                     placeholder = { Text(stringResource(R.string.placeholder_key)) },
-                                    modifier = Modifier.weight(1f)
+                                    modifier = Modifier.weight(1f),
                                 )
                                 Text(
                                     "=",
                                     modifier = Modifier.padding(horizontal = 4.dp),
-                                    color = MaterialTheme.colorScheme.onSurface
+                                    color = MaterialTheme.colorScheme.onSurface,
                                 )
                                 StyledTextField(
                                     value = pair.second,
                                     onValueChange = { envVarsList[index] = pair.first to it },
                                     label = stringResource(R.string.label_value),
                                     placeholder = { Text(stringResource(R.string.placeholder_value)) },
-                                    modifier = Modifier.weight(1f)
+                                    modifier = Modifier.weight(1f),
                                 )
                                 IconButton(onClick = { envVarsList.removeAt(index) }) {
                                     Icon(
                                         Icons.Default.Delete,
                                         contentDescription = stringResource(R.string.cd_remove),
-                                        tint = MaterialTheme.colorScheme.error
+                                        tint = MaterialTheme.colorScheme.error,
                                     )
                                 }
                             }
@@ -691,10 +730,11 @@ fun ScriptConfigDialog(
                         Button(
                             onClick = { envVarsList.add("" to "") },
                             modifier = Modifier.align(Alignment.End),
-                            colors = ButtonDefaults.filledTonalButtonColors(
-                                containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                                contentColor = MaterialTheme.colorScheme.onSecondaryContainer
-                            )
+                            colors =
+                                ButtonDefaults.filledTonalButtonColors(
+                                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                                ),
                         ) {
                             Icon(Icons.Default.Add, null, modifier = Modifier.size(18.dp))
                             Spacer(modifier = Modifier.width(8.dp))
@@ -712,31 +752,35 @@ fun ScriptConfigDialog(
             onConfirm = { newName ->
                 onAddNewCategory(newName)
                 showAddCategoryDialog = false
-            }
+            },
         )
     }
 }
 
 @Composable
-fun ConfigSection(title: String, content: @Composable ColumnScope.() -> Unit) {
+fun ConfigSection(
+    title: String,
+    content: @Composable ColumnScope.() -> Unit,
+) {
     Column {
         Text(
             text = title,
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.padding(start = 4.dp, bottom = 8.dp)
+            modifier = Modifier.padding(start = 4.dp, bottom = 8.dp),
         )
         ElevatedCard(
-            colors = CardDefaults.elevatedCardColors(
-                containerColor = MaterialTheme.colorScheme.surfaceContainer,
-                contentColor = MaterialTheme.colorScheme.onSurface
-            ),
+            colors =
+                CardDefaults.elevatedCardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceContainer,
+                    contentColor = MaterialTheme.colorScheme.onSurface,
+                ),
             shape = RoundedCornerShape(16.dp),
-            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         ) {
             Column(
                 modifier = Modifier.padding(16.dp),
-                content = content
+                content = content,
             )
         }
     }
@@ -750,28 +794,29 @@ fun PresetListManager(
     onAdd: () -> Unit,
     onRemove: (Int) -> Unit,
     onUpdate: (Int, String) -> Unit,
-    placeholder: String = ""
+    placeholder: String = "",
 ) {
     Column {
         Text(
             text = title,
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.padding(bottom = 8.dp)
+            modifier = Modifier.padding(bottom = 8.dp),
         )
         presets.forEachIndexed { index, value ->
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 8.dp),
-                verticalAlignment = Alignment.CenterVertically
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 8.dp),
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 StyledTextField(
                     value = value,
                     onValueChange = { onUpdate(index, it) },
                     label = textFieldLabel,
                     placeholder = { Text(placeholder) },
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f),
                 )
                 IconButton(onClick = { onRemove(index) }) {
                     Icon(Icons.Default.Delete, null, tint = MaterialTheme.colorScheme.error)
@@ -780,7 +825,7 @@ fun PresetListManager(
         }
         TextButton(
             onClick = onAdd,
-            modifier = Modifier.align(Alignment.Start)
+            modifier = Modifier.align(Alignment.Start),
         ) {
             Icon(Icons.Default.Add, null, modifier = Modifier.size(18.dp))
             Spacer(modifier = Modifier.width(8.dp))
@@ -793,20 +838,21 @@ fun PresetListManager(
 @Composable
 fun InteractionModeSpinner(
     selectedMode: InteractionMode,
-    onModeSelected: (InteractionMode) -> Unit
+    onModeSelected: (InteractionMode) -> Unit,
 ) {
     var expanded by remember { mutableStateOf(false) }
     val modes = InteractionMode.entries
 
-    val modeLabel = when (selectedMode) {
-        InteractionMode.NONE -> stringResource(R.string.interaction_none)
-        InteractionMode.TEXT_INPUT -> stringResource(R.string.interaction_text)
-        InteractionMode.MULTI_CHOICE -> stringResource(R.string.interaction_multi)
-    }
+    val modeLabel =
+        when (selectedMode) {
+            InteractionMode.NONE -> stringResource(R.string.interaction_none)
+            InteractionMode.TEXT_INPUT -> stringResource(R.string.interaction_text)
+            InteractionMode.MULTI_CHOICE -> stringResource(R.string.interaction_multi)
+        }
 
     ExposedDropdownMenuBox(
         expanded = expanded,
-        onExpandedChange = { expanded = !expanded }
+        onExpandedChange = { expanded = !expanded },
     ) {
         StyledTextField(
             value = modeLabel,
@@ -814,17 +860,17 @@ fun InteractionModeSpinner(
             readOnly = true,
             label = stringResource(R.string.label_interaction_mode),
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-            modifier = Modifier
-                .menuAnchor(
-                    type = ExposedDropdownMenuAnchorType.PrimaryNotEditable,
-                    enabled = true
-                )
-                .fillMaxWidth()
+            modifier =
+                Modifier
+                    .menuAnchor(
+                        type = ExposedDropdownMenuAnchorType.PrimaryNotEditable,
+                        enabled = true,
+                    ).fillMaxWidth(),
         )
 
         ExposedDropdownMenu(
             expanded = expanded,
-            onDismissRequest = { expanded = false }
+            onDismissRequest = { expanded = false },
         ) {
             modes.forEach { mode ->
                 DropdownMenuItem(
@@ -834,13 +880,13 @@ fun InteractionModeSpinner(
                                 InteractionMode.NONE -> stringResource(R.string.interaction_none)
                                 InteractionMode.TEXT_INPUT -> stringResource(R.string.interaction_text)
                                 InteractionMode.MULTI_CHOICE -> stringResource(R.string.interaction_multi)
-                            }
+                            },
                         )
                     },
                     onClick = {
                         onModeSelected(mode)
                         expanded = false
-                    }
+                    },
                 )
             }
         }
@@ -861,7 +907,7 @@ private fun PreviewConfigDialogLight() {
             onRequestBatteryUnrestricted = {},
             categories = emptyList(),
             onAddNewCategory = {},
-            onRequestNotificationPermission = {}
+            onRequestNotificationPermission = {},
         )
     }
 }
