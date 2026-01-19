@@ -199,7 +199,7 @@
     <string name="label_env_key">Значение переменной окружения</string>
 
     <!-- Tiles -->
-    <string name="title_tile_settings">Плитки быстрых настроек</string>
+    <string name="title_tile_settings">Плитки для шторки</string>
     <string name="tile_slot_label">Плитка %1$d</string>
     <string name="tile_unassigned">Не назначено (Нажмите для выбора)</string>
     <string name="tile_assigned_format">%1$s</string>

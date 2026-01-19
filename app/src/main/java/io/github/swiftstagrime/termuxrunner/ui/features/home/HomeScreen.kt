@@ -163,6 +163,7 @@ fun HomeScreen(
                 sortOption = sortOption,
                 scrollBehavior = scrollBehavior,
                 uiState = uiState,
+                selectedCategoryId = selectedCategoryId,
                 onToggleSearch = { isSearchActive = it },
                 actions = actions
             )
@@ -222,6 +223,7 @@ fun HomeScreen(
 private fun CollapsingHomeTopBar(
     isSearchActive: Boolean,
     searchQuery: String,
+    selectedCategoryId: Int?,
     sortOption: SortOption,
     scrollBehavior: TopAppBarScrollBehavior,
     uiState: HomeUiState,
@@ -285,7 +287,7 @@ private fun CollapsingHomeTopBar(
                     Spacer(modifier = Modifier.height(4.dp))
                 }
             }
-            CategoryTabs(uiState.categories, null, actions.onCategorySelect, actions.onDeleteCategory)
+            CategoryTabs(uiState.categories, selectedCategoryId, actions.onCategorySelect, actions.onDeleteCategory)
         }
     }
 }

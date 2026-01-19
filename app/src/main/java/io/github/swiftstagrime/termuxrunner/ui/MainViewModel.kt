@@ -10,7 +10,9 @@ import io.github.swiftstagrime.termuxrunner.ui.theme.AppTheme
 import io.github.swiftstagrime.termuxrunner.ui.theme.ThemeMode
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -18,6 +20,9 @@ import javax.inject.Inject
 class MainViewModel @Inject constructor(
     private val userPreferencesRepository: UserPreferencesRepository,
 ) : ViewModel() {
+
+    private val _isReady = MutableStateFlow(false)
+    val isReady = _isReady.asStateFlow()
 
     private val _backStack = mutableListOf<NavKey>()
     val backStack = MutableStateFlow<List<NavKey>>(emptyList())
@@ -30,11 +35,12 @@ class MainViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            userPreferencesRepository.hasCompletedOnboarding.collect { completed ->
+            userPreferencesRepository.hasCompletedOnboarding.take(1).collect { completed ->
                 if (_backStack.isEmpty()) {
                     val start = if (completed) Route.Home else Route.Onboarding
                     setRoot(start)
                 }
+                _isReady.value = true
             }
         }
     }

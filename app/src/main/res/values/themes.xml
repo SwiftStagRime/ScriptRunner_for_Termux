@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
-    <style name="Theme.ScriptRunnerForTermux" parent="Theme.AppCompat.DayNight.NoActionBar" />
+    <style name="Theme.App.Starting" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">#060000</item>
+        <item name="windowSplashScreenAnimatedIcon">@mipmap/ic_launcher</item>
+        <item name="postSplashScreenTheme">@style/Theme.ScriptRunnerForTermux</item>
+        <item name="windowSplashScreenAnimationDuration">600</item>
+    </style>
+    <style name="Theme.ScriptRunnerForTermux" parent="Theme.AppCompat.DayNight.NoActionBar"/>
 </resources>

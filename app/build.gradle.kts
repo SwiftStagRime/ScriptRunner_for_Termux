@@ -140,6 +140,7 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.navigation3)
     implementation(libs.androidx.material3.adaptive.navigation3)
     implementation(libs.kotlinx.serialization.core)
+    implementation(libs.androidx.core.splashscreen)
     implementation(libs.kotlinx.serialization.json)
     ksp(libs.androidx.room.compiler)
     ksp(libs.hilt.android.compiler)

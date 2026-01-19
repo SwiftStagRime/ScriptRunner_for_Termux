@@ -2,6 +2,7 @@
 agp = "8.13.1"
 androidDatabaseSqlcipher = "4.11.0"
 coilCompose = "3.3.0"
+coreSplashscreen = "1.2.0"
 datastorePreferences = "1.2.0"
 hiltAndroid = "2.58"
 hiltAndroidCompiler = "2.58"
@@ -43,6 +44,7 @@ uiUnit = "1.10.1"
 android-database-sqlcipher = { module = "net.zetetic:sqlcipher-android", version.ref = "androidDatabaseSqlcipher" }
 androidx-compose-material-icons-extended = { module = "androidx.compose.material:material-icons-extended", version.ref = "materialIconsExtended" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+androidx-core-splashscreen = { module = "androidx.core:core-splashscreen", version.ref = "coreSplashscreen" }
 androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastorePreferences" }
 androidx-espresso-intents = { module = "androidx.test.espresso:espresso-intents", version.ref = "espressoCore" }
 androidx-hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
