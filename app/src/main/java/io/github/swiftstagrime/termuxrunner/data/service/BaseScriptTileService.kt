@@ -24,6 +24,7 @@ import javax.inject.Inject
 
 @AndroidEntryPoint
 abstract class BaseScriptTileService : TileService() {
+
     abstract val tileIndex: Int
 
     @Inject
@@ -44,6 +45,59 @@ abstract class BaseScriptTileService : TileService() {
     override fun onStartListening() {
         super.onStartListening()
         updateTileState()
+    }
+
+    override fun onClick() {
+        val scriptId = assignedScriptId
+
+        if (scriptId == null) {
+            val launchIntent = packageManager.getLaunchIntentForPackage(packageName)?.apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+            launchIntent?.let { safeStartActivityAndCollapse(it) }
+            return
+        }
+
+        serviceScope.launch {
+            val script = scriptRepository.getScriptById(scriptId) ?: return@launch
+
+            val requiresInput = script.interactionMode != InteractionMode.NONE
+            val opensWindow = script.openNewSession
+
+            if (requiresInput || opensWindow) {
+                val intent = Intent(this@BaseScriptTileService, ScriptRunnerActivity::class.java).apply {
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    putExtra("SCRIPT_ID", script.id)
+                }
+                safeStartActivityAndCollapse(intent)
+            } else {
+                try {
+                    qsTile?.let { tile ->
+                        tile.state = Tile.STATE_UNAVAILABLE
+                        tile.updateTile()
+
+                        runScriptUseCase(script)
+
+                        Toast.makeText(
+                            applicationContext,
+                            getString(R.string.msg_script_executed, script.name),
+                            Toast.LENGTH_SHORT,
+                        ).show()
+                    }
+                } catch (e: Exception) {
+                    Toast.makeText(
+                        applicationContext,
+                        "Error: ${e.message}",
+                        Toast.LENGTH_LONG
+                    ).show()
+                } finally {
+                    qsTile?.let { tile ->
+                        tile.state = Tile.STATE_ACTIVE
+                        tile.updateTile()
+                    }
+                }
+            }
+        }
     }
 
     override fun onDestroy() {
@@ -77,70 +131,15 @@ abstract class BaseScriptTileService : TileService() {
         }
     }
 
-    override fun onClick() {
-        val scriptId = assignedScriptId
-
-        if (scriptId == null) {
-            val launchIntent =
-                packageManager.getLaunchIntentForPackage(packageName)?.apply {
-                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                }
-            if (launchIntent != null) {
-                safeStartActivityAndCollapse(launchIntent)
-            }
-            return
-        }
-
-        serviceScope.launch {
-            val script = scriptRepository.getScriptById(scriptId) ?: return@launch
-
-            val requiresInput = script.interactionMode != InteractionMode.NONE
-            val opensWindow = script.openNewSession
-
-            if (requiresInput || opensWindow) {
-                val intent =
-                    Intent(this@BaseScriptTileService, ScriptRunnerActivity::class.java).apply {
-                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                        putExtra("SCRIPT_ID", script.id)
-                    }
-                safeStartActivityAndCollapse(intent)
-            } else {
-                try {
-                    val tile = qsTile
-                    tile.state = Tile.STATE_UNAVAILABLE
-                    tile.updateTile()
-
-                    runScriptUseCase(script)
-
-                    Toast
-                        .makeText(
-                            applicationContext,
-                            getString(R.string.msg_script_executed, script.name),
-                            Toast.LENGTH_SHORT,
-                        ).show()
-                } catch (e: Exception) {
-                    Toast
-                        .makeText(applicationContext, "Error: ${e.message}", Toast.LENGTH_LONG)
-                        .show()
-                } finally {
-                    val tile = qsTile
-                    tile.state = Tile.STATE_ACTIVE
-                    tile.updateTile()
-                }
-            }
-        }
-    }
-
     @SuppressLint("StartActivityAndCollapseDeprecated")
     private fun safeStartActivityAndCollapse(intent: Intent) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-            val pendingIntent =
-                PendingIntent.getActivity(
-                    this,
-                    0,
-                    intent,
-                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
-                )
+            val pendingIntent = PendingIntent.getActivity(
+                this,
+                0,
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+            )
             startActivityAndCollapse(pendingIntent)
         } else {
             @Suppress("DEPRECATION")

@@ -2,7 +2,9 @@ package io.github.swiftstagrime.termuxrunner.ui.features.home
 
 import android.net.Uri
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -52,6 +54,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.LargeTopAppBar
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -61,19 +64,28 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.TopAppBarScrollBehavior
+import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
@@ -81,340 +93,371 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.util.lerp
 import androidx.compose.ui.zIndex
 import io.github.swiftstagrime.termuxrunner.R
 import io.github.swiftstagrime.termuxrunner.domain.model.Category
 import io.github.swiftstagrime.termuxrunner.domain.model.Script
-import io.github.swiftstagrime.termuxrunner.ui.components.ScriptConfigDialog
 import io.github.swiftstagrime.termuxrunner.ui.components.ScriptIcon
 import io.github.swiftstagrime.termuxrunner.ui.features.home.components.QuickSettingsBanner
+import io.github.swiftstagrime.termuxrunner.ui.features.scriptconfigdialog.ScriptConfigDialog
+import io.github.swiftstagrime.termuxrunner.ui.features.scriptconfigdialog.ScriptConfigState
 import io.github.swiftstagrime.termuxrunner.ui.preview.DevicePreviews
 import io.github.swiftstagrime.termuxrunner.ui.preview.sampleScripts
+import io.github.swiftstagrime.termuxrunner.ui.preview.stubHomeActions
 import io.github.swiftstagrime.termuxrunner.ui.theme.ScriptRunnerForTermuxTheme
+
+data class HomeActions(
+    val onSearchQueryChange: (String) -> Unit,
+    val onOpenConfig: (Script) -> Unit,
+    val onDismissConfig: () -> Unit,
+    val onAddClick: () -> Unit,
+    val onSettingsClick: () -> Unit,
+    val onScriptCodeClick: (Script) -> Unit,
+    val onRunClick: (Script) -> Unit,
+    val onDeleteScript: (Script) -> Unit,
+    val onCreateShortcutClick: (Script) -> Unit,
+    val onUpdateScript: (Script) -> Unit,
+    val onHeartbeatToggle: (Boolean) -> Unit,
+    val onRequestBatteryUnrestricted: () -> Unit,
+    val onRequestNotificationPermission: () -> Unit,
+    val onProcessImage: suspend (Uri) -> String?,
+    val onCategorySelect: (Int?) -> Unit,
+    val onSortOptionChange: (SortOption) -> Unit,
+    val onAddNewCategory: (String) -> Unit,
+    val onDeleteCategory: (Category) -> Unit,
+    val onMove: (Int, Int) -> Unit,
+    val onTileSettingsClick: () -> Unit,
+    val onNavigateToAutomation: () -> Unit,
+)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     uiState: HomeUiState,
     searchQuery: String,
-    onSearchQueryChange: (String) -> Unit,
-    onAddClick: () -> Unit,
-    onSettingsClick: () -> Unit,
-    onScriptCodeClick: (Script) -> Unit,
-    onRunClick: (Script) -> Unit,
-    onDeleteScript: (Script) -> Unit,
-    onCreateShortcutClick: (Script) -> Unit,
-    onUpdateScript: (Script) -> Unit,
-    onHeartbeatToggle: (Boolean) -> Unit,
+    configState: ScriptConfigState?,
+    originalScript: Script?,
     isBatteryUnrestricted: Boolean,
-    onRequestBatteryUnrestricted: () -> Unit,
-    onRequestNotificationPermission: () -> Unit,
-    snackbarHostState: SnackbarHostState,
-    onProcessImage: suspend (Uri) -> String?,
     selectedCategoryId: Int?,
     sortOption: SortOption,
-    onCategorySelect: (Int?) -> Unit,
-    onSortOptionChange: (SortOption) -> Unit,
-    onAddNewCategory: (String) -> Unit,
-    onDeleteCategory: (Category) -> Unit,
-    onMove: (Int, Int) -> Unit,
-    onTileSettingsClick: () -> Unit,
-    onNavigateToAutomation: () -> Unit,
+    snackbarHostState: SnackbarHostState,
+    actions: HomeActions
 ) {
-    var selectedScriptForConfig by remember { mutableStateOf<Script?>(null) }
-    var isSearchActive by remember { mutableStateOf(false) }
-    val handleConfigClick: (Script) -> Unit =
-        remember {
-            { script -> selectedScriptForConfig = script }
-        }
-    val lazyListState = rememberLazyListState()
-    val isManualSort = sortOption == SortOption.MANUAL
-
-    var draggedItemIndex by remember { mutableStateOf<Int?>(null) }
-    var dragOffset by remember { mutableFloatStateOf(0f) }
-
-    val uncategorizedLabel = stringResource(R.string.uncategorized)
-
-    fun getTargetIndex(
-        offset: Float,
-        startBuffer: Int = 0,
-    ): Int? {
-        val layoutInfo = lazyListState.layoutInfo
-        val itemInfo = layoutInfo.visibleItemsInfo
-        val currentDraggingItem = itemInfo.find { it.index == draggedItemIndex } ?: return null
-
-        val targetCenter = currentDraggingItem.offset + (currentDraggingItem.size / 2) + offset
-        return itemInfo.find { targetCenter.toInt() in it.offset..(it.offset + it.size) }?.index
-    }
+    var isSearchActive by rememberSaveable { mutableStateOf(false) }
+    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
 
     BackHandler(enabled = isSearchActive) {
         isSearchActive = false
-        onSearchQueryChange("")
+        actions.onSearchQueryChange("")
     }
 
     Scaffold(
+        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         containerColor = MaterialTheme.colorScheme.background,
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
-            if (isSearchActive) {
-                TopAppBar(
-                    colors =
-                        TopAppBarDefaults.topAppBarColors(
-                            containerColor = MaterialTheme.colorScheme.background,
-                            titleContentColor = MaterialTheme.colorScheme.onSurface,
-                            navigationIconContentColor = MaterialTheme.colorScheme.onSurface,
-                            actionIconContentColor = MaterialTheme.colorScheme.primary,
-                        ),
-                    title = {
-                        TextField(
-                            value = searchQuery,
-                            onValueChange = onSearchQueryChange,
-                            placeholder = {
-                                Text(
-                                    stringResource(R.string.search_placeholder),
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
-                                )
-                            },
-                            singleLine = true,
-                            textStyle =
-                                MaterialTheme.typography.bodyLarge.copy(
-                                    color = MaterialTheme.colorScheme.onSurface,
-                                ),
-                            colors =
-                                TextFieldDefaults.colors(
-                                    focusedContainerColor = Color.Transparent,
-                                    unfocusedContainerColor = Color.Transparent,
-                                    focusedIndicatorColor = Color.Transparent,
-                                    unfocusedIndicatorColor = Color.Transparent,
-                                    cursorColor = MaterialTheme.colorScheme.primary,
-                                ),
-                            modifier = Modifier.fillMaxWidth(),
-                        )
-                    },
-                    navigationIcon = {
-                        IconButton(onClick = {
-                            isSearchActive = false
-                            onSearchQueryChange("")
-                        }) {
-                            Icon(
-                                Icons.AutoMirrored.Filled.ArrowBack,
-                                stringResource(R.string.cd_close_search),
-                            )
-                        }
-                    },
-                    actions = {
-                        if (searchQuery.isNotEmpty()) {
-                            IconButton(onClick = { onSearchQueryChange("") }) {
-                                Icon(Icons.Default.Close, stringResource(R.string.cd_clear_search))
-                            }
-                        }
-                    },
-                )
-            } else {
-                TopAppBar(
-                    colors =
-                        TopAppBarDefaults.topAppBarColors(
-                            containerColor = MaterialTheme.colorScheme.background,
-                            titleContentColor = MaterialTheme.colorScheme.onSurface,
-                            actionIconContentColor = MaterialTheme.colorScheme.onSurface,
-                        ),
-                    title = { Text(stringResource(R.string.home_title)) },
-                    actions = {
-                        IconButton(onClick = { isSearchActive = true }) {
-                            Icon(
-                                Icons.Default.Search,
-                                contentDescription = stringResource(R.string.cd_search),
-                            )
-                        }
-                        IconButton(onClick = onNavigateToAutomation) {
-                            Icon(Icons.Default.Schedule, stringResource(R.string.cd_automation))
-                        }
-                        SortMenu(
-                            currentSort = sortOption,
-                            onSortSelected = onSortOptionChange,
-                        )
-                        IconButton(onClick = onSettingsClick) {
-                            Icon(
-                                Icons.Default.Settings,
-                                contentDescription = stringResource(R.string.cd_settings),
-                            )
-                        }
-                    },
-                )
-            }
+            CollapsingHomeTopBar(
+                isSearchActive = isSearchActive,
+                searchQuery = searchQuery,
+                sortOption = sortOption,
+                scrollBehavior = scrollBehavior,
+                uiState = uiState,
+                onToggleSearch = { isSearchActive = it },
+                actions = actions
+            )
         },
         floatingActionButton = {
             FloatingActionButton(
-                onClick = onAddClick,
-                containerColor = MaterialTheme.colorScheme.primaryContainer,
-                contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                onClick = actions.onAddClick,
+                containerColor = MaterialTheme.colorScheme.primaryContainer
             ) {
-                Icon(Icons.Default.Add, contentDescription = stringResource(R.string.cd_add_script))
+                Icon(Icons.Default.Add, stringResource(R.string.cd_add_script))
             }
         },
     ) { padding ->
-        Column(modifier = Modifier.padding(padding)) {
-            if (uiState is HomeUiState.Success) {
-                if (!isSearchActive) {
-                    QuickSettingsBanner(
-                        tileMappings = uiState.tileMappings,
-                        onTileClick = onRunClick,
-                        onEmptyTileClick = onTileSettingsClick,
-                        onSettingsClick = onTileSettingsClick,
+        Box(modifier = Modifier.padding(padding).fillMaxSize().fadingEdge()) {
+            when (uiState) {
+                is HomeUiState.Loading -> CircularProgressIndicator(Modifier.align(Alignment.Center))
+                is HomeUiState.Success -> {
+                    ScriptList(
+                        uiState = uiState,
+                        searchQuery = searchQuery,
+                        selectedCategoryId = selectedCategoryId,
+                        sortOption = sortOption,
+                        onMove = actions.onMove,
+                        onScriptCodeClick = actions.onScriptCodeClick,
+                        onRunClick = actions.onRunClick,
+                        onConfigClick = actions.onOpenConfig,
+                        onDeleteClick = actions.onDeleteScript,
+                        onCreateShortcutClick = actions.onCreateShortcutClick
                     )
                 }
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                CategoryTabs(
-                    categories = uiState.categories,
-                    selectedCategoryId = selectedCategoryId,
-                    onCategorySelect = onCategorySelect,
-                    onDeleteCategory = onDeleteCategory,
-                )
             }
+        }
 
-            Box(
-                modifier =
-                    Modifier
-                        .weight(1f)
-                        .fillMaxWidth(),
-            ) {
-                when (uiState) {
-                    is HomeUiState.Loading -> {
-                        CircularProgressIndicator(
-                            modifier = Modifier.align(Alignment.Center),
-                            color = MaterialTheme.colorScheme.primary,
-                        )
-                    }
+        if (configState != null && originalScript != null && uiState is HomeUiState.Success) {
+            ScriptConfigDialog(
+                state = configState,
+                script = originalScript,
+                categories = uiState.categories,
+                onDismiss = actions.onDismissConfig,
+                onSave = { updatedScript ->
+                    actions.onUpdateScript(updatedScript)
+                    actions.onDismissConfig()
+                },
+                onProcessImage = actions.onProcessImage,
+                onHeartbeatToggle = actions.onHeartbeatToggle,
+                isBatteryUnrestricted = isBatteryUnrestricted,
+                onRequestBatteryUnrestricted = actions.onRequestBatteryUnrestricted,
+                onAddNewCategory = actions.onAddNewCategory,
+                onRequestNotificationPermission = actions.onRequestNotificationPermission,
+            )
+        }
+    }
+}
 
-                    is HomeUiState.Success -> {
-                        LazyColumn(
-                            state = lazyListState,
-                            contentPadding =
-                                PaddingValues(
-                                    top = 16.dp,
-                                    start = 16.dp,
-                                    end = 16.dp,
-                                    bottom = 88.dp,
-                                ),
-                            verticalArrangement = Arrangement.spacedBy(10.dp),
-                            modifier =
-                                Modifier
-                                    .fillMaxSize()
-                                    .then(
-                                        if (isManualSort) {
-                                            Modifier.pointerInput(Unit) {
-                                                detectDragGesturesAfterLongPress(
-                                                    onDragStart = { offset ->
-                                                        lazyListState.layoutInfo.visibleItemsInfo
-                                                            .find { item ->
-                                                                offset.y.toInt() in item.offset..(item.offset + item.size)
-                                                            }?.let { draggedItemIndex = it.index }
-                                                    },
-                                                    onDrag = { change, dragAmount ->
-                                                        change.consume()
-                                                        dragOffset += dragAmount.y
-
-                                                        val targetIndex = getTargetIndex(dragOffset)
-                                                        if (targetIndex != null &&
-                                                            draggedItemIndex != null &&
-                                                            targetIndex != draggedItemIndex
-                                                        ) {
-                                                            onMove(draggedItemIndex!!, targetIndex)
-                                                            draggedItemIndex = targetIndex
-                                                            dragOffset = 0f
-                                                        }
-                                                    },
-                                                    onDragEnd = {
-                                                        draggedItemIndex = null
-                                                        dragOffset = 0f
-                                                    },
-                                                    onDragCancel = {
-                                                        draggedItemIndex = null
-                                                        dragOffset = 0f
-                                                    },
-                                                )
-                                            }
-                                        } else {
-                                            Modifier
-                                        },
-                                    ),
-                        ) {
-                            // Only show headers if NOT in manual sort mode
-                            // (Dragging across headers causes UI glitches without complex math) | but it does glitch anyway ;)
-                            val showHeaders =
-                                selectedCategoryId == null && searchQuery.isEmpty() && !isManualSort
-
-                            if (showHeaders) {
-                                val grouped = uiState.scripts.groupBy { it.categoryId }
-                                grouped.forEach { (catId, scripts) ->
-                                    val catName =
-                                        uiState.categories.find { it.id == catId }?.name
-                                            ?: uncategorizedLabel
-                                    item(key = "header_$catId") { CategoryHeader(catName) }
-                                    items(items = scripts, key = { it.id }) { script ->
-                                        ScriptItem(
-                                            script = script,
-                                            onCodeClick = onScriptCodeClick,
-                                            onRunClick = onRunClick,
-                                            onConfigClick = handleConfigClick,
-                                            onDeleteClick = onDeleteScript,
-                                            onCreateShortcutClick = onCreateShortcutClick,
-                                        )
-                                    }
-                                }
-                            } else {
-                                itemsIndexed(
-                                    items = uiState.scripts,
-                                    key = { _, script -> script.id },
-                                ) { index, script ->
-                                    val isDragging = index == draggedItemIndex
-
-                                    Box(
-                                        modifier =
-                                            Modifier
-                                                .fillMaxWidth()
-                                                .graphicsLayer {
-                                                    translationY = if (isDragging) dragOffset else 0f
-                                                    scaleX = if (isDragging) 1.05f else 1.0f
-                                                    scaleY = if (isDragging) 1.05f else 1.0f
-                                                    alpha = if (isDragging) 0.8f else 1.0f
-                                                }.zIndex(if (isDragging) 1f else 0f),
-                                    ) {
-                                        ScriptItem(
-                                            script = script,
-                                            onCodeClick = onScriptCodeClick,
-                                            onRunClick = onRunClick,
-                                            onConfigClick = handleConfigClick,
-                                            onDeleteClick = onDeleteScript,
-                                            onCreateShortcutClick = onCreateShortcutClick,
-                                        )
-                                    }
-                                }
-                            }
-                        }
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun CollapsingHomeTopBar(
+    isSearchActive: Boolean,
+    searchQuery: String,
+    sortOption: SortOption,
+    scrollBehavior: TopAppBarScrollBehavior,
+    uiState: HomeUiState,
+    onToggleSearch: (Boolean) -> Unit,
+    actions: HomeActions
+) {
+    Column(modifier = Modifier.background(MaterialTheme.colorScheme.background)) {
+        LargeTopAppBar(
+            scrollBehavior = if (isSearchActive) null else scrollBehavior,
+            colors = TopAppBarDefaults.topAppBarColors(
+                containerColor = Color.Transparent,
+                scrolledContainerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp),
+                titleContentColor = MaterialTheme.colorScheme.onBackground
+            ),
+            title = {
+                if (isSearchActive) {
+                    SearchField(searchQuery, actions.onSearchQueryChange)
+                } else {
+                    Text(stringResource(R.string.home_title))
+                }
+            },
+            navigationIcon = {
+                if (isSearchActive) {
+                    IconButton(onClick = {
+                        onToggleSearch(false)
+                        actions.onSearchQueryChange("")
+                    }) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.cd_close_search))
                     }
                 }
+            },
+            actions = {
+                if (isSearchActive) {
+                    if (searchQuery.isNotEmpty()) {
+                        IconButton(onClick = { actions.onSearchQueryChange("") }) {
+                            Icon(Icons.Default.Close, stringResource(R.string.cd_clear_search))
+                        }
+                    }
+                } else {
+                    AppBarActions(sortOption, actions, onToggleSearch)
+                }
             }
+        )
 
-            selectedScriptForConfig?.let { script ->
-                ScriptConfigDialog(
-                    script = script,
-                    categories = (uiState as? HomeUiState.Success)?.categories ?: emptyList(),
-                    onDismiss = { selectedScriptForConfig = null },
-                    onSave = { updatedScript ->
-                        onUpdateScript(updatedScript)
-                        selectedScriptForConfig = null
-                    },
-                    onProcessImage = onProcessImage,
-                    onHeartbeatToggle = onHeartbeatToggle,
-                    isBatteryUnrestricted = isBatteryUnrestricted,
-                    onRequestBatteryUnrestricted = onRequestBatteryUnrestricted,
-                    onAddNewCategory = onAddNewCategory,
-                    onRequestNotificationPermission = onRequestNotificationPermission,
-                )
+        if (uiState is HomeUiState.Success && !isSearchActive) {
+            val fraction = scrollBehavior.state.collapsedFraction
+            val easedAlpha = FastOutSlowInEasing.transform(1f - fraction)
+            val easedScale = lerp(0.92f, 1f, easedAlpha)
+
+            if (easedAlpha > 0.01f) {
+                Column(
+                    modifier = Modifier
+                        .graphicsLayer {
+                            alpha = easedAlpha
+                            scaleX = easedScale
+                            scaleY = easedScale
+                            translationY = scrollBehavior.state.heightOffset
+                        }
+                ) {
+                    QuickSettingsBanner(uiState.tileMappings, actions.onRunClick, actions.onTileSettingsClick, actions.onTileSettingsClick)
+                    Spacer(modifier = Modifier.height(4.dp))
+                }
+            }
+            CategoryTabs(uiState.categories, null, actions.onCategorySelect, actions.onDeleteCategory)
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+fun Modifier.fadingEdge(): Modifier = this.graphicsLayer(compositingStrategy = CompositingStrategy.Offscreen)
+    .drawWithContent {
+        drawContent()
+        val fadeHeight = 10f
+        val colors = listOf(Color.Transparent, Color.Black)
+
+        drawRect(
+            brush = Brush.verticalGradient(
+                colors = colors,
+                startY = 0f,
+                endY = fadeHeight
+            ),
+            blendMode = BlendMode.DstIn
+        )
+    }
+@Composable
+private fun SearchField(query: String, onQueryChange: (String) -> Unit) {
+    TextField(
+        value = query,
+        onValueChange = onQueryChange,
+        placeholder = { Text(stringResource(R.string.search_placeholder), color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)) },
+        singleLine = true,
+        colors = TextFieldDefaults.colors(
+            focusedContainerColor = Color.Transparent,
+            unfocusedContainerColor = Color.Transparent,
+            focusedIndicatorColor = Color.Transparent,
+            unfocusedIndicatorColor = Color.Transparent,
+        ),
+        modifier = Modifier.fillMaxWidth(),
+    )
+}
+
+@Composable
+private fun AppBarActions(
+    sortOption: SortOption,
+    actions: HomeActions,
+    onToggleSearch: (Boolean) -> Unit
+) {
+    IconButton(onClick = { onToggleSearch(true) }) {
+        Icon(Icons.Default.Search, stringResource(R.string.cd_search))
+    }
+    IconButton(onClick = actions.onNavigateToAutomation) {
+        Icon(Icons.Default.Schedule, stringResource(R.string.cd_automation))
+    }
+    SortMenu(currentSort = sortOption, onSortSelected = actions.onSortOptionChange)
+    IconButton(onClick = actions.onSettingsClick) {
+        Icon(Icons.Default.Settings, stringResource(R.string.cd_settings))
+    }
+}
+
+@Composable
+private fun ScriptList(
+    uiState: HomeUiState.Success,
+    searchQuery: String,
+    selectedCategoryId: Int?,
+    sortOption: SortOption,
+    onMove: (Int, Int) -> Unit,
+    onScriptCodeClick: (Script) -> Unit,
+    onConfigClick: (Script) -> Unit,
+    onRunClick: (Script) -> Unit,
+    onDeleteClick: (Script) -> Unit,
+    onCreateShortcutClick: (Script) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val scrollPositions = rememberSaveable { mutableMapOf<String, Pair<Int, Int>>() }
+    val scrollKey = remember(selectedCategoryId, searchQuery) {
+        if (searchQuery.isNotEmpty()) "search_$searchQuery"
+        else selectedCategoryId?.toString() ?: "ALL_LIST_PERSISTENCE_KEY"
+    }
+    val lazyListState = rememberLazyListState()
+    val isManualSort = sortOption == SortOption.MANUAL
+
+    var draggedItemIndex by rememberSaveable { mutableStateOf<Int?>(null) }
+    var dragOffset by rememberSaveable { mutableFloatStateOf(0f) }
+
+    LaunchedEffect(scrollKey) {
+        val saved = scrollPositions[scrollKey]
+        if (saved != null) {
+            lazyListState.scrollToItem(saved.first, saved.second)
+        } else {
+            lazyListState.scrollToItem(0, 0)
+        }
+    }
+
+    LaunchedEffect(lazyListState) {
+        snapshotFlow {
+            if (lazyListState.isScrollInProgress) {
+                lazyListState.firstVisibleItemIndex to lazyListState.firstVisibleItemScrollOffset
+            } else null
+        }.collect { position ->
+            if (position != null) {
+                scrollPositions[scrollKey] = position
+            }
+        }
+    }
+
+    LazyColumn(
+        state = lazyListState,
+        contentPadding = PaddingValues(top = 0.dp, start = 12.dp, end = 12.dp, bottom = 88.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = modifier.fillMaxSize().then(
+            if (isManualSort) {
+                Modifier.pointerInput(Unit) {
+                    detectDragGesturesAfterLongPress(
+                        onDragStart = { offset ->
+                            lazyListState.layoutInfo.visibleItemsInfo.find {
+                                it.offset <= offset.y.toInt() && (it.offset + it.size) >= offset.y.toInt()
+                            }?.let { draggedItemIndex = it.index }
+                        },
+                        onDrag = { change, dragAmount ->
+                            change.consume()
+                            dragOffset += dragAmount.y
+                            val layoutInfo = lazyListState.layoutInfo
+                            val itemInfo = layoutInfo.visibleItemsInfo
+                            val currentItem = itemInfo.find { it.index == draggedItemIndex }
+                            currentItem?.let {
+                                val targetCenter = it.offset + (it.size / 2) + dragOffset
+                                val targetItem = itemInfo.find { info -> targetCenter.toInt() in info.offset..(info.offset + info.size) }
+                                if (targetItem != null && draggedItemIndex != null && targetItem.index != draggedItemIndex) {
+                                    onMove(draggedItemIndex!!, targetItem.index)
+                                    draggedItemIndex = targetItem.index
+                                    dragOffset = 0f
+                                }
+                            }
+                        },
+                        onDragEnd = { draggedItemIndex = null; dragOffset = 0f },
+                        onDragCancel = { draggedItemIndex = null; dragOffset = 0f }
+                    )
+                }
+            } else Modifier
+        )
+    ) {
+        val showHeaders = selectedCategoryId == null && searchQuery.isEmpty() && !isManualSort
+
+        if (showHeaders) {
+            uiState.scripts.groupBy { it.categoryId }.forEach { (catId, scripts) ->
+                val catName = uiState.categories.find { it.id == catId }?.name ?: "Uncategorized"
+                item(key = "header_$catId") { CategoryHeader(catName) }
+                items(items = scripts, key = { it.id }) { script ->
+                    ScriptItem(
+                        script = script,
+                        onCodeClick = onScriptCodeClick,
+                        onConfigClick = onConfigClick,
+                        onRunClick = onRunClick,
+                        onDeleteClick = onDeleteClick,
+                        onCreateShortcutClick = onCreateShortcutClick
+                    )
+                }
+            }
+        } else {
+            itemsIndexed(items = uiState.scripts, key = { _, script -> script.id }) { index, script ->
+                val isDragging = index == draggedItemIndex
+                Box(modifier = Modifier.fillMaxWidth().graphicsLayer {
+                    translationY = if (isDragging) dragOffset else 0f
+                    scaleX = if (isDragging) 1.04f else 1.0f
+                    scaleY = if (isDragging) 1.04f else 1.0f
+                    alpha = if (isDragging) 0.9f else 1.0f
+                }.zIndex(if (isDragging) 1f else 0f)) {
+                    ScriptItem(
+                        script = script,
+                        onCodeClick = onScriptCodeClick,
+                        onConfigClick = onConfigClick,
+                        onRunClick = onRunClick,
+                        onDeleteClick = onDeleteClick,
+                        onCreateShortcutClick = onCreateShortcutClick
+                    )
+                }
             }
         }
     }
@@ -694,7 +737,7 @@ fun CategoryTabs(
     var categoryToEdit by remember { mutableStateOf<Category?>(null) }
 
     LazyRow(
-        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 0.dp),
+        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -815,31 +858,15 @@ private fun CategoryChip(
 private fun PreviewHomeScreen() {
     ScriptRunnerForTermuxTheme {
         HomeScreen(
-            onRunClick = {},
-            onAddClick = {},
-            onSettingsClick = {},
-            onScriptCodeClick = {},
-            onDeleteScript = {},
-            onCreateShortcutClick = {},
-            onUpdateScript = {},
             uiState = HomeUiState.Success(sampleScripts, emptyList(), emptyMap()),
             searchQuery = "",
-            onSearchQueryChange = {},
-            snackbarHostState = SnackbarHostState(),
-            onProcessImage = { null },
-            onHeartbeatToggle = {},
+            configState = null,
+            originalScript = null,
             isBatteryUnrestricted = false,
-            onRequestBatteryUnrestricted = {},
-            onCategorySelect = {},
-            onSortOptionChange = {},
-            sortOption = SortOption.NAME_ASC,
             selectedCategoryId = null,
-            onAddNewCategory = {},
-            onDeleteCategory = {},
-            onMove = { _, _ -> },
-            onRequestNotificationPermission = {},
-            onTileSettingsClick = {},
-            onNavigateToAutomation = {},
+            sortOption = SortOption.NAME_ASC,
+            snackbarHostState = SnackbarHostState(),
+            actions = stubHomeActions
         )
     }
 }
@@ -849,31 +876,15 @@ private fun PreviewHomeScreen() {
 private fun PreviewEmptyHome() {
     ScriptRunnerForTermuxTheme {
         HomeScreen(
-            onRunClick = {},
-            onAddClick = {},
-            onSettingsClick = {},
-            onScriptCodeClick = {},
-            onDeleteScript = {},
-            onCreateShortcutClick = {},
-            onUpdateScript = {},
             uiState = HomeUiState.Success(emptyList(), emptyList(), emptyMap()),
             searchQuery = "",
-            onSearchQueryChange = {},
-            snackbarHostState = SnackbarHostState(),
-            onProcessImage = { null },
-            onHeartbeatToggle = {},
+            configState = null,
+            originalScript = null,
             isBatteryUnrestricted = false,
-            onRequestBatteryUnrestricted = {},
-            onCategorySelect = {},
-            onSortOptionChange = {},
-            sortOption = SortOption.NAME_ASC,
             selectedCategoryId = null,
-            onAddNewCategory = {},
-            onDeleteCategory = {},
-            onMove = { _, _ -> },
-            onRequestNotificationPermission = {},
-            onTileSettingsClick = {},
-            onNavigateToAutomation = {},
+            sortOption = SortOption.NAME_ASC,
+            snackbarHostState = SnackbarHostState(),
+            actions = stubHomeActions
         )
     }
 }

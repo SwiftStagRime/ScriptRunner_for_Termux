@@ -19,75 +19,91 @@ import javax.inject.Inject
 /**
  * Manages the processing and internal storage of script icons.
  */
+class ImageStorageManager @Inject constructor(
+    @ApplicationContext private val context: Context,
+) {
 
-class ImageStorageManager
-    @Inject
-    constructor(
-        @ApplicationContext private val context: Context,
-    ) {
-        private companion object {
-            const val TARGET_SIZE_PX = 256
-            const val ICON_DIR = "script_icons"
+    /**
+     * Processes a selected image: decodes, resizes to fit [TARGET_SIZE_PX],
+     * and saves it as a WebP file. Returns the absolute path.
+     */
+    suspend fun saveImageFromUri(uri: Uri): Result<String> = withContext(Dispatchers.IO) {
+        try {
+            val directory = File(context.filesDir, ICON_DIR).apply {
+                if (!exists()) mkdirs()
+            }
+
+            val fileName = "icon_${UUID.randomUUID()}.webp"
+            val destFile = File(directory, fileName)
+
+            val bitmap = decodeBitmap(uri) ?: return@withContext Result.failure(
+                Exception("Failed to decode bitmap")
+            )
+
+            val scaledBitmap = scaleBitmapIfNeeded(bitmap)
+
+            saveBitmapToFile(scaledBitmap, destFile)
+
+            if (scaledBitmap != bitmap) {
+                bitmap.recycle()
+            }
+            scaledBitmap.recycle()
+
+            Result.success(destFile.absolutePath)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    private fun decodeBitmap(uri: Uri): Bitmap? {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            val source = ImageDecoder.createSource(context.contentResolver, uri)
+            ImageDecoder.decodeBitmap(source) { decoder, _, _ ->
+                decoder.allocator = ImageDecoder.ALLOCATOR_SOFTWARE
+                decoder.isMutableRequired = true
+            }
+        } else {
+            context.contentResolver.openInputStream(uri)?.use {
+                BitmapFactory.decodeStream(it)
+            }
+        }
+    }
+
+    private fun scaleBitmapIfNeeded(bitmap: Bitmap): Bitmap {
+        if (bitmap.width <= TARGET_SIZE_PX && bitmap.height <= TARGET_SIZE_PX) {
+            return bitmap
         }
 
-        /**
-         * Processes a selected image: decodes, resizes to fit [TARGET_SIZE_PX],
-         * and saves it as a WebP file. Returns the absolute path.
-         */
-        suspend fun saveImageFromUri(uri: Uri): Result<String> =
-            withContext(Dispatchers.IO) {
-                try {
-                    val directory = File(context.filesDir, ICON_DIR)
-                    if (!directory.exists()) directory.mkdirs()
+        val aspectRatio = bitmap.width.toFloat() / bitmap.height.toFloat()
+        val width: Int
+        val height: Int
 
-                    val fileName = "icon_${UUID.randomUUID()}.webp"
-                    val destFile = File(directory, fileName)
+        if (aspectRatio > 1) {
+            width = TARGET_SIZE_PX
+            height = (TARGET_SIZE_PX / aspectRatio).toInt()
+        } else {
+            width = (TARGET_SIZE_PX * aspectRatio).toInt()
+            height = TARGET_SIZE_PX
+        }
 
-                    val bitmap =
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                            val source = ImageDecoder.createSource(context.contentResolver, uri)
-                            ImageDecoder.decodeBitmap(source) { decoder, _, _ ->
-                                decoder.allocator = ImageDecoder.ALLOCATOR_SOFTWARE
-                                decoder.isMutableRequired = true
-                            }
-                        } else {
-                            context.contentResolver.openInputStream(uri)?.use {
-                                BitmapFactory.decodeStream(it)
-                            }
-                        }
-
-                    if (bitmap == null) {
-                        return@withContext Result.failure(Exception("Failed to decode bitmap"))
-                    }
-
-                    val scaledBitmap =
-                        if (bitmap.width > TARGET_SIZE_PX || bitmap.height > TARGET_SIZE_PX) {
-                            val aspectRatio = bitmap.width.toFloat() / bitmap.height.toFloat()
-                            val width =
-                                if (aspectRatio > 1) TARGET_SIZE_PX else (TARGET_SIZE_PX * aspectRatio).toInt()
-                            val height =
-                                if (aspectRatio > 1) (TARGET_SIZE_PX / aspectRatio).toInt() else TARGET_SIZE_PX
-                            bitmap.scale(width, height)
-                        } else {
-                            bitmap
-                        }
-
-                    FileOutputStream(destFile).use { out ->
-                        val format =
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                                Bitmap.CompressFormat.WEBP_LOSSLESS
-                            } else {
-                                Bitmap.CompressFormat.WEBP
-                            }
-                        scaledBitmap.compress(format, 50, out)
-                    }
-
-                    if (scaledBitmap != bitmap) bitmap.recycle()
-                    scaledBitmap.recycle()
-
-                    return@withContext Result.success(destFile.absolutePath)
-                } catch (e: Exception) {
-                    return@withContext Result.failure(e)
-                }
-            }
+        return bitmap.scale(width, height)
     }
+
+    private fun saveBitmapToFile(bitmap: Bitmap, file: File) {
+        FileOutputStream(file).use { out ->
+            val format = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                Bitmap.CompressFormat.WEBP_LOSSLESS
+            } else {
+                @Suppress("DEPRECATION")
+                Bitmap.CompressFormat.WEBP
+            }
+            bitmap.compress(format, 50, out)
+        }
+    }
+
+    private companion object {
+        const val TARGET_SIZE_PX = 256
+        const val ICON_DIR = "script_icons"
+    }
+
+}

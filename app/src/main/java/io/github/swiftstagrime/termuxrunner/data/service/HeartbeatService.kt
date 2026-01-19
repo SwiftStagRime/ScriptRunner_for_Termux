@@ -35,28 +35,6 @@ import javax.inject.Inject
  */
 @AndroidEntryPoint
 class HeartbeatService : Service() {
-    companion object {
-        // Intent actions
-        const val ACTION_START = "ACTION_START_MONITORING"
-        const val ACTION_STOP =
-            "ACTION_STOP_MONITORING" // Stops specific script if ID provided, or all
-        const val ACTION_STOP_ALL = "ACTION_STOP_ALL_MONITORING" // Explicit stop all
-        const val ACTION_HEARTBEAT = "io.github.swiftstagrime.HEARTBEAT"
-        const val ACTION_SCRIPT_FINISHED = "io.github.swiftstagrime.SCRIPT_FINISHED"
-
-        // Intent extras
-        const val EXTRA_SCRIPT_ID = "EXTRA_SCRIPT_ID" // Used in broadcasts and start commands
-        const val EXTRA_SCRIPT_NAME = "EXTRA_SCRIPT_NAME"
-        const val EXTRA_TIMEOUT_MS = "EXTRA_TIMEOUT_MS"
-        const val EXTRA_EXIT_CODE = "exit_code" // From Bash wrapper
-
-        // Service constants
-        private const val NOTIFICATION_ID = 999
-        private const val CHANNEL_ID = "termux_monitor_channel"
-        private const val DEFAULT_TIMEOUT_MS = 30_000L
-        private const val CHECK_INTERVAL_MS = 10_000L
-        private const val WAKELOCK_TAG = "TermuxRunner:HeartbeatWakeLock"
-    }
 
     @Inject
     lateinit var scriptRepository: ScriptRepository
@@ -66,50 +44,31 @@ class HeartbeatService : Service() {
 
     private val serviceScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
     private var wakeLock: PowerManager.WakeLock? = null
-
-    // --- Monitoring State ---
-    // Key: Script ID, Value: State Object
-    private val monitoredScripts = mutableMapOf<Int, ScriptMonitorState>()
     private var isServiceRunning = false
-
-    data class ScriptMonitorState(
-        val id: Int,
-        val name: String,
-        val timeoutLimit: Long,
-        var lastHeartbeatTime: Long = System.currentTimeMillis(),
-        var serviceStartTime: Long = System.currentTimeMillis(),
-        var restartCount: Int = 0,
-        var status: UiText = UiText.StringResource(R.string.notif_status_watching),
-    )
+    private val monitoredScripts = mutableMapOf<Int, ScriptMonitorState>()
 
     /**
      * Listens for heartbeat signals and finish signals.
      * Expects 'script_id' extra in the broadcast to identify the script.
      */
-    private val heartbeatReceiver =
-        object : BroadcastReceiver() {
-            override fun onReceive(
-                context: Context?,
-                intent: Intent?,
-            ) {
-                val scriptId = intent?.getIntExtra("script_id", -1) ?: return
+    private val heartbeatReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            val scriptId = intent?.getIntExtra("script_id", -1) ?: return
 
-                when (intent.action) {
-                    ACTION_HEARTBEAT -> {
-                        val state = monitoredScripts[scriptId] ?: return
-                        state.lastHeartbeatTime = System.currentTimeMillis()
-                        state.status = UiText.StringResource(R.string.notif_status_active)
-                    }
+            when (intent.action) {
+                ACTION_HEARTBEAT -> {
+                    val state = monitoredScripts[scriptId] ?: return
+                    state.lastHeartbeatTime = System.currentTimeMillis()
+                    state.status = UiText.StringResource(R.string.notif_status_active)
+                }
 
-                    ACTION_SCRIPT_FINISHED -> {
-                        val exitCode = intent.getIntExtra(EXTRA_EXIT_CODE, 0)
-                        handleScriptFinished(scriptId, exitCode)
-                    }
+                ACTION_SCRIPT_FINISHED -> {
+                    val exitCode = intent.getIntExtra(EXTRA_EXIT_CODE, 0)
+                    handleScriptFinished(scriptId, exitCode)
                 }
             }
         }
-
-    override fun onBind(intent: Intent?): IBinder? = null
+    }
 
     /**
      * Initializes the service, creates notification channel, registers receiver, and acquires a wakelock.
@@ -117,11 +76,10 @@ class HeartbeatService : Service() {
     override fun onCreate() {
         super.onCreate()
         createNotificationChannel()
-        val filter =
-            IntentFilter().apply {
-                addAction(ACTION_HEARTBEAT)
-                addAction(ACTION_SCRIPT_FINISHED)
-            }
+        val filter = IntentFilter().apply {
+            addAction(ACTION_HEARTBEAT)
+            addAction(ACTION_SCRIPT_FINISHED)
+        }
         ContextCompat.registerReceiver(
             this,
             heartbeatReceiver,
@@ -137,11 +95,7 @@ class HeartbeatService : Service() {
     /**
      * Handles service start commands.
      */
-    override fun onStartCommand(
-        intent: Intent?,
-        flags: Int,
-        startId: Int,
-    ): Int {
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         if (intent == null) {
             // Service restarted by system. If we have no data, stop.
             if (monitoredScripts.isEmpty()) stopSelf()
@@ -155,12 +109,11 @@ class HeartbeatService : Service() {
                 val timeout = intent.getLongExtra(EXTRA_TIMEOUT_MS, DEFAULT_TIMEOUT_MS)
 
                 if (id != -1) {
-                    val newState =
-                        ScriptMonitorState(
-                            id = id,
-                            name = name,
-                            timeoutLimit = timeout,
-                        )
+                    val newState = ScriptMonitorState(
+                        id = id,
+                        name = name,
+                        timeoutLimit = timeout,
+                    )
                     monitoredScripts[id] = newState
                     startServiceLoopIfNeeded()
                     updateNotification()
@@ -183,6 +136,19 @@ class HeartbeatService : Service() {
             ACTION_STOP_ALL -> stopAll()
         }
         return START_STICKY
+    }
+
+    override fun onBind(intent: Intent?): IBinder? = null
+
+    override fun onDestroy() {
+        super.onDestroy()
+        isServiceRunning = false
+        if (wakeLock?.isHeld == true) wakeLock?.release()
+        serviceScope.cancel()
+        try {
+            unregisterReceiver(heartbeatReceiver)
+        } catch (_: Exception) {
+        }
     }
 
     /**
@@ -240,18 +206,14 @@ class HeartbeatService : Service() {
         updateNotification()
     }
 
-    private fun handleScriptFinished(
-        scriptId: Int,
-        exitCode: Int,
-    ) {
+    private fun handleScriptFinished(scriptId: Int, exitCode: Int) {
         val state = monitoredScripts.remove(scriptId) ?: return
 
-        val finalMsg =
-            if (exitCode == 0) {
-                UiText.StringResource(R.string.notif_finished_success)
-            } else {
-                UiText.StringResource(R.string.notif_finished_error, exitCode)
-            }
+        val finalMsg = if (exitCode == 0) {
+            UiText.StringResource(R.string.notif_finished_success)
+        } else {
+            UiText.StringResource(R.string.notif_finished_error, exitCode)
+        }
 
         showFinalNotification(state.name, finalMsg)
 
@@ -265,17 +227,6 @@ class HeartbeatService : Service() {
         if (wakeLock?.isHeld == true) wakeLock?.release()
         stopForeground(STOP_FOREGROUND_REMOVE)
         stopSelf()
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        isServiceRunning = false
-        if (wakeLock?.isHeld == true) wakeLock?.release()
-        serviceScope.cancel()
-        try {
-            unregisterReceiver(heartbeatReceiver)
-        } catch (_: Exception) {
-        }
     }
 
     /**
@@ -298,28 +249,22 @@ class HeartbeatService : Service() {
         val uptimeMins = (System.currentTimeMillis() - state.serviceStartTime) / 60_000
         val secondsSincePulse = (System.currentTimeMillis() - state.lastHeartbeatTime) / 1000
 
-        val restartText =
-            if (state.restartCount > 0) {
-                UiText.StringResource(R.string.notif_restart_count, state.restartCount).asString(this)
-            } else {
-                ""
-            }
+        val restartText = if (state.restartCount > 0) {
+            UiText.StringResource(R.string.notif_restart_count, state.restartCount).asString(this)
+        } else {
+            ""
+        }
 
-        val contentText =
-            UiText
-                .StringResource(
-                    R.string.notif_details_format,
-                    state.status.asString(this),
-                    restartText,
-                    uptimeMins,
-                    secondsSincePulse,
-                ).asString(this)
+        val contentText = UiText.StringResource(
+            R.string.notif_details_format,
+            state.status.asString(this),
+            restartText,
+            uptimeMins,
+            secondsSincePulse,
+        ).asString(this)
 
         buildAndNotify(
-            title =
-                UiText
-                    .StringResource(R.string.notif_monitoring_title, state.name)
-                    .asString(this),
+            title = UiText.StringResource(R.string.notif_monitoring_title, state.name).asString(this),
             text = contentText,
         )
     }
@@ -334,48 +279,40 @@ class HeartbeatService : Service() {
         )
     }
 
-    private fun buildAndNotify(
-        title: String,
-        text: String,
-    ) {
-        val contentIntent =
-            PendingIntent.getActivity(
-                this,
-                0,
-                Intent(this, MainActivity::class.java),
-                PendingIntent.FLAG_IMMUTABLE,
-            )
+    private fun buildAndNotify(title: String, text: String) {
+        val contentIntent = PendingIntent.getActivity(
+            this,
+            0,
+            Intent(this, MainActivity::class.java),
+            PendingIntent.FLAG_IMMUTABLE,
+        )
 
         // "Stop All" action
-        val stopIntent =
-            Intent(this, HeartbeatService::class.java).apply {
-                action = ACTION_STOP_ALL
-            }
-        val stopPendingIntent =
-            PendingIntent.getService(
-                this,
-                2,
-                stopIntent,
-                PendingIntent.FLAG_IMMUTABLE,
-            )
+        val stopIntent = Intent(this, HeartbeatService::class.java).apply {
+            action = ACTION_STOP_ALL
+        }
+        val stopPendingIntent = PendingIntent.getService(
+            this,
+            2,
+            stopIntent,
+            PendingIntent.FLAG_IMMUTABLE,
+        )
 
-        val notification =
-            NotificationCompat
-                .Builder(this, CHANNEL_ID)
-                .setContentTitle(title)
-                .setContentText(text)
-                .setSmallIcon(R.drawable.ic_launcher_foreground)
-                .setOngoing(true)
-                .setOnlyAlertOnce(true)
-                .setContentIntent(contentIntent)
-                .addAction(
-                    android.R.drawable.ic_menu_close_clear_cancel,
-                    UiText.StringResource(R.string.notif_stop_all).asString(this),
-                    stopPendingIntent,
-                ).setStyle(NotificationCompat.BigTextStyle().bigText(text))
-                .setPriority(NotificationCompat.PRIORITY_LOW)
-                .setForegroundServiceBehavior(NotificationCompat.FOREGROUND_SERVICE_IMMEDIATE)
-                .build()
+        val notification = NotificationCompat.Builder(this, CHANNEL_ID)
+            .setContentTitle(title)
+            .setContentText(text)
+            .setSmallIcon(R.drawable.ic_launcher_foreground)
+            .setOngoing(true)
+            .setOnlyAlertOnce(true)
+            .setContentIntent(contentIntent)
+            .addAction(
+                android.R.drawable.ic_menu_close_clear_cancel,
+                UiText.StringResource(R.string.notif_stop_all).asString(this),
+                stopPendingIntent,
+            ).setStyle(NotificationCompat.BigTextStyle().bigText(text))
+            .setPriority(NotificationCompat.PRIORITY_LOW)
+            .setForegroundServiceBehavior(NotificationCompat.FOREGROUND_SERVICE_IMMEDIATE)
+            .build()
 
         startForeground(NOTIFICATION_ID, notification)
     }
@@ -383,22 +320,17 @@ class HeartbeatService : Service() {
     /**
      * Shows a non-ongoing notification when the script finishes.
      */
-    private fun showFinalNotification(
-        name: String,
-        text: UiText,
-    ) {
+    private fun showFinalNotification(name: String, text: UiText) {
         // We use a unique ID based on name hash to prevent overwriting if multiple finish at once
         val notifId = name.hashCode()
 
-        val notification =
-            NotificationCompat
-                .Builder(this, CHANNEL_ID)
-                .setContentTitle(name)
-                .setContentText(text.asString(this))
-                .setSmallIcon(R.drawable.ic_launcher_foreground)
-                .setOngoing(false)
-                .setAutoCancel(true)
-                .build()
+        val notification = NotificationCompat.Builder(this, CHANNEL_ID)
+            .setContentTitle(name)
+            .setContentText(text.asString(this))
+            .setSmallIcon(R.drawable.ic_launcher_foreground)
+            .setOngoing(false)
+            .setAutoCancel(true)
+            .build()
 
         val manager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
         manager.notify(notifId, notification)
@@ -409,19 +341,48 @@ class HeartbeatService : Service() {
      */
     private fun createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel =
-                NotificationChannel(
-                    CHANNEL_ID,
-                    UiText.StringResource(R.string.channel_monitor_name).asString(this),
-                    NotificationManager.IMPORTANCE_LOW,
-                ).apply {
-                    description =
-                        UiText
-                            .StringResource(R.string.channel_monitor_desc)
-                            .asString(this@HeartbeatService)
-                }
+            val channel = NotificationChannel(
+                CHANNEL_ID,
+                UiText.StringResource(R.string.channel_monitor_name).asString(this),
+                NotificationManager.IMPORTANCE_LOW,
+            ).apply {
+                description = UiText.StringResource(R.string.channel_monitor_desc)
+                    .asString(this@HeartbeatService)
+            }
             val manager = getSystemService(NotificationManager::class.java)
             manager.createNotificationChannel(channel)
         }
+    }
+
+    data class ScriptMonitorState(
+        val id: Int,
+        val name: String,
+        val timeoutLimit: Long,
+        var lastHeartbeatTime: Long = System.currentTimeMillis(),
+        var serviceStartTime: Long = System.currentTimeMillis(),
+        var restartCount: Int = 0,
+        var status: UiText = UiText.StringResource(R.string.notif_status_watching),
+    )
+
+    companion object {
+        // Intent actions
+        const val ACTION_START = "ACTION_START_MONITORING"
+        const val ACTION_STOP = "ACTION_STOP_MONITORING" // Stops specific script if ID provided, or all
+        const val ACTION_STOP_ALL = "ACTION_STOP_ALL_MONITORING" // Explicit stop all
+        const val ACTION_HEARTBEAT = "io.github.swiftstagrime.HEARTBEAT"
+        const val ACTION_SCRIPT_FINISHED = "io.github.swiftstagrime.SCRIPT_FINISHED"
+
+        // Intent extras
+        const val EXTRA_SCRIPT_ID = "EXTRA_SCRIPT_ID" // Used in broadcasts and start commands
+        const val EXTRA_SCRIPT_NAME = "EXTRA_SCRIPT_NAME"
+        const val EXTRA_TIMEOUT_MS = "EXTRA_TIMEOUT_MS"
+        const val EXTRA_EXIT_CODE = "exit_code" // From Bash wrapper
+
+        // Service constants
+        private const val NOTIFICATION_ID = 999
+        private const val CHANNEL_ID = "termux_monitor_channel"
+        private const val DEFAULT_TIMEOUT_MS = 30_000L
+        private const val CHECK_INTERVAL_MS = 10_000L
+        private const val WAKELOCK_TAG = "TermuxRunner:HeartbeatWakeLock"
     }
 }

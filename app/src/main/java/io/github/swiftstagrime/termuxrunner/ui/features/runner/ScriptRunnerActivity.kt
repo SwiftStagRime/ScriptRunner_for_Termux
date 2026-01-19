@@ -19,6 +19,7 @@ import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class ScriptRunnerActivity : ComponentActivity() {
+
     private val viewModel: ScriptRunnerViewModel by viewModels()
 
     private val requestPermissionLauncher =
@@ -28,12 +29,11 @@ class ScriptRunnerActivity : ComponentActivity() {
             if (isGranted) {
                 viewModel.onPermissionGranted()
             } else {
-                Toast
-                    .makeText(
-                        this,
-                        getString(R.string.script_runner_permission_denied),
-                        Toast.LENGTH_SHORT,
-                    ).show()
+                Toast.makeText(
+                    this,
+                    getString(R.string.script_runner_permission_denied),
+                    Toast.LENGTH_SHORT,
+                ).show()
                 viewModel.dismissPrompt()
             }
         }
@@ -63,6 +63,7 @@ class ScriptRunnerActivity : ComponentActivity() {
                 }
             }
         }
+
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.events.collect { handleEvent(it) }
@@ -76,7 +77,6 @@ class ScriptRunnerActivity : ComponentActivity() {
             is ScriptRunnerEvent.RequestPermission -> {
                 requestPermissionLauncher.launch("com.termux.permission.RUN_COMMAND")
             }
-
             is ScriptRunnerEvent.ShowError -> {
                 Toast.makeText(this, event.message, Toast.LENGTH_LONG).show()
             }

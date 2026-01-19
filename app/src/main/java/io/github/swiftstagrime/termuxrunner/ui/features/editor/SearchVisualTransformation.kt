@@ -17,7 +17,7 @@ class SearchVisualTransformation(
         val builder = AnnotatedString.Builder(text)
 
         for ((index, range) in matches.withIndex()) {
-            if (range.last < text.length) {
+            if (range.first >= 0 && range.last < text.length) {
                 val color = if (index == activeMatchIndex) activeColor else passiveColor
                 builder.addStyle(
                     style = SpanStyle(background = color),

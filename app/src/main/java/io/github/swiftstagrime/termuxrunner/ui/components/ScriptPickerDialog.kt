@@ -1,5 +1,6 @@
 package io.github.swiftstagrime.termuxrunner.ui.components
 
+import android.content.res.Configuration
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -50,11 +51,15 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import io.github.swiftstagrime.termuxrunner.R
 import io.github.swiftstagrime.termuxrunner.domain.model.Category
 import io.github.swiftstagrime.termuxrunner.domain.model.Script
+import io.github.swiftstagrime.termuxrunner.ui.preview.sampleCategories
+import io.github.swiftstagrime.termuxrunner.ui.preview.sampleScripts
+import io.github.swiftstagrime.termuxrunner.ui.theme.ScriptRunnerForTermuxTheme
 
 @Composable
 fun ScriptPickerDialog(
@@ -252,5 +257,65 @@ private fun ScriptPickerItem(
                 modifier = Modifier.size(24.dp),
             )
         }
+    }
+}
+
+@Preview(name = "Light Mode", showBackground = true)
+@Composable
+private fun PreviewScriptPickerDialogLight() {
+    ScriptRunnerForTermuxTheme {
+        Surface {
+            ScriptPickerDialog(
+                scripts = sampleScripts,
+                categories = sampleCategories,
+                onDismiss = {},
+                onScriptSelected = {}
+            )
+        }
+    }
+}
+
+@Preview(
+    name = "Night Mode",
+    showBackground = true,
+    uiMode = Configuration.UI_MODE_NIGHT_YES
+)
+@Composable
+private fun PreviewScriptPickerDialogNight() {
+    ScriptRunnerForTermuxTheme {
+        Surface {
+            ScriptPickerDialog(
+                scripts = sampleScripts,
+                categories = sampleCategories,
+                onDismiss = {},
+                onScriptSelected = {}
+            )
+        }
+    }
+}
+
+@Preview(name = "Empty State", showBackground = true)
+@Composable
+private fun PreviewScriptPickerDialogEmpty() {
+    ScriptRunnerForTermuxTheme {
+        Surface {
+            ScriptPickerDialog(
+                scripts = emptyList(),
+                categories = sampleCategories,
+                onDismiss = {},
+                onScriptSelected = {}
+            )
+        }
+    }
+}
+
+@Preview(name = "Picker Item Only", showBackground = true, widthDp = 320)
+@Composable
+private fun PreviewScriptPickerItem() {
+    ScriptRunnerForTermuxTheme {
+        ScriptPickerItem(
+            script = sampleScripts.first(),
+            onClick = {}
+        )
     }
 }

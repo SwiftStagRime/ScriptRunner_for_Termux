@@ -30,6 +30,7 @@ fun StyledTextField(
     singleLine: Boolean = true,
     isError: Boolean = false,
     readOnly: Boolean = false,
+    enabled: Boolean = true,
     supportingText: @Composable (() -> Unit)? = null,
     leadingIcon: @Composable (() -> Unit)? = null,
     trailingIcon: @Composable (() -> Unit)? = null,
@@ -92,6 +93,7 @@ fun StyledTextField(
         placeholder = placeholder,
         singleLine = singleLine,
         keyboardOptions = keyboardOptions,
+        enabled = enabled,
         visualTransformation = visualTransformation,
         shape = RoundedCornerShape(12.dp),
         colors =

@@ -1,6 +1,7 @@
 package io.github.swiftstagrime.termuxrunner.ui.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -28,9 +29,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.AndroidUiModes.UI_MODE_NIGHT_YES
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import io.github.swiftstagrime.termuxrunner.R
 import io.github.swiftstagrime.termuxrunner.domain.model.Category
+import io.github.swiftstagrime.termuxrunner.ui.preview.sampleCategories
+import io.github.swiftstagrime.termuxrunner.ui.theme.ScriptRunnerForTermuxTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -143,6 +148,36 @@ fun CategorySpinner(
                     contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding,
                 )
             }
+        }
+    }
+}
+
+@Preview(showBackground = true, name = "Uncategorized Selected")
+@Composable
+private fun PreviewCategorySpinnerUncategorized() {
+    ScriptRunnerForTermuxTheme {
+        Box(modifier = Modifier.padding(16.dp)) {
+            CategorySpinner(
+                categories = sampleCategories,
+                selectedCategoryId = null,
+                onCategorySelected = {},
+                onAddNewClick = {}
+            )
+        }
+    }
+}
+
+@Preview(showBackground = true, name = "Category Selected", uiMode = UI_MODE_NIGHT_YES)
+@Composable
+private fun PreviewCategorySpinnerSelected() {
+    ScriptRunnerForTermuxTheme {
+        Box(modifier = Modifier.padding(16.dp)) {
+            CategorySpinner(
+                categories = sampleCategories,
+                selectedCategoryId = 2,
+                onCategorySelected = {},
+                onAddNewClick = {}
+            )
         }
     }
 }

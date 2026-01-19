@@ -78,7 +78,8 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideIconRepository(imageStorageManager: ImageStorageManager): IconRepository = IconRepositoryImpl(imageStorageManager)
+    fun provideIconRepository(imageStorageManager: ImageStorageManager): IconRepository =
+        IconRepositoryImpl(imageStorageManager)
 
     @Provides
     @Singleton
@@ -105,7 +106,8 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideCategoryRepository(categoryDao: CategoryDao): CategoryRepository = CategoryRepositoryImpl(categoryDao)
+    fun provideCategoryRepository(categoryDao: CategoryDao): CategoryRepository =
+        CategoryRepositoryImpl(categoryDao)
 
     @Provides
     @Singleton

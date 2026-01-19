@@ -20,8 +20,7 @@ class Converters {
         if (data.isBlank()) return emptyMap()
         return try {
             json.decodeFromString(data)
-        } catch (e: Exception) {
-            e.printStackTrace()
+        } catch (_: Exception) {
             emptyMap()
         }
     }
@@ -33,7 +32,7 @@ class Converters {
     fun toInteractionMode(data: String): InteractionMode =
         try {
             InteractionMode.valueOf(data)
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             InteractionMode.NONE
         }
 
@@ -45,8 +44,7 @@ class Converters {
         if (data.isBlank()) return emptyList()
         return try {
             json.decodeFromString(data)
-        } catch (e: Exception) {
-            e.printStackTrace()
+        } catch (_: Exception) {
             emptyList()
         }
     }
@@ -65,8 +63,7 @@ class Converters {
         if (data.isBlank()) return emptyList()
         return try {
             json.decodeFromString(data)
-        } catch (e: Exception) {
-            e.printStackTrace()
+        } catch (_: Exception) {
             emptyList()
         }
     }

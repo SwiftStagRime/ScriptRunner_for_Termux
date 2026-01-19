@@ -1,5 +1,6 @@
 package io.github.swiftstagrime.termuxrunner.ui.features.automation.components
 
+import android.content.res.Configuration
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -46,8 +47,6 @@ import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -60,6 +59,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -69,85 +69,38 @@ import io.github.swiftstagrime.termuxrunner.domain.model.AutomationType
 import io.github.swiftstagrime.termuxrunner.domain.model.Script
 import io.github.swiftstagrime.termuxrunner.domain.util.AutomationTimeCalculator
 import io.github.swiftstagrime.termuxrunner.ui.components.DayOfWeekPicker
+import io.github.swiftstagrime.termuxrunner.ui.features.automation.AutomationConfigState
+import io.github.swiftstagrime.termuxrunner.ui.features.automation.AutomationSaveParams
+import io.github.swiftstagrime.termuxrunner.ui.preview.sampleScripts
+import io.github.swiftstagrime.termuxrunner.ui.theme.ScriptRunnerForTermuxTheme
 import java.text.SimpleDateFormat
-import java.util.Calendar
 import java.util.Date
 import java.util.Locale
+
+private const val MILLIS_IN_MINUTE = 60_000L
+private const val DEFAULT_INTERVAL_MINUTES = 60L
+private const val MAX_BATTERY_LEVEL = 100f
+private const val SLIDER_STEPS = 19
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AutomationConfigDialog(
     script: Script,
     onDismiss: () -> Unit,
-    onSave: (
-        label: String,
-        type: AutomationType,
-        timestamp: Long,
-        interval: Long,
-        days: List<Int>,
-        runIfMissed: Boolean,
-        wifi: Boolean,
-        charging: Boolean,
-        batteryThreshold: Int,
-    ) -> Unit,
+    onSave: (AutomationSaveParams) -> Unit,
 ) {
-    var label by rememberSaveable { mutableStateOf(script.name) }
-    var type by rememberSaveable { mutableStateOf(AutomationType.ONE_TIME) }
-    var runIfMissed by rememberSaveable { mutableStateOf(true) }
-
-    var selectedDate by rememberSaveable { mutableLongStateOf(System.currentTimeMillis()) }
-    var selectedHour by rememberSaveable {
-        mutableIntStateOf(Calendar.getInstance().get(Calendar.HOUR_OF_DAY))
-    }
-    var selectedMinute by rememberSaveable {
-        mutableIntStateOf(Calendar.getInstance().get(Calendar.MINUTE))
-    }
-
-    var selectedDays by rememberSaveable { mutableStateOf(emptyList<Int>()) }
-
-    var intervalValue by rememberSaveable { mutableStateOf("60") }
+    val state = rememberAutomationConfigState(script)
     var showDatePicker by rememberSaveable { mutableStateOf(false) }
     var showTimePicker by rememberSaveable { mutableStateOf(false) }
-    var requireWifi by rememberSaveable { mutableStateOf(false) }
-    var requireCharging by rememberSaveable { mutableStateOf(false) }
-    var batteryThreshold by rememberSaveable { mutableIntStateOf(0) }
-
-    val upcomingRuns =
-        remember(
-            type,
-            selectedDate,
-            selectedHour,
-            selectedMinute,
-            intervalValue,
-            selectedDays,
-        ) {
-            val temp =
-                AutomationEntity(
-                    scriptId = script.id,
-                    label = "",
-                    type = type,
-                    scheduledTimestamp = selectedDate,
-                    intervalMillis = (intervalValue.toLongOrNull() ?: 60) * 60_000L,
-                    daysOfWeek = selectedDays,
-                )
-            AutomationTimeCalculator.getNextRuns(temp, 3)
-        }
 
     Dialog(onDismissRequest = onDismiss) {
         Card(
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 16.dp)
-                    .imePadding(),
+            modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp).imePadding(),
             shape = RoundedCornerShape(28.dp),
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
         ) {
             Column(
-                modifier =
-                    Modifier
-                        .padding(24.dp)
-                        .verticalScroll(rememberScrollState()),
+                modifier = Modifier.padding(24.dp).verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(24.dp),
             ) {
                 Text(
@@ -157,282 +110,303 @@ fun AutomationConfigDialog(
                     color = MaterialTheme.colorScheme.primary,
                 )
 
-                ConfigSection(title = stringResource(R.string.automation_section_general)) {
-                    TextField(
-                        value = label,
-                        onValueChange = { label = it },
-                        label = { Text(stringResource(R.string.automation_label_hint)) },
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(12.dp),
-                        colors =
-                            TextFieldDefaults.colors(
-                                focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
-                                unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
-                                focusedIndicatorColor = Color.Transparent,
-                                unfocusedIndicatorColor = Color.Transparent,
-                            ),
-                    )
+                GeneralSection(state)
+                FrequencySection(state)
+                ScheduleSection(state, onShowDate = { showDatePicker = true }, onShowTime = { showTimePicker = true })
+                ConditionsSection(state)
+
+                if (state.type != AutomationType.ONE_TIME) {
+                    UpcomingRunsSection(script, state)
                 }
 
-                ConfigSection(title = stringResource(R.string.automation_section_frequency)) {
-                    SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
-                        AutomationType.entries.forEachIndexed { index, automationType ->
-                            SegmentedButton(
-                                selected = type == automationType,
-                                onClick = { type = automationType },
-                                shape =
-                                    SegmentedButtonDefaults.itemShape(
-                                        index,
-                                        AutomationType.entries.size,
-                                    ),
-                            ) {
-                                Text(
-                                    text =
-                                        when (automationType) {
-                                            AutomationType.ONE_TIME -> stringResource(R.string.automation_type_one_time)
-                                            AutomationType.PERIODIC -> stringResource(R.string.automation_type_periodic)
-                                            AutomationType.WEEKLY -> stringResource(R.string.automation_type_weekly)
-                                        },
-                                    style = MaterialTheme.typography.labelSmall,
-                                )
-                            }
-                        }
+                DialogActionButtons(
+                    onDismiss = onDismiss,
+                    onConfirm = {
+                        onSave(state.toSaveParams(script.id))
                     }
-                }
-
-                ConfigSection(title = stringResource(R.string.automation_section_schedule)) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp),
-                    ) {
-                        if (type == AutomationType.ONE_TIME) {
-                            DateTimeButton(
-                                icon = Icons.Default.CalendarToday,
-                                text =
-                                    SimpleDateFormat("MMM dd", Locale.getDefault()).format(
-                                        Date(
-                                            selectedDate,
-                                        ),
-                                    ),
-                                modifier = Modifier.weight(1f),
-                                onClick = { showDatePicker = true },
-                            )
-                        }
-
-                        DateTimeButton(
-                            icon = Icons.Default.AccessTime,
-                            text =
-                                String.format(
-                                    Locale.getDefault(),
-                                    "%02d:%02d",
-                                    selectedHour,
-                                    selectedMinute,
-                                ),
-                            modifier = Modifier.weight(1f),
-                            onClick = { showTimePicker = true },
-                        )
-                    }
-
-                    if (type == AutomationType.PERIODIC) {
-                        TextField(
-                            value = intervalValue,
-                            onValueChange = { if (it.all { c -> c.isDigit() }) intervalValue = it },
-                            label = { Text(stringResource(R.string.automation_interval_hint)) },
-                            modifier = Modifier.fillMaxWidth(),
-                            leadingIcon = {
-                                Icon(
-                                    Icons.Default.Timer,
-                                    null,
-                                    modifier = Modifier.size(20.dp),
-                                )
-                            },
-                            shape = RoundedCornerShape(12.dp),
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                            colors =
-                                TextFieldDefaults.colors(
-                                    focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
-                                    unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
-                                    focusedIndicatorColor = Color.Transparent,
-                                    unfocusedIndicatorColor = Color.Transparent,
-                                ),
-                        )
-                    }
-
-                    if (type == AutomationType.WEEKLY) {
-                        DayOfWeekPicker(
-                            selectedDays = selectedDays,
-                            onToggleDay = { day ->
-                                selectedDays =
-                                    if (selectedDays.contains(day)) {
-                                        selectedDays - day
-                                    } else {
-                                        selectedDays + day
-                                    }
-                            },
-                        )
-                    }
-                }
-
-                ConfigSection(title = stringResource(R.string.automation_section_conditions)) {
-                    Column(
-                        modifier =
-                            Modifier
-                                .clip(RoundedCornerShape(16.dp))
-                                .background(MaterialTheme.colorScheme.surfaceContainerLowest),
-                    ) {
-                        AutomationOptionTile(
-                            title = stringResource(R.string.automation_run_if_missed),
-                            checked = runIfMissed,
-                            onCheckedChange = { runIfMissed = it },
-                        )
-                        HorizontalDivider(
-                            modifier = Modifier.padding(horizontal = 16.dp),
-                            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f),
-                        )
-                        AutomationOptionTile(
-                            title = stringResource(R.string.automation_condition_wifi),
-                            checked = requireWifi,
-                            onCheckedChange = { requireWifi = it },
-                        )
-                        HorizontalDivider(
-                            modifier = Modifier.padding(horizontal = 16.dp),
-                            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f),
-                        )
-                        AutomationOptionTile(
-                            title = stringResource(R.string.automation_condition_charging),
-                            checked = requireCharging,
-                            onCheckedChange = { requireCharging = it },
-                        )
-
-                        Column(modifier = Modifier.padding(16.dp)) {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Text(
-                                    text = stringResource(R.string.label_battery_threshold),
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    modifier = Modifier.weight(1f),
-                                )
-                                Text(
-                                    text = "$batteryThreshold%",
-                                    style = MaterialTheme.typography.labelLarge,
-                                    color = MaterialTheme.colorScheme.primary,
-                                    fontWeight = FontWeight.Bold,
-                                )
-                            }
-                            Slider(
-                                value = batteryThreshold.toFloat(),
-                                onValueChange = { batteryThreshold = it.toInt() },
-                                valueRange = 0f..100f,
-                                steps = 19,
-                            )
-                        }
-                    }
-                }
-
-                if (type != AutomationType.ONE_TIME) {
-                    ConfigSection(title = stringResource(R.string.automation_section_upcoming)) {
-                        Surface(
-                            color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.1f),
-                            shape = RoundedCornerShape(12.dp),
-                            border =
-                                BorderStroke(
-                                    1.dp,
-                                    MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
-                                ),
-                        ) {
-                            Column(
-                                modifier =
-                                    Modifier
-                                        .padding(12.dp)
-                                        .fillMaxWidth(),
-                            ) {
-                                upcomingRuns.forEach { time ->
-                                    Row(
-                                        modifier = Modifier.padding(vertical = 4.dp),
-                                        verticalAlignment = Alignment.CenterVertically,
-                                    ) {
-                                        Icon(
-                                            Icons.Default.Schedule,
-                                            null,
-                                            modifier = Modifier.size(14.dp),
-                                            tint = MaterialTheme.colorScheme.primary,
-                                        )
-                                        Spacer(modifier = Modifier.width(8.dp))
-                                        Text(
-                                            text =
-                                                SimpleDateFormat(
-                                                    "MMM dd, HH:mm",
-                                                    Locale.getDefault(),
-                                                ).format(Date(time)),
-                                            style = MaterialTheme.typography.labelMedium,
-                                        )
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-                    TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) }
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Button(
-                        shape = RoundedCornerShape(12.dp),
-                        onClick = {
-                            val calendar =
-                                Calendar.getInstance().apply {
-                                    timeInMillis = selectedDate
-                                    set(Calendar.HOUR_OF_DAY, selectedHour)
-                                    set(Calendar.MINUTE, selectedMinute)
-                                    set(Calendar.SECOND, 0)
-                                }
-                            onSave(
-                                label.ifBlank { script.name },
-                                type,
-                                calendar.timeInMillis,
-                                (intervalValue.toLongOrNull() ?: 60L) * 60_000L,
-                                selectedDays,
-                                runIfMissed,
-                                requireWifi,
-                                requireCharging,
-                                batteryThreshold,
-                            )
-                        },
-                    ) {
-                        Text(stringResource(R.string.automation_save_button))
-                    }
-                }
+                )
             }
         }
     }
 
     if (showDatePicker) {
-        val datePickerState = rememberDatePickerState(initialSelectedDateMillis = selectedDate)
-        DatePickerDialog(
-            onDismissRequest = { showDatePicker = false },
-            confirmButton = {
-                TextButton(onClick = {
-                    datePickerState.selectedDateMillis?.let { selectedDate = it }
-                    showDatePicker = false
-                }) { Text(stringResource(R.string.ok)) }
-            },
-        ) { DatePicker(state = datePickerState) }
+        AutomationDatePicker(state) { showDatePicker = false }
     }
 
     if (showTimePicker) {
-        val timePickerState =
-            rememberTimePickerState(initialHour = selectedHour, initialMinute = selectedMinute)
-        AlertDialog(
-            onDismissRequest = { showTimePicker = false },
-            confirmButton = {
-                TextButton(onClick = {
-                    selectedHour = timePickerState.hour
-                    selectedMinute = timePickerState.minute
-                    showTimePicker = false
-                }) { Text(stringResource(R.string.ok)) }
-            },
-            text = { TimePicker(state = timePickerState) },
+        AutomationTimePicker(state) { showTimePicker = false }
+    }
+}
+
+@Composable
+private fun GeneralSection(state: AutomationConfigState) {
+    ConfigSection(title = stringResource(R.string.automation_section_general)) {
+        TextField(
+            value = state.label,
+            onValueChange = { state.label = it },
+            label = { Text(stringResource(R.string.automation_label_hint)) },
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(12.dp),
+            colors = transparentTextFieldColors(),
         )
     }
+}
+
+@Composable
+private fun FrequencySection(state: AutomationConfigState) {
+    ConfigSection(title = stringResource(R.string.automation_section_frequency)) {
+        SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
+            AutomationType.entries.forEachIndexed { index, automationType ->
+                SegmentedButton(
+                    selected = state.type == automationType,
+                    onClick = { state.type = automationType },
+                    shape = SegmentedButtonDefaults.itemShape(index, AutomationType.entries.size),
+                ) {
+                    Text(
+                        text = getAutomationTypeLabel(automationType),
+                        style = MaterialTheme.typography.labelSmall,
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ScheduleSection(
+    state: AutomationConfigState,
+    onShowDate: () -> Unit,
+    onShowTime: () -> Unit
+) {
+    ConfigSection(title = stringResource(R.string.automation_section_schedule)) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            if (state.type == AutomationType.ONE_TIME) {
+                DateTimeButton(
+                    icon = Icons.Default.CalendarToday,
+                    text = SimpleDateFormat("MMM dd", Locale.getDefault()).format(Date(state.selectedDate)),
+                    modifier = Modifier.weight(1f),
+                    onClick = onShowDate,
+                )
+            }
+            DateTimeButton(
+                icon = Icons.Default.AccessTime,
+                text = String.format(Locale.getDefault(), "%02d:%02d", state.selectedHour, state.selectedMinute),
+                modifier = Modifier.weight(1f),
+                onClick = onShowTime,
+            )
+        }
+
+        if (state.type == AutomationType.PERIODIC) {
+            TextField(
+                value = state.intervalValue,
+                onValueChange = { if (it.all { c -> c.isDigit() }) state.intervalValue = it },
+                label = { Text(stringResource(R.string.automation_interval_hint)) },
+                modifier = Modifier.fillMaxWidth(),
+                leadingIcon = { Icon(Icons.Default.Timer, null, modifier = Modifier.size(20.dp)) },
+                shape = RoundedCornerShape(12.dp),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                colors = transparentTextFieldColors(),
+            )
+        }
+
+        if (state.type == AutomationType.WEEKLY) {
+            DayOfWeekPicker(
+                selectedDays = state.selectedDays,
+                onToggleDay = { day ->
+                    state.selectedDays = if (state.selectedDays.contains(day)) {
+                        state.selectedDays - day
+                    } else {
+                        state.selectedDays + day
+                    }
+                },
+            )
+        }
+    }
+}
+
+@Composable
+private fun ConditionsSection(state: AutomationConfigState) {
+    ConfigSection(title = stringResource(R.string.automation_section_conditions)) {
+        Column(
+            modifier = Modifier.clip(RoundedCornerShape(16.dp))
+                .background(MaterialTheme.colorScheme.surfaceContainerLowest),
+        ) {
+            AutomationOptionTile(
+                title = stringResource(R.string.automation_run_if_missed),
+                checked = state.runIfMissed,
+                onCheckedChange = { state.runIfMissed = it },
+            )
+            HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), color = dividerColor())
+            AutomationOptionTile(
+                title = stringResource(R.string.automation_condition_wifi),
+                checked = state.requireWifi,
+                onCheckedChange = { state.requireWifi = it },
+            )
+            HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), color = dividerColor())
+            AutomationOptionTile(
+                title = stringResource(R.string.automation_condition_charging),
+                checked = state.requireCharging,
+                onCheckedChange = { state.requireCharging = it },
+            )
+
+            BatteryThresholdSlider(state)
+        }
+    }
+}
+
+@Composable
+private fun UpcomingRunsSection(script: Script, state: AutomationConfigState) {
+    val upcomingRuns = remember(state.type, state.selectedDate, state.selectedHour, state.selectedMinute, state.intervalValue, state.selectedDays) {
+        val temp = AutomationEntity(
+            scriptId = script.id,
+            label = "",
+            type = state.type,
+            scheduledTimestamp = state.selectedDate,
+            intervalMillis = (state.intervalValue.toLongOrNull() ?: DEFAULT_INTERVAL_MINUTES) * MILLIS_IN_MINUTE,
+            daysOfWeek = state.selectedDays,
+        )
+        AutomationTimeCalculator.getNextRuns(temp, 3)
+    }
+
+    ConfigSection(title = stringResource(R.string.automation_section_upcoming)) {
+        Surface(
+            color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.1f),
+            shape = RoundedCornerShape(12.dp),
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)),
+        ) {
+            Column(modifier = Modifier.padding(12.dp).fillMaxWidth()) {
+                upcomingRuns.forEach { time ->
+                    UpcomingRunRow(time)
+                }
+            }
+        }
+    }
+}
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun AutomationDatePicker(
+    state: AutomationConfigState,
+    onDismiss: () -> Unit
+) {
+    val datePickerState = rememberDatePickerState(initialSelectedDateMillis = state.selectedDate)
+    DatePickerDialog(
+        onDismissRequest = onDismiss,
+        confirmButton = {
+            TextButton(onClick = {
+                datePickerState.selectedDateMillis?.let { state.selectedDate = it }
+                onDismiss()
+            }) { Text(stringResource(R.string.ok)) }
+        },
+    ) {
+        DatePicker(state = datePickerState)
+    }
+}
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun AutomationTimePicker(
+    state: AutomationConfigState,
+    onDismiss: () -> Unit
+) {
+    val timePickerState = rememberTimePickerState(
+        initialHour = state.selectedHour,
+        initialMinute = state.selectedMinute
+    )
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        confirmButton = {
+            TextButton(onClick = {
+                state.selectedHour = timePickerState.hour
+                state.selectedMinute = timePickerState.minute
+                onDismiss()
+            }) { Text(stringResource(R.string.ok)) }
+        },
+        text = { TimePicker(state = timePickerState) },
+    )
+}
+@Composable
+private fun UpcomingRunRow(time: Long) {
+    Row(
+        modifier = Modifier.padding(vertical = 4.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Icon(
+            Icons.Default.Schedule,
+            null,
+            modifier = Modifier.size(14.dp),
+            tint = MaterialTheme.colorScheme.primary,
+        )
+        Spacer(modifier = Modifier.width(8.dp))
+        Text(
+            text = SimpleDateFormat("MMM dd, HH:mm", Locale.getDefault()).format(Date(time)),
+            style = MaterialTheme.typography.labelMedium,
+        )
+    }
+}
+@Composable
+private fun BatteryThresholdSlider(state: AutomationConfigState) {
+    Column(modifier = Modifier.padding(16.dp)) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                text = stringResource(R.string.label_battery_threshold),
+                style = MaterialTheme.typography.bodyLarge,
+                modifier = Modifier.weight(1f),
+            )
+            Text(
+                text = "${state.batteryThreshold}%",
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.primary,
+                fontWeight = FontWeight.Bold,
+            )
+        }
+        Slider(
+            value = state.batteryThreshold.toFloat(),
+            onValueChange = { state.batteryThreshold = it.toInt() },
+            valueRange = 0f..MAX_BATTERY_LEVEL,
+            steps = SLIDER_STEPS,
+        )
+    }
+}
+
+@Composable
+private fun DialogActionButtons(onDismiss: () -> Unit, onConfirm: () -> Unit) {
+    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+        TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) }
+        Spacer(modifier = Modifier.width(8.dp))
+        Button(
+            shape = RoundedCornerShape(12.dp),
+            onClick = onConfirm,
+        ) {
+            Text(stringResource(R.string.automation_save_button))
+        }
+    }
+}
+
+@Composable
+fun rememberAutomationConfigState(script: Script): AutomationConfigState {
+    return rememberSaveable(script, saver = AutomationConfigState.Saver(script)) {
+        AutomationConfigState(script)
+    }
+}
+
+@Composable
+private fun transparentTextFieldColors() = TextFieldDefaults.colors(
+    focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
+    unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
+    focusedIndicatorColor = Color.Transparent,
+    unfocusedIndicatorColor = Color.Transparent,
+)
+
+@Composable
+private fun dividerColor() = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)
+
+@Composable
+private fun getAutomationTypeLabel(type: AutomationType) = when (type) {
+    AutomationType.ONE_TIME -> stringResource(R.string.automation_type_one_time)
+    AutomationType.PERIODIC -> stringResource(R.string.automation_type_periodic)
+    AutomationType.WEEKLY -> stringResource(R.string.automation_type_weekly)
 }
 
 @Composable
@@ -510,6 +484,24 @@ private fun AutomationOptionTile(
             Switch(
                 checked = checked,
                 onCheckedChange = onCheckedChange,
+            )
+        }
+    }
+}
+
+@Preview(
+    name = "One-Time Automation - Night",
+    showBackground = true,
+    uiMode = Configuration.UI_MODE_NIGHT_YES
+)
+@Composable
+private fun PreviewAutomationConfigOneTime() {
+    ScriptRunnerForTermuxTheme {
+        Surface {
+            AutomationConfigDialog(
+                script = sampleScripts[0],
+                onDismiss = {},
+                onSave = {}
             )
         }
     }

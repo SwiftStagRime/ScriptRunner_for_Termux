@@ -13,6 +13,8 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.swiftstagrime.termuxrunner.R
 
+private const val GITHUB_URL = "https://github.com/SwiftStagRime/ScriptRunner_for_Termux"
+
 @Composable
 fun SettingsRoute(
     onBack: () -> Unit,
@@ -24,29 +26,19 @@ fun SettingsRoute(
     val selectedAccent by viewModel.selectedAccent.collectAsStateWithLifecycle()
     val selectedMode by viewModel.selectedMode.collectAsStateWithLifecycle()
     val ioMessage by viewModel.ioState.collectAsStateWithLifecycle()
-    val githubUrl = "https://github.com/SwiftStagRime/ScriptRunner_for_Termux"
     val exportFilename = stringResource(R.string.export_filename)
 
-    val exportLauncher =
-        rememberLauncherForActivityResult(
-            contract = ActivityResultContracts.CreateDocument("application/json"),
-        ) { uri ->
-            uri?.let { viewModel.exportData(it) }
-        }
+    val exportLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.CreateDocument("application/json"),
+    ) { uri -> uri?.let { viewModel.exportData(it) } }
 
-    val importBackupLauncher =
-        rememberLauncherForActivityResult(
-            contract = ActivityResultContracts.OpenDocument(),
-        ) { uri ->
-            uri?.let { viewModel.importData(it) }
-        }
+    val importBackupLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.OpenDocument(),
+    ) { uri -> uri?.let { viewModel.importData(it) } }
 
-    val importFileLauncher =
-        rememberLauncherForActivityResult(
-            contract = ActivityResultContracts.OpenDocument(),
-        ) { uri ->
-            uri?.let { viewModel.importSingleScript(it) }
-        }
+    val importFileLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.OpenDocument(),
+    ) { uri -> uri?.let { viewModel.importSingleScript(it) } }
 
     LaunchedEffect(Unit) {
         viewModel.navEvents.collect { event ->
@@ -63,15 +55,19 @@ fun SettingsRoute(
         }
     }
 
-    SettingsScreen(
-        selectedAccent = selectedAccent,
-        selectedMode = selectedMode,
+    val actions = SettingsActions(
         onAccentChange = viewModel::setAccent,
         onModeChange = viewModel::setMode,
         onTriggerExport = { exportLauncher.launch(exportFilename) },
         onTriggerImport = { importBackupLauncher.launch(arrayOf("application/json")) },
         onTriggerScriptImport = { importFileLauncher.launch(arrayOf("*/*")) },
-        onDeveloperClick = { uriHandler.openUri(githubUrl) },
-        onBack = onBack,
+        onDeveloperClick = { uriHandler.openUri(GITHUB_URL) },
+        onBack = onBack
+    )
+
+    SettingsScreen(
+        selectedAccent = selectedAccent,
+        selectedMode = selectedMode,
+        actions = actions
     )
 }

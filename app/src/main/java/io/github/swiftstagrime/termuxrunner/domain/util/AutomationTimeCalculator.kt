@@ -30,6 +30,23 @@ object AutomationTimeCalculator {
         }
     }
 
+    fun getNextRuns(
+        automation: AutomationEntity,
+        count: Int = 3,
+    ): List<Long> {
+        val runs = mutableListOf<Long>()
+        var lastFoundTime = System.currentTimeMillis()
+
+        repeat(count) {
+            val next = calculateNextRun(automation, lastFoundTime)
+            if (next != null) {
+                runs.add(next)
+                lastFoundTime = next
+            }
+        }
+        return runs
+    }
+
     private fun calculateNextWeeklyTimestamp(
         allowedDays: List<Int>,
         scheduledTime: Long,
@@ -55,22 +72,5 @@ object AutomationTimeCalculator {
             target.add(Calendar.DAY_OF_YEAR, 1)
         }
         return null
-    }
-
-    fun getNextRuns(
-        automation: AutomationEntity,
-        count: Int = 3,
-    ): List<Long> {
-        val runs = mutableListOf<Long>()
-        var lastFoundTime = System.currentTimeMillis()
-
-        repeat(count) {
-            val next = calculateNextRun(automation, lastFoundTime)
-            if (next != null) {
-                runs.add(next)
-                lastFoundTime = next
-            }
-        }
-        return runs
     }
 }

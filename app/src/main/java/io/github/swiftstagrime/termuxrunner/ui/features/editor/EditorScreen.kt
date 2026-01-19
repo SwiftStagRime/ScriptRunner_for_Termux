@@ -18,28 +18,34 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextOverflow
 import io.github.swiftstagrime.termuxrunner.R
 import io.github.swiftstagrime.termuxrunner.domain.model.Category
 import io.github.swiftstagrime.termuxrunner.domain.model.Script
-import io.github.swiftstagrime.termuxrunner.ui.components.ScriptConfigDialog
+import io.github.swiftstagrime.termuxrunner.ui.features.scriptconfigdialog.ScriptConfigDialog
+import io.github.swiftstagrime.termuxrunner.ui.features.scriptconfigdialog.ScriptConfigState
 import io.github.swiftstagrime.termuxrunner.ui.preview.DevicePreviews
 import io.github.swiftstagrime.termuxrunner.ui.theme.ScriptRunnerForTermuxTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditorScreen(
-    script: Script,
+    scriptDraft: Script,
+    codeState: TextFieldValue,
+    onCodeChange: (TextFieldValue) -> Unit,
+    onMetadataChange: (Script) -> Unit,
     snackbarHostState: SnackbarHostState,
     onBack: () -> Unit,
     onSave: (Script) -> Unit,
     categories: List<Category>,
+    configState: ScriptConfigState?,
+    onOpenConfig: () -> Unit,
+    onDismissConfig: () -> Unit,
     onAddNewCategory: (String) -> Unit,
     isBatteryUnrestricted: Boolean,
     onRequestNotificationPermission: () -> Unit,
@@ -47,18 +53,7 @@ fun EditorScreen(
     onHeartbeatToggle: (Boolean) -> Unit,
     onProcessImage: suspend (Uri) -> String?,
 ) {
-    var codeState by remember(script.id) {
-        mutableStateOf(
-            TextFieldValue(
-                text = script.code,
-                selection = TextRange(script.code.length),
-            ),
-        )
-    }
-
-    var currentScriptObj by remember(script) { mutableStateOf(script) }
-    var showConfigDialog by remember { mutableStateOf(false) }
-
+    var showConfigDialog by rememberSaveable { mutableStateOf(false) }
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
@@ -66,12 +61,12 @@ fun EditorScreen(
                 title = {
                     Column {
                         Text(
-                            currentScriptObj.name.ifBlank { stringResource(R.string.editor_untitled) },
+                            scriptDraft.name.ifBlank { stringResource(R.string.editor_untitled) },
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
                         )
                         Text(
-                            "${currentScriptObj.interpreter} • ${currentScriptObj.fileExtension}",
+                            "${scriptDraft.interpreter} • ${scriptDraft.fileExtension}",
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
@@ -79,41 +74,39 @@ fun EditorScreen(
                 },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(
-                            Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = stringResource(R.string.back_description),
-                        )
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.back_description))
                     }
                 },
                 actions = {
-                    IconButton(onClick = { showConfigDialog = true }) {
-                        Icon(
-                            Icons.Default.Save,
-                            contentDescription = stringResource(R.string.cd_save),
-                            tint = MaterialTheme.colorScheme.primary,
-                        )
+                    IconButton(onClick = {
+                        onOpenConfig()
+                        showConfigDialog = true
+                    }) {
+                        Icon(Icons.Default.Save, stringResource(R.string.cd_save), tint = MaterialTheme.colorScheme.primary)
                     }
                 },
             )
         },
     ) { padding ->
-
         CodeEditor(
             code = codeState,
-            onCodeChange = { codeState = it },
-            interpreter = currentScriptObj.interpreter,
+            onCodeChange = onCodeChange,
+            interpreter = scriptDraft.interpreter,
             modifier = Modifier.padding(padding),
         )
 
         if (showConfigDialog) {
             ScriptConfigDialog(
-                script = currentScriptObj.copy(code = codeState.text),
+                state = configState!!,
                 categories = categories,
-                onAddNewCategory = onAddNewCategory,
-                onDismiss = { showConfigDialog = false },
-                onSave = { configuredScript ->
-                    currentScriptObj = configuredScript
+                onDismiss = {
                     showConfigDialog = false
+                    onDismissConfig()
+                },
+                onSave = { configuredScript ->
+                    onMetadataChange(configuredScript)
+                    showConfigDialog = false
+                    onDismissConfig()
                     onSave(configuredScript)
                 },
                 onProcessImage = onProcessImage,
@@ -121,29 +114,33 @@ fun EditorScreen(
                 isBatteryUnrestricted = isBatteryUnrestricted,
                 onRequestBatteryUnrestricted = onRequestBatteryUnrestricted,
                 onRequestNotificationPermission = onRequestNotificationPermission,
+                script = scriptDraft,
+                onAddNewCategory = onAddNewCategory,
             )
         }
     }
 }
-
 @DevicePreviews
 @Composable
 private fun PreviewEditorNewRaw() {
+    val sampleCode = """
+        #!/bin/bash
+        echo "Hello World"
+        for i in {1..10}; do
+           echo "Counting i"
+        done
+    """.trimIndent()
+
     ScriptRunnerForTermuxTheme {
         EditorScreen(
-            script =
-                Script(
-                    id = 1,
-                    name = "Complex Logic",
-                    code =
-                        """
-                        #!/bin/bash
-                        echo "Hello World"
-                        for i in {1..10}; do
-                           echo "Counting i"
-                        done
-                        """.trimIndent(),
-                ),
+            scriptDraft = Script(
+                id = 1,
+                name = "Complex Logic",
+                code = sampleCode,
+            ),
+            codeState = TextFieldValue(sampleCode),
+            onCodeChange = {},
+            onMetadataChange = {},
             onBack = {},
             onSave = {},
             onProcessImage = { null },
@@ -154,6 +151,9 @@ private fun PreviewEditorNewRaw() {
             categories = emptyList(),
             onAddNewCategory = {},
             onRequestNotificationPermission = {},
+            configState = null,
+            onOpenConfig = {},
+            onDismissConfig = {}
         )
     }
 }

@@ -5,7 +5,7 @@ import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.Serializable
 
 /*
-    I have no idea what I marked this as serializable for
+    I have no idea what I marked this as serializable for, probably json - TODO: remove after testing
  */
 @Serializable
 @Parcelize

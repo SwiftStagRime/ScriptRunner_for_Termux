@@ -59,11 +59,14 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.saveable.listSaver
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -81,6 +84,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.swiftstagrime.termuxrunner.R
@@ -91,6 +95,39 @@ import io.github.swiftstagrime.termuxrunner.ui.preview.DevicePreviews
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
+private const val UNDO_LIMIT = 30
+private const val AUTO_SAVE_DELAY = 1000L
+private const val ANIMATION_DURATION = 300
+private const val LINE_HEIGHT_SP = 20
+private const val EXTRA_LINES_COUNT = 5
+private const val TOOLBAR_HEIGHT_DP = 50
+
+val TextFieldValueSaver = listSaver<TextFieldValue, Any>(
+    save = { listOf(it.text, it.selection.start, it.selection.end) },
+    restore = {
+        TextFieldValue(
+            text = it[0] as String,
+            selection = TextRange(it[1] as Int, it[2] as Int)
+        )
+    }
+)
+
+val UndoStackSaver = listSaver<SnapshotStateList<TextFieldValue>, Any>(
+    save = { it.map { tfv -> listOf(tfv.text, tfv.selection.start, tfv.selection.end) } },
+    restore = { savedList ->
+        val list = mutableStateListOf<TextFieldValue>()
+        (savedList as List<List<Any>>).forEach { item ->
+            list.add(
+                TextFieldValue(
+                    text = item[0] as String,
+                    selection = TextRange(item[1] as Int, item[2] as Int)
+                )
+            )
+        }
+        list
+    }
+)
+
 @Composable
 fun CodeEditor(
     code: TextFieldValue,
@@ -98,517 +135,381 @@ fun CodeEditor(
     interpreter: String,
     modifier: Modifier = Modifier,
 ) {
+    var isSearchVisible by rememberSaveable { mutableStateOf(false) }
+    var searchQuery by rememberSaveable { mutableStateOf("") }
+    var currentMatchIndex by rememberSaveable { mutableIntStateOf(-1) }
+    var isAccessoryVisible by rememberSaveable { mutableStateOf(true) }
+    var isWrappingEnabled by rememberSaveable { mutableStateOf(false) }
+
     val verticalScrollState = rememberScrollState()
     val focusRequester = remember { FocusRequester() }
     val coroutineScope = rememberCoroutineScope()
-
-    val undoStack = remember { ArrayDeque<TextFieldValue>().apply { add(code) } }
-    val redoStack = remember { ArrayDeque<TextFieldValue>() }
-    var lastUndoSave by remember { mutableStateOf(code) }
-
-    var isSearchVisible by remember { mutableStateOf(false) }
-    var searchQuery by remember { mutableStateOf("") }
-    var currentMatchIndex by remember { mutableIntStateOf(-1) }
-
-    var isAccessoryVisible by remember { mutableStateOf(true) }
-    val toolbarHeight = 50.dp
-    val extraLines = 5
-    val bottomBuffer = toolbarHeight + with(LocalDensity.current) { (extraLines * 20).sp.toDp() }
-
-    var isWrappingEnabled by remember { mutableStateOf(false) }
     var textLayoutResult by remember { mutableStateOf<TextLayoutResult?>(null) }
 
-    val currentCode by rememberUpdatedState(code)
-    val currentOnCodeChange by rememberUpdatedState(onCodeChange)
+    val undoStack = rememberSaveable(saver = UndoStackSaver) { mutableStateListOf(code) }
+    val redoStack = rememberSaveable(saver = UndoStackSaver) { mutableStateListOf() }
+    var lastUndoSave by rememberSaveable(stateSaver = TextFieldValueSaver) { mutableStateOf(code) }
 
-    fun getIndentationForNewLine(
-        text: String,
-        cursorIndex: Int,
-    ): String {
-        if (cursorIndex <= 0) return ""
-        val textBeforeCursor = text.take(cursorIndex)
-        val lastNewLineIndex = textBeforeCursor.lastIndexOf('\n')
-        val lineStart = if (lastNewLineIndex == -1) 0 else lastNewLineIndex + 1
-        val currentLinePrefix = textBeforeCursor.substring(lineStart)
-        return currentLinePrefix.takeWhile { it.isWhitespace() }
+    LaunchedEffect(code.text) {
+        delay(AUTO_SAVE_DELAY)
+        if (lastUndoSave.text != code.text) {
+            undoStack.add(code)
+            if (undoStack.size > UNDO_LIMIT) undoStack.removeAt(0)
+            redoStack.clear()
+            lastUndoSave = code
+        }
     }
-
-    fun handleCodeChange(newValue: TextFieldValue) {
-        val oldText = currentCode.text
-        val newText = newValue.text
-        val cursor = newValue.selection.start
-
-        if (newText.length == oldText.length + 1) {
-            val charInserted = newText[cursor - 1]
-
-            if (charInserted == '\n') {
-                val indentation = getIndentationForNewLine(newText, cursor - 1)
-
-                if (indentation.isNotEmpty()) {
-                    val textWithIndent =
-                        newText.take(cursor) + indentation + newText.substring(cursor)
-                    val newCursor = cursor + indentation.length
-
-                    val indentedValue =
-                        newValue.copy(
-                            text = textWithIndent,
-                            selection = TextRange(newCursor),
-                        )
-                    currentOnCodeChange(indentedValue)
-                    return
-                }
-            }
-
-            val nextChar = if (cursor < newText.length) newText[cursor] else null
-            val pairs = mapOf('(' to ')', '{' to '}', '[' to ']', '"' to '"', '\'' to '\'')
-
-            if (pairs.containsKey(charInserted)) {
-                val closing = pairs[charInserted]
-                currentOnCodeChange(
-                    newValue
-                        .insert(closing.toString())
-                        .copy(selection = TextRange(cursor)),
-                )
-                return
-            } else if (pairs.containsValue(charInserted) && nextChar == charInserted) {
-                currentOnCodeChange(currentCode.copy(selection = TextRange(cursor + 1)))
-                return
-            }
-        }
-
-        currentOnCodeChange(newValue)
-    }
-
-    val handleInsertSymbol =
-        remember {
-            { symbol: String ->
-                val textValue = currentCode
-                when (symbol) {
-                    "HOME_KEY" -> {
-                        val lineStart =
-                            textValue.text.lastIndexOf('\n', textValue.selection.start - 1) + 1
-                        currentOnCodeChange(textValue.copy(selection = TextRange(lineStart)))
-                    }
-
-                    "END_KEY" -> {
-                        val lineEnd =
-                            textValue.text
-                                .indexOf('\n', textValue.selection.start)
-                                .let { if (it == -1) textValue.text.length else it }
-                        currentOnCodeChange(textValue.copy(selection = TextRange(lineEnd)))
-                    }
-
-                    "\n" -> {
-                        val indent = getIndentationForNewLine(textValue.text, textValue.selection.start)
-                        currentOnCodeChange(textValue.insert("\n$indent"))
-                    }
-
-                    "BACKTAB" -> {
-                        val cursor = textValue.selection.start
-                        val textStr = textValue.text
-                        val lineStart =
-                            textStr.lastIndexOf('\n', cursor - 1).let { if (it == -1) 0 else it + 1 }
-
-                        val fourSpaces = "    "
-                        val tab = "\t"
-
-                        val newTextValue =
-                            if (textStr.startsWith(fourSpaces, lineStart)) {
-                                val newText = textStr.removeRange(lineStart, lineStart + 4)
-                                val newCursor = (cursor - 4).coerceAtLeast(lineStart)
-                                textValue.copy(text = newText, selection = TextRange(newCursor))
-                            } else if (textStr.startsWith(tab, lineStart)) {
-                                val newText = textStr.removeRange(lineStart, lineStart + 1)
-                                val newCursor = (cursor - 1).coerceAtLeast(lineStart)
-                                textValue.copy(text = newText, selection = TextRange(newCursor))
-                            } else {
-                                textValue
-                            }
-                        currentOnCodeChange(newTextValue)
-                    }
-
-                    else -> {
-                        currentOnCodeChange(textValue.insert(symbol))
-                    }
-                }
-            }
-        }
-
-    val handleToggleComment =
-        remember {
-            {
-                val symbol = LanguageUtils.getCommentSymbol(interpreter)
-                currentOnCodeChange(currentCode.toggleComment(symbol))
-            }
-        }
 
     val searchMatches by remember(code.text, searchQuery) {
-        derivedStateOf {
-            if (searchQuery.isEmpty()) return@derivedStateOf emptyList()
-            val matches = mutableListOf<IntRange>()
-            var index = code.text.indexOf(searchQuery, ignoreCase = true)
-            while (index >= 0) {
-                matches.add(index until (index + searchQuery.length))
-                index = code.text.indexOf(searchQuery, index + 1, ignoreCase = true)
-            }
-            matches
-        }
+        derivedStateOf { findSearchMatches(code.text, searchQuery) }
     }
 
     LaunchedEffect(searchQuery) {
         currentMatchIndex = if (searchMatches.isNotEmpty()) 0 else -1
     }
 
-    fun navigateSearch(direction: Int) {
-        if (searchMatches.isEmpty()) return
-        var newIndex = currentMatchIndex + direction
-        if (newIndex >= searchMatches.size) newIndex = 0
-        if (newIndex < 0) newIndex = searchMatches.size - 1
-
-        currentMatchIndex = newIndex
-        val range = searchMatches[newIndex]
-        onCodeChange(code.copy(selection = TextRange(range.first, range.last + 1)))
-    }
-
     val activeMatchColor = MaterialTheme.colorScheme.primaryContainer
     val passiveMatchColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f)
 
-    val searchTransformation =
-        remember(searchMatches, currentMatchIndex, isSearchVisible) {
-            if (isSearchVisible && searchMatches.isNotEmpty()) {
-                SearchVisualTransformation(
-                    matches = searchMatches,
-                    activeMatchIndex = currentMatchIndex,
-                    activeColor = activeMatchColor,
-                    passiveColor = passiveMatchColor,
-                )
-            } else {
-                VisualTransformation.None
-            }
-        }
-
-    LaunchedEffect(currentMatchIndex) {
-        if (currentMatchIndex != -1 && textLayoutResult != null) {
-            val matchRange = searchMatches[currentMatchIndex]
-            val line = textLayoutResult!!.getLineForOffset(matchRange.first)
-            val yOffset = textLayoutResult!!.getLineTop(line).toInt()
-            verticalScrollState.animateScrollTo(yOffset)
-        }
+    val searchTransformation = remember(searchMatches, currentMatchIndex, isSearchVisible, activeMatchColor, passiveMatchColor) {
+        if (isSearchVisible && searchMatches.isNotEmpty()) {
+            SearchVisualTransformation(searchMatches, currentMatchIndex, activeMatchColor, passiveMatchColor)
+        } else VisualTransformation.None
     }
 
-    fun addToUndo(newValue: TextFieldValue) {
-        if (undoStack.isEmpty() || undoStack.last().text != newValue.text) {
-            undoStack.addLast(newValue)
-            if (undoStack.size > 30) undoStack.removeFirst()
-            redoStack.clear()
-        }
+    val actions = remember(interpreter) {
+        EditorActions(onCodeChange, interpreter, undoStack, redoStack)
     }
 
-    fun undo() {
-        if (undoStack.size > 1) {
-            val current = undoStack.removeLast()
-            redoStack.addLast(current)
-            onCodeChange(undoStack.last())
-        }
-    }
-
-    fun redo() {
-        if (redoStack.isNotEmpty()) {
-            val next = redoStack.removeLast()
-            undoStack.addLast(next)
-            onCodeChange(next)
-        }
-    }
-
-    LaunchedEffect(code.text) {
-        delay(1000)
-        if (lastUndoSave.text != code.text) {
-            addToUndo(code)
-            lastUndoSave = code
-        }
-    }
-
-    Box(
-        modifier =
-            modifier
-                .fillMaxSize()
-                .imePadding(),
-    ) {
+    Box(modifier = modifier.fillMaxSize().imePadding()) {
         Column(modifier = Modifier.fillMaxSize()) {
-            AnimatedVisibility(
+            EditorSearchBar(
                 visible = isSearchVisible,
-                enter = expandVertically(expandFrom = Alignment.Top) + fadeIn(),
-                exit = shrinkVertically(shrinkTowards = Alignment.Top) + fadeOut(),
-            ) {
-                Surface(
-                    color = MaterialTheme.colorScheme.surfaceContainer,
-                    tonalElevation = 3.dp,
-                    shadowElevation = 2.dp,
-                    modifier = Modifier.fillMaxWidth(),
-                ) {
-                    Row(
-                        modifier = Modifier.padding(8.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Icon(
-                            Icons.Default.Search,
-                            null,
-                            modifier = Modifier.size(20.dp),
-                            tint = MaterialTheme.colorScheme.primary,
-                        )
-                        BasicTextField(
-                            value = searchQuery,
-                            onValueChange = { searchQuery = it },
-                            modifier =
-                                Modifier
-                                    .weight(1f)
-                                    .padding(horizontal = 8.dp),
-                            textStyle =
-                                TextStyle(
-                                    color = MaterialTheme.colorScheme.onSurface,
-                                    fontSize = 14.sp,
-                                ),
-                            singleLine = true,
-                            cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
-                            decorationBox = { inner ->
-                                if (searchQuery.isEmpty()) {
-                                    Text(
-                                        stringResource(R.string.editor_search_placeholder),
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
-                                    )
-                                }
-                                inner()
-                            },
-                        )
-                        if (searchMatches.isNotEmpty()) {
-                            Text(
-                                text = "${currentMatchIndex + 1}/${searchMatches.size}",
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.padding(end = 8.dp),
-                            )
-                        }
-                        IconButton(
-                            onClick = { navigateSearch(-1) },
-                            modifier = Modifier.size(32.dp),
-                        ) {
-                            Icon(
-                                Icons.Default.KeyboardArrowUp,
-                                stringResource(R.string.cd_prev_match),
-                                tint = MaterialTheme.colorScheme.primary,
-                            )
-                        }
-                        IconButton(
-                            onClick = { navigateSearch(1) },
-                            modifier = Modifier.size(32.dp),
-                        ) {
-                            Icon(
-                                Icons.Default.KeyboardArrowDown,
-                                stringResource(R.string.cd_next_match),
-                                tint = MaterialTheme.colorScheme.primary,
-                            )
-                        }
-                        IconButton(
-                            onClick = {
-                                isSearchVisible = false
-                                searchQuery = ""
-                            },
-                            modifier = Modifier.size(32.dp),
-                        ) {
-                            Icon(
-                                Icons.Default.Close,
-                                stringResource(R.string.cd_close_search),
-                                tint = MaterialTheme.colorScheme.primary,
-                            )
-                        }
-                    }
+                query = searchQuery,
+                onQueryChange = { searchQuery = it },
+                matchInfo = if (searchMatches.isNotEmpty()) "${currentMatchIndex + 1}/${searchMatches.size}" else null,
+                onPrev = { currentMatchIndex = navigateSearch(searchMatches, currentMatchIndex, -1) },
+                onNext = { currentMatchIndex = navigateSearch(searchMatches, currentMatchIndex, 1) },
+                onClose = {
+                    isSearchVisible = false
+                    searchQuery = ""
                 }
+            )
+
+            MainEditorArea(
+                code = code,
+                onCodeChange = { actions.handleCodeChange(code, it) },
+                textLayoutResult = textLayoutResult,
+                onTextLayout = { textLayoutResult = it },
+                scrollState = verticalScrollState,
+                isWrappingEnabled = isWrappingEnabled,
+                visualTransformation = searchTransformation,
+                focusRequester = focusRequester,
+                onBottomClick = { actions.handleBottomClick(code, focusRequester) }
+            )
+        }
+
+        EditorAccessoryWrapper(
+            isVisible = isAccessoryVisible,
+            onShow = { isAccessoryVisible = true },
+            modifier = Modifier.align(Alignment.BottomCenter)
+        ) {
+            EditorAccessoryToolbar(
+                undoEnabled = undoStack.size > 1,
+                redoEnabled = redoStack.isNotEmpty(),
+                onUndo = { actions.undo(onCodeChange) },
+                onRedo = { actions.redo(onCodeChange) },
+                onToggleSearch = { isSearchVisible = !isSearchVisible },
+                onToggleComment = { onCodeChange(code.toggleComment(LanguageUtils.getCommentSymbol(interpreter))) },
+                onHide = { isAccessoryVisible = false },
+                onInsertSymbol = { actions.handleInsertSymbol(code, it) },
+                interpreter = interpreter,
+                onToggleWrap = { isWrappingEnabled = !isWrappingEnabled },
+                isWrappingEnabled = isWrappingEnabled,
+                onScrollTop = { coroutineScope.launch { verticalScrollState.animateScrollTo(0) } },
+                onScrollBottom = { coroutineScope.launch { verticalScrollState.animateScrollTo(verticalScrollState.maxValue) } }
+            )
+        }
+    }
+}
+@Composable
+private fun EditorAccessoryWrapper(
+    isVisible: Boolean,
+    onShow: () -> Unit,
+    modifier: Modifier = Modifier,
+    content: @Composable () -> Unit
+) {
+    AnimatedContent(
+        targetState = isVisible,
+        modifier = modifier,
+        label = "ToolbarTransition",
+        transitionSpec = {
+            val spec = tween<Float>(ANIMATION_DURATION)
+            val slide = tween<IntOffset>(ANIMATION_DURATION)
+            if (targetState) {
+                (slideInVertically(slide) { it } + fadeIn(spec)).togetherWith(fadeOut(spec))
+            } else {
+                fadeIn(tween(ANIMATION_DURATION, delayMillis = ANIMATION_DURATION))
+                    .togetherWith(slideOutVertically(slide) { it } + fadeOut(spec))
             }
-
-            Row(
-                modifier =
-                    Modifier
-                        .weight(1f)
-                        .fillMaxWidth()
-                        .background(MaterialTheme.colorScheme.surface),
+        }
+    ) { show ->
+        if (show) {
+            content()
+        } else {
+            Surface(
+                tonalElevation = 8.dp,
+                shadowElevation = 4.dp,
+                color = MaterialTheme.colorScheme.surfaceContainer,
+                shape = RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp),
+                modifier = Modifier.fillMaxWidth().clickable(onClick = onShow)
             ) {
-                LineNumberGutter(
-                    text = code.text,
-                    layoutResult = textLayoutResult,
-                    scrollState = verticalScrollState,
-                    extraLines = extraLines,
-                    bottomBuffer = bottomBuffer,
-                )
-
-                Box(
-                    modifier =
-                        Modifier
-                            .weight(1f)
-                            .fillMaxHeight()
-                            .verticalScroll(verticalScrollState)
-                            .then(
-                                if (isWrappingEnabled) {
-                                    Modifier
-                                } else {
-                                    Modifier.horizontalScroll(rememberScrollState())
-                                },
-                            ),
-                ) {
-                    BasicTextField(
-                        value = code,
-                        onValueChange = { handleCodeChange(it) },
-                        onTextLayout = { textLayoutResult = it },
-                        textStyle =
-                            TextStyle(
-                                fontFamily = FontFamily.Monospace,
-                                fontSize = 14.sp,
-                                lineHeight = 20.sp,
-                                color = MaterialTheme.colorScheme.onSurface,
-                            ),
-                        cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
-                        visualTransformation = searchTransformation,
-                        modifier =
-                            Modifier
-                                .then(if (isWrappingEnabled) Modifier.fillMaxWidth() else Modifier)
-                                .padding(horizontal = 8.dp)
-                                .focusRequester(focusRequester),
-                        decorationBox = { inner ->
-                            Column(
-                                modifier =
-                                    Modifier
-                                        .fillMaxWidth()
-                                        .padding(bottom = toolbarHeight + 100.dp),
-                            ) {
-                                Box {
-                                    if (code.text.isEmpty()) {
-                                        Text(
-                                            stringResource(R.string.editor_placeholder),
-                                            color =
-                                                MaterialTheme.colorScheme.onSurfaceVariant.copy(
-                                                    alpha = 0.5f,
-                                                ),
-                                        )
-                                    }
-                                    inner()
-                                }
-
-                                Spacer(
-                                    modifier =
-                                        Modifier
-                                            .fillMaxWidth()
-                                            .height(bottomBuffer)
-                                            .clickable(
-                                                interactionSource = remember { MutableInteractionSource() },
-                                                indication = null,
-                                            ) {
-                                                // Limited to one time to not cause accidental spam
-                                                val currentText = code.text
-                                                if (currentText.isNotEmpty() && !currentText.endsWith("\n")) {
-                                                    val indentation =
-                                                        getIndentationForNewLine(
-                                                            currentText,
-                                                            currentText.length,
-                                                        )
-                                                    val newText = currentText + "\n" + indentation
-                                                    onCodeChange(
-                                                        code.copy(
-                                                            text = newText,
-                                                            selection = TextRange(newText.length),
-                                                        ),
-                                                    )
-                                                } else {
-                                                    onCodeChange(
-                                                        code.copy(
-                                                            selection =
-                                                                TextRange(
-                                                                    currentText.length,
-                                                                ),
-                                                        ),
-                                                    )
-                                                }
-                                                focusRequester.requestFocus()
-                                            },
-                                )
-                            }
-                        },
-                    )
+                Box(modifier = Modifier.height(32.dp), contentAlignment = Alignment.Center) {
+                    Icon(Icons.Default.KeyboardArrowUp, stringResource(R.string.cd_show_toolbar), tint = MaterialTheme.colorScheme.primary)
                 }
             }
         }
+    }
+}
 
-        val animationDuration = 300
-        AnimatedContent(
-            targetState = isAccessoryVisible,
-            modifier = Modifier.align(Alignment.BottomCenter),
-            label = "ToolbarTransition",
-            transitionSpec = {
-                if (targetState) {
-                    (
-                        slideInVertically(animationSpec = tween(animationDuration)) { height -> height } +
-                            fadeIn(animationSpec = tween(animationDuration))
-                    ).togetherWith(
-                        fadeOut(animationSpec = tween(animationDuration)),
-                    )
-                } else {
-                    fadeIn(
-                        animationSpec =
-                            tween(
-                                durationMillis = 300,
-                                delayMillis = animationDuration,
-                            ),
-                    ).togetherWith(
-                        slideOutVertically(animationSpec = tween(animationDuration)) { height -> height } +
-                            fadeOut(animationSpec = tween(animationDuration)),
-                    )
+private class EditorActions(
+    val onCodeChange: (TextFieldValue) -> Unit,
+    val interpreter: String,
+    val undoStack: MutableList<TextFieldValue>,
+    val redoStack: MutableList<TextFieldValue>
+) {
+    fun undo(update: (TextFieldValue) -> Unit) {
+        if (undoStack.size > 1) {
+            val current = undoStack.removeAt(undoStack.size - 1)
+            redoStack.add(current)
+            update(undoStack.last())
+        }
+    }
+
+    fun redo(update: (TextFieldValue) -> Unit) {
+        if (redoStack.isNotEmpty()) {
+            val next = redoStack.removeAt(redoStack.size - 1)
+            undoStack.add(next)
+            update(next)
+        }
+    }
+
+    fun handleCodeChange(oldValue: TextFieldValue, newValue: TextFieldValue) {
+        val newText = newValue.text
+        val cursor = newValue.selection.start
+
+        if (newText.length != oldValue.text.length + 1) {
+            onCodeChange(newValue)
+            return
+        }
+
+        val char = newText[cursor - 1]
+        if (char == '\n') {
+            val indent = getIndentation(newText, cursor - 1)
+            if (indent.isNotEmpty()) {
+                val result = newText.take(cursor) + indent + newText.substring(cursor)
+                onCodeChange(newValue.copy(text = result, selection = TextRange(cursor + indent.length)))
+                return
+            }
+        }
+
+        val pairs = mapOf('(' to ')', '{' to '}', '[' to ']', '"' to '"', '\'' to '\'')
+        if (pairs.containsKey(char)) {
+            onCodeChange(newValue.insert(pairs[char].toString()).copy(selection = TextRange(cursor)))
+            return
+        }
+
+        onCodeChange(newValue)
+    }
+
+    fun handleInsertSymbol(current: TextFieldValue, symbol: String) {
+        when (symbol) {
+            "HOME_KEY" -> {
+                val start = current.text.lastIndexOf('\n', current.selection.start - 1) + 1
+                onCodeChange(current.copy(selection = TextRange(start)))
+            }
+            "END_KEY" -> {
+                val index = current.text.indexOf('\n', current.selection.start)
+                val end = if (index == -1) current.text.length else index
+                onCodeChange(current.copy(selection = TextRange(end)))
+            }
+            "BACKTAB" -> {
+                val cursor = current.selection.start
+                val lineStart = current.text.lastIndexOf('\n', cursor - 1).let { if (it == -1) 0 else it + 1 }
+                val spaces = "    "
+                if (current.text.startsWith(spaces, lineStart)) {
+                    onCodeChange(current.copy(text = current.text.removeRange(lineStart, lineStart + 4), selection = TextRange((cursor - 4).coerceAtLeast(lineStart))))
+                } else if (current.text.startsWith("\t", lineStart)) {
+                    onCodeChange(current.copy(text = current.text.removeRange(lineStart, lineStart + 1), selection = TextRange((cursor - 1).coerceAtLeast(lineStart))))
                 }
-            },
-        ) { showToolbar ->
+            }
+            else -> onCodeChange(current.insert(symbol))
+        }
+    }
 
-            if (showToolbar) {
-                EditorAccessoryToolbar(
-                    undoEnabled = undoStack.size > 1,
-                    redoEnabled = redoStack.isNotEmpty(),
-                    onUndo = { undo() },
-                    onRedo = { redo() },
-                    onToggleSearch = { isSearchVisible = !isSearchVisible },
-                    onToggleComment = handleToggleComment,
-                    onHide = { isAccessoryVisible = false },
-                    onInsertSymbol = handleInsertSymbol,
-                    interpreter = interpreter,
-                    onToggleWrap = { isWrappingEnabled = !isWrappingEnabled },
-                    isWrappingEnabled = isWrappingEnabled,
-                    onScrollTop = {
-                        coroutineScope.launch { verticalScrollState.animateScrollTo(0) }
-                    },
-                    onScrollBottom = {
-                        coroutineScope.launch {
-                            verticalScrollState.animateScrollTo(
-                                verticalScrollState.maxValue,
+    fun handleBottomClick(code: TextFieldValue, focus: FocusRequester) {
+        val currentText = code.text
+        if (currentText.isNotEmpty() && !currentText.endsWith("\n")) {
+            val indent = getIndentation(currentText, currentText.length)
+            val newText = "$currentText\n$indent"
+            onCodeChange(code.copy(text = newText, selection = TextRange(newText.length)))
+        } else {
+            onCodeChange(code.copy(selection = TextRange(currentText.length)))
+        }
+        focus.requestFocus()
+    }
+}
+
+@Composable
+private fun MainEditorArea(
+    code: TextFieldValue,
+    onCodeChange: (TextFieldValue) -> Unit,
+    textLayoutResult: TextLayoutResult?,
+    onTextLayout: (TextLayoutResult) -> Unit,
+    scrollState: ScrollState,
+    isWrappingEnabled: Boolean,
+    visualTransformation: VisualTransformation,
+    focusRequester: FocusRequester,
+    onBottomClick: () -> Unit
+) {
+    val bottomBuffer = with(LocalDensity.current) { (TOOLBAR_HEIGHT_DP.dp + (EXTRA_LINES_COUNT * LINE_HEIGHT_SP).sp.toDp() + 100.dp) }
+
+    Row(modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surface)) {
+        LineNumberGutter(code.text, textLayoutResult, scrollState, EXTRA_LINES_COUNT, TOOLBAR_HEIGHT_DP.dp)
+
+        Box(modifier = Modifier.weight(1f).fillMaxHeight().verticalScroll(scrollState)
+            .then(if (isWrappingEnabled) Modifier else Modifier.horizontalScroll(rememberScrollState()))
+        ) {
+            BasicTextField(
+                value = code,
+                onValueChange = onCodeChange,
+                onTextLayout = onTextLayout,
+                textStyle = TextStyle(fontFamily = FontFamily.Monospace, fontSize = 14.sp, lineHeight = LINE_HEIGHT_SP.sp, color = MaterialTheme.colorScheme.onSurface),
+                cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+                visualTransformation = visualTransformation,
+                modifier = Modifier.then(if (isWrappingEnabled) Modifier.fillMaxWidth() else Modifier)
+                    .padding(horizontal = 8.dp).focusRequester(focusRequester),
+                decorationBox = { inner ->
+                    Column(modifier = Modifier.fillMaxWidth()) {
+                        Box {
+                            if (code.text.isEmpty()) Text(stringResource(R.string.editor_placeholder), color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f))
+                            inner()
+                        }
+                        Spacer(modifier = Modifier.fillMaxWidth().height(bottomBuffer).clickable(interactionSource = remember { MutableInteractionSource() }, indication = null, onClick = onBottomClick))
+                    }
+                }
+            )
+        }
+    }
+}
+
+private fun getIndentation(text: String, cursor: Int): String {
+    if (cursor <= 0) return ""
+    val lastNL = text.take(cursor).lastIndexOf('\n')
+    val start = if (lastNL == -1) 0 else lastNL + 1
+    return text.substring(start, cursor).takeWhile { it.isWhitespace() }
+}
+
+private fun findSearchMatches(text: String, query: String): List<IntRange> {
+    if (query.isEmpty()) return emptyList()
+    val matches = mutableListOf<IntRange>()
+    var index = text.indexOf(query, ignoreCase = true)
+    while (index >= 0) {
+        matches.add(index until (index + query.length))
+        index = text.indexOf(query, index + 1, ignoreCase = true)
+    }
+    return matches
+}
+
+private fun navigateSearch(matches: List<IntRange>, current: Int, delta: Int): Int {
+    if (matches.isEmpty()) return -1
+    var next = current + delta
+    if (next >= matches.size) next = 0
+    if (next < 0) next = matches.size - 1
+    return next
+}
+
+@Composable
+fun EditorSearchBar(
+    visible: Boolean,
+    query: String,
+    onQueryChange: (String) -> Unit,
+    matchInfo: String?,
+    onPrev: () -> Unit,
+    onNext: () -> Unit,
+    onClose: () -> Unit,
+) {
+    AnimatedVisibility(
+        visible = visible,
+        enter = expandVertically(expandFrom = Alignment.Top) + fadeIn(),
+        exit = shrinkVertically(shrinkTowards = Alignment.Top) + fadeOut(),
+    ) {
+        Surface(
+            color = MaterialTheme.colorScheme.surfaceContainer,
+            tonalElevation = 3.dp,
+            shadowElevation = 2.dp,
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            Row(
+                modifier = Modifier.padding(8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Icon(
+                    Icons.Default.Search,
+                    null,
+                    modifier = Modifier.size(20.dp),
+                    tint = MaterialTheme.colorScheme.primary,
+                )
+                BasicTextField(
+                    value = query,
+                    onValueChange = onQueryChange,
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(horizontal = 8.dp),
+                    textStyle = TextStyle(
+                        color = MaterialTheme.colorScheme.onSurface,
+                        fontSize = 14.sp,
+                    ),
+                    singleLine = true,
+                    cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+                    decorationBox = { inner ->
+                        if (query.isEmpty()) {
+                            Text(
+                                stringResource(R.string.editor_search_placeholder),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
                             )
                         }
+                        inner()
                     },
                 )
-            } else {
-                Surface(
-                    tonalElevation = 8.dp,
-                    shadowElevation = 4.dp,
-                    color = MaterialTheme.colorScheme.surfaceContainer,
-                    shape = RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp),
-                    modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .clickable { isAccessoryVisible = true },
-                ) {
-                    Box(
-                        modifier = Modifier.height(32.dp),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        Icon(
-                            Icons.Default.KeyboardArrowUp,
-                            stringResource(R.string.cd_show_toolbar),
-                            tint = MaterialTheme.colorScheme.primary,
-                        )
-                    }
+                if (matchInfo != null) {
+                    Text(
+                        text = matchInfo,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(end = 8.dp),
+                    )
+                }
+                IconButton(onClick = onPrev, modifier = Modifier.size(32.dp)) {
+                    Icon(
+                        Icons.Default.KeyboardArrowUp,
+                        stringResource(R.string.cd_prev_match),
+                        tint = MaterialTheme.colorScheme.primary,
+                    )
+                }
+                IconButton(onClick = onNext, modifier = Modifier.size(32.dp)) {
+                    Icon(
+                        Icons.Default.KeyboardArrowDown,
+                        stringResource(R.string.cd_next_match),
+                        tint = MaterialTheme.colorScheme.primary,
+                    )
+                }
+                IconButton(onClick = onClose, modifier = Modifier.size(32.dp)) {
+                    Icon(
+                        Icons.Default.Close,
+                        stringResource(R.string.cd_close_search),
+                        tint = MaterialTheme.colorScheme.primary,
+                    )
                 }
             }
         }
@@ -937,11 +838,6 @@ def calculate_sum(a, b):
     }
 }
 
-data class Snippet(
-    val label: String,
-    val code: String,
-)
-
 fun getSnippetsForInterpreter(interpreter: String): List<Snippet> =
     when (interpreter.trim()) {
         "python", "python3" ->
@@ -974,3 +870,8 @@ fun getSnippetsForInterpreter(interpreter: String): List<Snippet> =
 
         else -> emptyList()
     }
+
+data class Snippet(
+    val label: String,
+    val code: String,
+)

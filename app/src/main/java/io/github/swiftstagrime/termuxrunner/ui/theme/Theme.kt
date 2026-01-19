@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.ContextWrapper
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.dynamicDarkColorScheme
@@ -12,6 +13,7 @@ import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
@@ -314,39 +316,23 @@ fun ScriptRunnerForTermuxTheme(
     content: @Composable () -> Unit,
 ) {
     val context = LocalContext.current
-    val isDark =
-        when (mode) {
-            ThemeMode.LIGHT -> false
-            ThemeMode.DARK -> true
-            ThemeMode.SYSTEM -> isSystemInDarkTheme()
-        }
-    val colorScheme =
-        when (accent) {
-            AppTheme.DYNAMIC -> {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                    if (isDark) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-                } else {
-                    if (isDark) DarkGreenColorScheme else LightGreenColorScheme
-                }
-            }
+    val isDark = when (mode) {
+        ThemeMode.LIGHT -> false
+        ThemeMode.DARK -> true
+        ThemeMode.SYSTEM -> isSystemInDarkTheme()
+    }
 
-            AppTheme.GREEN -> if (isDark) DarkGreenColorScheme else LightGreenColorScheme
-            AppTheme.BLUE -> if (isDark) DarkBlueColorScheme else LightBlueColorScheme
-            AppTheme.RED -> if (isDark) DarkRedColorScheme else LightRedColorScheme
-            AppTheme.AMOLED -> if (isDark) DarkAmoledColorScheme else LightAmoledColorScheme
-            AppTheme.CYBER -> if (isDark) DarkColorfulAmoledColorScheme else LightColorfulAmoledColorScheme
-        }
+    val colorScheme = remember(accent, isDark) {
+        pickColorScheme(accent, isDark, context)
+    }
 
     val view = LocalView.current
     if (!view.isInEditMode) {
         SideEffect {
-            val activity = view.context.findActivity()
-            if (activity != null) {
-                val window = activity.window
-                val insetsController = WindowCompat.getInsetsController(window, view)
-                insetsController.isAppearanceLightStatusBars = !isDark
-                insetsController.isAppearanceLightNavigationBars = !isDark
-            }
+            val window = (view.context.findActivity())?.window ?: return@SideEffect
+            val insetsController = WindowCompat.getInsetsController(window, view)
+            insetsController.isAppearanceLightStatusBars = !isDark
+            insetsController.isAppearanceLightNavigationBars = !isDark
         }
     }
 
@@ -355,6 +341,27 @@ fun ScriptRunnerForTermuxTheme(
         typography = Typography,
         content = content,
     )
+}
+
+private fun pickColorScheme(
+    accent: AppTheme,
+    isDark: Boolean,
+    context: Context
+): ColorScheme {
+    return when (accent) {
+        AppTheme.DYNAMIC -> {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                if (isDark) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+            } else {
+                if (isDark) DarkGreenColorScheme else LightGreenColorScheme
+            }
+        }
+        AppTheme.GREEN -> if (isDark) DarkGreenColorScheme else LightGreenColorScheme
+        AppTheme.BLUE -> if (isDark) DarkBlueColorScheme else LightBlueColorScheme
+        AppTheme.RED -> if (isDark) DarkRedColorScheme else LightRedColorScheme
+        AppTheme.AMOLED -> if (isDark) DarkAmoledColorScheme else LightAmoledColorScheme
+        AppTheme.CYBER -> if (isDark) DarkColorfulAmoledColorScheme else LightColorfulAmoledColorScheme
+    }
 }
 
 tailrec fun Context.findActivity(): Activity? =
