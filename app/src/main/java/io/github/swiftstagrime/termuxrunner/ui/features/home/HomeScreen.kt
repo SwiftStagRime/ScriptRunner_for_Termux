@@ -2,7 +2,6 @@ package io.github.swiftstagrime.termuxrunner.ui.features.home
 
 import android.net.Uri
 import androidx.activity.compose.BackHandler
-import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -69,6 +68,7 @@ import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -80,20 +80,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
-import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.util.lerp
 import androidx.compose.ui.zIndex
 import io.github.swiftstagrime.termuxrunner.R
 import io.github.swiftstagrime.termuxrunner.domain.model.Category
@@ -177,7 +175,7 @@ fun HomeScreen(
             }
         },
     ) { padding ->
-        Box(modifier = Modifier.padding(padding).fillMaxSize().fadingEdge()) {
+        Box(modifier = Modifier.padding(padding).fillMaxSize().fadingEdge(MaterialTheme.colorScheme.background)) {
             when (uiState) {
                 is HomeUiState.Loading -> CircularProgressIndicator(Modifier.align(Alignment.Center))
                 is HomeUiState.Success -> {
@@ -230,6 +228,10 @@ private fun CollapsingHomeTopBar(
     onToggleSearch: (Boolean) -> Unit,
     actions: HomeActions
 ) {
+    val bannerAlpha by remember {
+        derivedStateOf { 1f - scrollBehavior.state.collapsedFraction }
+    }
+
     Column(modifier = Modifier.background(MaterialTheme.colorScheme.background)) {
         LargeTopAppBar(
             scrollBehavior = if (isSearchActive) null else scrollBehavior,
@@ -269,21 +271,28 @@ private fun CollapsingHomeTopBar(
         )
 
         if (uiState is HomeUiState.Success && !isSearchActive) {
-            val fraction = scrollBehavior.state.collapsedFraction
-            val easedAlpha = FastOutSlowInEasing.transform(1f - fraction)
-            val easedScale = lerp(0.92f, 1f, easedAlpha)
-
-            if (easedAlpha > 0.01f) {
-                Column(
-                    modifier = Modifier
-                        .graphicsLayer {
-                            alpha = easedAlpha
-                            scaleX = easedScale
-                            scaleY = easedScale
-                            translationY = scrollBehavior.state.heightOffset
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .graphicsLayer {
+                        alpha = bannerAlpha
+                        translationY = scrollBehavior.state.heightOffset * 0.5f
+                    }
+                    .layout { measurable, constraints ->
+                        val placeable = measurable.measure(constraints)
+                        val currentHeight = (placeable.height * bannerAlpha).toInt()
+                        layout(placeable.width, currentHeight) {
+                            placeable.placeRelative(0, 0)
                         }
-                ) {
-                    QuickSettingsBanner(uiState.tileMappings, actions.onRunClick, actions.onTileSettingsClick, actions.onTileSettingsClick)
+                    }
+            ) {
+                Column {
+                    QuickSettingsBanner(
+                        uiState.tileMappings,
+                        actions.onRunClick,
+                        actions.onTileSettingsClick,
+                        actions.onTileSettingsClick
+                    )
                     Spacer(modifier = Modifier.height(4.dp))
                 }
             }
@@ -292,22 +301,18 @@ private fun CollapsingHomeTopBar(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
-fun Modifier.fadingEdge(): Modifier = this.graphicsLayer(compositingStrategy = CompositingStrategy.Offscreen)
-    .drawWithContent {
-        drawContent()
-        val fadeHeight = 10f
-        val colors = listOf(Color.Transparent, Color.Black)
-
-        drawRect(
-            brush = Brush.verticalGradient(
-                colors = colors,
-                startY = 0f,
-                endY = fadeHeight
-            ),
-            blendMode = BlendMode.DstIn
+fun Modifier.fadingEdge(backgroundColor: Color): Modifier = this.drawWithContent {
+    drawContent()
+    val fadeHeight = 16.dp.toPx()
+    drawRect(
+        brush = Brush.verticalGradient(
+            colors = listOf(backgroundColor, Color.Transparent),
+            startY = 0f,
+            endY = fadeHeight
         )
-    }
+    )
+}
+
 @Composable
 private fun SearchField(query: String, onQueryChange: (String) -> Unit) {
     TextField(
@@ -445,12 +450,17 @@ private fun ScriptList(
         } else {
             itemsIndexed(items = uiState.scripts, key = { _, script -> script.id }) { index, script ->
                 val isDragging = index == draggedItemIndex
-                Box(modifier = Modifier.fillMaxWidth().graphicsLayer {
-                    translationY = if (isDragging) dragOffset else 0f
-                    scaleX = if (isDragging) 1.04f else 1.0f
-                    scaleY = if (isDragging) 1.04f else 1.0f
-                    alpha = if (isDragging) 0.9f else 1.0f
-                }.zIndex(if (isDragging) 1f else 0f)) {
+                val itemModifier = if (isDragging) {
+                    Modifier.graphicsLayer {
+                        translationY = dragOffset
+                        scaleX = 1.04f
+                        scaleY = 1.04f
+                        alpha = 0.9f
+                    }.zIndex(1f)
+                } else {
+                    Modifier
+                }
+                Box(modifier = Modifier.fillMaxWidth().then(itemModifier)) {
                     ScriptItem(
                         script = script,
                         onCodeClick = onScriptCodeClick,
