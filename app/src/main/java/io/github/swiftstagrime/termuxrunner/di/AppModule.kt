@@ -6,6 +6,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import io.github.swiftstagrime.termuxrunner.data.automation.AutomationNotificationHelper
 import io.github.swiftstagrime.termuxrunner.data.automation.AutomationScheduler
 import io.github.swiftstagrime.termuxrunner.data.local.ImageStorageManager
 import io.github.swiftstagrime.termuxrunner.data.local.dao.AutomationDao
@@ -113,4 +114,14 @@ object AppModule {
     @Singleton
     fun provideAutomationLogRepository(automationLogDao: AutomationLogDao): AutomationLogRepository =
         AutomationLogRepositoryImpl(automationLogDao)
+
+    @Provides
+    @Singleton
+    fun provideAutomationNotificationHelper(
+        @ApplicationContext context: Context,
+    ): AutomationNotificationHelper = AutomationNotificationHelper(context)
+
+    @Provides
+    @PackageName
+    fun providePackageName(@ApplicationContext context: Context): String = context.packageName
 }

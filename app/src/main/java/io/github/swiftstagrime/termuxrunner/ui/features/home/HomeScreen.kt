@@ -86,6 +86,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.layout
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -169,6 +170,7 @@ fun HomeScreen(
         floatingActionButton = {
             FloatingActionButton(
                 onClick = actions.onAddClick,
+                modifier = Modifier.testTag("fab_add_script"),
                 containerColor = MaterialTheme.colorScheme.primaryContainer
             ) {
                 Icon(Icons.Default.Add, stringResource(R.string.cd_add_script))

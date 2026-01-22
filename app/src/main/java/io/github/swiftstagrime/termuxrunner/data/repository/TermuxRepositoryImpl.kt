@@ -67,7 +67,7 @@ class TermuxRepositoryImpl @Inject constructor(
 
             if (notifyOnResult) {
                 val resultIntent = Intent(context, TermuxResultReceiver::class.java).apply {
-                    action = "io.github.swiftstagrime.SCRIPT_RESULT"
+                    action = "${context.packageName}.SCRIPT_RESULT"
                     data = "script://result/$scriptId".toUri()
                     putExtra("script_id", scriptId)
                     putExtra("script_name", scriptName)

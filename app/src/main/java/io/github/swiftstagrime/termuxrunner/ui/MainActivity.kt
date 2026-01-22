@@ -1,11 +1,8 @@
 package io.github.swiftstagrime.termuxrunner.ui
 
-import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
 import android.os.Bundle
 import android.view.View
-import android.view.ViewAnimationUtils
-import android.view.animation.AnticipateInterpolator
 import android.view.animation.OvershootInterpolator
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge

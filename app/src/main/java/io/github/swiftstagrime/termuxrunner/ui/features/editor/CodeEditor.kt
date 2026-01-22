@@ -74,6 +74,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextRange
@@ -388,7 +389,7 @@ private fun MainEditorArea(
                 cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
                 visualTransformation = visualTransformation,
                 modifier = Modifier.then(if (isWrappingEnabled) Modifier.fillMaxWidth() else Modifier)
-                    .padding(horizontal = 8.dp).focusRequester(focusRequester),
+                    .padding(horizontal = 8.dp).focusRequester(focusRequester).testTag("code_editor_input"),
                 decorationBox = { inner ->
                     Column(modifier = Modifier.fillMaxWidth()) {
                         Box {

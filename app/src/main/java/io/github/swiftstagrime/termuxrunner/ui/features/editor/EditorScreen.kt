@@ -21,6 +21,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextOverflow
@@ -81,7 +82,7 @@ fun EditorScreen(
                     IconButton(onClick = {
                         onOpenConfig()
                         showConfigDialog = true
-                    }) {
+                    }, modifier = Modifier.testTag("editor_save_btn")) {
                         Icon(Icons.Default.Save, stringResource(R.string.cd_save), tint = MaterialTheme.colorScheme.primary)
                     }
                 },

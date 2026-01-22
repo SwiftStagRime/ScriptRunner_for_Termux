@@ -63,6 +63,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -526,7 +527,7 @@ private fun ConfigTopBar(onDismiss: () -> Unit, onSave: () -> Unit) {
             }
         },
         actions = {
-            IconButton(onClick = onSave) {
+            IconButton(onClick = onSave, modifier = Modifier.testTag("config_save_btn")) {
                 Icon(Icons.Default.Save, stringResource(R.string.cd_save))
             }
         }
@@ -567,7 +568,7 @@ private fun IdentitySection(
                 onValueChange = { state.name = it; state.nameError = false },
                 label = stringResource(R.string.label_script_name),
                 isError = state.nameError,
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(1f).testTag("config_name_input")
             )
         }
     }

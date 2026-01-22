@@ -23,10 +23,13 @@ android {
         versionCode = 1
         versionName = "1.4"
 
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner  = "io.github.swiftstagrime.termuxrunner.di.HiltTestRunner"
 
         setProperty("archivesBaseName", "ScriptRunnerForTermux")
     }
+
+    testBuildType = "instrumented"
+
     buildTypes {
         release {
             isMinifyEnabled = true
@@ -35,6 +38,14 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",
             )
+        }
+        debug {
+            applicationIdSuffix = ".debug"
+        }
+        create("instrumented") {
+            initWith(getByName("debug"))
+            applicationIdSuffix = ".instrumented"
+            signingConfig = signingConfigs.getByName("debug")
         }
     }
     compileOptions {
@@ -77,6 +88,17 @@ android {
         warningsAsErrors = false
         baseline = file("lint-baseline.xml")
     }
+    packaging {
+        resources {
+            excludes += "/META-INF/{AL2.0,LGPL2.1,LICENSE.md,LICENSE-notice.md}"
+        }
+    }
+    testOptions {
+        animationsDisabled = true
+        unitTests {
+            isIncludeAndroidResources = true
+        }
+    }
 }
 
 ktlint {
@@ -118,6 +140,8 @@ dependencies {
     implementation(libs.androidx.hilt.common)
     implementation(libs.androidx.hilt.work)
     implementation(libs.androidx.compose.ui.unit)
+    implementation(libs.core.ktx)
+    implementation(libs.androidx.work.testing)
     ksp(libs.hilt.compiler)
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.android.database.sqlcipher)
@@ -141,9 +165,9 @@ dependencies {
     implementation(libs.androidx.material3.adaptive.navigation3)
     implementation(libs.kotlinx.serialization.core)
     implementation(libs.androidx.core.splashscreen)
+    testImplementation(libs.kotlin.reflect)
     implementation(libs.kotlinx.serialization.json)
     ksp(libs.androidx.room.compiler)
-    ksp(libs.hilt.android.compiler)
     ksp(libs.androidx.hilt.compiler)
     implementation(libs.androidx.room.ktx)
     testImplementation(libs.androidx.room.testing)
@@ -151,4 +175,9 @@ dependencies {
     androidTestImplementation(libs.androidx.uiautomator)
     testImplementation(libs.mockk)
     testImplementation(libs.kotlinx.coroutines.test)
+    androidTestImplementation(libs.mockk.android)
+    androidTestImplementation(libs.hilt.android.testing)
+    kspAndroidTest(libs.hilt.compiler)
+    androidTestImplementation(libs.androidx.work.testing)
+    testImplementation(libs.robolectric)
 }

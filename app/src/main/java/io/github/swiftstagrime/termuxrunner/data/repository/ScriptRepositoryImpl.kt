@@ -33,11 +33,7 @@ import java.io.InputStreamReader
 import java.util.UUID
 import javax.inject.Inject
 
-sealed class ScriptException : Exception()
 
-class ExportStreamException : ScriptException()
-
-class ImportStreamException : ScriptException()
 
 /**
  * Repository implementation for managing scripts, handling database operations
@@ -168,6 +164,9 @@ class ScriptRepositoryImpl @Inject constructor(
                     useHeartbeat = dto.useHeartbeat,
                     heartbeatTimeout = dto.heartbeatTimeout,
                     heartbeatInterval = dto.heartbeatInterval,
+                    argumentPresets = dto.argumentPresets,
+                    prefixPresets = dto.prefixPresets,
+                    envVarPresets = dto.envVarPresets,
                     iconPath = newIconPath,
                     orderIndex = dto.orderIndex,
                     notifyOnResult = dto.notifyOnResult,
@@ -292,3 +291,9 @@ class ScriptRepositoryImpl @Inject constructor(
         )
     }
 }
+
+sealed class ScriptException : Exception()
+
+class ExportStreamException : ScriptException()
+
+class ImportStreamException : ScriptException()

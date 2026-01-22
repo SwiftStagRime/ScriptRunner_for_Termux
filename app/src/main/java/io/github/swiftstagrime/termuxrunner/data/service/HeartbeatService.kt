@@ -46,6 +46,9 @@ class HeartbeatService : Service() {
     private var wakeLock: PowerManager.WakeLock? = null
     private var isServiceRunning = false
     private val monitoredScripts = mutableMapOf<Int, ScriptMonitorState>()
+    private val actionHeartbeat by lazy { "${packageName}.HEARTBEAT" }
+    private val actionFinished by lazy { "${packageName}.SCRIPT_FINISHED" }
+
 
     /**
      * Listens for heartbeat signals and finish signals.
@@ -56,13 +59,13 @@ class HeartbeatService : Service() {
             val scriptId = intent?.getIntExtra("script_id", -1) ?: return
 
             when (intent.action) {
-                ACTION_HEARTBEAT -> {
+                actionHeartbeat -> {
                     val state = monitoredScripts[scriptId] ?: return
                     state.lastHeartbeatTime = System.currentTimeMillis()
                     state.status = UiText.StringResource(R.string.notif_status_active)
                 }
 
-                ACTION_SCRIPT_FINISHED -> {
+                actionFinished -> {
                     val exitCode = intent.getIntExtra(EXTRA_EXIT_CODE, 0)
                     handleScriptFinished(scriptId, exitCode)
                 }
@@ -77,8 +80,8 @@ class HeartbeatService : Service() {
         super.onCreate()
         createNotificationChannel()
         val filter = IntentFilter().apply {
-            addAction(ACTION_HEARTBEAT)
-            addAction(ACTION_SCRIPT_FINISHED)
+            addAction(actionHeartbeat)
+            addAction(actionFinished)
         }
         ContextCompat.registerReceiver(
             this,
@@ -369,9 +372,6 @@ class HeartbeatService : Service() {
         const val ACTION_START = "ACTION_START_MONITORING"
         const val ACTION_STOP = "ACTION_STOP_MONITORING" // Stops specific script if ID provided, or all
         const val ACTION_STOP_ALL = "ACTION_STOP_ALL_MONITORING" // Explicit stop all
-        const val ACTION_HEARTBEAT = "io.github.swiftstagrime.HEARTBEAT"
-        const val ACTION_SCRIPT_FINISHED = "io.github.swiftstagrime.SCRIPT_FINISHED"
-
         // Intent extras
         const val EXTRA_SCRIPT_ID = "EXTRA_SCRIPT_ID" // Used in broadcasts and start commands
         const val EXTRA_SCRIPT_NAME = "EXTRA_SCRIPT_NAME"

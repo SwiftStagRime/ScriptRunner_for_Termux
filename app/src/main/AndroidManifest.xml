@@ -52,7 +52,11 @@
 
         <receiver
             android:name=".data.receiver.TermuxResultReceiver"
-            android:exported="false" />
+            android:exported="true">
+            <intent-filter>
+                <action android:name="${applicationId}.SCRIPT_RESULT" />
+            </intent-filter>
+        </receiver>
 
         <service
             android:name=".data.service.HeartbeatService"

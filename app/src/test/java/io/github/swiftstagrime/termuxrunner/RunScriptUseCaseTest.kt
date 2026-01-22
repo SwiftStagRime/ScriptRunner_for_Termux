@@ -1,302 +1,207 @@
 package io.github.swiftstagrime.termuxrunner
 
-import android.util.Base64
 import io.github.swiftstagrime.termuxrunner.domain.model.Script
 import io.github.swiftstagrime.termuxrunner.domain.repository.MonitoringRepository
 import io.github.swiftstagrime.termuxrunner.domain.repository.ScriptFileRepository
 import io.github.swiftstagrime.termuxrunner.domain.repository.TermuxRepository
 import io.github.swiftstagrime.termuxrunner.domain.usecase.RunScriptUseCase
-import io.mockk.MockKAnnotations
+import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
-import io.mockk.impl.annotations.MockK
-import io.mockk.mockkStatic
+import io.mockk.mockk
 import io.mockk.slot
-import io.mockk.unmockkStatic
 import io.mockk.verify
+import junit.framework.TestCase.assertEquals
+import junit.framework.TestCase.assertFalse
 import junit.framework.TestCase.assertTrue
 import kotlinx.coroutines.test.runTest
-import org.junit.After
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 
+@RunWith(RobolectricTestRunner::class)
+@Config(application = TestApplication::class, sdk = [33])
 class RunScriptUseCaseTest {
-    @MockK
-    lateinit var termuxRepository: TermuxRepository
 
-    @MockK
-    lateinit var scriptFileRepository: ScriptFileRepository
-
-    @MockK
-    lateinit var monitoringRepository: MonitoringRepository
+    private val termuxRepo = mockk<TermuxRepository>(relaxed = true)
+    private val fileRepo = mockk<ScriptFileRepository>(relaxed = true)
+    private val monitorRepo = mockk<MonitoringRepository>(relaxed = true)
 
     private lateinit var useCase: RunScriptUseCase
+    private val testPackageName = "io.github.swiftstagrime.test"
 
     @Before
-    fun setUp() {
-        MockKAnnotations.init(this)
-
-        mockkStatic(Base64::class)
-
-        every {
-            Base64.encodeToString(any<ByteArray>(), any())
-        } answers { call ->
-            val bytes = call.invocation.args[0] as ByteArray
-            java.util.Base64
-                .getEncoder()
-                .encodeToString(bytes)
-        }
-
-        useCase = RunScriptUseCase(termuxRepository, scriptFileRepository, monitoringRepository)
-    }
-
-    @After
-    fun tearDown() {
-        unmockkStatic(Base64::class)
+    fun setup() {
+        useCase = RunScriptUseCase(testPackageName, termuxRepo, fileRepo, monitorRepo)
     }
 
     @Test
-    fun `invoke with LARGE script (4000 chars) uses file bridge strategy`() =
-        runTest {
-            val largeCode = "a".repeat(4005)
+    fun `small script is encoded as base64 in the command`() = runTest {
+        val script = Script(
+            id = 1,
+            name = "SmallScript",
+            code = "echo 'hello'",
+            interpreter = "bash"
+        )
 
-            val script =
-                Script(
-                    id = 99,
-                    name = "Large Script",
-                    code = largeCode,
-                    interpreter = "python",
-                    fileExtension = "py",
-                    commandPrefix = "",
-                    runInBackground = true,
-                    openNewSession = false,
-                    executionParams = "",
-                    iconPath = null,
-                    envVars = emptyMap(),
-                    keepSessionOpen = false,
-                )
+        useCase(script)
 
-            val fakeSavedPath = "/sdcard/Download/TermuxRunnerBridge/script_fake.py"
-
-            every {
-                scriptFileRepository.saveToBridge(any(), largeCode)
-            } returns fakeSavedPath
-
-            val commandSlot = slot<String>()
-            every { termuxRepository.runCommand(capture(commandSlot), any(), any()) } returns Unit
-
-            useCase(script)
-
-            val generatedCommand = commandSlot.captured
-
-            verify { scriptFileRepository.saveToBridge(any(), largeCode) }
-
-            assertTrue(
-                "Command should copy from bridge path",
-                generatedCommand.contains("cp -f $fakeSavedPath"),
-            )
-
-            assertTrue(
-                "Large scripts should not be base64 encoded into the command line",
-                !generatedCommand.contains("base64 -d"),
+        val commandSlot = slot<String>()
+        verify {
+            termuxRepo.runCommand(
+                command = capture(commandSlot),
+                any(), any(), any(), any(), any(), any()
             )
         }
+
+        val command = commandSlot.captured
+        assertTrue(command.contains("mkdir -p ~/scriptrunner_for_termux"))
+        assertTrue(command.contains("base64 -d"))
+        assertTrue(command.contains("ZWNobyAnaGVsbG8n"))
+    }
 
     @Test
-    fun `invoke with SMALL script uses base64 strategy`() =
-        runTest {
-            val smallCode = "print('hello')"
-            val script =
-                Script(
-                    id = 1,
-                    name = "Small",
-                    code = smallCode,
-                    interpreter = "python",
-                    fileExtension = "py",
-                    commandPrefix = "",
-                    runInBackground = true,
-                    openNewSession = false,
-                    executionParams = "",
-                    iconPath = null,
-                    envVars = emptyMap(),
-                    keepSessionOpen = false,
-                )
+    fun `large script is saved to bridge repository`() = runTest {
+        val largeCode = "a".repeat(4001)
+        val script = Script(id = 2, name = "LargeScript", code = largeCode)
 
-            every { termuxRepository.runCommand(any(), any(), any()) } returns Unit
+        coEvery { fileRepo.saveToBridge(any(), any()) } returns "/sdcard/bridge/script_2.sh"
 
-            useCase(script)
+        useCase(script)
 
-            verify(exactly = 0) { scriptFileRepository.saveToBridge(any(), any()) }
+        coVerify { fileRepo.saveToBridge(match { it.startsWith("script_2") }, largeCode) }
 
-            coVerify {
-                termuxRepository.runCommand(
-                    match { cmd -> cmd.contains("base64 -d") },
-                    any(),
-                    any(),
-                )
-            }
-        }
+        val commandSlot = slot<String>()
+        verify { termuxRepo.runCommand(command = capture(commandSlot), any(), any(), any(), any(), any(), any()) }
+
+        assertTrue(commandSlot.captured.contains("cp -f /sdcard/bridge/script_2.sh"))
+    }
 
     @Test
-    fun `invoke handles file write failure gracefully`() =
-        runTest {
-            val largeCode = "b".repeat(4005)
-            val script =
-                Script(
-                    id = 2,
-                    name = "Fail Script",
-                    code = largeCode,
-                    interpreter = "bash",
-                    fileExtension = "sh",
-                    commandPrefix = "",
-                    runInBackground = false,
-                    openNewSession = false,
-                    executionParams = "",
-                    iconPath = null,
-                    envVars = emptyMap(),
-                    keepSessionOpen = false,
-                )
+    fun `environment variables are sanitized and exported`() = runTest {
+        val script = Script(
+            id = 3,
+            name = "EnvTest",
+            code = "env",
+            envVars = mapOf("VALID_KEY" to "value'with'quote", "123INVALID" to "bad")
+        )
 
-            every {
-                scriptFileRepository.saveToBridge(
-                    any(),
-                    any(),
-                )
-            } throws RuntimeException("Disk full")
+        useCase(script)
 
-            val commandSlot = slot<String>()
-            every { termuxRepository.runCommand(capture(commandSlot), any(), any()) } returns Unit
+        val commandSlot = slot<String>()
+        verify { termuxRepo.runCommand(command = capture(commandSlot), any(), any(), any(), any(), any(), any()) }
 
-            useCase(script)
-
-            val cmd = commandSlot.captured
-            assertTrue(cmd.contains("echo 'Error: Could not save script"))
-        }
+        val command = commandSlot.captured
+        assertTrue(command.contains("export VALID_KEY='value'\\''with'\\''quote'"))
+        assertFalse(command.contains("123INVALID"))
+    }
 
     @Test
-    fun `invoke assembles all command components in correct order (Small Script)`() =
-        runTest {
-            // Arrange
-            val script =
-                Script(
-                    id = 1,
-                    name = "Complex Config",
-                    code = "print('hello')",
-                    interpreter = "python3",
-                    fileExtension = "py",
-                    commandPrefix = "sudo nice -n 10",
-                    executionParams = "--verbose --dry-run",
-                    envVars = mapOf("API_KEY" to "12345", "MODE" to "prod"),
-                    runInBackground = true,
-                    openNewSession = false,
-                    keepSessionOpen = false,
-                    iconPath = null,
-                )
+    fun `interpreter maps to correct file extension when extension is blank`() = runTest {
+        val script = Script(
+            id = 4,
+            name = "PyTest",
+            code = "print()",
+            interpreter = "python3",
+            fileExtension = ""
+        )
 
-            val commandSlot = slot<String>()
-            every { termuxRepository.runCommand(capture(commandSlot), any(), any()) } returns Unit
+        useCase(script)
 
-            useCase(script)
+        val commandSlot = slot<String>()
+        verify { termuxRepo.runCommand(command = capture(commandSlot), any(), any(), any(), any(), any(), any()) }
 
-            val fullCommand = commandSlot.captured
-
-            assertTrue("Env vars must be exported", fullCommand.contains("export API_KEY='12345';"))
-            assertTrue("Env vars must be exported", fullCommand.contains("export MODE='prod';"))
-
-            assertTrue(
-                "Interpreter must follow prefix",
-                fullCommand.contains("sudo nice -n 10 python3"),
-            )
-
-            val interpreterIndex = fullCommand.indexOf("python3")
-            val paramsIndex = fullCommand.indexOf("--verbose --dry-run")
-
-            assertTrue("Interpreter was found", interpreterIndex != -1)
-            assertTrue("Params were found", paramsIndex != -1)
-            assertTrue(
-                "Execution params must appear AFTER the interpreter and script path",
-                paramsIndex > interpreterIndex,
-            )
-        }
+        assertTrue("Should contain .py extension", commandSlot.captured.contains(".py"))
+        assertFalse("Should not contain default .sh extension", commandSlot.captured.contains(".sh"))
+    }
 
     @Test
-    fun `invoke assembles all command components in correct order (Large Script)`() =
-        runTest {
-            val largeCode = "a".repeat(4005)
-            val script =
-                Script(
-                    id = 2,
-                    name = "Large Config",
-                    code = largeCode,
-                    interpreter = "node",
-                    fileExtension = "js",
-                    commandPrefix = "time",
-                    executionParams = "server.js",
-                    envVars = mapOf("PORT" to "8080"),
-                    runInBackground = true,
-                    openNewSession = false,
-                    keepSessionOpen = false,
-                    iconPath = null,
-                )
+    fun `heartbeat wrapper is added when enabled`() = runTest {
+        val script = Script(
+            id = 5,
+            name = "HeartbeatTest",
+            code = "sleep 10",
+            useHeartbeat = true,
+            heartbeatInterval = 5000L
+        )
+        every { monitorRepo.hasNotificationPermission() } returns true
 
-            every { scriptFileRepository.saveToBridge(any(), any()) } returns "/sdcard/fake.js"
+        useCase(script)
 
-            val commandSlot = slot<String>()
-            every { termuxRepository.runCommand(capture(commandSlot), any(), any()) } returns Unit
-
-            useCase(script)
-
-            val fullCommand = commandSlot.captured
-
-            assertTrue(fullCommand.contains("export PORT='8080';"))
-
-            assertTrue(
-                "Prefix must precede interpreter",
-                fullCommand.contains("time node"),
+        val commandSlot = slot<String>()
+        verify {
+            termuxRepo.runCommand(
+                command = capture(commandSlot),
+                runInBackground = any(),
+                sessionAction = any(),
+                scriptId = any(),
+                scriptName = any(),
+                notifyOnResult = any(),
+                automationId = any()
             )
-
-            val interpreterIndex = fullCommand.indexOf("node")
-            val paramsIndex = fullCommand.indexOf("server.js")
-
-            assertTrue(
-                "Params must appear after interpreter",
-                paramsIndex > interpreterIndex,
-            )
-
-            assertTrue(fullCommand.contains("cp -f /sdcard/fake.js"))
         }
+
+        val command = commandSlot.captured
+
+        assertTrue(command.contains("am broadcast -a $testPackageName.HEARTBEAT"))
+        assertTrue(command.contains("am broadcast -a $testPackageName.SCRIPT_FINISHED"))
+
+        assertTrue(command.contains("HEARTBEAT_PID=$!"))
+        assertTrue(command.contains("trap cleanup_heartbeat EXIT"))
+
+        verify { monitorRepo.startMonitoring(script) }
+    }
 
     @Test
-    fun `invoke correctly escapes Environment Variable values`() =
-        runTest {
-            val script =
-                Script(
-                    id = 3,
-                    name = "Escape Test",
-                    code = $$"echo $MSG",
-                    interpreter = "bash",
-                    fileExtension = "sh",
-                    commandPrefix = "",
-                    executionParams = "",
-                    envVars = mapOf("MSG" to "Don't stop"),
-                    runInBackground = true,
-                    openNewSession = false,
-                    keepSessionOpen = false,
-                    iconPath = null,
-                )
+    fun `keepSessionOpen appends shell hack`() = runTest {
+        val script = Script(id = 6, name = "KeepOpen", code = "ls", keepSessionOpen = true)
 
-            val commandSlot = slot<String>()
-            every { termuxRepository.runCommand(capture(commandSlot), any(), any()) } returns Unit
+        useCase(script)
 
-            useCase(script)
+        val commandSlot = slot<String>()
+        verify { termuxRepo.runCommand(command = capture(commandSlot), any(), any(), any(), any(), any(), any()) }
 
-            val fullCommand = commandSlot.captured
+        assertTrue(commandSlot.captured.contains("--- Finished (Press Enter) ---"))
+        assertTrue(commandSlot.captured.contains($$"read; exec $SHELL"))
+    }
 
-            val expected = "export MSG='Don'\\''t stop';"
+    @Test
+    fun `runtimeArgs are correctly appended to script executionParams`() = runTest {
+        val script = Script(id = 7, name = "ArgTest", code = "ls", executionParams = "-l")
 
-            assertTrue(
-                "Env var with single quotes must be escaped properly. \nGot: $fullCommand",
-                fullCommand.contains(expected),
-            )
-        }
+        useCase(script, runtimeArgs = "-a")
+
+        val commandSlot = slot<String>()
+        verify { termuxRepo.runCommand(command = capture(commandSlot), any(), any(), any(), any(), any(), any()) }
+
+        assertTrue(commandSlot.captured.contains("-l -a"))
+    }
+
+    @Test
+    fun `runtime arguments containing double quotes are escaped correctly for bash -c`() = runTest {
+        val script = Script(id = 8, name = "QuoteTest", code = "ls")
+        useCase(script, runtimeArgs = "--name=\"My Script\"")
+
+        val commandSlot = slot<String>()
+        verify { termuxRepo.runCommand(command = capture(commandSlot), any(), any(), any(), any(), any(), any()) }
+
+        val command = commandSlot.captured
+        assertTrue(command.contains("--name=\\\"My Script\\\""))
+    }
+
+    @Test
+    fun `returns error message command when large script fails to save to bridge`() = runTest {
+        val script = Script(id = 9, name = "FailTest", code = "a".repeat(4001))
+
+        coEvery { fileRepo.saveToBridge(any(), any()) } throws RuntimeException("Disk Full")
+
+        useCase(script)
+
+        val commandSlot = slot<String>()
+        verify { termuxRepo.runCommand(command = capture(commandSlot), any(), any(), any(), any(), any(), any()) }
+
+        assertEquals("echo 'Error: Could not save script to device storage.'", commandSlot.captured)
+    }
 }

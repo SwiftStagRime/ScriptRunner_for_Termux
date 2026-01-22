@@ -1,6 +1,9 @@
 package io.github.swiftstagrime.termuxrunner.domain.usecase
 
+import android.content.Context
 import android.util.Base64
+import dagger.hilt.android.qualifiers.ApplicationContext
+import io.github.swiftstagrime.termuxrunner.di.PackageName
 import io.github.swiftstagrime.termuxrunner.domain.model.Script
 import io.github.swiftstagrime.termuxrunner.domain.repository.MonitoringRepository
 import io.github.swiftstagrime.termuxrunner.domain.repository.ScriptFileRepository
@@ -15,6 +18,7 @@ import javax.inject.Inject
 class RunScriptUseCase
     @Inject
     constructor(
+        @PackageName private val packageName: String,
         private val termuxRepository: TermuxRepository,
         private val scriptFileRepository: ScriptFileRepository,
         private val monitoringRepository: MonitoringRepository,
@@ -201,8 +205,8 @@ class RunScriptUseCase
             intervalMs: Long,
             scriptId: Int,
         ): String {
-            val heartbeatAction = "io.github.swiftstagrime.HEARTBEAT"
-            val finishedAction = "io.github.swiftstagrime.SCRIPT_FINISHED"
+            val heartbeatAction = "$packageName.HEARTBEAT"
+            val finishedAction = "$packageName.SCRIPT_FINISHED"
             val intervalSeconds = (intervalMs / 1000).coerceAtLeast(5)
 
             return $$"""
