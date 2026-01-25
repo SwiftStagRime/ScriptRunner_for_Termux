@@ -58,8 +58,7 @@ fun QuickSettingsBanner(
     Card(
         modifier =
             modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 16.dp),
+                .fillMaxWidth(),
         shape = RoundedCornerShape(24.dp),
         colors =
             CardDefaults.cardColors(

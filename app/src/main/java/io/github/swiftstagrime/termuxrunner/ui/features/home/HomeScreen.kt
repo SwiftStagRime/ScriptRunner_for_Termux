@@ -3,6 +3,7 @@ package io.github.swiftstagrime.termuxrunner.ui.features.home
 import android.net.Uri
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
@@ -16,6 +17,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -63,12 +65,12 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -85,7 +87,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
@@ -161,8 +162,6 @@ fun HomeScreen(
                 searchQuery = searchQuery,
                 sortOption = sortOption,
                 scrollBehavior = scrollBehavior,
-                uiState = uiState,
-                selectedCategoryId = selectedCategoryId,
                 onToggleSearch = { isSearchActive = it },
                 actions = actions
             )
@@ -177,7 +176,7 @@ fun HomeScreen(
             }
         },
     ) { padding ->
-        Box(modifier = Modifier.padding(padding).fillMaxSize().fadingEdge(MaterialTheme.colorScheme.background)) {
+        Box(modifier = Modifier.padding(padding).fillMaxSize()) {
             when (uiState) {
                 is HomeUiState.Loading -> CircularProgressIndicator(Modifier.align(Alignment.Center))
                 is HomeUiState.Success -> {
@@ -186,12 +185,8 @@ fun HomeScreen(
                         searchQuery = searchQuery,
                         selectedCategoryId = selectedCategoryId,
                         sortOption = sortOption,
-                        onMove = actions.onMove,
-                        onScriptCodeClick = actions.onScriptCodeClick,
-                        onRunClick = actions.onRunClick,
-                        onConfigClick = actions.onOpenConfig,
-                        onDeleteClick = actions.onDeleteScript,
-                        onCreateShortcutClick = actions.onCreateShortcutClick
+                        isSearchActive = isSearchActive,
+                        actions = actions
                     )
                 }
             }
@@ -223,96 +218,54 @@ fun HomeScreen(
 private fun CollapsingHomeTopBar(
     isSearchActive: Boolean,
     searchQuery: String,
-    selectedCategoryId: Int?,
     sortOption: SortOption,
     scrollBehavior: TopAppBarScrollBehavior,
-    uiState: HomeUiState,
     onToggleSearch: (Boolean) -> Unit,
     actions: HomeActions
 ) {
-    val bannerAlpha by remember {
-        derivedStateOf { 1f - scrollBehavior.state.collapsedFraction }
-    }
-
     Column(modifier = Modifier.background(MaterialTheme.colorScheme.background)) {
-        LargeTopAppBar(
-            scrollBehavior = if (isSearchActive) null else scrollBehavior,
-            colors = TopAppBarDefaults.topAppBarColors(
-                containerColor = Color.Transparent,
-                scrolledContainerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp),
-                titleContentColor = MaterialTheme.colorScheme.onBackground
-            ),
-            title = {
-                if (isSearchActive) {
+        if (isSearchActive) {
+            TopAppBar(
+                title = {
                     SearchField(searchQuery, actions.onSearchQueryChange)
-                } else {
-                    Text(stringResource(R.string.home_title))
-                }
-            },
-            navigationIcon = {
-                if (isSearchActive) {
+                },
+                navigationIcon = {
                     IconButton(onClick = {
                         onToggleSearch(false)
                         actions.onSearchQueryChange("")
                     }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.cd_close_search))
                     }
-                }
-            },
-            actions = {
-                if (isSearchActive) {
+                },
+                actions = {
                     if (searchQuery.isNotEmpty()) {
                         IconButton(onClick = { actions.onSearchQueryChange("") }) {
                             Icon(Icons.Default.Close, stringResource(R.string.cd_clear_search))
                         }
                     }
-                } else {
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.background,
+                    titleContentColor = MaterialTheme.colorScheme.onBackground
+                )
+            )
+        } else {
+            LargeTopAppBar(
+                scrollBehavior = scrollBehavior,
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color.Transparent,
+                    scrolledContainerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp),
+                    titleContentColor = MaterialTheme.colorScheme.onBackground
+                ),
+                title = {
+                    Text(stringResource(R.string.home_title))
+                },
+                actions = {
                     AppBarActions(sortOption, actions, onToggleSearch)
                 }
-            }
-        )
-
-        if (uiState is HomeUiState.Success && !isSearchActive) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .graphicsLayer {
-                        alpha = bannerAlpha
-                        translationY = scrollBehavior.state.heightOffset * 0.5f
-                    }
-                    .layout { measurable, constraints ->
-                        val placeable = measurable.measure(constraints)
-                        val currentHeight = (placeable.height * bannerAlpha).toInt()
-                        layout(placeable.width, currentHeight) {
-                            placeable.placeRelative(0, 0)
-                        }
-                    }
-            ) {
-                Column {
-                    QuickSettingsBanner(
-                        uiState.tileMappings,
-                        actions.onRunClick,
-                        actions.onTileSettingsClick,
-                        actions.onTileSettingsClick
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                }
-            }
-            CategoryTabs(uiState.categories, selectedCategoryId, actions.onCategorySelect, actions.onDeleteCategory)
+            )
         }
     }
-}
-
-fun Modifier.fadingEdge(backgroundColor: Color): Modifier = this.drawWithContent {
-    drawContent()
-    val fadeHeight = 16.dp.toPx()
-    drawRect(
-        brush = Brush.verticalGradient(
-            colors = listOf(backgroundColor, Color.Transparent),
-            startY = 0f,
-            endY = fadeHeight
-        )
-    )
 }
 
 @Composable
@@ -350,31 +303,33 @@ private fun AppBarActions(
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun ScriptList(
     uiState: HomeUiState.Success,
     searchQuery: String,
     selectedCategoryId: Int?,
     sortOption: SortOption,
-    onMove: (Int, Int) -> Unit,
-    onScriptCodeClick: (Script) -> Unit,
-    onConfigClick: (Script) -> Unit,
-    onRunClick: (Script) -> Unit,
-    onDeleteClick: (Script) -> Unit,
-    onCreateShortcutClick: (Script) -> Unit,
+    isSearchActive: Boolean,
+    actions: HomeActions,
     modifier: Modifier = Modifier
 ) {
-    val scrollPositions = rememberSaveable { mutableMapOf<String, Pair<Int, Int>>() }
+    val uncategorizedLabel = stringResource(R.string.uncategorized)
+
+    val showBanner = !isSearchActive && searchQuery.isEmpty()
+    val showTabs = !isSearchActive
+
+    var listOffset = 0
+    if (showBanner) listOffset++
+    if (showTabs) listOffset++
+
+    val lazyListState = rememberLazyListState()
     val scrollKey = remember(selectedCategoryId, searchQuery) {
         if (searchQuery.isNotEmpty()) "search_$searchQuery"
         else selectedCategoryId?.toString() ?: "ALL_LIST_PERSISTENCE_KEY"
     }
-    val lazyListState = rememberLazyListState()
-    val isManualSort = sortOption == SortOption.MANUAL
 
-    var draggedItemIndex by rememberSaveable { mutableStateOf<Int?>(null) }
-    var dragOffset by rememberSaveable { mutableFloatStateOf(0f) }
-
+    val scrollPositions = rememberSaveable { mutableMapOf<String, Pair<Int, Int>>() }
     LaunchedEffect(scrollKey) {
         val saved = scrollPositions[scrollKey]
         if (saved != null) {
@@ -390,11 +345,13 @@ private fun ScriptList(
                 lazyListState.firstVisibleItemIndex to lazyListState.firstVisibleItemScrollOffset
             } else null
         }.collect { position ->
-            if (position != null) {
-                scrollPositions[scrollKey] = position
-            }
+            if (position != null) scrollPositions[scrollKey] = position
         }
     }
+
+    val isManualSort = sortOption == SortOption.MANUAL
+    var draggedItemIndex by rememberSaveable { mutableStateOf<Int?>(null) }
+    var dragOffset by rememberSaveable { mutableFloatStateOf(0f) }
 
     LazyColumn(
         state = lazyListState,
@@ -407,19 +364,30 @@ private fun ScriptList(
                         onDragStart = { offset ->
                             lazyListState.layoutInfo.visibleItemsInfo.find {
                                 it.offset <= offset.y.toInt() && (it.offset + it.size) >= offset.y.toInt()
-                            }?.let { draggedItemIndex = it.index }
+                            }?.let { item ->
+                                if (item.index >= listOffset) {
+                                    draggedItemIndex = item.index
+                                }
+                            }
                         },
                         onDrag = { change, dragAmount ->
                             change.consume()
                             dragOffset += dragAmount.y
+                            val currentIdx = draggedItemIndex ?: return@detectDragGesturesAfterLongPress
                             val layoutInfo = lazyListState.layoutInfo
-                            val itemInfo = layoutInfo.visibleItemsInfo
-                            val currentItem = itemInfo.find { it.index == draggedItemIndex }
+                            val currentItem = layoutInfo.visibleItemsInfo.find { it.index == currentIdx }
+
                             currentItem?.let {
                                 val targetCenter = it.offset + (it.size / 2) + dragOffset
-                                val targetItem = itemInfo.find { info -> targetCenter.toInt() in info.offset..(info.offset + info.size) }
-                                if (targetItem != null && draggedItemIndex != null && targetItem.index != draggedItemIndex) {
-                                    onMove(draggedItemIndex!!, targetItem.index)
+                                val targetItem = layoutInfo.visibleItemsInfo.find { info ->
+                                    targetCenter.toInt() in info.offset..(info.offset + info.size)
+                                }
+
+                                if (targetItem != null &&
+                                    targetItem.index != currentIdx &&
+                                    targetItem.index >= listOffset
+                                ) {
+                                    actions.onMove(currentIdx - listOffset, targetItem.index - listOffset)
                                     draggedItemIndex = targetItem.index
                                     dragOffset = 0f
                                 }
@@ -432,44 +400,99 @@ private fun ScriptList(
             } else Modifier
         )
     ) {
+        if (showBanner) {
+            item(key = "banner_header") {
+                Box(modifier = Modifier.padding(top = 8.dp, bottom = 4.dp)) {
+                    QuickSettingsBanner(
+                        uiState.tileMappings,
+                        actions.onRunClick,
+                        actions.onTileSettingsClick,
+                        actions.onTileSettingsClick
+                    )
+                }
+            }
+        }
+
+        if (showTabs) {
+            stickyHeader(key = "category_tabs_sticky") {
+                Box(modifier = Modifier.zIndex(2f)) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(MaterialTheme.colorScheme.background)
+                            .padding(vertical = 8.dp)
+                    ) {
+                        CategoryTabs(
+                            uiState.categories,
+                            selectedCategoryId,
+                            actions.onCategorySelect,
+                            actions.onDeleteCategory
+                        )
+                    }
+
+                    val fadeHeight = 16.dp
+                    val backgroundColor = MaterialTheme.colorScheme.background
+
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(fadeHeight)
+                            .align(Alignment.BottomCenter)
+                            .offset(y = fadeHeight)
+                            .background(
+                                Brush.verticalGradient(
+                                    colors = listOf(backgroundColor, Color.Transparent)
+                                )
+                            )
+                    )
+                }
+            }
+        }
+
         val showHeaders = selectedCategoryId == null && searchQuery.isEmpty() && !isManualSort
 
         if (showHeaders) {
             uiState.scripts.groupBy { it.categoryId }.forEach { (catId, scripts) ->
-                val catName = uiState.categories.find { it.id == catId }?.name ?: "Uncategorized"
+                val catName = uiState.categories.find { it.id == catId }?.name ?: uncategorizedLabel
                 item(key = "header_$catId") { CategoryHeader(catName) }
                 items(items = scripts, key = { it.id }) { script ->
                     ScriptItem(
                         script = script,
-                        onCodeClick = onScriptCodeClick,
-                        onConfigClick = onConfigClick,
-                        onRunClick = onRunClick,
-                        onDeleteClick = onDeleteClick,
-                        onCreateShortcutClick = onCreateShortcutClick
+                        onCodeClick = actions.onScriptCodeClick,
+                        onConfigClick = actions.onOpenConfig,
+                        onRunClick = actions.onRunClick,
+                        onDeleteClick = actions.onDeleteScript,
+                        onCreateShortcutClick = actions.onCreateShortcutClick
                     )
                 }
             }
         } else {
             itemsIndexed(items = uiState.scripts, key = { _, script -> script.id }) { index, script ->
-                val isDragging = index == draggedItemIndex
+                val absoluteIndex = index + listOffset
+                val isDragging = absoluteIndex == draggedItemIndex
+
                 val itemModifier = if (isDragging) {
-                    Modifier.graphicsLayer {
-                        translationY = dragOffset
-                        scaleX = 1.04f
-                        scaleY = 1.04f
-                        alpha = 0.9f
-                    }.zIndex(1f)
+                    Modifier
+                        .zIndex(3f)
+                        .graphicsLayer {
+                            translationY = dragOffset
+                            scaleX = 1.04f
+                            scaleY = 1.04f
+                            alpha = 0.9f
+                            shadowElevation = 8.dp.toPx()
+                        }
                 } else {
                     Modifier
                 }
+
                 Box(modifier = Modifier.fillMaxWidth().then(itemModifier)) {
                     ScriptItem(
                         script = script,
-                        onCodeClick = onScriptCodeClick,
-                        onConfigClick = onConfigClick,
-                        onRunClick = onRunClick,
-                        onDeleteClick = onDeleteClick,
-                        onCreateShortcutClick = onCreateShortcutClick
+                        onCodeClick = actions.onScriptCodeClick,
+                        onConfigClick = actions.onOpenConfig,
+                        onRunClick = actions.onRunClick,
+                        onDeleteClick = actions.onDeleteScript,
+                        onCreateShortcutClick = actions.onCreateShortcutClick
                     )
                 }
             }
@@ -751,7 +774,7 @@ fun CategoryTabs(
     var categoryToEdit by remember { mutableStateOf<Category?>(null) }
 
     LazyRow(
-        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+        contentPadding = PaddingValues(vertical = 8.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -798,6 +821,7 @@ fun CategoryTabs(
                     categoryToEdit = null
                 }) { Text(stringResource(R.string.cancel)) }
             },
+            containerColor = MaterialTheme.colorScheme.primaryContainer,
             shape = RoundedCornerShape(28.dp),
         )
     }
