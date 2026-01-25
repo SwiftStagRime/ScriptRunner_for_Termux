@@ -86,20 +86,20 @@ fun AutomationRoute(
         onSave = { params ->
             viewModel.saveAutomation(params)
             flowState = AutomationFlowState.Idle
-        }
+        },
     )
 
     AutomationHistoryView(
         selectedAutomation = selectedAutomationForHistory,
         onDismiss = { selectedAutomationForHistory = null },
-        viewModel = viewModel
+        viewModel = viewModel,
     )
 }
 
 @Composable
 private fun rememberAutomationUiItems(
     automations: List<Automation>,
-    allScripts: List<Script>
+    allScripts: List<Script>,
 ): List<AutomationUiItem> {
     val context = LocalContext.current
     val colorError = MaterialTheme.colorScheme.error.toArgb()
@@ -117,11 +117,12 @@ private fun rememberAutomationUiItems(
         val scriptMap = allScripts.associateBy { it.id }
         automations.map { automation ->
             val script = scriptMap[automation.scriptId]
-            val statusColor = when (automation.lastExitCode) {
-                0 -> colorSuccess
-                null -> colorIdle
-                else -> colorError
-            }
+            val statusColor =
+                when (automation.lastExitCode) {
+                    0 -> colorSuccess
+                    null -> colorIdle
+                    else -> colorError
+                }
             AutomationUiItem(
                 automation = automation,
                 scriptName = script?.name ?: "Unknown",
@@ -142,7 +143,7 @@ private fun AutomationCreationFlow(
     allCategories: List<Category>,
     onDismiss: () -> Unit,
     onStateChange: (AutomationFlowState) -> Unit,
-    onSave: (AutomationSaveParams) -> Unit
+    onSave: (AutomationSaveParams) -> Unit,
 ) {
     when (flowState) {
         is AutomationFlowState.PickingScript -> {
@@ -157,7 +158,7 @@ private fun AutomationCreationFlow(
                         val params = ScriptRuntimeParams(script.executionParams, script.commandPrefix, script.envVars)
                         onStateChange(AutomationFlowState.Configuring(script, params))
                     }
-                }
+                },
             )
         }
         is AutomationFlowState.PromptingRuntime -> {
@@ -166,7 +167,7 @@ private fun AutomationCreationFlow(
                 onDismiss = onDismiss,
                 onConfirm = { args, prefix, env ->
                     onStateChange(AutomationFlowState.Configuring(flowState.script, ScriptRuntimeParams(args, prefix, env)))
-                }
+                },
             )
         }
         is AutomationFlowState.Configuring -> {
@@ -175,7 +176,7 @@ private fun AutomationCreationFlow(
                 onDismiss = onDismiss,
                 onSave = { uiParams ->
                     onSave(uiParams.copy(runtime = flowState.runtime))
-                }
+                },
             )
         }
         else -> Unit
@@ -187,7 +188,7 @@ private fun AutomationCreationFlow(
 private fun AutomationHistoryView(
     selectedAutomation: Automation?,
     onDismiss: () -> Unit,
-    viewModel: AutomationViewModel
+    viewModel: AutomationViewModel,
 ) {
     if (selectedAutomation == null) return
 
@@ -211,33 +212,34 @@ private fun AutomationHistoryView(
 private fun HandleLifecyclePermissions(onTrigger: () -> Unit) {
     val lifecycleOwner = LocalLifecycleOwner.current
     DisposableEffect(lifecycleOwner) {
-        val observer = LifecycleEventObserver { _, event ->
-            if (event == Lifecycle.Event.ON_RESUME) onTrigger()
-        }
+        val observer =
+            LifecycleEventObserver { _, event ->
+                if (event == Lifecycle.Event.ON_RESUME) onTrigger()
+            }
         lifecycleOwner.lifecycle.addObserver(observer)
         onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
 }
 
-private fun checkExactAlarmPermission(context: Context): Boolean {
-    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+private fun checkExactAlarmPermission(context: Context): Boolean =
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
         (context.getSystemService(Context.ALARM_SERVICE) as AlarmManager).canScheduleExactAlarms()
     } else {
         true
     }
-}
 
 private fun launchExactAlarmSettings(context: Context) {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-        val intent = try {
-            Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM).apply {
-                data = Uri.fromParts("package", context.packageName, null)
+        val intent =
+            try {
+                Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM).apply {
+                    data = Uri.fromParts("package", context.packageName, null)
+                }
+            } catch (e: ActivityNotFoundException) {
+                Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                    data = Uri.fromParts("package", context.packageName, null)
+                }
             }
-        } catch (e: ActivityNotFoundException) {
-            Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
-                data = Uri.fromParts("package", context.packageName, null)
-            }
-        }
         context.startActivity(intent)
     }
 }
@@ -245,9 +247,17 @@ private fun launchExactAlarmSettings(context: Context) {
 sealed class AutomationFlowState : Parcelable {
     @Parcelize
     object Idle : AutomationFlowState()
+
     @Parcelize object PickingScript : AutomationFlowState()
-    @Parcelize data class PromptingRuntime(val script: Script) : AutomationFlowState()
-    @Parcelize data class Configuring(val script: Script, val runtime: ScriptRuntimeParams) : AutomationFlowState()
+
+    @Parcelize data class PromptingRuntime(
+        val script: Script,
+    ) : AutomationFlowState()
+
+    @Parcelize data class Configuring(
+        val script: Script,
+        val runtime: ScriptRuntimeParams,
+    ) : AutomationFlowState()
 }
 
 data class AutomationSaveParams(
@@ -261,5 +271,5 @@ data class AutomationSaveParams(
     val requireWifi: Boolean = false,
     val requireCharging: Boolean = false,
     val batteryThreshold: Int = 0,
-    val runtime: ScriptRuntimeParams = ScriptRuntimeParams()
+    val runtime: ScriptRuntimeParams = ScriptRuntimeParams(),
 )

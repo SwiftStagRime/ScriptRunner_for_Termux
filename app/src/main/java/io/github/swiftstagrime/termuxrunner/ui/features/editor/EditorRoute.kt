@@ -55,8 +55,8 @@ fun EditorRoute(
         mutableStateOf(
             TextFieldValue(
                 text = script?.code ?: "",
-                selection = TextRange(script?.code?.length ?: 0)
-            )
+                selection = TextRange(script?.code?.length ?: 0),
+            ),
         )
     }
 
@@ -64,34 +64,38 @@ fun EditorRoute(
         mutableStateOf(BatteryUtils.isIgnoringBatteryOptimizations(context))
     }
 
-    val notificationPermissionLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestPermission(),
-    ) { isGranted ->
-        if (!isGranted) {
-            scope.launch {
-                snackbarHostState.showSnackbar(
-                    message = UiText
-                        .StringResource(R.string.msg_notification_needed_for_heartbeat)
-                        .asString(context),
-                )
-            }
-        }
-    }
-
-    val requestNotifications = remember {
-        {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                val hasPermission = ContextCompat.checkSelfPermission(
-                    context,
-                    android.Manifest.permission.POST_NOTIFICATIONS,
-                ) == PackageManager.PERMISSION_GRANTED
-
-                if (!hasPermission) {
-                    notificationPermissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+    val notificationPermissionLauncher =
+        rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.RequestPermission(),
+        ) { isGranted ->
+            if (!isGranted) {
+                scope.launch {
+                    snackbarHostState.showSnackbar(
+                        message =
+                            UiText
+                                .StringResource(R.string.msg_notification_needed_for_heartbeat)
+                                .asString(context),
+                    )
                 }
             }
         }
-    }
+
+    val requestNotifications =
+        remember {
+            {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    val hasPermission =
+                        ContextCompat.checkSelfPermission(
+                            context,
+                            android.Manifest.permission.POST_NOTIFICATIONS,
+                        ) == PackageManager.PERMISSION_GRANTED
+
+                    if (!hasPermission) {
+                        notificationPermissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+                    }
+                }
+            }
+        }
 
     LaunchedEffect(script) {
         if (scriptDraft == null && script != null) {
@@ -101,11 +105,12 @@ fun EditorRoute(
     }
 
     DisposableEffect(lifecycleOwner) {
-        val observer = LifecycleEventObserver { _, event ->
-            if (event == Lifecycle.Event.ON_RESUME) {
-                isBatteryUnrestricted = BatteryUtils.isIgnoringBatteryOptimizations(context)
+        val observer =
+            LifecycleEventObserver { _, event ->
+                if (event == Lifecycle.Event.ON_RESUME) {
+                    isBatteryUnrestricted = BatteryUtils.isIgnoringBatteryOptimizations(context)
+                }
             }
-        }
         lifecycleOwner.lifecycle.addObserver(observer)
         onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
@@ -126,7 +131,7 @@ fun EditorRoute(
     if (script == null || scriptDraft == null) {
         Box(
             modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center
+            contentAlignment = Alignment.Center,
         ) {
             CircularProgressIndicator()
         }

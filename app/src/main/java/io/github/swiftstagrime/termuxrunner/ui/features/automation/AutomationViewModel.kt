@@ -81,46 +81,49 @@ class AutomationViewModel
             viewModelScope.launch {
                 val now = System.currentTimeMillis()
 
-                val tempEntity = AutomationEntity(
-                    id = 0,
-                    scriptId = params.scriptId,
-                    label = params.label,
-                    type = params.type,
-                    scheduledTimestamp = params.timestamp,
-                    intervalMillis = params.interval,
-                    daysOfWeek = params.days,
-                    isEnabled = true,
-                    runIfMissed = params.runIfMissed,
-                    requireWifi = params.requireWifi,
-                    requireCharging = params.requireCharging,
-                    batteryThreshold = params.batteryThreshold,
-                )
+                val tempEntity =
+                    AutomationEntity(
+                        id = 0,
+                        scriptId = params.scriptId,
+                        label = params.label,
+                        type = params.type,
+                        scheduledTimestamp = params.timestamp,
+                        intervalMillis = params.interval,
+                        daysOfWeek = params.days,
+                        isEnabled = true,
+                        runIfMissed = params.runIfMissed,
+                        requireWifi = params.requireWifi,
+                        requireCharging = params.requireCharging,
+                        batteryThreshold = params.batteryThreshold,
+                    )
 
-                val nextRun = AutomationTimeCalculator.calculateNextRun(
-                    automation = tempEntity,
-                    fromTime = now,
-                )
+                val nextRun =
+                    AutomationTimeCalculator.calculateNextRun(
+                        automation = tempEntity,
+                        fromTime = now,
+                    )
 
-                val automation = Automation(
-                    id = 0,
-                    scriptId = params.scriptId,
-                    label = params.label,
-                    type = params.type,
-                    scheduledTimestamp = params.timestamp,
-                    intervalMillis = params.interval,
-                    daysOfWeek = params.days,
-                    isEnabled = true,
-                    runIfMissed = params.runIfMissed,
-                    nextRunTimestamp = nextRun,
-                    runtimeArgs = params.runtime.arguments,
-                    runtimePrefix = params.runtime.prefix,
-                    runtimeEnv = params.runtime.envVars,
-                    requireWifi = params.requireWifi,
-                    requireCharging = params.requireCharging,
-                    batteryThreshold = params.batteryThreshold,
-                    lastRunTimestamp = null,
-                    lastExitCode = null,
-                )
+                val automation =
+                    Automation(
+                        id = 0,
+                        scriptId = params.scriptId,
+                        label = params.label,
+                        type = params.type,
+                        scheduledTimestamp = params.timestamp,
+                        intervalMillis = params.interval,
+                        daysOfWeek = params.days,
+                        isEnabled = true,
+                        runIfMissed = params.runIfMissed,
+                        nextRunTimestamp = nextRun,
+                        runtimeArgs = params.runtime.arguments,
+                        runtimePrefix = params.runtime.prefix,
+                        runtimeEnv = params.runtime.envVars,
+                        requireWifi = params.requireWifi,
+                        requireCharging = params.requireCharging,
+                        batteryThreshold = params.batteryThreshold,
+                        lastRunTimestamp = null,
+                        lastExitCode = null,
+                    )
 
                 automationRepository.saveAutomation(automation)
             }

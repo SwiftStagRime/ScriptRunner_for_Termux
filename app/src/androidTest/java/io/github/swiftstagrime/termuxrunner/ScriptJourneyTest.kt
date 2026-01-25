@@ -21,7 +21,6 @@ import javax.inject.Inject
 @HiltAndroidTest
 @RunWith(AndroidJUnit4::class)
 class ScriptJourneyTest {
-
     @get:Rule(order = 0)
     val hiltRule = HiltAndroidRule(this)
 

@@ -20,7 +20,6 @@ import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class ScriptRunnerActivity : ComponentActivity() {
-
     private val viewModel: ScriptRunnerViewModel by viewModels()
 
     private val requestPermissionLauncher =
@@ -30,11 +29,12 @@ class ScriptRunnerActivity : ComponentActivity() {
             if (isGranted) {
                 viewModel.onPermissionGranted()
             } else {
-                Toast.makeText(
-                    this,
-                    getString(R.string.script_runner_permission_denied),
-                    Toast.LENGTH_SHORT,
-                ).show()
+                Toast
+                    .makeText(
+                        this,
+                        getString(R.string.script_runner_permission_denied),
+                        Toast.LENGTH_SHORT,
+                    ).show()
                 viewModel.dismissPrompt()
             }
         }
@@ -60,7 +60,7 @@ class ScriptRunnerActivity : ComponentActivity() {
                         onDismiss = { viewModel.dismissPicker() },
                         onScriptSelected = { script ->
                             viewModel.onScriptSelected(script)
-                        }
+                        },
                     )
                 }
 

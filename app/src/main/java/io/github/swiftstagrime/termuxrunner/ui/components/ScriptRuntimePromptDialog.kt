@@ -65,51 +65,58 @@ fun ScriptRuntimePromptDialog(
     var runtimePrefix by rememberSaveable { mutableStateOf(script.commandPrefix) }
     var runtimeArgs by rememberSaveable { mutableStateOf(script.executionParams) }
 
-    val selectedMultiOptions = rememberSaveable(saver = snapshotStateListSaver<String>()) {
-        mutableStateListOf()
-    }
-
-    val selectedEnvPresets = rememberSaveable(saver = snapshotStateListSaver()) {
-        mutableStateListOf<String>().apply {
-            addAll(script.envVarPresets.map { it.split("=")[0] })
+    val selectedMultiOptions =
+        rememberSaveable(saver = snapshotStateListSaver<String>()) {
+            mutableStateListOf()
         }
-    }
 
-
-    val multiModeEnvMap = rememberSaveable(saver = mapStateSaver()) {
-        val map = mutableStateMapOf<String, String>()
-        script.envVarPresets.forEach { raw ->
-            val parts = raw.split("=", limit = 2)
-            val key = parts.getOrNull(0) ?: ""
-            val defaultValue = parts.getOrNull(1) ?: ""
-            map[key] = defaultValue
+    val selectedEnvPresets =
+        rememberSaveable(saver = snapshotStateListSaver()) {
+            mutableStateListOf<String>().apply {
+                addAll(script.envVarPresets.map { it.split("=")[0] })
+            }
         }
-        map
-    }
 
-    val textModeEnvList = rememberSaveable(saver = listPairSaver()) {
-        script.envVarPresets.map { raw ->
-            val parts = raw.split("=", limit = 2)
-            (parts.getOrNull(0) ?: "") to (parts.getOrNull(1) ?: "")
-        }.toMutableStateList()
-    }
+    val multiModeEnvMap =
+        rememberSaveable(saver = mapStateSaver()) {
+            val map = mutableStateMapOf<String, String>()
+            script.envVarPresets.forEach { raw ->
+                val parts = raw.split("=", limit = 2)
+                val key = parts.getOrNull(0) ?: ""
+                val defaultValue = parts.getOrNull(1) ?: ""
+                map[key] = defaultValue
+            }
+            map
+        }
+
+    val textModeEnvList =
+        rememberSaveable(saver = listPairSaver()) {
+            script.envVarPresets
+                .map { raw ->
+                    val parts = raw.split("=", limit = 2)
+                    (parts.getOrNull(0) ?: "") to (parts.getOrNull(1) ?: "")
+                }.toMutableStateList()
+        }
 
     Dialog(onDismissRequest = onDismiss) {
         ElevatedCard(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 24.dp)
-                .imePadding(),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 24.dp)
+                    .imePadding(),
             shape = RoundedCornerShape(24.dp),
-            colors = CardDefaults.elevatedCardColors(
-                containerColor = MaterialTheme.colorScheme.surface,
-                contentColor = MaterialTheme.colorScheme.onSurface,
-            ),
+            colors =
+                CardDefaults.elevatedCardColors(
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    contentColor = MaterialTheme.colorScheme.onSurface,
+                ),
         ) {
             Column(
-                modifier = Modifier
-                    .padding(24.dp)
-                    .verticalScroll(rememberScrollState()),
+                modifier =
+                    Modifier
+                        .padding(24.dp)
+                        .verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(20.dp),
             ) {
                 DialogHeader(scriptName = script.name)
@@ -121,7 +128,7 @@ fun ScriptRuntimePromptDialog(
                             onPrefixChange = { runtimePrefix = it },
                             runtimeArgs = runtimeArgs,
                             onArgsChange = { runtimeArgs = it },
-                            envList = textModeEnvList
+                            envList = textModeEnvList,
                         )
                     }
                     InteractionMode.MULTI_CHOICE -> {
@@ -131,7 +138,7 @@ fun ScriptRuntimePromptDialog(
                             onPrefixChange = { runtimePrefix = it },
                             selectedOptions = selectedMultiOptions,
                             envMap = multiModeEnvMap,
-                            selectedEnvPresets = selectedEnvPresets
+                            selectedEnvPresets = selectedEnvPresets,
                         )
                     }
 
@@ -141,20 +148,22 @@ fun ScriptRuntimePromptDialog(
                 ActionButtons(
                     onDismiss = onDismiss,
                     onRun = {
-                        val finalArgs = if (script.interactionMode == InteractionMode.MULTI_CHOICE) {
-                            selectedMultiOptions.joinToString(" ")
-                        } else {
-                            runtimeArgs
-                        }
+                        val finalArgs =
+                            if (script.interactionMode == InteractionMode.MULTI_CHOICE) {
+                                selectedMultiOptions.joinToString(" ")
+                            } else {
+                                runtimeArgs
+                            }
 
-                        val finalEnv = if (script.interactionMode == InteractionMode.MULTI_CHOICE) {
-                            multiModeEnvMap.filterKeys { it in selectedEnvPresets }.toMap()
-                        } else {
-                            textModeEnvList.filter { it.first.isNotBlank() }.toMap()
-                        }
+                        val finalEnv =
+                            if (script.interactionMode == InteractionMode.MULTI_CHOICE) {
+                                multiModeEnvMap.filterKeys { it in selectedEnvPresets }.toMap()
+                            } else {
+                                textModeEnvList.filter { it.first.isNotBlank() }.toMap()
+                            }
 
                         onConfirm(finalArgs, runtimePrefix, finalEnv)
-                    }
+                    },
                 )
             }
         }
@@ -177,7 +186,7 @@ private fun TextInputSection(
     onPrefixChange: (String) -> Unit,
     runtimeArgs: String,
     onArgsChange: (String) -> Unit,
-    envList: SnapshotStateList<Pair<String, String>>
+    envList: SnapshotStateList<Pair<String, String>>,
 ) {
     StyledTextField(
         value = runtimePrefix,
@@ -243,7 +252,7 @@ private fun MultiChoiceSection(
     onPrefixChange: (String) -> Unit,
     selectedOptions: SnapshotStateList<String>,
     envMap: SnapshotStateMap<String, String>,
-    selectedEnvPresets: SnapshotStateList<String>
+    selectedEnvPresets: SnapshotStateList<String>,
 ) {
     if (script.prefixPresets.isNotEmpty()) {
         Text(stringResource(R.string.label_choose_prefix), style = MaterialTheme.typography.labelLarge)
@@ -261,12 +270,16 @@ private fun MultiChoiceSection(
     Text(stringResource(R.string.label_select_options), style = MaterialTheme.typography.labelLarge)
     script.argumentPresets.forEach { option ->
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable {
-                    if (selectedOptions.contains(option)) selectedOptions.remove(option)
-                    else selectedOptions.add(option)
-                }.padding(vertical = 4.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .clickable {
+                        if (selectedOptions.contains(option)) {
+                            selectedOptions.remove(option)
+                        } else {
+                            selectedOptions.add(option)
+                        }
+                    }.padding(vertical = 4.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Checkbox(checked = selectedOptions.contains(option), onCheckedChange = null)
@@ -285,18 +298,22 @@ private fun MultiChoiceSection(
             val isSelected = selectedEnvPresets.contains(keyLabel)
 
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 4.dp),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 4.dp),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 Checkbox(
                     checked = isSelected,
                     onCheckedChange = { checked ->
-                        if (checked) selectedEnvPresets.add(keyLabel)
-                        else selectedEnvPresets.remove(keyLabel)
-                    }
+                        if (checked) {
+                            selectedEnvPresets.add(keyLabel)
+                        } else {
+                            selectedEnvPresets.remove(keyLabel)
+                        }
+                    },
                 )
 
                 StyledTextField(
@@ -304,7 +321,7 @@ private fun MultiChoiceSection(
                     onValueChange = { envMap[keyLabel] = it },
                     label = keyLabel,
                     modifier = Modifier.weight(1f),
-                    enabled = isSelected
+                    enabled = isSelected,
                 )
             }
         }
@@ -314,7 +331,7 @@ private fun MultiChoiceSection(
 @Composable
 private fun ActionButtons(
     onDismiss: () -> Unit,
-    onRun: () -> Unit
+    onRun: () -> Unit,
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -333,39 +350,42 @@ private fun ActionButtons(
     }
 }
 
-fun <T : Any> snapshotStateListSaver() = Saver<SnapshotStateList<T>, ArrayList<T>>(
-    save = { ArrayList(it) },
-    restore = { it.toMutableStateList() }
-)
+fun <T : Any> snapshotStateListSaver() =
+    Saver<SnapshotStateList<T>, ArrayList<T>>(
+        save = { ArrayList(it) },
+        restore = { it.toMutableStateList() },
+    )
 
-private fun listPairSaver() = Saver<SnapshotStateList<Pair<String, String>>, ArrayList<String>>(
-    save = {
-        val flatList = ArrayList<String>()
-        it.forEach { pair ->
-            flatList.add(pair.first)
-            flatList.add(pair.second)
-        }
-        flatList
-    },
-    restore = { flatList ->
-        val list = mutableStateListOf<Pair<String, String>>()
-        for (i in flatList.indices step 2) {
-            if (i + 1 < flatList.size) {
-                list.add(flatList[i] to flatList[i + 1])
+private fun listPairSaver() =
+    Saver<SnapshotStateList<Pair<String, String>>, ArrayList<String>>(
+        save = {
+            val flatList = ArrayList<String>()
+            it.forEach { pair ->
+                flatList.add(pair.first)
+                flatList.add(pair.second)
             }
-        }
-        list
-    }
-)
+            flatList
+        },
+        restore = { flatList ->
+            val list = mutableStateListOf<Pair<String, String>>()
+            for (i in flatList.indices step 2) {
+                if (i + 1 < flatList.size) {
+                    list.add(flatList[i] to flatList[i + 1])
+                }
+            }
+            list
+        },
+    )
 
-private fun mapStateSaver() = Saver<SnapshotStateMap<String, String>, HashMap<String, String>>(
-    save = { HashMap(it) },
-    restore = {
-        val map = mutableStateMapOf<String, String>()
-        it.forEach { (k, v) -> map[k] = v }
-        map
-    }
-)
+private fun mapStateSaver() =
+    Saver<SnapshotStateMap<String, String>, HashMap<String, String>>(
+        save = { HashMap(it) },
+        restore = {
+            val map = mutableStateMapOf<String, String>()
+            it.forEach { (k, v) -> map[k] = v }
+            map
+        },
+    )
 
 @Preview(name = "Text Input Mode - Light", showBackground = true)
 @Composable
@@ -375,7 +395,7 @@ private fun PreviewRuntimeDialogText() {
             ScriptRuntimePromptDialog(
                 script = textInputScript,
                 onDismiss = {},
-                onConfirm = { _, _, _ -> }
+                onConfirm = { _, _, _ -> },
             )
         }
     }
@@ -384,7 +404,7 @@ private fun PreviewRuntimeDialogText() {
 @Preview(
     name = "Multi Choice Mode - Night",
     showBackground = true,
-    uiMode = Configuration.UI_MODE_NIGHT_YES
+    uiMode = Configuration.UI_MODE_NIGHT_YES,
 )
 @Composable
 private fun PreviewRuntimeDialogMulti() {
@@ -393,9 +413,8 @@ private fun PreviewRuntimeDialogMulti() {
             ScriptRuntimePromptDialog(
                 script = multiChoiceScript,
                 onDismiss = {},
-                onConfirm = { _, _, _ -> }
+                onConfirm = { _, _, _ -> },
             )
         }
     }
 }
-

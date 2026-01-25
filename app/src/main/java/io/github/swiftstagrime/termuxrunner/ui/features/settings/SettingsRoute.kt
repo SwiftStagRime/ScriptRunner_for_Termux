@@ -28,17 +28,20 @@ fun SettingsRoute(
     val ioMessage by viewModel.ioState.collectAsStateWithLifecycle()
     val exportFilename = stringResource(R.string.export_filename)
 
-    val exportLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.CreateDocument("application/json"),
-    ) { uri -> uri?.let { viewModel.exportData(it) } }
+    val exportLauncher =
+        rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.CreateDocument("application/json"),
+        ) { uri -> uri?.let { viewModel.exportData(it) } }
 
-    val importBackupLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.OpenDocument(),
-    ) { uri -> uri?.let { viewModel.importData(it) } }
+    val importBackupLauncher =
+        rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.OpenDocument(),
+        ) { uri -> uri?.let { viewModel.importData(it) } }
 
-    val importFileLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.OpenDocument(),
-    ) { uri -> uri?.let { viewModel.importSingleScript(it) } }
+    val importFileLauncher =
+        rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.OpenDocument(),
+        ) { uri -> uri?.let { viewModel.importSingleScript(it) } }
 
     LaunchedEffect(Unit) {
         viewModel.navEvents.collect { event ->
@@ -55,19 +58,20 @@ fun SettingsRoute(
         }
     }
 
-    val actions = SettingsActions(
-        onAccentChange = viewModel::setAccent,
-        onModeChange = viewModel::setMode,
-        onTriggerExport = { exportLauncher.launch(exportFilename) },
-        onTriggerImport = { importBackupLauncher.launch(arrayOf("application/json")) },
-        onTriggerScriptImport = { importFileLauncher.launch(arrayOf("*/*")) },
-        onDeveloperClick = { uriHandler.openUri(GITHUB_URL) },
-        onBack = onBack
-    )
+    val actions =
+        SettingsActions(
+            onAccentChange = viewModel::setAccent,
+            onModeChange = viewModel::setMode,
+            onTriggerExport = { exportLauncher.launch(exportFilename) },
+            onTriggerImport = { importBackupLauncher.launch(arrayOf("application/json")) },
+            onTriggerScriptImport = { importFileLauncher.launch(arrayOf("*/*")) },
+            onDeveloperClick = { uriHandler.openUri(GITHUB_URL) },
+            onBack = onBack,
+        )
 
     SettingsScreen(
         selectedAccent = selectedAccent,
         selectedMode = selectedMode,
-        actions = actions
+        actions = actions,
     )
 }

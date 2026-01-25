@@ -105,15 +105,16 @@ fun ScriptConfigDialog(
 ) {
     val scope = rememberCoroutineScope()
 
-    val photoPickerLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.PickVisualMedia(),
-    ) { uri ->
-        uri?.let {
-            scope.launch {
-                onProcessImage(it)?.let { savedPath -> state.iconPath = savedPath }
+    val photoPickerLauncher =
+        rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.PickVisualMedia(),
+        ) { uri ->
+            uri?.let {
+                scope.launch {
+                    onProcessImage(it)?.let { savedPath -> state.iconPath = savedPath }
+                }
             }
         }
-    }
 
     Dialog(
         onDismissRequest = onDismiss,
@@ -127,15 +128,16 @@ fun ScriptConfigDialog(
                         if (state.validate()) {
                             onSave(state.toScript(script))
                         }
-                    }
+                    },
                 )
-            }
+            },
         ) { padding ->
             LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding)
-                    .padding(horizontal = PADDING_STANDARD.dp),
+                modifier =
+                    Modifier
+                        .fillMaxSize()
+                        .padding(padding)
+                        .padding(horizontal = PADDING_STANDARD.dp),
                 verticalArrangement = Arrangement.spacedBy(PADDING_STANDARD.dp),
                 contentPadding = PaddingValues(bottom = 24.dp),
             ) {
@@ -157,7 +159,7 @@ fun ScriptConfigDialog(
                         isBatteryUnrestricted = isBatteryUnrestricted,
                         onRequestBatteryUnrestricted = onRequestBatteryUnrestricted,
                         onHeartbeatToggle = onHeartbeatToggle,
-                        onRequestNotificationPermission = onRequestNotificationPermission
+                        onRequestNotificationPermission = onRequestNotificationPermission,
                     )
                 }
                 item {
@@ -173,7 +175,7 @@ fun ScriptConfigDialog(
             onConfirm = {
                 onAddNewCategory(it)
                 state.showAddCategoryDialog = false
-            }
+            },
         )
     }
 }
@@ -216,7 +218,7 @@ private fun InteractivitySection(state: ScriptConfigState) {
                 title = stringResource(R.string.label_runtime_env_vars),
                 presets = state.envVarPresets,
                 onAdd = { state.envVarPresets.add("=") },
-                onRemove = { state.envVarPresets.removeAt(it) }
+                onRemove = { state.envVarPresets.removeAt(it) },
             )
         }
     }
@@ -229,7 +231,7 @@ private fun BehaviorSection(state: ScriptConfigState) {
             title = stringResource(R.string.label_bg_execution),
             description = stringResource(R.string.desc_bg_execution),
             checked = state.runInBackground,
-            onCheckedChange = { state.runInBackground = it }
+            onCheckedChange = { state.runInBackground = it },
         )
 
         if (!state.runInBackground) {
@@ -244,7 +246,7 @@ private fun BehaviorSection(state: ScriptConfigState) {
                 onCheckedChange = { isChecked ->
                     state.keepOpen = isChecked
                     if (isChecked) state.notifyOnResult = false
-                }
+                },
             )
         }
     }
@@ -271,9 +273,10 @@ private fun KeyValuePresetManager(
             val value = parts.getOrNull(1) ?: ""
 
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 8.dp),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 8.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 StyledTextField(
@@ -288,7 +291,7 @@ private fun KeyValuePresetManager(
                 Text(
                     "=",
                     modifier = Modifier.padding(horizontal = 8.dp),
-                    style = MaterialTheme.typography.bodyLarge
+                    style = MaterialTheme.typography.bodyLarge,
                 )
 
                 // Value Field
@@ -332,9 +335,10 @@ private fun EnvironmentSection(state: ScriptConfigState) {
 
         state.envVars.forEachIndexed { index, pair ->
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 8.dp),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 8.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 StyledTextField(
@@ -367,10 +371,11 @@ private fun EnvironmentSection(state: ScriptConfigState) {
         Button(
             onClick = { state.envVars.add("" to "") },
             modifier = Modifier.align(Alignment.End),
-            colors = ButtonDefaults.filledTonalButtonColors(
-                containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-            ),
+            colors =
+                ButtonDefaults.filledTonalButtonColors(
+                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                ),
         ) {
             Icon(Icons.Default.Add, null, modifier = Modifier.size(18.dp))
             Spacer(modifier = Modifier.width(8.dp))
@@ -456,7 +461,6 @@ private fun PresetListManager(
     }
 }
 
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun InteractionModeSpinner(
@@ -518,7 +522,10 @@ fun InteractionModeSpinner(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun ConfigTopBar(onDismiss: () -> Unit, onSave: () -> Unit) {
+private fun ConfigTopBar(
+    onDismiss: () -> Unit,
+    onSave: () -> Unit,
+) {
     TopAppBar(
         title = { Text(stringResource(R.string.config_dialog_title)) },
         navigationIcon = {
@@ -530,33 +537,34 @@ private fun ConfigTopBar(onDismiss: () -> Unit, onSave: () -> Unit) {
             IconButton(onClick = onSave, modifier = Modifier.testTag("config_save_btn")) {
                 Icon(Icons.Default.Save, stringResource(R.string.cd_save))
             }
-        }
+        },
     )
 }
 
 @Composable
 private fun IdentitySection(
     state: ScriptConfigState,
-    launcher: ManagedActivityResultLauncher<PickVisualMediaRequest, Uri?>
+    launcher: ManagedActivityResultLauncher<PickVisualMediaRequest, Uri?>,
 ) {
     ConfigSection(title = stringResource(R.string.section_identity)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Box(
-                modifier = Modifier
-                    .size(ICON_SIZE.dp)
-                    .clip(RoundedCornerShape(ICON_CORNER_RADIUS.dp))
-                    .background(MaterialTheme.colorScheme.surfaceVariant)
-                    .clickable {
-                        launcher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
-                    },
-                contentAlignment = Alignment.Center
+                modifier =
+                    Modifier
+                        .size(ICON_SIZE.dp)
+                        .clip(RoundedCornerShape(ICON_CORNER_RADIUS.dp))
+                        .background(MaterialTheme.colorScheme.surfaceVariant)
+                        .clickable {
+                            launcher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+                        },
+                contentAlignment = Alignment.Center,
             ) {
                 if (state.iconPath != null) {
                     AsyncImage(
                         model = state.iconPath,
                         contentDescription = null,
                         contentScale = ContentScale.Crop,
-                        modifier = Modifier.fillMaxSize()
+                        modifier = Modifier.fillMaxSize(),
                     )
                 } else {
                     Icon(Icons.Default.AddPhotoAlternate, stringResource(R.string.cd_add_icon))
@@ -565,10 +573,13 @@ private fun IdentitySection(
             Spacer(modifier = Modifier.width(PADDING_STANDARD.dp))
             StyledTextField(
                 value = state.name,
-                onValueChange = { state.name = it; state.nameError = false },
+                onValueChange = {
+                    state.name = it
+                    state.nameError = false
+                },
                 label = stringResource(R.string.label_script_name),
                 isError = state.nameError,
-                modifier = Modifier.weight(1f).testTag("config_name_input")
+                modifier = Modifier.weight(1f).testTag("config_name_input"),
             )
         }
     }
@@ -577,7 +588,7 @@ private fun IdentitySection(
 @Composable
 private fun ExecutionSection(
     state: ScriptConfigState,
-    categories: List<Category>
+    categories: List<Category>,
 ) {
     ConfigSection(title = stringResource(R.string.section_execution)) {
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -585,13 +596,13 @@ private fun ExecutionSection(
                 value = state.interpreter,
                 onValueChange = { state.interpreter = it },
                 label = stringResource(R.string.label_interpreter),
-                modifier = Modifier.weight(0.6f)
+                modifier = Modifier.weight(0.6f),
             )
             StyledTextField(
                 value = state.fileExtension,
                 onValueChange = { state.fileExtension = it },
                 label = stringResource(R.string.label_extension),
-                modifier = Modifier.weight(0.4f)
+                modifier = Modifier.weight(0.4f),
             )
         }
         Spacer(modifier = Modifier.height(SPACING_ITEM.dp))
@@ -599,21 +610,21 @@ private fun ExecutionSection(
             value = state.commandPrefix,
             onValueChange = { state.commandPrefix = it },
             label = stringResource(R.string.label_prefix),
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
         )
         Spacer(modifier = Modifier.height(SPACING_ITEM.dp))
         StyledTextField(
             value = state.executionParams,
             onValueChange = { state.executionParams = it },
             label = stringResource(R.string.label_arguments),
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
         )
         Spacer(modifier = Modifier.height(SPACING_ITEM.dp))
         CategorySpinner(
             categories = categories,
             selectedCategoryId = state.selectedCategoryId,
             onCategorySelected = { state.selectedCategoryId = it },
-            onAddNewClick = { state.showAddCategoryDialog = true }
+            onAddNewClick = { state.showAddCategoryDialog = true },
         )
     }
 }
@@ -624,18 +635,19 @@ private fun ReliabilitySection(
     isBatteryUnrestricted: Boolean,
     onRequestBatteryUnrestricted: () -> Unit,
     onHeartbeatToggle: (Boolean) -> Unit,
-    onRequestNotificationPermission: () -> Unit
+    onRequestNotificationPermission: () -> Unit,
 ) {
     ConfigSection(title = stringResource(R.string.reliability_monitoring)) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 16.dp)
-                .background(
-                    color = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.7f),
-                    shape = RoundedCornerShape(12.dp)
-                ).padding(12.dp),
-            verticalAlignment = Alignment.CenterVertically
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp)
+                    .background(
+                        color = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.7f),
+                        shape = RoundedCornerShape(12.dp),
+                    ).padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             Icon(Icons.Default.Warning, null, tint = MaterialTheme.colorScheme.error, modifier = Modifier.size(20.dp))
             Spacer(modifier = Modifier.width(12.dp))
@@ -643,35 +655,40 @@ private fun ReliabilitySection(
                 text = stringResource(R.string.experimental_warning),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onErrorContainer,
-                fontWeight = FontWeight.Medium
+                fontWeight = FontWeight.Medium,
             )
         }
 
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(8.dp))
-                .clickable(!isBatteryUnrestricted) { onRequestBatteryUnrestricted() }
-                .padding(vertical = 4.dp),
-            verticalAlignment = Alignment.CenterVertically
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(8.dp))
+                    .clickable(!isBatteryUnrestricted) { onRequestBatteryUnrestricted() }
+                    .padding(vertical = 4.dp),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             Icon(
                 imageVector = if (isBatteryUnrestricted) Icons.Default.CheckCircle else Icons.Default.BatteryAlert,
                 contentDescription = null,
-                tint = if (isBatteryUnrestricted) Color(0xFF4CAF50) else MaterialTheme.colorScheme.error
+                tint = if (isBatteryUnrestricted) Color(0xFF4CAF50) else MaterialTheme.colorScheme.error,
             )
             Spacer(modifier = Modifier.width(SPACING_ITEM.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = if (isBatteryUnrestricted) stringResource(R.string.battery_unrestricted)
-                    else stringResource(R.string.battery_optimized_restricted),
-                    color = if (isBatteryUnrestricted) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.error
+                    text =
+                        if (isBatteryUnrestricted) {
+                            stringResource(R.string.battery_unrestricted)
+                        } else {
+                            stringResource(R.string.battery_optimized_restricted)
+                        },
+                    color = if (isBatteryUnrestricted) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.error,
                 )
                 if (!isBatteryUnrestricted) {
                     Text(
                         text = stringResource(R.string.tap_to_allow_background_activity_for_better_stability),
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
             }
@@ -684,14 +701,18 @@ private fun ReliabilitySection(
             onCheckedChange = {
                 state.useHeartbeat = it
                 onHeartbeatToggle(it)
-            }
+            },
         )
 
         HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp), color = MaterialTheme.colorScheme.outlineVariant)
         SwitchRow(
             title = stringResource(R.string.execution_feedback),
-            description = if (state.keepOpen) stringResource(R.string.not_available_in_interactive_mode)
-            else stringResource(R.string.show_a_notification_with_the_result_success_fail_when_finished),
+            description =
+                if (state.keepOpen) {
+                    stringResource(R.string.not_available_in_interactive_mode)
+                } else {
+                    stringResource(R.string.show_a_notification_with_the_result_success_fail_when_finished)
+                },
             checked = state.notifyOnResult,
             enabled = !state.keepOpen,
             onCheckedChange = { isChecked ->
@@ -700,7 +721,7 @@ private fun ReliabilitySection(
                     state.keepOpen = false
                     onRequestNotificationPermission()
                 }
-            }
+            },
         )
 
         AnimatedVisibility(visible = state.useHeartbeat) {
@@ -709,7 +730,7 @@ private fun ReliabilitySection(
                     text = stringResource(R.string.advanced_timings),
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.padding(bottom = 8.dp)
+                    modifier = Modifier.padding(bottom = 8.dp),
                 )
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     StyledTextField(
@@ -717,21 +738,24 @@ private fun ReliabilitySection(
                         onValueChange = { if (it.all { c -> c.isDigit() }) state.heartbeatInterval = it },
                         label = stringResource(R.string.pulse_interval_s),
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier.weight(1f),
                     )
                     StyledTextField(
                         value = state.heartbeatTimeout,
                         onValueChange = { if (it.all { c -> c.isDigit() }) state.heartbeatTimeout = it },
                         label = stringResource(R.string.timeout_limit_s),
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier.weight(1f),
                     )
                 }
                 Text(
-                    text = stringResource(R.string.pulse_how_often_the_script_signals_it_is_alive_timeout_restart_if_no_signal_received_after_this_time),
+                    text =
+                        stringResource(
+                            R.string.pulse_how_often_the_script_signals_it_is_alive_timeout_restart_if_no_signal_received_after_this_time,
+                        ),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
-                    modifier = Modifier.padding(top = 8.dp)
+                    modifier = Modifier.padding(top = 8.dp),
                 )
             }
         }
@@ -744,32 +768,33 @@ private fun SwitchRow(
     description: String,
     checked: Boolean,
     enabled: Boolean = true,
-    onCheckedChange: (Boolean) -> Unit
+    onCheckedChange: (Boolean) -> Unit,
 ) {
     val alpha = if (enabled) 1f else 0.5f
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp),
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(vertical = 8.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = title,
                 style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = alpha)
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = alpha),
             )
             Text(
                 text = description,
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = alpha)
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = alpha),
             )
         }
         Switch(
             checked = checked,
             onCheckedChange = onCheckedChange,
-            enabled = enabled
+            enabled = enabled,
         )
     }
 }
@@ -784,10 +809,11 @@ private fun PreviewConfigDialogLight() {
         ScriptConfigDialog(
             state = previewState,
             script = sampleScript,
-            categories = listOf(
-                Category(id = 1, name = "Automation"),
-                Category(id = 2, name = "Utility")
-            ),
+            categories =
+                listOf(
+                    Category(id = 1, name = "Automation"),
+                    Category(id = 2, name = "Utility"),
+                ),
             onDismiss = {},
             onSave = {},
             onProcessImage = { null },
@@ -795,7 +821,7 @@ private fun PreviewConfigDialogLight() {
             isBatteryUnrestricted = false,
             onRequestBatteryUnrestricted = {},
             onAddNewCategory = {},
-            onRequestNotificationPermission = {}
+            onRequestNotificationPermission = {},
         )
     }
 }

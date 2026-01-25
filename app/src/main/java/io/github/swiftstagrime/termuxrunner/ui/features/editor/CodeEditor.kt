@@ -103,31 +103,33 @@ private const val LINE_HEIGHT_SP = 20
 private const val EXTRA_LINES_COUNT = 5
 private const val TOOLBAR_HEIGHT_DP = 50
 
-val TextFieldValueSaver = listSaver<TextFieldValue, Any>(
-    save = { listOf(it.text, it.selection.start, it.selection.end) },
-    restore = {
-        TextFieldValue(
-            text = it[0] as String,
-            selection = TextRange(it[1] as Int, it[2] as Int)
-        )
-    }
-)
-
-val UndoStackSaver = listSaver<SnapshotStateList<TextFieldValue>, Any>(
-    save = { it.map { tfv -> listOf(tfv.text, tfv.selection.start, tfv.selection.end) } },
-    restore = { savedList ->
-        val list = mutableStateListOf<TextFieldValue>()
-        (savedList as List<List<Any>>).forEach { item ->
-            list.add(
-                TextFieldValue(
-                    text = item[0] as String,
-                    selection = TextRange(item[1] as Int, item[2] as Int)
-                )
+val TextFieldValueSaver =
+    listSaver<TextFieldValue, Any>(
+        save = { listOf(it.text, it.selection.start, it.selection.end) },
+        restore = {
+            TextFieldValue(
+                text = it[0] as String,
+                selection = TextRange(it[1] as Int, it[2] as Int),
             )
-        }
-        list
-    }
-)
+        },
+    )
+
+val UndoStackSaver =
+    listSaver<SnapshotStateList<TextFieldValue>, Any>(
+        save = { it.map { tfv -> listOf(tfv.text, tfv.selection.start, tfv.selection.end) } },
+        restore = { savedList ->
+            val list = mutableStateListOf<TextFieldValue>()
+            (savedList as List<List<Any>>).forEach { item ->
+                list.add(
+                    TextFieldValue(
+                        text = item[0] as String,
+                        selection = TextRange(item[1] as Int, item[2] as Int),
+                    ),
+                )
+            }
+            list
+        },
+    )
 
 @Composable
 fun CodeEditor(
@@ -172,15 +174,19 @@ fun CodeEditor(
     val activeMatchColor = MaterialTheme.colorScheme.primaryContainer
     val passiveMatchColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f)
 
-    val searchTransformation = remember(searchMatches, currentMatchIndex, isSearchVisible, activeMatchColor, passiveMatchColor) {
-        if (isSearchVisible && searchMatches.isNotEmpty()) {
-            SearchVisualTransformation(searchMatches, currentMatchIndex, activeMatchColor, passiveMatchColor)
-        } else VisualTransformation.None
-    }
+    val searchTransformation =
+        remember(searchMatches, currentMatchIndex, isSearchVisible, activeMatchColor, passiveMatchColor) {
+            if (isSearchVisible && searchMatches.isNotEmpty()) {
+                SearchVisualTransformation(searchMatches, currentMatchIndex, activeMatchColor, passiveMatchColor)
+            } else {
+                VisualTransformation.None
+            }
+        }
 
-    val actions = remember(interpreter) {
-        EditorActions(onCodeChange, interpreter, undoStack, redoStack)
-    }
+    val actions =
+        remember(interpreter) {
+            EditorActions(onCodeChange, interpreter, undoStack, redoStack)
+        }
 
     Box(modifier = modifier.fillMaxSize().imePadding()) {
         Column(modifier = Modifier.fillMaxSize()) {
@@ -194,7 +200,7 @@ fun CodeEditor(
                 onClose = {
                     isSearchVisible = false
                     searchQuery = ""
-                }
+                },
             )
 
             MainEditorArea(
@@ -206,14 +212,14 @@ fun CodeEditor(
                 isWrappingEnabled = isWrappingEnabled,
                 visualTransformation = searchTransformation,
                 focusRequester = focusRequester,
-                onBottomClick = { actions.handleBottomClick(code, focusRequester) }
+                onBottomClick = { actions.handleBottomClick(code, focusRequester) },
             )
         }
 
         EditorAccessoryWrapper(
             isVisible = isAccessoryVisible,
             onShow = { isAccessoryVisible = true },
-            modifier = Modifier.align(Alignment.BottomCenter)
+            modifier = Modifier.align(Alignment.BottomCenter),
         ) {
             EditorAccessoryToolbar(
                 undoEnabled = undoStack.size > 1,
@@ -228,17 +234,18 @@ fun CodeEditor(
                 onToggleWrap = { isWrappingEnabled = !isWrappingEnabled },
                 isWrappingEnabled = isWrappingEnabled,
                 onScrollTop = { coroutineScope.launch { verticalScrollState.animateScrollTo(0) } },
-                onScrollBottom = { coroutineScope.launch { verticalScrollState.animateScrollTo(verticalScrollState.maxValue) } }
+                onScrollBottom = { coroutineScope.launch { verticalScrollState.animateScrollTo(verticalScrollState.maxValue) } },
             )
         }
     }
 }
+
 @Composable
 private fun EditorAccessoryWrapper(
     isVisible: Boolean,
     onShow: () -> Unit,
     modifier: Modifier = Modifier,
-    content: @Composable () -> Unit
+    content: @Composable () -> Unit,
 ) {
     AnimatedContent(
         targetState = isVisible,
@@ -253,7 +260,7 @@ private fun EditorAccessoryWrapper(
                 fadeIn(tween(ANIMATION_DURATION, delayMillis = ANIMATION_DURATION))
                     .togetherWith(slideOutVertically(slide) { it } + fadeOut(spec))
             }
-        }
+        },
     ) { show ->
         if (show) {
             content()
@@ -263,7 +270,7 @@ private fun EditorAccessoryWrapper(
                 shadowElevation = 4.dp,
                 color = MaterialTheme.colorScheme.surfaceContainer,
                 shape = RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp),
-                modifier = Modifier.fillMaxWidth().clickable(onClick = onShow)
+                modifier = Modifier.fillMaxWidth().clickable(onClick = onShow),
             ) {
                 Box(modifier = Modifier.height(32.dp), contentAlignment = Alignment.Center) {
                     Icon(Icons.Default.KeyboardArrowUp, stringResource(R.string.cd_show_toolbar), tint = MaterialTheme.colorScheme.primary)
@@ -277,7 +284,7 @@ private class EditorActions(
     val onCodeChange: (TextFieldValue) -> Unit,
     val interpreter: String,
     val undoStack: MutableList<TextFieldValue>,
-    val redoStack: MutableList<TextFieldValue>
+    val redoStack: MutableList<TextFieldValue>,
 ) {
     fun undo(update: (TextFieldValue) -> Unit) {
         if (undoStack.size > 1) {
@@ -295,7 +302,10 @@ private class EditorActions(
         }
     }
 
-    fun handleCodeChange(oldValue: TextFieldValue, newValue: TextFieldValue) {
+    fun handleCodeChange(
+        oldValue: TextFieldValue,
+        newValue: TextFieldValue,
+    ) {
         val newText = newValue.text
         val cursor = newValue.selection.start
 
@@ -323,7 +333,10 @@ private class EditorActions(
         onCodeChange(newValue)
     }
 
-    fun handleInsertSymbol(current: TextFieldValue, symbol: String) {
+    fun handleInsertSymbol(
+        current: TextFieldValue,
+        symbol: String,
+    ) {
         when (symbol) {
             "HOME_KEY" -> {
                 val start = current.text.lastIndexOf('\n', current.selection.start - 1) + 1
@@ -339,16 +352,29 @@ private class EditorActions(
                 val lineStart = current.text.lastIndexOf('\n', cursor - 1).let { if (it == -1) 0 else it + 1 }
                 val spaces = "    "
                 if (current.text.startsWith(spaces, lineStart)) {
-                    onCodeChange(current.copy(text = current.text.removeRange(lineStart, lineStart + 4), selection = TextRange((cursor - 4).coerceAtLeast(lineStart))))
+                    onCodeChange(
+                        current.copy(
+                            text = current.text.removeRange(lineStart, lineStart + 4),
+                            selection = TextRange((cursor - 4).coerceAtLeast(lineStart)),
+                        ),
+                    )
                 } else if (current.text.startsWith("\t", lineStart)) {
-                    onCodeChange(current.copy(text = current.text.removeRange(lineStart, lineStart + 1), selection = TextRange((cursor - 1).coerceAtLeast(lineStart))))
+                    onCodeChange(
+                        current.copy(
+                            text = current.text.removeRange(lineStart, lineStart + 1),
+                            selection = TextRange((cursor - 1).coerceAtLeast(lineStart)),
+                        ),
+                    )
                 }
             }
             else -> onCodeChange(current.insert(symbol))
         }
     }
 
-    fun handleBottomClick(code: TextFieldValue, focus: FocusRequester) {
+    fun handleBottomClick(
+        code: TextFieldValue,
+        focus: FocusRequester,
+    ) {
         val currentText = code.text
         if (currentText.isNotEmpty() && !currentText.endsWith("\n")) {
             val indent = getIndentation(currentText, currentText.length)
@@ -371,47 +397,83 @@ private fun MainEditorArea(
     isWrappingEnabled: Boolean,
     visualTransformation: VisualTransformation,
     focusRequester: FocusRequester,
-    onBottomClick: () -> Unit
+    onBottomClick: () -> Unit,
 ) {
     val bottomBuffer = with(LocalDensity.current) { (TOOLBAR_HEIGHT_DP.dp + (EXTRA_LINES_COUNT * LINE_HEIGHT_SP).sp.toDp() + 100.dp) }
 
     Row(modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surface)) {
         LineNumberGutter(code.text, textLayoutResult, scrollState, EXTRA_LINES_COUNT, TOOLBAR_HEIGHT_DP.dp)
 
-        Box(modifier = Modifier.weight(1f).fillMaxHeight().verticalScroll(scrollState)
-            .then(if (isWrappingEnabled) Modifier else Modifier.horizontalScroll(rememberScrollState()))
+        Box(
+            modifier =
+                Modifier
+                    .weight(1f)
+                    .fillMaxHeight()
+                    .verticalScroll(scrollState)
+                    .then(if (isWrappingEnabled) Modifier else Modifier.horizontalScroll(rememberScrollState())),
         ) {
             BasicTextField(
                 value = code,
                 onValueChange = onCodeChange,
                 onTextLayout = onTextLayout,
-                textStyle = TextStyle(fontFamily = FontFamily.Monospace, fontSize = 14.sp, lineHeight = LINE_HEIGHT_SP.sp, color = MaterialTheme.colorScheme.onSurface),
+                textStyle =
+                    TextStyle(
+                        fontFamily = FontFamily.Monospace,
+                        fontSize = 14.sp,
+                        lineHeight = LINE_HEIGHT_SP.sp,
+                        color = MaterialTheme.colorScheme.onSurface,
+                    ),
                 cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
                 visualTransformation = visualTransformation,
-                modifier = Modifier.then(if (isWrappingEnabled) Modifier.fillMaxWidth() else Modifier)
-                    .padding(horizontal = 8.dp).focusRequester(focusRequester).testTag("code_editor_input"),
+                modifier =
+                    Modifier
+                        .then(if (isWrappingEnabled) Modifier.fillMaxWidth() else Modifier)
+                        .padding(horizontal = 8.dp)
+                        .focusRequester(focusRequester)
+                        .testTag("code_editor_input"),
                 decorationBox = { inner ->
                     Column(modifier = Modifier.fillMaxWidth()) {
                         Box {
-                            if (code.text.isEmpty()) Text(stringResource(R.string.editor_placeholder), color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f))
+                            if (code.text.isEmpty()) {
+                                Text(
+                                    stringResource(R.string.editor_placeholder),
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                                )
+                            }
                             inner()
                         }
-                        Spacer(modifier = Modifier.fillMaxWidth().height(bottomBuffer).clickable(interactionSource = remember { MutableInteractionSource() }, indication = null, onClick = onBottomClick))
+                        Spacer(
+                            modifier =
+                                Modifier.fillMaxWidth().height(bottomBuffer).clickable(
+                                    interactionSource =
+                                        remember {
+                                            MutableInteractionSource()
+                                        },
+                                    indication = null,
+                                    onClick = onBottomClick,
+                                ),
+                        )
                     }
-                }
+                },
             )
         }
     }
 }
 
-private fun getIndentation(text: String, cursor: Int): String {
+private fun getIndentation(
+    text: String,
+    cursor: Int,
+): String {
     if (cursor <= 0) return ""
     val lastNL = text.take(cursor).lastIndexOf('\n')
     val start = if (lastNL == -1) 0 else lastNL + 1
     return text.substring(start, cursor).takeWhile { it.isWhitespace() }
 }
 
-private fun findSearchMatches(text: String, query: String): List<IntRange> {
+private fun findSearchMatches(
+    text: String,
+    query: String,
+): List<IntRange> {
     if (query.isEmpty()) return emptyList()
     val matches = mutableListOf<IntRange>()
     var index = text.indexOf(query, ignoreCase = true)
@@ -422,7 +484,11 @@ private fun findSearchMatches(text: String, query: String): List<IntRange> {
     return matches
 }
 
-private fun navigateSearch(matches: List<IntRange>, current: Int, delta: Int): Int {
+private fun navigateSearch(
+    matches: List<IntRange>,
+    current: Int,
+    delta: Int,
+): Int {
     if (matches.isEmpty()) return -1
     var next = current + delta
     if (next >= matches.size) next = 0
@@ -464,13 +530,15 @@ fun EditorSearchBar(
                 BasicTextField(
                     value = query,
                     onValueChange = onQueryChange,
-                    modifier = Modifier
-                        .weight(1f)
-                        .padding(horizontal = 8.dp),
-                    textStyle = TextStyle(
-                        color = MaterialTheme.colorScheme.onSurface,
-                        fontSize = 14.sp,
-                    ),
+                    modifier =
+                        Modifier
+                            .weight(1f)
+                            .padding(horizontal = 8.dp),
+                    textStyle =
+                        TextStyle(
+                            color = MaterialTheme.colorScheme.onSurface,
+                            fontSize = 14.sp,
+                        ),
                     singleLine = true,
                     cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
                     decorationBox = { inner ->

@@ -15,7 +15,10 @@ class TermuxResultReceiver : BroadcastReceiver() {
     @Inject
     lateinit var processUseCase: ProcessTermuxResultUseCase
 
-    override fun onReceive(context: Context, intent: Intent) {
+    override fun onReceive(
+        context: Context,
+        intent: Intent,
+    ) {
         val expectedAction = "${context.packageName}.SCRIPT_RESULT"
         if (intent.action != expectedAction) return
 
@@ -26,13 +29,11 @@ class TermuxResultReceiver : BroadcastReceiver() {
         var exitCode = -1337
         var internalError: String? = null
 
-
         val bundle = intent.getBundleExtra("result")
         if (bundle != null) {
             exitCode = bundle.getInt("exitCode", -1337)
             internalError = bundle.getString("errmsg")
-        }
-        else if (intent.hasExtra("com.termux.RUN_COMMAND_RESULT_CODE")) {
+        } else if (intent.hasExtra("com.termux.RUN_COMMAND_RESULT_CODE")) {
             exitCode = intent.getIntExtra("com.termux.RUN_COMMAND_RESULT_CODE", -1337)
             internalError = intent.getStringExtra("com.termux.RUN_COMMAND_ERRMSG")
         }
@@ -45,7 +46,7 @@ class TermuxResultReceiver : BroadcastReceiver() {
                     scriptId = scriptId,
                     scriptName = scriptName,
                     exitCode = exitCode,
-                    internalError = internalError
+                    internalError = internalError,
                 )
             } finally {
                 pendingResult?.finish()

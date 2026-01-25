@@ -83,10 +83,11 @@ fun SettingsScreen(
         topBar = { SettingsTopBar(actions.onBack) },
     ) { padding ->
         Column(
-            modifier = Modifier
-                .padding(padding)
-                .fillMaxSize()
-                .padding(PADDING_LARGE),
+            modifier =
+                Modifier
+                    .padding(padding)
+                    .fillMaxSize()
+                    .padding(PADDING_LARGE),
             verticalArrangement = Arrangement.SpaceBetween,
         ) {
             Column {
@@ -150,11 +151,12 @@ private fun AppearanceSection(
 @Composable
 private fun LanguageRow() {
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(RADIUS_MEDIUM))
-            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = SURFACE_ALPHA))
-            .padding(PADDING_LARGE),
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(RADIUS_MEDIUM))
+                .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = SURFACE_ALPHA))
+                .padding(PADDING_LARGE),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -168,16 +170,20 @@ private fun LanguageRow() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun DisplayModeSelector(selectedMode: ThemeMode, onModeChange: (ThemeMode) -> Unit) {
+private fun DisplayModeSelector(
+    selectedMode: ThemeMode,
+    onModeChange: (ThemeMode) -> Unit,
+) {
     SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
         ThemeMode.entries.forEachIndexed { index, mode ->
             SegmentedButton(
                 selected = selectedMode == mode,
                 onClick = { onModeChange(mode) },
-                shape = SegmentedButtonDefaults.itemShape(
-                    index = index,
-                    count = ThemeMode.entries.size,
-                ),
+                shape =
+                    SegmentedButtonDefaults.itemShape(
+                        index = index,
+                        count = ThemeMode.entries.size,
+                    ),
             ) {
                 Text(stringResource(mode.labelRes))
             }
@@ -202,14 +208,14 @@ private fun DataManagementSection(actions: SettingsActions) {
             onClick = actions.onTriggerImport,
             icon = Icons.Default.Download,
             label = stringResource(R.string.import_label),
-            modifier = Modifier.weight(1f)
+            modifier = Modifier.weight(1f),
         )
         ActionButton(
             onClick = actions.onTriggerExport,
             icon = Icons.Default.Upload,
             label = stringResource(R.string.export_label),
             modifier = Modifier.weight(1f),
-            isTonal = true
+            isTonal = true,
         )
     }
     Spacer(modifier = Modifier.height(8.dp))
@@ -217,7 +223,7 @@ private fun DataManagementSection(actions: SettingsActions) {
         onClick = actions.onTriggerScriptImport,
         icon = Icons.Default.Description,
         label = stringResource(R.string.import_script_from_file),
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier.fillMaxWidth(),
     )
 }
 
@@ -233,7 +239,7 @@ private fun ActionButton(
         onClick = onClick,
         modifier = modifier,
         shape = RoundedCornerShape(RADIUS_MEDIUM),
-        colors = if (isTonal) ButtonDefaults.filledTonalButtonColors() else ButtonDefaults.buttonColors()
+        colors = if (isTonal) ButtonDefaults.filledTonalButtonColors() else ButtonDefaults.buttonColors(),
     ) {
         Icon(icon, contentDescription = null)
         Spacer(modifier = Modifier.width(8.dp))
@@ -244,12 +250,14 @@ private fun ActionButton(
 @Composable
 private fun DeveloperCard(onClick: () -> Unit) {
     Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable { onClick() },
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.secondaryContainer,
-        ),
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .clickable { onClick() },
+        colors =
+            CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.secondaryContainer,
+            ),
     ) {
         Row(
             modifier = Modifier.padding(PADDING_LARGE),
@@ -296,16 +304,17 @@ fun ThemeSelectorItem(
         modifier = Modifier.width(64.dp),
     ) {
         Box(
-            modifier = Modifier
-                .size(CIRCLE_SIZE)
-                .clip(CircleShape)
-                .background(circleColor)
-                .clickable { onClick() }
-                .border(
-                    width = if (isSelected) 3.dp else 1.dp,
-                    color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant,
-                    shape = CircleShape,
-                ),
+            modifier =
+                Modifier
+                    .size(CIRCLE_SIZE)
+                    .clip(CircleShape)
+                    .background(circleColor)
+                    .clickable { onClick() }
+                    .border(
+                        width = if (isSelected) 3.dp else 1.dp,
+                        color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant,
+                        shape = CircleShape,
+                    ),
             contentAlignment = Alignment.Center,
         ) {
             if (isSelected) {
@@ -331,9 +340,10 @@ fun ThemeSelectorItem(
 @Composable
 private fun SelectionOverlay() {
     Box(
-        modifier = Modifier
-            .size(CIRCLE_ICON_SIZE)
-            .background(color = Color.Black.copy(alpha = OVERLAY_ALPHA), shape = CircleShape),
+        modifier =
+            Modifier
+                .size(CIRCLE_ICON_SIZE)
+                .background(color = Color.Black.copy(alpha = OVERLAY_ALPHA), shape = CircleShape),
         contentAlignment = Alignment.Center,
     ) {
         Icon(
@@ -351,10 +361,11 @@ private fun BoxScope.DynamicThemeIcon() {
         imageVector = Icons.Default.AutoAwesome,
         contentDescription = null,
         tint = Color.White.copy(alpha = DYNAMIC_ICON_ALPHA),
-        modifier = Modifier
-            .size(16.dp)
-            .align(Alignment.BottomEnd)
-            .padding(bottom = 8.dp, end = 8.dp),
+        modifier =
+            Modifier
+                .size(16.dp)
+                .align(Alignment.BottomEnd)
+                .padding(bottom = 8.dp, end = 8.dp),
     )
 }
 
@@ -365,14 +376,16 @@ private fun PreviewSettingsScreen() {
         SettingsScreen(
             selectedAccent = AppTheme.GREEN,
             selectedMode = ThemeMode.SYSTEM,
-            actions = SettingsActions(
-                onAccentChange = {},
-                onModeChange = {},
-                onTriggerExport = {},
-                onTriggerImport = {},
-                onTriggerScriptImport = {},
-                onDeveloperClick = {},
-                onBack = {},
-            ))
+            actions =
+                SettingsActions(
+                    onAccentChange = {},
+                    onModeChange = {},
+                    onTriggerExport = {},
+                    onTriggerImport = {},
+                    onTriggerScriptImport = {},
+                    onDeveloperClick = {},
+                    onBack = {},
+                ),
+        )
     }
 }

@@ -8,7 +8,9 @@ import io.github.swiftstagrime.termuxrunner.domain.model.Script
 
 private const val MS_TO_S = 1000L
 
-class ScriptConfigState(script: Script) {
+class ScriptConfigState(
+    script: Script,
+) {
     var name by mutableStateOf(script.name)
     var nameError by mutableStateOf(false)
     var interpreter by mutableStateOf(script.interpreter)
@@ -25,7 +27,10 @@ class ScriptConfigState(script: Script) {
     var interactionMode by mutableStateOf(script.interactionMode)
     var showAddCategoryDialog by mutableStateOf(false)
     var notifyOnResult by mutableStateOf(script.notifyOnResult)
-    val envVars = script.envVars.entries.map { it.key to it.value }.toMutableStateList()
+    val envVars =
+        script.envVars.entries
+            .map { it.key to it.value }
+            .toMutableStateList()
     val argumentPresets = script.argumentPresets.toMutableStateList()
     val prefixPresets = script.prefixPresets.toMutableStateList()
     val envVarPresets = script.envVarPresets.toMutableStateList()
@@ -38,24 +43,25 @@ class ScriptConfigState(script: Script) {
         return true
     }
 
-    fun toScript(original: Script): Script = original.copy(
-        name = name,
-        interpreter = interpreter,
-        fileExtension = fileExtension,
-        commandPrefix = commandPrefix,
-        iconPath = iconPath,
-        categoryId = selectedCategoryId,
-        useHeartbeat = useHeartbeat,
-        executionParams = executionParams,
-        heartbeatInterval = heartbeatInterval.toLongOrNull()?.times(MS_TO_S) ?: original.heartbeatInterval,
-        heartbeatTimeout = heartbeatTimeout.toLongOrNull()?.times(MS_TO_S) ?: original.heartbeatTimeout,
-        runInBackground = runInBackground,
-        keepSessionOpen = keepOpen,
-        interactionMode = interactionMode,
-        notifyOnResult = notifyOnResult,
-        envVars = envVars.filter { it.first.isNotBlank() }.toMap(),
-        argumentPresets = argumentPresets.toList(),
-        prefixPresets = prefixPresets.toList(),
-        envVarPresets = envVarPresets.toList()
-    )
+    fun toScript(original: Script): Script =
+        original.copy(
+            name = name,
+            interpreter = interpreter,
+            fileExtension = fileExtension,
+            commandPrefix = commandPrefix,
+            iconPath = iconPath,
+            categoryId = selectedCategoryId,
+            useHeartbeat = useHeartbeat,
+            executionParams = executionParams,
+            heartbeatInterval = heartbeatInterval.toLongOrNull()?.times(MS_TO_S) ?: original.heartbeatInterval,
+            heartbeatTimeout = heartbeatTimeout.toLongOrNull()?.times(MS_TO_S) ?: original.heartbeatTimeout,
+            runInBackground = runInBackground,
+            keepSessionOpen = keepOpen,
+            interactionMode = interactionMode,
+            notifyOnResult = notifyOnResult,
+            envVars = envVars.filter { it.first.isNotBlank() }.toMap(),
+            argumentPresets = argumentPresets.toList(),
+            prefixPresets = prefixPresets.toList(),
+            envVarPresets = envVarPresets.toList(),
+        )
 }

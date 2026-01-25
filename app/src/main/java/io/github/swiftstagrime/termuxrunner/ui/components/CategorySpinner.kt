@@ -161,7 +161,7 @@ private fun PreviewCategorySpinnerUncategorized() {
                 categories = sampleCategories,
                 selectedCategoryId = null,
                 onCategorySelected = {},
-                onAddNewClick = {}
+                onAddNewClick = {},
             )
         }
     }
@@ -176,7 +176,7 @@ private fun PreviewCategorySpinnerSelected() {
                 categories = sampleCategories,
                 selectedCategoryId = 2,
                 onCategorySelected = {},
-                onAddNewClick = {}
+                onAddNewClick = {},
             )
         }
     }

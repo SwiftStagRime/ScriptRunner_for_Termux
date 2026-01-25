@@ -20,22 +20,24 @@ import org.robolectric.RobolectricTestRunner
 class DeviceBootReceiverTest {
     private val dao = mockk<AutomationDao>(relaxed = true)
     private val scheduler = mockk<AutomationScheduler>(relaxed = true)
-    private val receiver = DeviceBootReceiver().apply {
-        this.automationDao = dao
-        this.scheduler = scheduler
-    }
+    private val receiver =
+        DeviceBootReceiver().apply {
+            this.automationDao = dao
+            this.scheduler = scheduler
+        }
 
     @OptIn(ExperimentalCoroutinesApi::class)
     @Test
-    fun `on BOOT_COMPLETED schedules all enabled automations`() = runTest {
-        val enabledList = listOf(mockk<AutomationEntity>(), mockk<AutomationEntity>())
-        coEvery { dao.getEnabledAutomations() } returns enabledList
+    fun `on BOOT_COMPLETED schedules all enabled automations`() =
+        runTest {
+            val enabledList = listOf(mockk<AutomationEntity>(), mockk<AutomationEntity>())
+            coEvery { dao.getEnabledAutomations() } returns enabledList
 
-        val intent = Intent(Intent.ACTION_BOOT_COMPLETED)
-        receiver.onReceive(ApplicationProvider.getApplicationContext(), intent)
+            val intent = Intent(Intent.ACTION_BOOT_COMPLETED)
+            receiver.onReceive(ApplicationProvider.getApplicationContext(), intent)
 
-        advanceUntilIdle()
+            advanceUntilIdle()
 
-        verify(exactly = 2) { scheduler.schedule(any()) }
-    }
+            verify(exactly = 2) { scheduler.schedule(any()) }
+        }
 }

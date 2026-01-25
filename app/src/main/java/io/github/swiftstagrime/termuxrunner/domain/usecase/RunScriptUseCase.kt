@@ -1,8 +1,6 @@
 package io.github.swiftstagrime.termuxrunner.domain.usecase
 
-import android.content.Context
 import android.util.Base64
-import dagger.hilt.android.qualifiers.ApplicationContext
 import io.github.swiftstagrime.termuxrunner.di.PackageName
 import io.github.swiftstagrime.termuxrunner.domain.model.Script
 import io.github.swiftstagrime.termuxrunner.domain.repository.MonitoringRepository

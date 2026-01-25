@@ -7,7 +7,9 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextReplacement
 
-class HomeRobot(private val composeTestRule: ComposeTestRule) {
+class HomeRobot(
+    private val composeTestRule: ComposeTestRule,
+) {
     fun clickAddScript() {
         composeTestRule.onNodeWithTag("fab_add_script").performClick()
     }
@@ -17,7 +19,9 @@ class HomeRobot(private val composeTestRule: ComposeTestRule) {
     }
 }
 
-class EditorRobot(private val composeTestRule: ComposeTestRule) {
+class EditorRobot(
+    private val composeTestRule: ComposeTestRule,
+) {
     fun typeCode(code: String) {
         composeTestRule.onNodeWithTag("code_editor_input").performTextReplacement(code)
     }
@@ -27,7 +31,9 @@ class EditorRobot(private val composeTestRule: ComposeTestRule) {
     }
 }
 
-class ConfigRobot(private val composeTestRule: ComposeTestRule) {
+class ConfigRobot(
+    private val composeTestRule: ComposeTestRule,
+) {
     fun enterName(name: String) {
         composeTestRule.onNodeWithTag("config_name_input").performTextReplacement(name)
     }
@@ -37,6 +43,17 @@ class ConfigRobot(private val composeTestRule: ComposeTestRule) {
     }
 }
 
-fun homeRobot(rule: ComposeTestRule, block: HomeRobot.() -> Unit) = HomeRobot(rule).block()
-fun editorRobot(rule: ComposeTestRule, block: EditorRobot.() -> Unit) = EditorRobot(rule).block()
-fun configRobot(rule: ComposeTestRule, block: ConfigRobot.() -> Unit) = ConfigRobot(rule).block()
+fun homeRobot(
+    rule: ComposeTestRule,
+    block: HomeRobot.() -> Unit,
+) = HomeRobot(rule).block()
+
+fun editorRobot(
+    rule: ComposeTestRule,
+    block: EditorRobot.() -> Unit,
+) = EditorRobot(rule).block()
+
+fun configRobot(
+    rule: ComposeTestRule,
+    block: ConfigRobot.() -> Unit,
+) = ConfigRobot(rule).block()

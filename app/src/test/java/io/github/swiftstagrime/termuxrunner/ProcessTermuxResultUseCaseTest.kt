@@ -18,25 +18,27 @@ class ProcessTermuxResultUseCaseTest {
     private val useCase = ProcessTermuxResultUseCase(dao, repo, notifier)
 
     @Test
-    fun `execute updates db and shows notification`() = runTest {
-        useCase.execute(
-            automationId = 1,
-            scriptId = 10,
-            scriptName = "Test",
-            exitCode = 0,
-            internalError = null
-        )
+    fun `execute updates db and shows notification`() =
+        runTest {
+            useCase.execute(
+                automationId = 1,
+                scriptId = 10,
+                scriptName = "Test",
+                exitCode = 0,
+                internalError = null,
+            )
 
-        coVerify { dao.updateLastResult(1, 0, any()) }
-        coVerify { repo.insertLog(match { it.automationId == 1 && it.exitCode == 0 }) }
-        verify { notifier.showResultNotification(10, "Test", 0, null) }
-    }
+            coVerify { dao.updateLastResult(1, 0, any()) }
+            coVerify { repo.insertLog(match { it.automationId == 1 && it.exitCode == 0 }) }
+            verify { notifier.showResultNotification(10, "Test", 0, null) }
+        }
 
     @Test
-    fun `execute with id -1 skip database but shows notification`() = runTest {
-        useCase.execute(-1, 10, "Test", 0, null)
+    fun `execute with id -1 skip database but shows notification`() =
+        runTest {
+            useCase.execute(-1, 10, "Test", 0, null)
 
-        coVerify(exactly = 0) { dao.updateLastResult(any(), any(), any()) }
-        verify { notifier.showResultNotification(10, "Test", 0, null) }
-    }
+            coVerify(exactly = 0) { dao.updateLastResult(any(), any(), any()) }
+            verify { notifier.showResultNotification(10, "Test", 0, null) }
+        }
 }

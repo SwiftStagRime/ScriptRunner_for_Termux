@@ -22,23 +22,22 @@ import kotlin.reflect.full.memberProperties
  * The Entity is always treated as the source of truth.
  */
 class DataLayerMappingTest {
-
     @Test
     fun `Script - All entity fields are mapped to domain and DTO`() {
         assertAllPropertiesMapped(
             source = ScriptEntity::class,
-            destination = Script::class
+            destination = Script::class,
         )
 
         assertAllPropertiesMapped(
             source = Script::class,
-            destination = ScriptEntity::class
+            destination = ScriptEntity::class,
         )
 
         assertAllPropertiesMapped(
             source = ScriptEntity::class,
             destination = ScriptExportDto::class,
-            ignoreProperties = setOf("iconPath")
+            ignoreProperties = setOf("iconPath"),
         )
     }
 
@@ -46,22 +45,23 @@ class DataLayerMappingTest {
     fun `Automation - All entity fields are mapped to domain and DTO`() {
         assertAllPropertiesMapped(
             source = AutomationEntity::class,
-            destination = Automation::class
+            destination = Automation::class,
         )
 
         assertAllPropertiesMapped(
             source = Automation::class,
-            destination = AutomationEntity::class
+            destination = AutomationEntity::class,
         )
 
         assertAllPropertiesMapped(
             source = AutomationEntity::class,
             destination = AutomationExportDto::class,
-            ignoreProperties = setOf(
-                "id",
-                "lastRunTimestamp",
-                "nextRunTimestamp"
-            )
+            ignoreProperties =
+                setOf(
+                    "id",
+                    "lastRunTimestamp",
+                    "nextRunTimestamp",
+                ),
         )
     }
 
@@ -69,17 +69,17 @@ class DataLayerMappingTest {
     fun `Category - All entity fields are mapped to domain and DTO`() {
         assertAllPropertiesMapped(
             source = CategoryEntity::class,
-            destination = Category::class
+            destination = Category::class,
         )
 
         assertAllPropertiesMapped(
             source = Category::class,
-            destination = CategoryEntity::class
+            destination = CategoryEntity::class,
         )
 
         assertAllPropertiesMapped(
             source = CategoryEntity::class,
-            destination = CategoryExportDto::class
+            destination = CategoryExportDto::class,
         )
     }
 
@@ -87,19 +87,19 @@ class DataLayerMappingTest {
     fun `AutomationLog - All entity fields are mapped to domain`() {
         assertAllPropertiesMapped(
             source = AutomationLogEntity::class,
-            destination = AutomationLog::class
+            destination = AutomationLog::class,
         )
 
         assertAllPropertiesMapped(
             source = AutomationLog::class,
-            destination = AutomationLogEntity::class
+            destination = AutomationLogEntity::class,
         )
     }
 
     private fun assertAllPropertiesMapped(
         source: KClass<*>,
         destination: KClass<*>,
-        ignoreProperties: Set<String> = emptySet()
+        ignoreProperties: Set<String> = emptySet(),
     ) {
         val sourceProperties = source.memberProperties.map { it.name }.toSet()
         val destProperties = destination.memberProperties.map { it.name }.toSet()
@@ -109,7 +109,7 @@ class DataLayerMappingTest {
         if (missingProperties.isNotEmpty()) {
             fail(
                 "MAPPING INCOMPLETE: The following properties from `${source.simpleName}` " +
-                        "are missing in `${destination.simpleName}`: $missingProperties"
+                    "are missing in `${destination.simpleName}`: $missingProperties",
             )
         }
     }

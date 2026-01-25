@@ -77,7 +77,7 @@ class TermuxRepositoryTest {
             scriptId = 123,
             scriptName = "MyScript",
             notifyOnResult = true,
-            automationId = 456
+            automationId = 456,
         )
 
         val nextServiceIntent = shadowOf(context).nextStartedService

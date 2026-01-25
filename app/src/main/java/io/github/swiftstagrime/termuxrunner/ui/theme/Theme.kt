@@ -316,15 +316,17 @@ fun ScriptRunnerForTermuxTheme(
     content: @Composable () -> Unit,
 ) {
     val context = LocalContext.current
-    val isDark = when (mode) {
-        ThemeMode.LIGHT -> false
-        ThemeMode.DARK -> true
-        ThemeMode.SYSTEM -> isSystemInDarkTheme()
-    }
+    val isDark =
+        when (mode) {
+            ThemeMode.LIGHT -> false
+            ThemeMode.DARK -> true
+            ThemeMode.SYSTEM -> isSystemInDarkTheme()
+        }
 
-    val colorScheme = remember(accent, isDark) {
-        pickColorScheme(accent, isDark, context)
-    }
+    val colorScheme =
+        remember(accent, isDark) {
+            pickColorScheme(accent, isDark, context)
+        }
 
     val view = LocalView.current
     if (!view.isInEditMode) {
@@ -346,9 +348,9 @@ fun ScriptRunnerForTermuxTheme(
 private fun pickColorScheme(
     accent: AppTheme,
     isDark: Boolean,
-    context: Context
-): ColorScheme {
-    return when (accent) {
+    context: Context,
+): ColorScheme =
+    when (accent) {
         AppTheme.DYNAMIC -> {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                 if (isDark) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
@@ -362,7 +364,6 @@ private fun pickColorScheme(
         AppTheme.AMOLED -> if (isDark) DarkAmoledColorScheme else LightAmoledColorScheme
         AppTheme.CYBER -> if (isDark) DarkColorfulAmoledColorScheme else LightColorfulAmoledColorScheme
     }
-}
 
 tailrec fun Context.findActivity(): Activity? =
     when (this) {

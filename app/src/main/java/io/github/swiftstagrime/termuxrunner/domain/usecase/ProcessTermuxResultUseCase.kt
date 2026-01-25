@@ -8,38 +8,40 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class ProcessTermuxResultUseCase @Inject constructor(
-    private val automationDao: AutomationDao,
-    private val logRepository: AutomationLogRepository,
-    private val notificationHelper: AutomationNotificationHelper,
-) {
-    suspend fun execute(
-        automationId: Int,
-        scriptId: Int,
-        scriptName: String,
-        exitCode: Int,
-        internalError: String?,
+class ProcessTermuxResultUseCase
+    @Inject
+    constructor(
+        private val automationDao: AutomationDao,
+        private val logRepository: AutomationLogRepository,
+        private val notificationHelper: AutomationNotificationHelper,
     ) {
-        val timestamp = System.currentTimeMillis()
+        suspend fun execute(
+            automationId: Int,
+            scriptId: Int,
+            scriptName: String,
+            exitCode: Int,
+            internalError: String?,
+        ) {
+            val timestamp = System.currentTimeMillis()
 
-        if (automationId != -1) {
-            automationDao.updateLastResult(automationId, exitCode, timestamp)
+            if (automationId != -1) {
+                automationDao.updateLastResult(automationId, exitCode, timestamp)
 
-            logRepository.insertLog(
-                AutomationLog(
-                    automationId = automationId,
-                    timestamp = timestamp,
-                    exitCode = exitCode,
-                    message = internalError
+                logRepository.insertLog(
+                    AutomationLog(
+                        automationId = automationId,
+                        timestamp = timestamp,
+                        exitCode = exitCode,
+                        message = internalError,
+                    ),
                 )
+            }
+
+            notificationHelper.showResultNotification(
+                scriptId = scriptId,
+                name = scriptName,
+                exitCode = exitCode,
+                internalError = internalError,
             )
         }
-
-        notificationHelper.showResultNotification(
-            scriptId = scriptId,
-            name = scriptName,
-            exitCode = exitCode,
-            internalError = internalError
-        )
     }
-}

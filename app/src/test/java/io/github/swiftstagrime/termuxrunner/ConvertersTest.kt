@@ -7,7 +7,6 @@ import junit.framework.TestCase.assertEquals
 import org.junit.Test
 
 class ConvertersTest {
-
     private val converters = Converters()
 
     @Test
@@ -81,7 +80,6 @@ class ConvertersTest {
         assertEquals(emptyList<String>(), converters.toStringList("not json array"))
         assertEquals(emptyList<String>(), converters.toStringList("[\"item1\""))
     }
-
 
     @Test
     fun `automationTypeConverters - correctly handles all enum values`() {

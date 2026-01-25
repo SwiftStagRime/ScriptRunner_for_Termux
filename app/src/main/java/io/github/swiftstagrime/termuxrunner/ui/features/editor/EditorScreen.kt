@@ -121,24 +121,27 @@ fun EditorScreen(
         }
     }
 }
+
 @DevicePreviews
 @Composable
 private fun PreviewEditorNewRaw() {
-    val sampleCode = """
+    val sampleCode =
+        """
         #!/bin/bash
         echo "Hello World"
         for i in {1..10}; do
            echo "Counting i"
         done
-    """.trimIndent()
+        """.trimIndent()
 
     ScriptRunnerForTermuxTheme {
         EditorScreen(
-            scriptDraft = Script(
-                id = 1,
-                name = "Complex Logic",
-                code = sampleCode,
-            ),
+            scriptDraft =
+                Script(
+                    id = 1,
+                    name = "Complex Logic",
+                    code = sampleCode,
+                ),
             codeState = TextFieldValue(sampleCode),
             onCodeChange = {},
             onMetadataChange = {},
@@ -154,7 +157,7 @@ private fun PreviewEditorNewRaw() {
             onRequestNotificationPermission = {},
             configState = null,
             onOpenConfig = {},
-            onDismissConfig = {}
+            onDismissConfig = {},
         )
     }
 }

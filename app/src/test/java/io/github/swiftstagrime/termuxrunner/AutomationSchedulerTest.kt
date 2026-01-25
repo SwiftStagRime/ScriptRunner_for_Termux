@@ -34,10 +34,11 @@ class AutomationSchedulerTest {
     @Test
     fun `schedule triggers immediate work if missed and runIfMissed is true`() {
         val pastTime = System.currentTimeMillis() - 10000
-        val automation = createAutomation(
-            nextRunTimestamp = pastTime,
-            runIfMissed = true
-        )
+        val automation =
+            createAutomation(
+                nextRunTimestamp = pastTime,
+                runIfMissed = true,
+            )
 
         scheduler.schedule(automation)
 
@@ -56,7 +57,7 @@ class AutomationSchedulerTest {
         val shadowAlarmManager = shadowOf(alarmManager)
         val alarm = shadowAlarmManager.nextScheduledAlarm
         assertNotNull(alarm)
-        assertEquals(futureTime, alarm?.triggerAtTime )
+        assertEquals(futureTime, alarm?.triggerAtTime)
 
         val intent = shadowOf(alarm?.operation).savedIntent
         assertEquals(123, intent.getIntExtra("automation_id", -1))
@@ -67,11 +68,18 @@ class AutomationSchedulerTest {
         id: Int = 1,
         isEnabled: Boolean = true,
         nextRunTimestamp: Long? = null,
-        runIfMissed: Boolean = true
+        runIfMissed: Boolean = true,
     ) = AutomationEntity(
-        id = id, isEnabled = isEnabled, nextRunTimestamp = nextRunTimestamp,
-        runIfMissed = runIfMissed, scheduledTimestamp = System.currentTimeMillis(),
-        type = AutomationType.PERIODIC, scriptId = 1, label = "Test",
-        intervalMillis = 0, daysOfWeek = emptyList(), lastRunTimestamp = null
+        id = id,
+        isEnabled = isEnabled,
+        nextRunTimestamp = nextRunTimestamp,
+        runIfMissed = runIfMissed,
+        scheduledTimestamp = System.currentTimeMillis(),
+        type = AutomationType.PERIODIC,
+        scriptId = 1,
+        label = "Test",
+        intervalMillis = 0,
+        daysOfWeek = emptyList(),
+        lastRunTimestamp = null,
     )
 }

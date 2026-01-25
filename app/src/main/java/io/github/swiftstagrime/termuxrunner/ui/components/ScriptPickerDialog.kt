@@ -269,7 +269,7 @@ private fun PreviewScriptPickerDialogLight() {
                 scripts = sampleScripts,
                 categories = sampleCategories,
                 onDismiss = {},
-                onScriptSelected = {}
+                onScriptSelected = {},
             )
         }
     }
@@ -278,7 +278,7 @@ private fun PreviewScriptPickerDialogLight() {
 @Preview(
     name = "Night Mode",
     showBackground = true,
-    uiMode = Configuration.UI_MODE_NIGHT_YES
+    uiMode = Configuration.UI_MODE_NIGHT_YES,
 )
 @Composable
 private fun PreviewScriptPickerDialogNight() {
@@ -288,7 +288,7 @@ private fun PreviewScriptPickerDialogNight() {
                 scripts = sampleScripts,
                 categories = sampleCategories,
                 onDismiss = {},
-                onScriptSelected = {}
+                onScriptSelected = {},
             )
         }
     }
@@ -303,7 +303,7 @@ private fun PreviewScriptPickerDialogEmpty() {
                 scripts = emptyList(),
                 categories = sampleCategories,
                 onDismiss = {},
-                onScriptSelected = {}
+                onScriptSelected = {},
             )
         }
     }
@@ -315,7 +315,7 @@ private fun PreviewScriptPickerItem() {
     ScriptRunnerForTermuxTheme {
         ScriptPickerItem(
             script = sampleScripts.first(),
-            onClick = {}
+            onClick = {},
         )
     }
 }

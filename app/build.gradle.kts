@@ -23,7 +23,7 @@ android {
         versionCode = 1
         versionName = "1.4"
 
-        testInstrumentationRunner  = "io.github.swiftstagrime.termuxrunner.di.HiltTestRunner"
+        testInstrumentationRunner = "io.github.swiftstagrime.termuxrunner.di.HiltTestRunner"
 
         setProperty("archivesBaseName", "ScriptRunnerForTermux")
     }

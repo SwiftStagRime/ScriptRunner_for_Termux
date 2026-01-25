@@ -197,34 +197,38 @@ fun HomeRoute(
         }
     }
 
-    val actions = remember(viewModel, context) {
-        HomeActions(
-            onSearchQueryChange = viewModel::onSearchQueryChange,
-            onOpenConfig = viewModel::openConfig,
-            onDismissConfig = viewModel::dismissConfig,
-            onAddClick = { onNavigateToEditor(0) },
-            onSettingsClick = onNavigateToSettings,
-            onScriptCodeClick = { onNavigateToEditor(it.id) },
-            onRunClick = { script ->
-                if (script.interactionMode == InteractionMode.NONE) viewModel.runScript(script)
-                else scriptToPrompt = script
-            },
-            onDeleteScript = viewModel::deleteScript,
-            onCreateShortcutClick = viewModel::createShortcut,
-            onUpdateScript = viewModel::updateScript,
-            onHeartbeatToggle = { if (it) requestNotifications() },
-            onRequestBatteryUnrestricted = { BatteryUtils.requestIgnoreBatteryOptimizations(context) },
-            onRequestNotificationPermission = { requestNotifications() },
-            onProcessImage = viewModel::processImage,
-            onCategorySelect = viewModel::selectCategory,
-            onSortOptionChange = viewModel::setSortOption,
-            onAddNewCategory = viewModel::addCategory,
-            onDeleteCategory = viewModel::deleteCategory,
-            onMove = viewModel::moveScript,
-            onTileSettingsClick = onNavigateToTileSettings,
-            onNavigateToAutomation = onNavigateToAutomation
-        )
-    }
+    val actions =
+        remember(viewModel, context) {
+            HomeActions(
+                onSearchQueryChange = viewModel::onSearchQueryChange,
+                onOpenConfig = viewModel::openConfig,
+                onDismissConfig = viewModel::dismissConfig,
+                onAddClick = { onNavigateToEditor(0) },
+                onSettingsClick = onNavigateToSettings,
+                onScriptCodeClick = { onNavigateToEditor(it.id) },
+                onRunClick = { script ->
+                    if (script.interactionMode == InteractionMode.NONE) {
+                        viewModel.runScript(script)
+                    } else {
+                        scriptToPrompt = script
+                    }
+                },
+                onDeleteScript = viewModel::deleteScript,
+                onCreateShortcutClick = viewModel::createShortcut,
+                onUpdateScript = viewModel::updateScript,
+                onHeartbeatToggle = { if (it) requestNotifications() },
+                onRequestBatteryUnrestricted = { BatteryUtils.requestIgnoreBatteryOptimizations(context) },
+                onRequestNotificationPermission = { requestNotifications() },
+                onProcessImage = viewModel::processImage,
+                onCategorySelect = viewModel::selectCategory,
+                onSortOptionChange = viewModel::setSortOption,
+                onAddNewCategory = viewModel::addCategory,
+                onDeleteCategory = viewModel::deleteCategory,
+                onMove = viewModel::moveScript,
+                onTileSettingsClick = onNavigateToTileSettings,
+                onNavigateToAutomation = onNavigateToAutomation,
+            )
+        }
 
     HomeScreen(
         uiState = uiState,
@@ -235,7 +239,7 @@ fun HomeRoute(
         selectedCategoryId = selectedCategoryId,
         sortOption = sortOption,
         snackbarHostState = snackbarHostState,
-        actions = actions
+        actions = actions,
     )
 
     scriptToPrompt?.let { script ->
@@ -245,7 +249,7 @@ fun HomeRoute(
             onConfirm = { args, prefix, env ->
                 viewModel.runScript(script, args, prefix, env)
                 scriptToPrompt = null
-            }
+            },
         )
     }
 }

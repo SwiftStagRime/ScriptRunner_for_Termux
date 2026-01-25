@@ -123,7 +123,7 @@ fun AutomationConfigDialog(
                     onDismiss = onDismiss,
                     onConfirm = {
                         onSave(state.toSaveParams(script.id))
-                    }
+                    },
                 )
             }
         }
@@ -176,7 +176,7 @@ private fun FrequencySection(state: AutomationConfigState) {
 private fun ScheduleSection(
     state: AutomationConfigState,
     onShowDate: () -> Unit,
-    onShowTime: () -> Unit
+    onShowTime: () -> Unit,
 ) {
     ConfigSection(title = stringResource(R.string.automation_section_schedule)) {
         Row(
@@ -216,11 +216,12 @@ private fun ScheduleSection(
             DayOfWeekPicker(
                 selectedDays = state.selectedDays,
                 onToggleDay = { day ->
-                    state.selectedDays = if (state.selectedDays.contains(day)) {
-                        state.selectedDays - day
-                    } else {
-                        state.selectedDays + day
-                    }
+                    state.selectedDays =
+                        if (state.selectedDays.contains(day)) {
+                            state.selectedDays - day
+                        } else {
+                            state.selectedDays + day
+                        }
                 },
             )
         }
@@ -231,8 +232,10 @@ private fun ScheduleSection(
 private fun ConditionsSection(state: AutomationConfigState) {
     ConfigSection(title = stringResource(R.string.automation_section_conditions)) {
         Column(
-            modifier = Modifier.clip(RoundedCornerShape(16.dp))
-                .background(MaterialTheme.colorScheme.surfaceContainerLowest),
+            modifier =
+                Modifier
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(MaterialTheme.colorScheme.surfaceContainerLowest),
         ) {
             AutomationOptionTile(
                 title = stringResource(R.string.automation_run_if_missed),
@@ -258,18 +261,23 @@ private fun ConditionsSection(state: AutomationConfigState) {
 }
 
 @Composable
-private fun UpcomingRunsSection(script: Script, state: AutomationConfigState) {
-    val upcomingRuns = remember(state.type, state.selectedDate, state.selectedHour, state.selectedMinute, state.intervalValue, state.selectedDays) {
-        val temp = AutomationEntity(
-            scriptId = script.id,
-            label = "",
-            type = state.type,
-            scheduledTimestamp = state.selectedDate,
-            intervalMillis = (state.intervalValue.toLongOrNull() ?: DEFAULT_INTERVAL_MINUTES) * MILLIS_IN_MINUTE,
-            daysOfWeek = state.selectedDays,
-        )
-        AutomationTimeCalculator.getNextRuns(temp, 3)
-    }
+private fun UpcomingRunsSection(
+    script: Script,
+    state: AutomationConfigState,
+) {
+    val upcomingRuns =
+        remember(state.type, state.selectedDate, state.selectedHour, state.selectedMinute, state.intervalValue, state.selectedDays) {
+            val temp =
+                AutomationEntity(
+                    scriptId = script.id,
+                    label = "",
+                    type = state.type,
+                    scheduledTimestamp = state.selectedDate,
+                    intervalMillis = (state.intervalValue.toLongOrNull() ?: DEFAULT_INTERVAL_MINUTES) * MILLIS_IN_MINUTE,
+                    daysOfWeek = state.selectedDays,
+                )
+            AutomationTimeCalculator.getNextRuns(temp, 3)
+        }
 
     ConfigSection(title = stringResource(R.string.automation_section_upcoming)) {
         Surface(
@@ -285,11 +293,12 @@ private fun UpcomingRunsSection(script: Script, state: AutomationConfigState) {
         }
     }
 }
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun AutomationDatePicker(
     state: AutomationConfigState,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
 ) {
     val datePickerState = rememberDatePickerState(initialSelectedDateMillis = state.selectedDate)
     DatePickerDialog(
@@ -304,16 +313,18 @@ private fun AutomationDatePicker(
         DatePicker(state = datePickerState)
     }
 }
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun AutomationTimePicker(
     state: AutomationConfigState,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
 ) {
-    val timePickerState = rememberTimePickerState(
-        initialHour = state.selectedHour,
-        initialMinute = state.selectedMinute
-    )
+    val timePickerState =
+        rememberTimePickerState(
+            initialHour = state.selectedHour,
+            initialMinute = state.selectedMinute,
+        )
     AlertDialog(
         onDismissRequest = onDismiss,
         confirmButton = {
@@ -326,6 +337,7 @@ private fun AutomationTimePicker(
         text = { TimePicker(state = timePickerState) },
     )
 }
+
 @Composable
 private fun UpcomingRunRow(time: Long) {
     Row(
@@ -345,6 +357,7 @@ private fun UpcomingRunRow(time: Long) {
         )
     }
 }
+
 @Composable
 private fun BatteryThresholdSlider(state: AutomationConfigState) {
     Column(modifier = Modifier.padding(16.dp)) {
@@ -371,7 +384,10 @@ private fun BatteryThresholdSlider(state: AutomationConfigState) {
 }
 
 @Composable
-private fun DialogActionButtons(onDismiss: () -> Unit, onConfirm: () -> Unit) {
+private fun DialogActionButtons(
+    onDismiss: () -> Unit,
+    onConfirm: () -> Unit,
+) {
     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
         TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) }
         Spacer(modifier = Modifier.width(8.dp))
@@ -385,29 +401,30 @@ private fun DialogActionButtons(onDismiss: () -> Unit, onConfirm: () -> Unit) {
 }
 
 @Composable
-fun rememberAutomationConfigState(script: Script): AutomationConfigState {
-    return rememberSaveable(script, saver = AutomationConfigState.Saver(script)) {
+fun rememberAutomationConfigState(script: Script): AutomationConfigState =
+    rememberSaveable(script, saver = AutomationConfigState.Saver(script)) {
         AutomationConfigState(script)
     }
-}
 
 @Composable
-private fun transparentTextFieldColors() = TextFieldDefaults.colors(
-    focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
-    unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
-    focusedIndicatorColor = Color.Transparent,
-    unfocusedIndicatorColor = Color.Transparent,
-)
+private fun transparentTextFieldColors() =
+    TextFieldDefaults.colors(
+        focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
+        unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
+        focusedIndicatorColor = Color.Transparent,
+        unfocusedIndicatorColor = Color.Transparent,
+    )
 
 @Composable
 private fun dividerColor() = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)
 
 @Composable
-private fun getAutomationTypeLabel(type: AutomationType) = when (type) {
-    AutomationType.ONE_TIME -> stringResource(R.string.automation_type_one_time)
-    AutomationType.PERIODIC -> stringResource(R.string.automation_type_periodic)
-    AutomationType.WEEKLY -> stringResource(R.string.automation_type_weekly)
-}
+private fun getAutomationTypeLabel(type: AutomationType) =
+    when (type) {
+        AutomationType.ONE_TIME -> stringResource(R.string.automation_type_one_time)
+        AutomationType.PERIODIC -> stringResource(R.string.automation_type_periodic)
+        AutomationType.WEEKLY -> stringResource(R.string.automation_type_weekly)
+    }
 
 @Composable
 private fun ConfigSection(
@@ -492,7 +509,7 @@ private fun AutomationOptionTile(
 @Preview(
     name = "One-Time Automation - Night",
     showBackground = true,
-    uiMode = Configuration.UI_MODE_NIGHT_YES
+    uiMode = Configuration.UI_MODE_NIGHT_YES,
 )
 @Composable
 private fun PreviewAutomationConfigOneTime() {
@@ -501,7 +518,7 @@ private fun PreviewAutomationConfigOneTime() {
             AutomationConfigDialog(
                 script = sampleScripts[0],
                 onDismiss = {},
-                onSave = {}
+                onSave = {},
             )
         }
     }

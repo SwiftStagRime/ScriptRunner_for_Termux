@@ -12,7 +12,6 @@ import io.github.swiftstagrime.termuxrunner.ui.features.runner.ScriptRunnerActiv
 
 @AndroidEntryPoint
 class MasterScriptTileService : TileService() {
-
     override fun onStartListening() {
         super.onStartListening()
         qsTile?.apply {
@@ -23,21 +22,23 @@ class MasterScriptTileService : TileService() {
     }
 
     override fun onClick() {
-        val intent = Intent(this, ScriptRunnerActivity::class.java).apply {
-            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        }
+        val intent =
+            Intent(this, ScriptRunnerActivity::class.java).apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
         safeStartActivityAndCollapse(intent)
     }
 
     @SuppressLint("StartActivityAndCollapseDeprecated")
     private fun safeStartActivityAndCollapse(intent: Intent) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-            val pendingIntent = PendingIntent.getActivity(
-                this,
-                0,
-                intent,
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
-            )
+            val pendingIntent =
+                PendingIntent.getActivity(
+                    this,
+                    0,
+                    intent,
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+                )
             startActivityAndCollapse(pendingIntent)
         } else {
             @Suppress("DEPRECATION")

@@ -100,40 +100,57 @@ val mockAutomations =
         ),
     )
 
-val stubHomeActions = HomeActions(
-    onSearchQueryChange = {}, onOpenConfig = {}, onDismissConfig = {},
-    onAddClick = {}, onSettingsClick = {}, onScriptCodeClick = {},
-    onRunClick = {}, onDeleteScript = {}, onCreateShortcutClick = {},
-    onUpdateScript = {}, onHeartbeatToggle = {}, onRequestBatteryUnrestricted = {},
-    onRequestNotificationPermission = {}, onProcessImage = { null },
-    onCategorySelect = {}, onSortOptionChange = {}, onAddNewCategory = {},
-    onDeleteCategory = {}, onMove = { _, _ -> }, onTileSettingsClick = {},
-    onNavigateToAutomation = {}
-)
+val stubHomeActions =
+    HomeActions(
+        onSearchQueryChange = {},
+        onOpenConfig = {},
+        onDismissConfig = {},
+        onAddClick = {},
+        onSettingsClick = {},
+        onScriptCodeClick = {},
+        onRunClick = {},
+        onDeleteScript = {},
+        onCreateShortcutClick = {},
+        onUpdateScript = {},
+        onHeartbeatToggle = {},
+        onRequestBatteryUnrestricted = {},
+        onRequestNotificationPermission = {},
+        onProcessImage = { null },
+        onCategorySelect = {},
+        onSortOptionChange = {},
+        onAddNewCategory = {},
+        onDeleteCategory = {},
+        onMove = { _, _ -> },
+        onTileSettingsClick = {},
+        onNavigateToAutomation = {},
+    )
 
-val sampleCategories = listOf(
-    Category(id = 1, name = "Automation", orderIndex = 0),
-    Category(id = 2, name = "Network Tools", orderIndex = 1),
-    Category(id = 3, name = "System Maintenance", orderIndex = 2),
-    Category(id = 4, name = "Python Scripts", orderIndex = 3)
-)
+val sampleCategories =
+    listOf(
+        Category(id = 1, name = "Automation", orderIndex = 0),
+        Category(id = 2, name = "Network Tools", orderIndex = 1),
+        Category(id = 3, name = "System Maintenance", orderIndex = 2),
+        Category(id = 4, name = "Python Scripts", orderIndex = 3),
+    )
 
-val textInputScript = Script(
-    id = 1,
-    code = "print('hello')",
-    name = "Custom Deployment",
-    interactionMode = InteractionMode.TEXT_INPUT,
-    commandPrefix = "sudo",
-    executionParams = "--verbose --port 8080",
-    envVarPresets = listOf("API_KEY", "DB_PASSWORD")
-)
+val textInputScript =
+    Script(
+        id = 1,
+        code = "print('hello')",
+        name = "Custom Deployment",
+        interactionMode = InteractionMode.TEXT_INPUT,
+        commandPrefix = "sudo",
+        executionParams = "--verbose --port 8080",
+        envVarPresets = listOf("API_KEY", "DB_PASSWORD"),
+    )
 
-val multiChoiceScript = Script(
-    id = 1,
-    code = "print('hello')",
-    name = "System Cleaner",
-    interactionMode = InteractionMode.MULTI_CHOICE,
-    prefixPresets = listOf("", "tsu", "sudo"),
-    argumentPresets = listOf("--cache", "--temp-files", "--logs", "--old-kernels"),
-    envVarPresets = listOf("LOG_LEVEL", "DRY_RUN")
-)
+val multiChoiceScript =
+    Script(
+        id = 1,
+        code = "print('hello')",
+        name = "System Cleaner",
+        interactionMode = InteractionMode.MULTI_CHOICE,
+        prefixPresets = listOf("", "tsu", "sudo"),
+        argumentPresets = listOf("--cache", "--temp-files", "--logs", "--old-kernels"),
+        envVarPresets = listOf("LOG_LEVEL", "DRY_RUN"),
+    )

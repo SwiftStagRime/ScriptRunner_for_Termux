@@ -75,12 +75,13 @@ class MainActivity : AppCompatActivity() {
     private fun applyTerminalSlide(splashProvider: SplashScreenViewProvider) {
         val splashScreenView = splashProvider.view
 
-        val slideUp = ObjectAnimator.ofFloat(
-            splashScreenView,
-            View.TRANSLATION_Y,
-            0f,
-            -splashScreenView.height.toFloat()
-        )
+        val slideUp =
+            ObjectAnimator.ofFloat(
+                splashScreenView,
+                View.TRANSLATION_Y,
+                0f,
+                -splashScreenView.height.toFloat(),
+            )
 
         slideUp.apply {
             interpolator = OvershootInterpolator(1.2f)
@@ -90,4 +91,3 @@ class MainActivity : AppCompatActivity() {
         }
     }
 }
-

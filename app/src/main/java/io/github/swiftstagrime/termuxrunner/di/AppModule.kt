@@ -79,8 +79,7 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideIconRepository(imageStorageManager: ImageStorageManager): IconRepository =
-        IconRepositoryImpl(imageStorageManager)
+    fun provideIconRepository(imageStorageManager: ImageStorageManager): IconRepository = IconRepositoryImpl(imageStorageManager)
 
     @Provides
     @Singleton
@@ -107,8 +106,7 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideCategoryRepository(categoryDao: CategoryDao): CategoryRepository =
-        CategoryRepositoryImpl(categoryDao)
+    fun provideCategoryRepository(categoryDao: CategoryDao): CategoryRepository = CategoryRepositoryImpl(categoryDao)
 
     @Provides
     @Singleton
@@ -123,5 +121,7 @@ object AppModule {
 
     @Provides
     @PackageName
-    fun providePackageName(@ApplicationContext context: Context): String = context.packageName
+    fun providePackageName(
+        @ApplicationContext context: Context,
+    ): String = context.packageName
 }
