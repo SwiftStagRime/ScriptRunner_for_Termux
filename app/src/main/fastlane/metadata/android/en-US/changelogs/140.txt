@@ -1,0 +1,8 @@
+Automation + lot's of fixes and general UI and logic overhaul.
+What arrives:
+Automation - some small automation options for now
+Better script picker for relevant stuff
+Master tile
+Fixes as well as improvements to runtime parameters
+Bug fixes for import/export
+Bug fix for results receiver

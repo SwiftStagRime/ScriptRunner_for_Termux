@@ -1,0 +1,1 @@
+A secure Android bridge for managing, writing and executing scripts via Termux
