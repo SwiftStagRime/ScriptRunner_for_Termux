@@ -214,6 +214,7 @@
     <string name="msg_tile_updated">Tuile mise à jour</string>
     <string name="clear">Effacer</string>
     <string name="back">Retour</string>
+    <string name="tile_master_label">Tous les scripts</string>
 
     <!-- Script Picker Dialog -->
     <string name="title_select_script">Sélectionner un script</string>

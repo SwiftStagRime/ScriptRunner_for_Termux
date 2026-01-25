@@ -213,6 +213,7 @@
     <string name="msg_tile_updated">Плитка обновлена</string>
     <string name="clear">Очистить</string>
     <string name="back">Назад</string>
+    <string name="tile_master_label">Все скрипты</string>
 
     <!-- Script Picker Dialog -->
     <string name="title_select_script">Выбрать скрипт</string>

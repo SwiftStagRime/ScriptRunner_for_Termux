@@ -214,6 +214,7 @@
     <string name="msg_tile_updated">Bloco atualizado</string>
     <string name="clear">Limpar</string>
     <string name="back">Voltar</string>
+    <string name="tile_master_label">Todos os scripts</string>
 
     <!-- Script Picker Dialog -->
     <string name="title_select_script">Selecionar script</string>

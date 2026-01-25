@@ -215,6 +215,7 @@
     <string name="msg_tile_updated">Kachel aktualisiert</string>
     <string name="clear">Leeren</string>
     <string name="back">Zurück</string>
+    <string name="tile_master_label">Alle Skripte</string>
 
     <!-- Script Picker Dialog -->
     <string name="title_select_script">Skript auswählen</string>

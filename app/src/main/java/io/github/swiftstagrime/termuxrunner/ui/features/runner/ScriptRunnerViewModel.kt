@@ -7,6 +7,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.swiftstagrime.termuxrunner.data.repository.TermuxPermissionException
 import io.github.swiftstagrime.termuxrunner.domain.model.InteractionMode
 import io.github.swiftstagrime.termuxrunner.domain.model.Script
+import io.github.swiftstagrime.termuxrunner.domain.repository.CategoryRepository
 import io.github.swiftstagrime.termuxrunner.domain.repository.ScriptRepository
 import io.github.swiftstagrime.termuxrunner.domain.repository.UserPreferencesRepository
 import io.github.swiftstagrime.termuxrunner.domain.usecase.RunScriptUseCase
@@ -25,6 +26,7 @@ import javax.inject.Inject
 class ScriptRunnerViewModel @Inject constructor(
     private val scriptRepository: ScriptRepository,
     private val runScriptUseCase: RunScriptUseCase,
+    private val categoryRepository: CategoryRepository,
     private val userPreferencesRepository: UserPreferencesRepository,
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
@@ -37,21 +39,56 @@ class ScriptRunnerViewModel @Inject constructor(
     val selectedMode = userPreferencesRepository.selectedMode
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), ThemeMode.SYSTEM)
 
+    // State for the Picker Dialog
+    private val _showScriptPicker = MutableStateFlow(false)
+    val showScriptPicker = _showScriptPicker.asStateFlow()
+
+    // Data for the Picker
+    val allScripts = scriptRepository.getAllScripts()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    val allCategories = categoryRepository.getAllCategories()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
     private val _scriptToPrompt = MutableStateFlow<Script?>(null)
     val scriptToPrompt = _scriptToPrompt.asStateFlow()
 
     private val _events = Channel<ScriptRunnerEvent>()
     val events = _events.receiveAsFlow()
 
+    private var pendingScript: Script? = null
     private var pendingArgs: String? = null
     private var pendingPrefix: String? = null
     private var pendingEnv: Map<String, String>? = null
 
     init {
         if (scriptId != -1) {
-            checkScriptAndExecute()
+            fetchAndRunScript(scriptId)
         } else {
-            sendEvent(ScriptRunnerEvent.Finish)
+            _showScriptPicker.value = true
+        }
+    }
+
+    private fun fetchAndRunScript(id: Int) {
+        viewModelScope.launch {
+            val script = scriptRepository.getScriptById(id)
+            if (script == null) {
+                sendEvent(ScriptRunnerEvent.Finish)
+                return@launch
+            }
+            processScriptLogic(script)
+        }
+    }
+
+    fun onScriptSelected(script: Script) {
+        _showScriptPicker.value = false
+        processScriptLogic(script)
+    }
+    private fun processScriptLogic(script: Script) {
+        if (script.interactionMode == InteractionMode.NONE) {
+            executeScript(script)
+        } else {
+            _scriptToPrompt.value = script
         }
     }
 
@@ -71,6 +108,7 @@ class ScriptRunnerViewModel @Inject constructor(
                 )
                 sendEvent(ScriptRunnerEvent.Finish)
             } catch (_: TermuxPermissionException) {
+                pendingScript = script
                 pendingArgs = runtimeArgs
                 pendingPrefix = runtimePrefix
                 pendingEnv = runtimeEnv
@@ -83,7 +121,7 @@ class ScriptRunnerViewModel @Inject constructor(
     }
 
     fun onPermissionGranted() {
-        val script = _scriptToPrompt.value ?: return
+        val script = pendingScript ?: _scriptToPrompt.value ?: return
         executeScript(script, pendingArgs, pendingPrefix, pendingEnv)
     }
 
@@ -91,20 +129,8 @@ class ScriptRunnerViewModel @Inject constructor(
         sendEvent(ScriptRunnerEvent.Finish)
     }
 
-    private fun checkScriptAndExecute() {
-        viewModelScope.launch {
-            val script = scriptRepository.getScriptById(scriptId)
-            if (script == null) {
-                sendEvent(ScriptRunnerEvent.Finish)
-                return@launch
-            }
-
-            if (script.interactionMode == InteractionMode.NONE) {
-                executeScript(script)
-            } else {
-                _scriptToPrompt.value = script
-            }
-        }
+    fun dismissPicker() {
+        sendEvent(ScriptRunnerEvent.Finish)
     }
 
     private fun sendEvent(event: ScriptRunnerEvent) {

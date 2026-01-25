@@ -223,6 +223,7 @@
     <string name="msg_tile_updated">Tile updated</string>
     <string name="clear">Clear</string>
     <string name="back">Back</string>
+    <string name="tile_master_label">All scripts</string>
 
     <!-- Script Picker Dialog -->
     <string name="title_select_script">Select Script</string>

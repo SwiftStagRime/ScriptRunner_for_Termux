@@ -213,6 +213,7 @@
     <string name="msg_tile_updated">磁贴已更新</string>
     <string name="clear">清除</string>
     <string name="back">返回</string>
+    <string name="tile_master_label">所有脚本</string>
 
     <!-- Script Picker Dialog -->
     <string name="title_select_script">选择脚本</string>

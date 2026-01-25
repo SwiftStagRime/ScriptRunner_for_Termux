@@ -13,6 +13,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import dagger.hilt.android.AndroidEntryPoint
 import io.github.swiftstagrime.termuxrunner.R
+import io.github.swiftstagrime.termuxrunner.ui.components.ScriptPickerDialog
 import io.github.swiftstagrime.termuxrunner.ui.components.ScriptRuntimePromptDialog
 import io.github.swiftstagrime.termuxrunner.ui.theme.ScriptRunnerForTermuxTheme
 import kotlinx.coroutines.launch
@@ -44,9 +45,25 @@ class ScriptRunnerActivity : ComponentActivity() {
         setContent {
             val accent by viewModel.selectedAccent.collectAsStateWithLifecycle()
             val mode by viewModel.selectedMode.collectAsStateWithLifecycle()
+
+            val showPicker by viewModel.showScriptPicker.collectAsStateWithLifecycle()
+            val scripts by viewModel.allScripts.collectAsStateWithLifecycle()
+            val categories by viewModel.allCategories.collectAsStateWithLifecycle()
+
             val scriptToPrompt by viewModel.scriptToPrompt.collectAsStateWithLifecycle()
 
             ScriptRunnerForTermuxTheme(accent = accent, mode = mode) {
+                if (showPicker) {
+                    ScriptPickerDialog(
+                        scripts = scripts,
+                        categories = categories,
+                        onDismiss = { viewModel.dismissPicker() },
+                        onScriptSelected = { script ->
+                            viewModel.onScriptSelected(script)
+                        }
+                    )
+                }
+
                 scriptToPrompt?.let { script ->
                     ScriptRuntimePromptDialog(
                         script = script,

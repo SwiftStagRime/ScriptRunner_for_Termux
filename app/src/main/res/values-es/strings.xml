@@ -213,6 +213,7 @@
     <string name="msg_tile_updated">Mosaico actualizado</string>
     <string name="clear">Borrar</string>
     <string name="back">Atrás</string>
+    <string name="tile_master_label">Todos los scripts</string>
 
     <!-- Script Picker Dialog -->
     <string name="title_select_script">Seleccionar script</string>
