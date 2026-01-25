@@ -1,6 +1,8 @@
 Script Runner for Termux
 
-A secure Android bridge for managing and executing scripts via Termux. This app allows you to automate tasks, manage environment variables, and create home screen shortcuts for your favorite scripts with a focus on security and ease of use. Features
+Requires Termux to be installed to execute scripts.
+
+A secure Android bridge for managing and executing scripts via Termux. This app allows you to automate tasks, manage environment variables, and create home screen shortcuts for your favorite scripts with a focus on security and ease of use. Features:
 
 Integrated Script Editor: Write and modify scripts directly within the app.
 
