@@ -5,7 +5,6 @@ coilCompose = "3.3.0"
 coreSplashscreen = "1.2.0"
 datastorePreferences = "1.2.0"
 hiltAndroid = "2.58"
-hiltAndroidCompiler = "2.58"
 hiltNavigationCompose = "1.3.0"
 kotlin = "2.3.0"
 coreKtx = "1.17.0"
@@ -56,7 +55,6 @@ androidx-room-testing = { module = "androidx.room:room-testing", version.ref = "
 androidx-uiautomator = { module = "androidx.test.uiautomator:uiautomator", version.ref = "uiautomator" }
 coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coilCompose" }
 coil-network-okhttp = { module = "io.coil-kt.coil3:coil-network-okhttp", version.ref = "coilCompose" }
-hilt-android-compiler = { module = "com.google.dagger:hilt-android-compiler", version.ref = "hiltAndroidCompiler" }
 hilt-compiler = { module = "com.google.dagger:hilt-compiler", version.ref = "hiltAndroid" }
 hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hiltAndroid" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
