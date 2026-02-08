@@ -49,7 +49,8 @@ class ScriptRepositoryImplTest {
     ) = """
         "id": $id, "name": "$name", "code": "ls", "interpreter": "bash",
         "fileExtension": "sh", "commandPrefix": "", "runInBackground": false,
-        "openNewSession": true, "executionParams": "", "envVars": {}, "keepSessionOpen": false
+        "openNewSession": true, "executionParams": "", "envVars": {}, "keepSessionOpen": false,
+        "adbCode": "test2"
         """.trimIndent()
 
     private fun validAutomationJson(scriptId: Int) =
@@ -263,6 +264,7 @@ class ScriptRepositoryImplTest {
                     envVarPresets = listOf("KEY=VAL"),
                     iconPath = null,
                     categoryId = null,
+                    adbCode = "test2",
                 )
 
             coEvery { scriptDao.getAllScriptsOneShot() } returns listOf(script)
@@ -285,6 +287,7 @@ class ScriptRepositoryImplTest {
             assertEquals(true, exportedScript.useHeartbeat)
             assertEquals(60000L, exportedScript.heartbeatTimeout)
             assertEquals(mapOf("DEBUG" to "1"), exportedScript.envVars)
+            assertEquals("test2", exportedScript.adbCode)
         }
 
     @Test
@@ -396,7 +399,8 @@ class ScriptRepositoryImplTest {
                         "argumentPresets": ["p1"],
                         "prefixPresets": ["pr1"],
                         "envVarPresets": ["e1"],
-                        "orderIndex": 99
+                        "orderIndex": 99,
+                        "adbCode": "test2"
                     }],
                     "automations": []
                 }
@@ -425,6 +429,7 @@ class ScriptRepositoryImplTest {
             assertEquals(listOf("pr1"), entity.prefixPresets)
             assertEquals(listOf("e1"), entity.envVarPresets)
             assertEquals(99, entity.orderIndex)
+            assertEquals("test2", entity.adbCode)
         }
 
     @Test

@@ -20,6 +20,9 @@ interface ScriptDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertScript(script: ScriptEntity): Long
 
+    @Query("SELECT * FROM scripts WHERE adbCode = :adbCode LIMIT 1")
+    suspend fun getScriptByAdbCode(adbCode: String): ScriptEntity?
+
     @Delete
     suspend fun deleteScript(script: ScriptEntity)
 

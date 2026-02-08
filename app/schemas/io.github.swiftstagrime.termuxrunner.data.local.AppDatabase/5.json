@@ -1,0 +1,406 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 5,
+    "identityHash": "99b8d061fbb35a4cedd6551558950994",
+    "entities": [
+      {
+        "tableName": "scripts",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL, `code` TEXT NOT NULL, `interpreter` TEXT NOT NULL, `fileExtension` TEXT NOT NULL, `commandPrefix` TEXT NOT NULL, `runInBackground` INTEGER NOT NULL, `openNewSession` INTEGER NOT NULL, `executionParams` TEXT NOT NULL, `iconPath` TEXT, `envVars` TEXT NOT NULL, `keepSessionOpen` INTEGER NOT NULL, `useHeartbeat` INTEGER NOT NULL DEFAULT 0, `heartbeatTimeout` INTEGER NOT NULL DEFAULT 30000, `heartbeatInterval` INTEGER NOT NULL DEFAULT 10000, `categoryId` INTEGER DEFAULT NULL, `orderIndex` INTEGER NOT NULL DEFAULT 0, `notifyOnResult` INTEGER NOT NULL DEFAULT 0, `interactionMode` TEXT NOT NULL DEFAULT 'NONE', `argumentPresets` TEXT NOT NULL DEFAULT '', `prefixPresets` TEXT NOT NULL DEFAULT '', `envVarPresets` TEXT NOT NULL DEFAULT '', `adbCode` TEXT DEFAULT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "code",
+            "columnName": "code",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "interpreter",
+            "columnName": "interpreter",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fileExtension",
+            "columnName": "fileExtension",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "commandPrefix",
+            "columnName": "commandPrefix",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "runInBackground",
+            "columnName": "runInBackground",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "openNewSession",
+            "columnName": "openNewSession",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "executionParams",
+            "columnName": "executionParams",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "iconPath",
+            "columnName": "iconPath",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "envVars",
+            "columnName": "envVars",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "keepSessionOpen",
+            "columnName": "keepSessionOpen",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "useHeartbeat",
+            "columnName": "useHeartbeat",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
+          },
+          {
+            "fieldPath": "heartbeatTimeout",
+            "columnName": "heartbeatTimeout",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "30000"
+          },
+          {
+            "fieldPath": "heartbeatInterval",
+            "columnName": "heartbeatInterval",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "10000"
+          },
+          {
+            "fieldPath": "categoryId",
+            "columnName": "categoryId",
+            "affinity": "INTEGER",
+            "defaultValue": "NULL"
+          },
+          {
+            "fieldPath": "orderIndex",
+            "columnName": "orderIndex",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
+          },
+          {
+            "fieldPath": "notifyOnResult",
+            "columnName": "notifyOnResult",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
+          },
+          {
+            "fieldPath": "interactionMode",
+            "columnName": "interactionMode",
+            "affinity": "TEXT",
+            "notNull": true,
+            "defaultValue": "'NONE'"
+          },
+          {
+            "fieldPath": "argumentPresets",
+            "columnName": "argumentPresets",
+            "affinity": "TEXT",
+            "notNull": true,
+            "defaultValue": "''"
+          },
+          {
+            "fieldPath": "prefixPresets",
+            "columnName": "prefixPresets",
+            "affinity": "TEXT",
+            "notNull": true,
+            "defaultValue": "''"
+          },
+          {
+            "fieldPath": "envVarPresets",
+            "columnName": "envVarPresets",
+            "affinity": "TEXT",
+            "notNull": true,
+            "defaultValue": "''"
+          },
+          {
+            "fieldPath": "adbCode",
+            "columnName": "adbCode",
+            "affinity": "TEXT",
+            "defaultValue": "NULL"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "categories",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL, `orderIndex` INTEGER NOT NULL DEFAULT 0)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "orderIndex",
+            "columnName": "orderIndex",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "automations",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `scriptId` INTEGER NOT NULL, `label` TEXT NOT NULL, `type` TEXT NOT NULL, `scheduledTimestamp` INTEGER NOT NULL, `intervalMillis` INTEGER NOT NULL, `daysOfWeek` TEXT NOT NULL, `isEnabled` INTEGER NOT NULL, `runIfMissed` INTEGER NOT NULL, `lastRunTimestamp` INTEGER, `lastExitCode` INTEGER, `nextRunTimestamp` INTEGER, `runtimeArgs` TEXT, `runtimeEnv` TEXT NOT NULL, `runtimePrefix` TEXT, `requireWifi` INTEGER NOT NULL, `requireCharging` INTEGER NOT NULL, `batteryThreshold` INTEGER NOT NULL, FOREIGN KEY(`scriptId`) REFERENCES `scripts`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "scriptId",
+            "columnName": "scriptId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "label",
+            "columnName": "label",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "type",
+            "columnName": "type",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "scheduledTimestamp",
+            "columnName": "scheduledTimestamp",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "intervalMillis",
+            "columnName": "intervalMillis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "daysOfWeek",
+            "columnName": "daysOfWeek",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isEnabled",
+            "columnName": "isEnabled",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "runIfMissed",
+            "columnName": "runIfMissed",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lastRunTimestamp",
+            "columnName": "lastRunTimestamp",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "lastExitCode",
+            "columnName": "lastExitCode",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "nextRunTimestamp",
+            "columnName": "nextRunTimestamp",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "runtimeArgs",
+            "columnName": "runtimeArgs",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "runtimeEnv",
+            "columnName": "runtimeEnv",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "runtimePrefix",
+            "columnName": "runtimePrefix",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "requireWifi",
+            "columnName": "requireWifi",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "requireCharging",
+            "columnName": "requireCharging",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "batteryThreshold",
+            "columnName": "batteryThreshold",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_automations_scriptId",
+            "unique": false,
+            "columnNames": [
+              "scriptId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_automations_scriptId` ON `${TABLE_NAME}` (`scriptId`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "scripts",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "scriptId"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "automation_logs",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `automationId` INTEGER NOT NULL, `timestamp` INTEGER NOT NULL, `exitCode` INTEGER NOT NULL, `message` TEXT, FOREIGN KEY(`automationId`) REFERENCES `automations`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "automationId",
+            "columnName": "automationId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "timestamp",
+            "columnName": "timestamp",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "exitCode",
+            "columnName": "exitCode",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "message",
+            "columnName": "message",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_automation_logs_automationId",
+            "unique": false,
+            "columnNames": [
+              "automationId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_automation_logs_automationId` ON `${TABLE_NAME}` (`automationId`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "automations",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "automationId"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '99b8d061fbb35a4cedd6551558950994')"
+    ]
+  }
+}

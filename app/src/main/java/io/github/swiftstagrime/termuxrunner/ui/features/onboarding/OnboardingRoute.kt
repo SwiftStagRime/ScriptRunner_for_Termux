@@ -21,6 +21,18 @@ fun OnboardingRoute(
     val isTermuxOptimized by viewModel.isTermuxOptimized.collectAsStateWithLifecycle()
     val isBatteryUnrestricted = !isTermuxOptimized
 
+    val alarmLauncher =
+        rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.RequestPermission(),
+        ) { _ ->
+        }
+
+    val notificationLauncher =
+        rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.RequestPermission(),
+        ) { _ ->
+        }
+
     val permissionLauncher =
         rememberLauncherForActivityResult(
             contract = ActivityResultContracts.RequestPermission(),
@@ -48,6 +60,16 @@ fun OnboardingRoute(
         isPermissionGranted = isPermissionGranted,
         onPermissionGranted = {
             permissionLauncher.launch("com.termux.permission.RUN_COMMAND")
+        },
+        onAlarmPermissionGranted = {
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+                alarmLauncher.launch(android.Manifest.permission.SCHEDULE_EXACT_ALARM)
+            }
+        },
+        onNotificationPermissionGranted = {
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+                notificationLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+            }
         },
         onCheckAgain = {
             viewModel.completeSetup()

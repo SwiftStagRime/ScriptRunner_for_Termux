@@ -40,6 +40,14 @@
     <string name="setup_step_5_desc">O Android restringe apps em segundo plano. Você deve definir o uso de bateria do Termux como \'Irrestrito\'.</string>
     <string name="battery_warning_text">Se ignorado: Scripts e Atalhos NÃO funcionarão a menos que você abra o Termux manualmente antes.</string>
 
+    <string name="setup_step_6_title">Permissão de Alarme</string>
+    <string name="setup_step_6_desc">Necessária para agendar a automação do script. Sem isso, os scripts automatizados podem não ser executados nos horários programados.</string>
+    <string name="grant_alarm_permission_label">Conceder Permissão de Alarme</string>
+    <string name="setup_step_7_title">Permissão de Notificação</string>
+    <string name="setup_step_7_desc">Recomendado para monitorar o status da execução do script e receber notificações sobre os resultados.</string>
+    <string name="grant_notification_permission_label">Habilitar Notificações</string>
+    <string name="notification_permission_not_needed">As notificações são ativadas automaticamente em versões mais antigas do Android.</string>
+
     <!--Home -->
     <string name="home_title">Meus Scripts</string>
     <string name="search_placeholder">Pesquisar scripts…</string>
@@ -102,6 +110,7 @@
     <string name="label_interpreter">Interpretador</string>
     <string name="label_prefix">Prefixo do Comando</string>
     <string name="placeholder_prefix">ex: sudo, time</string>
+    <string name="adb_code">Código ADB (vazio por padrão)</string>
     <string name="label_arguments">Argumentos</string>
     <string name="label_bg_execution">Execução em Segundo Plano</string>
     <string name="desc_bg_execution">Mostrar apenas notificação</string>

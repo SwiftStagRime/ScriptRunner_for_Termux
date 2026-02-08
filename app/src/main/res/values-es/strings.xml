@@ -40,6 +40,14 @@
     <string name="setup_step_5_desc">Android restringe las aplicaciones en segundo plano. Debes establecer el uso de batería de Termux en \'Sin restricciones\'.</string>
     <string name="battery_warning_text">Si se ignora: Los scripts y accesos directos NO funcionarán a menos que abras Termux manualmente primero.</string>
 
+    <string name="setup_step_6_title">Permiso de Alarma</string>
+    <string name="setup_step_6_desc">Requerido para programar la automatización de scripts. Sin él, los scripts automáticos pueden no ejecutarse en sus horarios programados.</string>
+    <string name="grant_alarm_permission_label">Conceder Permiso de Alarma</string>
+    <string name="setup_step_7_title">Permiso de Notificación</string>
+    <string name="setup_step_7_desc">Recomendado para monitorear el estado de ejecución del script y recibir notificaciones sobre los resultados.</string>
+    <string name="grant_notification_permission_label">Habilitar Notificaciones</string>
+    <string name="notification_permission_not_needed">Las notificaciones están habilitadas automáticamente en versiones antiguas de Android.</string>
+
     <!--Home -->
     <string name="home_title">Mis Scripts</string>
     <string name="search_placeholder">Buscar scripts…</string>
@@ -146,6 +154,7 @@
     <string name="label_prefix_value">Valor del prefijo</string>
     <string name="btn_add_preset">Añadir ajuste</string>
     <string name="placeholder_prefix_example">ej. sudo</string>
+    <string name="adb_code">Código ADB (vacío por defecto)</string>
 
     <!-- Repo errors -->
     <string name="error_termux_permission_missing">Falta el permiso "Run Command" de Termux.</string>

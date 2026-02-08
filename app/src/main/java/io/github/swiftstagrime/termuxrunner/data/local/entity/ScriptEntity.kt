@@ -40,6 +40,8 @@ data class ScriptEntity(
     val prefixPresets: List<String> = emptyList(),
     @ColumnInfo(defaultValue = "")
     val envVarPresets: List<String> = emptyList(),
+    @ColumnInfo(defaultValue = "NULL")
+    val adbCode: String? = null,
 ) {
     fun toScriptDomain(): Script =
         Script(
@@ -65,6 +67,7 @@ data class ScriptEntity(
             argumentPresets = argumentPresets,
             prefixPresets = prefixPresets,
             envVarPresets = envVarPresets,
+            adbCode = adbCode,
         )
 }
 
@@ -92,4 +95,5 @@ fun Script.toScriptEntity(): ScriptEntity =
         argumentPresets = argumentPresets,
         prefixPresets = prefixPresets,
         envVarPresets = envVarPresets,
+        adbCode = adbCode,
     )

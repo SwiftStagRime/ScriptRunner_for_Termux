@@ -29,6 +29,15 @@ Features
     Experimental !!! Support for script monitoring for auto-restarting them if they were killed by system.
     They are not restarted if they finished themself.
 
+    Now script can be run using ADB with command:
+    ```
+    adb shell am start \
+      -n io.github.swiftstagrime.termuxrunner/io.github.swiftstagrime.termuxrunner.ui.features.adbtrigger.AdbTriggerActivity \
+      --es io.github.swiftstagrime.termuxrunner.adb_code "YOUR_CODE_HERE"
+    ```
+    YOUR_CODE_HERE is ADB code name that you have specified when saving the script. It's empty by default, and I don't think
+    that binding it to script's name is a good ided. Also note that it ignores runtime args, as it's made with the sole purpose of running it without interacting with phone
+
 ### App Showcase
 
 |                      Home                      |                      Editor                      |                                             Config & Monitoring                                              |                                               Quick Settings Tiles                                               |

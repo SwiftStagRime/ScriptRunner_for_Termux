@@ -74,6 +74,7 @@ class TermuxRepositoryImpl
                         val resultIntent =
                             Intent(context, TermuxResultReceiver::class.java).apply {
                                 action = "${context.packageName}.SCRIPT_RESULT"
+                                setPackage(context.packageName)
                                 data = "script://result/$scriptId".toUri()
                                 putExtra("script_id", scriptId)
                                 putExtra("script_name", scriptName)
@@ -87,7 +88,7 @@ class TermuxRepositoryImpl
                                 PendingIntent.FLAG_UPDATE_CURRENT
                             }
 
-                        val requestCode = automationId ?: scriptId
+                        val requestCode = (automationId?.hashCode() ?: 0) + scriptId
                         val pendingIntent =
                             PendingIntent.getBroadcast(
                                 context,

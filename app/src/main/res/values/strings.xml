@@ -43,6 +43,13 @@
     <string name="setup_step_5_title">Disable Battery Saver</string>
     <string name="setup_step_5_desc">Android restricts background apps to save power. You must set Termux battery usage to \'Unrestricted\'.</string>
     <string name="battery_warning_text">If ignored: Scripts and Shortcuts will NOT run unless you open Termux manually first.</string>
+    <string name="setup_step_6_title">Alarm Permission</string>
+    <string name="setup_step_6_desc">Required for scheduling script automation. Without this, automated scripts may not run at their scheduled times.</string>
+    <string name="grant_alarm_permission_label">Grant Alarm Permission</string>
+    <string name="setup_step_7_title">Notification Permission</string>
+    <string name="setup_step_7_desc">Recommended for monitoring script execution status and receiving notifications about script results.</string>
+    <string name="grant_notification_permission_label">Enable Notifications</string>
+    <string name="notification_permission_not_needed">Notifications are enabled automatically on older Android versions.</string>
 
     <!--Home -->
     <string name="home_title">My Scripts</string>
@@ -151,6 +158,7 @@
     <string name="label_prefix_value">Prefix Value</string>
     <string name="btn_add_preset">Add Preset</string>
     <string name="placeholder_prefix_example">e.g. sudo</string>
+    <string name="adb_code">ADB code name(empty by default)</string>
 
 
     <!-- Repo errors -->

@@ -35,6 +35,7 @@ class ScriptConfigState(
     val argumentPresets = script.argumentPresets.toMutableStateList()
     val prefixPresets = script.prefixPresets.toMutableStateList()
     val envVarPresets = script.envVarPresets.toMutableStateList()
+    var adbCode by mutableStateOf(script.adbCode)
 
     fun validate(): Boolean {
         if (name.isBlank()) {
@@ -65,5 +66,6 @@ class ScriptConfigState(
             argumentPresets = argumentPresets.toList(),
             prefixPresets = prefixPresets.toList(),
             envVarPresets = envVarPresets.toList(),
+            adbCode = adbCode,
         )
 }

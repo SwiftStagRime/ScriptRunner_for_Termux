@@ -64,6 +64,8 @@ fun OnboardingScreen(
     onPermissionGranted: () -> Unit,
     onCheckAgain: () -> Unit,
     onOpenTermuxSettings: () -> Unit,
+    onAlarmPermissionGranted: () -> Unit = {},
+    onNotificationPermissionGranted: () -> Unit = {},
     isTermuxInstalled: Boolean,
     isPermissionGranted: Boolean,
     isBatteryUnrestricted: Boolean,
@@ -229,6 +231,57 @@ fun OnboardingScreen(
                 }
             }
 
+            var step = 6
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+                SetupStepCardOptional(
+                    step = step.toString(),
+                    title = stringResource(R.string.setup_step_6_title),
+                    description = stringResource(R.string.setup_step_6_desc),
+                    isDone = false,
+                ) {
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Button(
+                        onClick = onAlarmPermissionGranted,
+                        modifier = Modifier.fillMaxWidth(),
+                        colors =
+                            ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.tertiary,
+                            ),
+                    ) {
+                        Text(stringResource(R.string.grant_alarm_permission_label))
+                    }
+                }
+                step++
+            }
+
+            SetupStepCardOptional(
+                step = step.toString(),
+                title = stringResource(R.string.setup_step_7_title),
+                description = stringResource(R.string.setup_step_7_desc),
+                isDone = false,
+            ) {
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Button(
+                        onClick = onNotificationPermissionGranted,
+                        modifier = Modifier.fillMaxWidth(),
+                        colors =
+                            ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.tertiary,
+                            ),
+                    ) {
+                        Text(stringResource(R.string.grant_notification_permission_label))
+                    }
+                } else {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = stringResource(R.string.notification_permission_not_needed),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
+
             Button(
                 onClick = onCheckAgain,
                 modifier =
@@ -339,6 +392,89 @@ fun SetupStepCard(
 }
 
 @Composable
+fun SetupStepCardOptional(
+    step: String,
+    title: String,
+    description: String,
+    isDone: Boolean,
+    content: @Composable () -> Unit = {},
+) {
+    val borderColor =
+        when {
+            isDone -> MaterialTheme.colorScheme.primary
+            else -> Color.Transparent
+        }
+
+    val containerColor =
+        when {
+            isDone -> MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f)
+            else -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f)
+        }
+
+    Card(
+        colors = CardDefaults.cardColors(containerColor = containerColor),
+        shape = RoundedCornerShape(16.dp),
+        border = if (isDone) BorderStroke(1.dp, borderColor) else null,
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        Row(
+            modifier = Modifier.padding(16.dp),
+            verticalAlignment = Alignment.Top,
+        ) {
+            Box(
+                modifier =
+                    Modifier
+                        .size(32.dp)
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.1f)),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(
+                    text = step,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+
+            Spacer(modifier = Modifier.width(16.dp))
+
+            Column(modifier = Modifier.weight(1f)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(
+                        text = title,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    if (isDone) {
+                        Icon(
+                            Icons.Default.CheckCircle,
+                            contentDescription = stringResource(R.string.done_description),
+                            tint = MaterialTheme.colorScheme.primary,
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(4.dp))
+
+                Text(
+                    text = description,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+
+                content()
+            }
+        }
+    }
+}
+
+@Composable
 fun CodeBlock(
     code: String,
     onCopy: (String) -> Unit = {},
@@ -392,6 +528,8 @@ private fun PreviewOnboardingScreen() {
             isTermuxInstalled = true,
             isPermissionGranted = false,
             onOpenTermuxSettings = {},
+            onAlarmPermissionGranted = {},
+            onNotificationPermissionGranted = {},
             isBatteryUnrestricted = true,
         )
     }

@@ -40,6 +40,14 @@
     <string name="setup_step_5_desc">Android restreint les applications en arrière-plan. Vous devez régler l\'utilisation de la batterie pour Termux sur \'Non restreinte\'.</string>
     <string name="battery_warning_text">Si ignoré : Les scripts et raccourcis ne fonctionneront PAS à moins d\'ouvrir Termux manuellement d\'abord.</string>
 
+    <string name="setup_step_6_title">Autorisation d\'alarme</string>
+    <string name="setup_step_6_desc">Nécessaire pour programmer l\'automatisation des scripts. Sans cela, les scripts automatisés peuvent ne pas s\'exécuter à leurs heures programmées.</string>
+    <string name="grant_alarm_permission_label">Accorder l\'autorisation d\'alarme</string>
+    <string name="setup_step_7_title">Autorisation de notification</string>
+    <string name="setup_step_7_desc">Recommandé pour surveiller le statut d\'exécution des scripts et recevoir des notifications sur les résultats.</string>
+    <string name="grant_notification_permission_label">Activer les notifications</string>
+    <string name="notification_permission_not_needed">Les notifications sont activées automatiquement sur les anciennes versions d\'Android.</string>
+
     <!--Home -->
     <string name="home_title">Mes Scripts</string>
     <string name="search_placeholder">Rechercher des scripts…</string>
@@ -110,6 +118,7 @@
     <string name="empty_env_vars">Aucune variable définie.</string>
     <string name="label_key">Clé</string>
     <string name="label_value">Valeur</string>
+    <string name="adb_code">Code ADB (vide par défaut)</string>
     <string name="placeholder_value">12345</string>
     <string name="cd_remove">Retirer</string>
     <string name="reliability_monitoring">Fiabilité &amp; Surveillance</string>

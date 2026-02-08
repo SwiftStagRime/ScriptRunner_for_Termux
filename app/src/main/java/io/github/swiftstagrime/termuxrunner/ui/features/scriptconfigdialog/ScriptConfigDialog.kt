@@ -620,6 +620,13 @@ private fun ExecutionSection(
             modifier = Modifier.fillMaxWidth(),
         )
         Spacer(modifier = Modifier.height(SPACING_ITEM.dp))
+        StyledTextField(
+            value = state.adbCode,
+            onValueChange = { state.adbCode = it },
+            label = stringResource(R.string.adb_code),
+            modifier = Modifier.fillMaxWidth(),
+        )
+        Spacer(modifier = Modifier.height(SPACING_ITEM.dp))
         CategorySpinner(
             categories = categories,
             selectedCategoryId = state.selectedCategoryId,

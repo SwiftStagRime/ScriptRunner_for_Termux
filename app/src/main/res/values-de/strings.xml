@@ -40,6 +40,14 @@
     <string name="setup_step_5_desc">Android schränkt Hintergrund-Apps ein. Sie müssen die Akkunutzung für Termux auf \'Nicht eingeschränkt\' setzen.</string>
     <string name="battery_warning_text">Bei Ignorieren: Skripte und Verknüpfungen funktionieren NICHT, es sei denn, Sie öffnen Termux zuerst manuell.</string>
 
+    <string name="setup_step_6_title">Alarmberechtigung</string>
+    <string name="setup_step_6_desc">Erforderlich zum Planen der Skriptautomatisierung. Ohne diese Berechtigung werden automatisierte Skripte möglicherweise nicht zu ihren geplanten Zeiten ausgeführt.</string>
+    <string name="grant_alarm_permission_label">Alarmberechtigung erteilen</string>
+    <string name="setup_step_7_title">Benachrichtigungsberechtigung</string>
+    <string name="setup_step_7_desc">Empfohlen zum Überwachen des Skriptausführungsstatus und zum Empfang von Benachrichtigungen über Ergebnisse.</string>
+    <string name="grant_notification_permission_label">Benachrichtigungen aktivieren</string>
+    <string name="notification_permission_not_needed">Benachrichtigungen sind auf älteren Android-Versionen automatisch aktiviert.</string>
+
     <!--Home -->
     <string name="home_title">Meine Skripte</string>
     <string name="search_placeholder">Skripte suchen…</string>
@@ -134,7 +142,7 @@
     <string name="battery_unrestricted">Akku: Nicht eingeschränkt</string>
     <string name="battery_optimized_restricted">Akku: Optimiert (Eingeschränkt)</string>
     <string name="not_available_in_interactive_mode">Im interaktiven Modus nicht verfügbar</string>
-
+    <string name="adb_code">ADB-Code (standardmäßig leer)</string>
     <string name="section_interactivity">Interaktivität &amp; Vorlagen</string>
     <string name="label_interaction_mode">Interaktionsmodus</string>
     <string name="interaction_none">Keine (Sofort)</string>

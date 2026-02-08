@@ -21,6 +21,10 @@
         <package android:name="com.termux" />
     </queries>
 
+    <permission
+        android:name="${applicationId}.permission.RUN_SCRIPT"
+        android:protectionLevel="normal" />
+
     <application
         android:name=".di.ScriptRunnerApp"
         android:allowBackup="true"
@@ -49,7 +53,13 @@
             android:exported="true"
             android:taskAffinity=""
             android:theme="@android:style/Theme.Translucent.NoTitleBar" />
-
+        <activity
+            android:name=".ui.features.adbtrigger.AdbTriggerActivity"
+            android:theme="@android:style/Theme.NoDisplay"
+            android:showForAllUsers="true"
+            android:excludeFromRecents="true"
+            android:exported="true">
+        </activity>
         <receiver
             android:name=".data.receiver.TermuxResultReceiver"
             android:exported="true">
@@ -57,6 +67,12 @@
                 <action android:name="${applicationId}.SCRIPT_RESULT" />
             </intent-filter>
         </receiver>
+
+        <service
+            android:name=".data.service.AdbScriptExecutionService"
+            android:foregroundServiceType="dataSync"
+            android:exported="false" />
+
 
         <service
             android:name=".data.service.HeartbeatService"

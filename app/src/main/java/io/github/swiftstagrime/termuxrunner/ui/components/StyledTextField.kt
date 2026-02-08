@@ -23,7 +23,7 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun StyledTextField(
-    value: String,
+    value: String?,
     onValueChange: (String) -> Unit,
     label: String,
     modifier: Modifier = Modifier,
@@ -39,7 +39,7 @@ fun StyledTextField(
     visualTransformation: VisualTransformation = VisualTransformation.None,
 ) {
     var isFocused by remember { mutableStateOf(false) }
-    val isFloating = isFocused || value.isNotEmpty()
+    val isFloating = isFocused || value?.isNotEmpty() == true
 
     val labelBgColor by animateColorAsState(
         targetValue =
@@ -63,7 +63,7 @@ fun StyledTextField(
     )
 
     OutlinedTextField(
-        value = value,
+        value = value ?: "",
         onValueChange = onValueChange,
         modifier =
             modifier

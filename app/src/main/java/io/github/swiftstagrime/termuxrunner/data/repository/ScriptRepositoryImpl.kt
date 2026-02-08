@@ -11,10 +11,10 @@ import io.github.swiftstagrime.termuxrunner.data.local.dao.ScriptDao
 import io.github.swiftstagrime.termuxrunner.data.local.dto.CategoryExportDto
 import io.github.swiftstagrime.termuxrunner.data.local.dto.FullBackupDto
 import io.github.swiftstagrime.termuxrunner.data.local.dto.ScriptExportDto
+import io.github.swiftstagrime.termuxrunner.data.local.dto.toEntity
 import io.github.swiftstagrime.termuxrunner.data.local.dto.toExportDto
 import io.github.swiftstagrime.termuxrunner.data.local.entity.AutomationEntity
 import io.github.swiftstagrime.termuxrunner.data.local.entity.CategoryEntity
-import io.github.swiftstagrime.termuxrunner.data.local.entity.ScriptEntity
 import io.github.swiftstagrime.termuxrunner.data.local.entity.toAutomationDomain
 import io.github.swiftstagrime.termuxrunner.data.local.entity.toScriptEntity
 import io.github.swiftstagrime.termuxrunner.domain.model.Script
@@ -156,30 +156,10 @@ class ScriptRepositoryImpl
                     val scriptIdMap = mutableMapOf<Int, Int>()
                     backup.scripts.forEach { dto ->
                         val newIconPath = saveBase64Icon(dto.iconBase64)
-                        val entity =
-                            ScriptEntity(
-                                name = dto.name,
-                                code = dto.code,
-                                interactionMode = dto.interactionMode,
-                                interpreter = dto.interpreter,
-                                fileExtension = dto.fileExtension,
-                                commandPrefix = dto.commandPrefix,
-                                runInBackground = dto.runInBackground,
-                                openNewSession = dto.openNewSession,
-                                executionParams = dto.executionParams,
-                                envVars = dto.envVars,
-                                keepSessionOpen = dto.keepSessionOpen,
-                                useHeartbeat = dto.useHeartbeat,
-                                heartbeatTimeout = dto.heartbeatTimeout,
-                                heartbeatInterval = dto.heartbeatInterval,
-                                argumentPresets = dto.argumentPresets,
-                                prefixPresets = dto.prefixPresets,
-                                envVarPresets = dto.envVarPresets,
-                                iconPath = newIconPath,
-                                orderIndex = dto.orderIndex,
-                                notifyOnResult = dto.notifyOnResult,
-                                categoryId = if (dto.categoryId != null) categoryIdMap[dto.categoryId] else null,
-                            )
+                        val mappedCategoryId = dto.categoryId?.let { categoryIdMap[it] }
+
+                        val entity = dto.toEntity(newIconPath, mappedCategoryId)
+
                         val newId = dao.insertScript(entity)
                         scriptIdMap[dto.id] = newId.toInt()
                     }
@@ -241,6 +221,16 @@ class ScriptRepositoryImpl
                     // We return the script object so the UI can decide
                     // whether to open it in the editor first or save it directly.
                     newScript
+                }
+            }
+
+        override suspend fun getScriptByAdbCode(code: String): Result<Script> =
+            runCatching {
+                withContext(Dispatchers.IO) {
+                    val entity =
+                        dao.getScriptByAdbCode(code)
+                            ?: throw ScriptNotFoundException(code)
+                    entity.toScriptDomain()
                 }
             }
 
@@ -338,3 +328,9 @@ sealed class ScriptException : Exception()
 class ExportStreamException : ScriptException()
 
 class ImportStreamException : ScriptException()
+
+class ScriptNotFoundException(
+    val adbCode: String,
+) : Exception(
+        "Script with adbCode '$adbCode' was not found in the database.",
+    )

@@ -1,5 +1,6 @@
 package io.github.swiftstagrime.termuxrunner.data.local.dto
 
+import io.github.swiftstagrime.termuxrunner.data.local.entity.ScriptEntity
 import io.github.swiftstagrime.termuxrunner.domain.model.InteractionMode
 import io.github.swiftstagrime.termuxrunner.domain.model.Script
 import kotlinx.serialization.Serializable
@@ -28,6 +29,7 @@ data class ScriptExportDto(
     val argumentPresets: List<String> = emptyList(),
     val prefixPresets: List<String> = emptyList(),
     val envVarPresets: List<String> = emptyList(),
+    val adbCode: String? = null,
 )
 
 fun Script.toExportDto(base64Icon: String?): ScriptExportDto =
@@ -54,4 +56,34 @@ fun Script.toExportDto(base64Icon: String?): ScriptExportDto =
         argumentPresets = argumentPresets,
         prefixPresets = prefixPresets,
         envVarPresets = envVarPresets,
+        adbCode = adbCode,
+    )
+
+fun ScriptExportDto.toEntity(
+    newIconPath: String?,
+    mappedCategoryId: Int?,
+): ScriptEntity =
+    ScriptEntity(
+        name = name,
+        code = code,
+        interactionMode = interactionMode,
+        interpreter = interpreter,
+        fileExtension = fileExtension,
+        commandPrefix = commandPrefix,
+        runInBackground = runInBackground,
+        openNewSession = openNewSession,
+        executionParams = executionParams,
+        envVars = envVars,
+        keepSessionOpen = keepSessionOpen,
+        useHeartbeat = useHeartbeat,
+        heartbeatTimeout = heartbeatTimeout,
+        heartbeatInterval = heartbeatInterval,
+        argumentPresets = argumentPresets,
+        prefixPresets = prefixPresets,
+        envVarPresets = envVarPresets,
+        iconPath = newIconPath,
+        orderIndex = orderIndex,
+        notifyOnResult = notifyOnResult,
+        categoryId = mappedCategoryId,
+        adbCode = adbCode,
     )

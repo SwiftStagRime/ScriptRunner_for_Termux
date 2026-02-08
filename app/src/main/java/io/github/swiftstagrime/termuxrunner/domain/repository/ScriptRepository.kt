@@ -20,4 +20,6 @@ interface ScriptRepository {
     suspend fun updateScriptsOrder(orders: List<Pair<Int, Int>>)
 
     suspend fun importSingleScript(uri: Uri): Result<Script>
+
+    suspend fun getScriptByAdbCode(code: String): Result<Script>
 }

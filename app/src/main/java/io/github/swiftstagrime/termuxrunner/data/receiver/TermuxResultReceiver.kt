@@ -16,9 +16,10 @@ class TermuxResultReceiver : BroadcastReceiver() {
     lateinit var processUseCase: ProcessTermuxResultUseCase
 
     override fun onReceive(
-        context: Context,
-        intent: Intent,
+        context: Context?,
+        intent: Intent?,
     ) {
+        if (context == null || intent == null) return
         val expectedAction = "${context.packageName}.SCRIPT_RESULT"
         if (intent.action != expectedAction) return
 

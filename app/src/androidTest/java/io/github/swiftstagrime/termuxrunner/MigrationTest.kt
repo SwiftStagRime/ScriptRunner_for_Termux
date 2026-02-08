@@ -11,6 +11,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import java.io.IOException
+import kotlin.text.trimIndent
 
 @RunWith(AndroidJUnit4::class)
 class MigrationTest {
@@ -158,6 +159,31 @@ class MigrationTest {
         assertEquals(1, cursor.getInt(cursor.getColumnIndexOrThrow("runInBackground")))
         assertEquals("{\"KEY\":\"VAL\"}", cursor.getString(cursor.getColumnIndexOrThrow("envVars")))
         assertEquals(1, cursor.getInt(cursor.getColumnIndexOrThrow("keepSessionOpen")))
+
+        cursor.close()
+    }
+
+    @Test
+    @Throws(IOException::class)
+    fun migrate4To5_addsNewField() {
+        val db =
+            helper.createDatabase(TEST_DB, 4).apply {
+                execSQL(
+                    """
+                    INSERT INTO scripts (id, name, code, interpreter, fileExtension, commandPrefix,
+                    runInBackground, openNewSession, executionParams, envVars, keepSessionOpen) 
+                    VALUES (1, 'V4 Script', 'ls', 'sh', '.sh', '', 0, 0, '', '{}', 0)
+                    """.trimIndent(),
+                )
+                close()
+            }
+
+        val migratedDb = helper.runMigrationsAndValidate(TEST_DB, 5, true)
+
+        val cursor = migratedDb.query("SELECT * FROM scripts WHERE id = 1")
+        assertTrue(cursor.moveToFirst())
+
+        assertEquals(0, cursor.getInt(cursor.getColumnIndexOrThrow("orderIndex")))
 
         cursor.close()
     }

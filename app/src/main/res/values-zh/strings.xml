@@ -39,6 +39,14 @@
     <string name="setup_step_5_title">禁用电池优化</string>
     <string name="setup_step_5_desc">Android 会限制后台应用。您必须将 Termux 的电池使用量设置为 “无限制”。</string>
     <string name="battery_warning_text">若忽略此项：除非您手动打开 Termux，否则脚本和快捷方式将无法运行。</string>
+    <string name="setup_step_6_title">闹钟权限</string>
+    <string name="setup_step_6_desc">用于调度脚本自动化。没有此权限，自动脚本可能无法在预定时间运行。</string>
+    <string name="grant_alarm_permission_label">授予闹钟权限</string>
+    <string name="setup_step_7_title">通知权限</string>
+    <string name="setup_step_7_desc">建议启用以监控脚本执行状态并接收脚本结果的通知。</string>
+    <string name="grant_notification_permission_label">启用通知</string>
+    <string name="notification_permission_not_needed">在较旧的 Android 版本上，通知会自动启用。</string>
+
 
     <!--Home -->
     <string name="home_title">我的脚本</string>
@@ -118,6 +126,7 @@
     <string name="advanced_timings">高级计时设置</string>
     <string name="pulse_interval_s">心跳间隔 (秒)</string>
     <string name="timeout_limit_s">超时限制 (秒)</string>
+    <string name="adb_code">ADB 代码（默认为空）</string>
     <string name="pulse_how_often_the_script_signals_it_is_alive_timeout_restart_if_no_signal_received_after_this_time">心跳：脚本发送存活信号的频率。\n超时：若在此时间后未收到信号则重启。</string>
     <string name="experimental_warning">警告！实验性功能 - 可能会导致脚本出错或消耗过多电池和 CPU。</string>
     <string name="btn_add_variable">添加变量</string>
