@@ -73,6 +73,7 @@ A streamlined onboarding process is included to simplify initial setup.
 *   **Target SDK:** 36 (Android 16)
 *   **Xiaomi / MIUI / HyperOS:** Specific fixes are included to handle the unique way these systems manage shortcut permissions.
 *   **Other OEMs:** If shortcuts do not appear, please manually check "Background Start" or "Shortcut" permissions in system settings. Note that some OS flavors may silently reject permissions without notifying the app.
+*   **Other quirks:** Exact alarms permission for some OEMs can be different then default one. If that is the case for you please grant it in settings. This is only relevant for android 12+
 
 ## Current Status
 
@@ -86,4 +87,4 @@ This project is currently in early development.
 
 ## Contributing
 
-Contributions, bug reports, and feature requests are welcome! Feedback on how the app handles different script types or specific OS flavors is especially valuable during these early stages.
+Contributions, bug reports, and feature requests are welcome!
