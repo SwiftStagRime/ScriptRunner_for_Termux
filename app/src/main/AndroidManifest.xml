@@ -37,6 +37,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.App.Starting"
         tools:ignore="UnusedAttribute">
+        <profileable android:shell="true" />
         <activity
             android:name=".ui.MainActivity"
             android:exported="true"

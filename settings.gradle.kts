@@ -20,3 +20,4 @@ dependencyResolutionManagement {
 }
 rootProject.name = "Script Runner for Termux"
 include(":app")
+include(":baselineprofile")

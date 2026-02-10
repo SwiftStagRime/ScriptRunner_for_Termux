@@ -96,7 +96,8 @@ class TermuxRepositoryTest {
 
         val shadowPendingIntent = shadowOf(pendingIntent)
         val resultIntent = shadowPendingIntent.savedIntent
-        assertEquals("io.github.swiftstagrime.SCRIPT_RESULT", resultIntent.action)
+        val expectedAction = "${context.packageName}.SCRIPT_RESULT"
+        assertEquals(expectedAction, resultIntent.action)
         assertEquals(123, resultIntent.getIntExtra("script_id", -1))
         assertEquals(456, resultIntent.getIntExtra("automation_id", -1))
     }

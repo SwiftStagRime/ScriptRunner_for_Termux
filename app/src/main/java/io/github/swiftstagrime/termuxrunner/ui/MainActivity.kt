@@ -11,10 +11,14 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalInspectionMode
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.core.animation.doOnEnd
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.splashscreen.SplashScreenViewProvider
@@ -33,6 +37,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         val splashScreen = installSplashScreen()
         super.onCreate(savedInstanceState)
+
         splashScreen.setKeepOnScreenCondition {
             !mainViewModel.isReady.value
         }
@@ -45,27 +50,33 @@ class MainActivity : AppCompatActivity() {
             val accent by mainViewModel.selectedAccent.collectAsStateWithLifecycle()
             val mode by mainViewModel.selectedMode.collectAsStateWithLifecycle()
             val backStack by mainViewModel.backStack.collectAsStateWithLifecycle()
-
-            ScriptRunnerForTermuxTheme(accent = accent, mode = mode) {
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background,
-                ) {
-                    val entryProvider = rememberEntryProvider(mainViewModel)
-                    val saveableStateHolder = rememberSaveableStateHolder()
-                    if (backStack.isNotEmpty()) {
-                        NavDisplay(
-                            backStack = backStack,
-                            onBack = { mainViewModel.goBack() },
-                            entryDecorators =
-                                listOf(
-                                    remember(saveableStateHolder) {
-                                        SaveableStateHolderNavEntryDecorator(saveableStateHolder)
-                                    },
-                                    rememberViewModelStoreNavEntryDecorator(),
-                                ),
-                            entryProvider = entryProvider,
-                        )
+            CompositionLocalProvider(
+                LocalInspectionMode provides false,
+            ) {
+                ScriptRunnerForTermuxTheme(accent = accent, mode = mode) {
+                    Surface(
+                        modifier =
+                            Modifier
+                                .fillMaxSize()
+                                .semantics { testTagsAsResourceId = true },
+                        color = MaterialTheme.colorScheme.background,
+                    ) {
+                        val entryProvider = rememberEntryProvider(mainViewModel)
+                        val saveableStateHolder = rememberSaveableStateHolder()
+                        if (backStack.isNotEmpty()) {
+                            NavDisplay(
+                                backStack = backStack,
+                                onBack = { mainViewModel.goBack() },
+                                entryDecorators =
+                                    listOf(
+                                        remember(saveableStateHolder) {
+                                            SaveableStateHolderNavEntryDecorator(saveableStateHolder)
+                                        },
+                                        rememberViewModelStoreNavEntryDecorator(),
+                                    ),
+                                entryProvider = entryProvider,
+                            )
+                        }
                     }
                 }
             }

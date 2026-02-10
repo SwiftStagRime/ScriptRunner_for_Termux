@@ -1,6 +1,5 @@
 plugins {
     alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.jetbrains.kotlin.serialization)
     alias(libs.plugins.ksp)
@@ -8,13 +7,23 @@ plugins {
     alias(libs.plugins.kotlin.parcelize)
     alias(libs.plugins.ktlint)
     alias(libs.plugins.detekt)
+    alias(libs.plugins.baselineprofile)
 }
 
+ksp {
+    arg("room.schemaLocation", "$projectDir/schemas")
+}
+kotlin {
+    compilerOptions {
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21)
+    }
+}
+kotlin {
+    jvmToolchain(21)
+}
 android {
     namespace = "io.github.swiftstagrime.termuxrunner"
-    compileSdk {
-        version = release(36)
-    }
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "io.github.swiftstagrime.termuxrunner"
@@ -25,15 +34,16 @@ android {
 
         testInstrumentationRunner = "io.github.swiftstagrime.termuxrunner.di.HiltTestRunner"
 
-        setProperty("archivesBaseName", "ScriptRunnerForTermux")
     }
 
-    testBuildType = "instrumented"
+    //testBuildType = "instrumented"
+    //testBuildType = "benchmark"
 
     buildTypes {
         release {
             isMinifyEnabled = true
             isShrinkResources = true
+            isProfileable = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",
@@ -47,14 +57,11 @@ android {
             applicationIdSuffix = ".instrumented"
             signingConfig = signingConfigs.getByName("debug")
         }
-    }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
-    }
-    kotlin {
-        compilerOptions {
-            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11)
+        create("benchmark") {
+            initWith(getByName("release"))
+            signingConfig = signingConfigs.getByName("debug")
+            matchingFallbacks += listOf("release")
+            isDebuggable = false
         }
     }
     buildFeatures {
@@ -63,12 +70,9 @@ android {
     configurations.all {
         exclude(group = "com.intellij", module = "annotations")
     }
-    ksp {
-        arg("room.schemaLocation", "$projectDir/schemas")
-    }
     sourceSets {
         getByName("androidTest") {
-            assets.srcDirs(files("$projectDir/schemas"))
+            assets.directories.add("$projectDir/schemas")
         }
     }
     splits {
@@ -104,6 +108,11 @@ android {
         includeInApk = false
         includeInBundle = false
     }
+
+}
+
+base {
+    archivesName.set("ScriptRunnerForTermux")
 }
 
 ktlint {
@@ -147,6 +156,8 @@ dependencies {
     implementation(libs.androidx.compose.ui.unit)
     implementation(libs.core.ktx)
     implementation(libs.androidx.work.testing)
+    implementation(libs.androidx.profileinstaller)
+    "baselineProfile"(project(":baselineprofile"))
     ksp(libs.hilt.compiler)
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.android.database.sqlcipher)
@@ -185,4 +196,10 @@ dependencies {
     kspAndroidTest(libs.hilt.compiler)
     androidTestImplementation(libs.androidx.work.testing)
     testImplementation(libs.robolectric)
+}
+
+baselineProfile {
+    filter {
+        include("io.github.swiftstagrime.termuxrunner.**")
+    }
 }
