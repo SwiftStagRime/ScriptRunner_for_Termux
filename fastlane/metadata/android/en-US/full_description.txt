@@ -45,6 +45,7 @@ Note on Permissions: During setup, you will be asked to grant the com.termux.per
 ### Current Status
 
 This project is currently in early development.
+
 * **Testing:** Tested various extensions, and all works as expected
 * **Documentation:** Detailed code description is currently under construction.
 * **Translation:** En and Ru are made by me, everything else is AI. You can always switch in settings or during onboarding
