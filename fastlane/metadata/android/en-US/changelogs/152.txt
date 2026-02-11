@@ -1,0 +1,5 @@
+Added ADB control, if your OS flavor supports background execution - you can cold launch scripts correctly.
+Command is in the readme - done by separate activity, so should cause no problems.
+Note that this will skip runtime args, as it's meant to be ran without touching the phone, thus I can't display UI elements.
+Updated all the libs and apg to newer versions. Everything works fine from the looks of things.
+Added manual baseline profile for the main workflow, though failed miserably to make StartupBenchmarks work.

@@ -26,7 +26,3 @@
 -keepclassmembers class * {
     @kotlinx.serialization.Serializable <init>(...);
 }
--keep class androidx.profileinstaller.ProfileInstallReceiver { *; }
--keepnames class androidx.profileinstaller.ProfileInstallReceiver
--keep class androidx.profileinstaller.BenchmarkOperation { *; }
--keep class androidx.profileinstaller.ProfileInstaller { *; }
