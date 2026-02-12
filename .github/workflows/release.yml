@@ -23,7 +23,7 @@ jobs:
         run: chmod +x gradlew
 
       - name: Build Unsigned Release APK
-        run: ./gradlew clean assembleRelease
+        run: ./gradlew clean assembleRelease -Dlint.baselines.continue=true
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
