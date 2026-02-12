@@ -202,4 +202,6 @@ baselineProfile {
     filter {
         include("io.github.swiftstagrime.termuxrunner.**")
     }
+    saveInSrc = true
+    automaticGenerationDuringBuild = false
 }
