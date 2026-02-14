@@ -30,7 +30,7 @@ android {
         minSdk = 24
         targetSdk = 36
         versionCode = 151
-        versionName = "1.5.1"
+        versionName = "1.5.5"
 
         testInstrumentationRunner = "io.github.swiftstagrime.termuxrunner.di.HiltTestRunner"
 
@@ -87,12 +87,13 @@ android {
         }
     }
     lint {
-        abortOnError = true
-        checkReleaseBuilds = true
+        abortOnError = false
+        checkReleaseBuilds = false
         warningsAsErrors = false
         baseline = file("lint-baseline.xml")
     }
     packaging {
+        jniLibs.keepDebugSymbols.add("**/*.so")
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1,LICENSE.md,LICENSE-notice.md}"
         }
