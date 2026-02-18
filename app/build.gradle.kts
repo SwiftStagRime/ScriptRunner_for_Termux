@@ -29,8 +29,8 @@ android {
         applicationId = "io.github.swiftstagrime.termuxrunner"
         minSdk = 24
         targetSdk = 36
-        versionCode = 151
-        versionName = "1.5.5"
+        versionCode = 160
+        versionName = "1.6.0"
 
         testInstrumentationRunner = "io.github.swiftstagrime.termuxrunner.di.HiltTestRunner"
 
@@ -197,6 +197,8 @@ dependencies {
     kspAndroidTest(libs.hilt.compiler)
     androidTestImplementation(libs.androidx.work.testing)
     testImplementation(libs.robolectric)
+    implementation(libs.androidx.glance.material3)
+    implementation(libs.androidx.glance.appwidget)
 }
 
 baselineProfile {

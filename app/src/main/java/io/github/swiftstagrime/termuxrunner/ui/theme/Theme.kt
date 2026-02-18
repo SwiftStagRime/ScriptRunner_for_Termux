@@ -345,7 +345,7 @@ fun ScriptRunnerForTermuxTheme(
     )
 }
 
-private fun pickColorScheme(
+fun pickColorScheme(
     accent: AppTheme,
     isDark: Boolean,
     context: Context,
