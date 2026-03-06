@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
     android:initialLayout="@layout/glance_default_loading_layout"
-    android:previewImage="@drawable/script"
+    android:previewImage="@drawable/logs"
     android:minWidth="160dp"
     android:minHeight="120dp"
     android:minResizeWidth="160dp"
@@ -9,5 +9,4 @@
     android:widgetCategory="home_screen"
     android:resizeMode="horizontal|vertical"
     android:updatePeriodMillis="0"
-    android:configure="io.github.swiftstagrime.termuxrunner.ui.features.widget.WidgetConfigurationActivity"
     />

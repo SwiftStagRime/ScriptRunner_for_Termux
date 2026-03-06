@@ -192,9 +192,9 @@ private fun AutomationHistoryView(
 ) {
     if (selectedAutomation == null) return
 
-    val historyLogs by produceState(emptyList<AutomationLog>(), selectedAutomation) {
-        viewModel.getAutomationLogs(selectedAutomation.id).collect { value = it }
-    }
+    val historyLogs by remember(selectedAutomation.id) {
+        viewModel.getAutomationLogs(selectedAutomation.id)
+    }.collectAsStateWithLifecycle(initialValue = emptyList())
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,

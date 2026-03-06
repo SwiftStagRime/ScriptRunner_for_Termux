@@ -1,4 +1,4 @@
-package io.github.swiftstagrime.termuxrunner.ui.features.widget
+package io.github.swiftstagrime.termuxrunner.ui.features.widget.script
 
 import android.content.Context
 import android.content.Intent

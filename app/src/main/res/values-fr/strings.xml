@@ -95,6 +95,8 @@
     <string name="toggle_wrap">Retour à la ligne</string>
     <string name="top">Haut</string>
     <string name="bottom">Bas</string>
+    <string name="select_all">Tout sélectionner</string>
+    <string name="paste">Coller</string>
 
     <!-- Config -->
     <string name="config_dialog_title">Configuration du script</string>
@@ -309,4 +311,25 @@
     <string name="day_sat">Sam</string>
     <string name="label_battery_threshold">Seuil de batterie</string>
     <string name="battery_threshold_desc">Lancer uniquement si la batterie est supérieure à %1$d%%</string>
+
+    <!-- Automation Widget -->
+    <string name="automation_widget_title">Automatisations</string>
+    <string name="automation_active_count">%1$d Actifs</string>
+    <string name="automation_no_script">Pas de script</string>
+    <string name="automation_next_run">Prochain : %1$s</string>
+    <string name="automation_run_now_description">Exécuter maintenant</string>
+
+    <!-- Logs Widget -->
+    <string name="logs_widget_title">Exécutions récentes</string>
+    <string name="logs_no_activity">Aucune activité pour le moment</string>
+    <string name="logs_status_success">Succès</string>
+    <string name="logs_status_failed">Échec</string>
+    <string name="logs_unknown_automation">Inconnu</string>
+    <string name="logs_unknown_date">Date inconnue</string>
+
+    <!-- Script Widget -->
+    <string name="script_widget_title">Scripts</string>
+    <string name="script_edit_description">Modifier</string>
+    <string name="script_no_scripts">Aucun script assigné</string>
+
 </resources>

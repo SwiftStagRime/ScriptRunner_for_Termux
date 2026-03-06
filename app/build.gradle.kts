@@ -158,6 +158,7 @@ dependencies {
     implementation(libs.core.ktx)
     implementation(libs.androidx.work.testing)
     implementation(libs.androidx.profileinstaller)
+    implementation(libs.androidx.glance.preview)
     "baselineProfile"(project(":baselineprofile"))
     ksp(libs.hilt.compiler)
     implementation(libs.androidx.datastore.preferences)

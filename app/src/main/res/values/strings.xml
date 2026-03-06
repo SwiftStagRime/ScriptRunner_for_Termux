@@ -98,6 +98,8 @@
     <string name="toggle_wrap">Toggle Wrap</string>
     <string name="top">Top</string>
     <string name="bottom">Bottom</string>
+    <string name="select_all">Select All</string>
+    <string name="paste">Paste</string>
 
     <!-- Config -->
     <string name="config_dialog_title">Script Configuration</string>
@@ -317,4 +319,24 @@
     <string name="day_sat">Sat</string>
     <string name="label_battery_threshold">Battery Threshold</string>
     <string name="battery_threshold_desc">Run only if battery is above %1$d%%</string>
+
+    <!-- Automation Widget -->
+    <string name="automation_widget_title">Automations</string>
+    <string name="automation_active_count">%1$d Active</string>
+    <string name="automation_no_script">No Script</string>
+    <string name="automation_next_run">Next: %1$s</string>
+    <string name="automation_run_now_description">Run Now</string>
+
+    <!-- Logs Widget -->
+    <string name="logs_widget_title">Recent Runs</string>
+    <string name="logs_no_activity">No activity yet</string>
+    <string name="logs_status_success">Success</string>
+    <string name="logs_status_failed">Failed</string>
+    <string name="logs_unknown_automation">Unknown</string>
+    <string name="logs_unknown_date">Unknown date</string>
+
+    <!-- Script Widget -->
+    <string name="script_widget_title">Scripts</string>
+    <string name="script_edit_description">Edit</string>
+    <string name="script_no_scripts">No scripts assigned</string>
 </resources>

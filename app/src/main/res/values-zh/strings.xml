@@ -95,6 +95,8 @@
     <string name="toggle_wrap">自动换行</string>
     <string name="top">顶部</string>
     <string name="bottom">底部</string>
+    <string name="select_all">全选</string>
+    <string name="paste">粘贴</string>
 
     <!-- Config -->
     <string name="config_dialog_title">脚本配置</string>
@@ -307,5 +309,25 @@
     <string name="day_fri">周五</string>
     <string name="day_sat">周六</string>
     <string name="label_battery_threshold">电池电量阈值</string>
-    <string name="battery_threshold_desc">仅在电池电量高于 %1$d%% 时运行</string>
+    <string name="battery_threshold_desc">仅在电池电量高于 %1$d%% 时运行</string>\
+
+    <!-- Automation Widget -->
+    <string name="automation_widget_title">自动化</string>
+    <string name="automation_active_count">%1$d 个活跃</string>
+    <string name="automation_no_script">无脚本</string>
+    <string name="automation_next_run">下次：%1$s</string>
+    <string name="automation_run_now_description">立即运行</string>
+
+    <!-- Logs Widget -->
+    <string name="logs_widget_title">最近运行</string>
+    <string name="logs_no_activity">暂无活动</string>
+    <string name="logs_status_success">成功</string>
+    <string name="logs_status_failed">失败</string>
+    <string name="logs_unknown_automation">未知</string>
+    <string name="logs_unknown_date">未知日期</string>
+
+    <!-- Script Widget -->
+    <string name="script_widget_title">脚本</string>
+    <string name="script_edit_description">编辑</string>
+    <string name="script_no_scripts">未分配脚本</string>
 </resources>

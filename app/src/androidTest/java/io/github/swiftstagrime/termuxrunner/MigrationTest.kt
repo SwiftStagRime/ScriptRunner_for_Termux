@@ -11,7 +11,6 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import java.io.IOException
-import kotlin.text.trimIndent
 
 @RunWith(AndroidJUnit4::class)
 class MigrationTest {

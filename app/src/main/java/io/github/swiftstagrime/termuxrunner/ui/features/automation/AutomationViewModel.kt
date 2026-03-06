@@ -61,19 +61,21 @@ class AutomationViewModel
             viewModelScope.launch { automationRepository.deleteAutomation(automation) }
         }
 
-        fun runAutomationNow(automation: Automation) {
-            viewModelScope.launch {
-                scriptRepository.getScriptById(automation.scriptId)?.let { script ->
-                    runScriptUseCase(
-                        script = script,
-                        runtimeArgs = automation.runtimeArgs,
-                        runtimeEnv = automation.runtimeEnv,
-                        runtimePrefix = automation.runtimePrefix,
-                        automationId = automation.id,
-                    )
-                }
+    fun runAutomationNow(automation: Automation) {
+        viewModelScope.launch {
+            scriptRepository.getScriptById(automation.scriptId)?.let { script ->
+                val scriptForAutomation = script.copy(notifyOnResult = true)
+
+                runScriptUseCase(
+                    script = scriptForAutomation,
+                    runtimeArgs = automation.runtimeArgs,
+                    runtimeEnv = automation.runtimeEnv,
+                    runtimePrefix = automation.runtimePrefix,
+                    automationId = automation.id,
+                )
             }
         }
+    }
 
         fun getAutomationLogs(automationId: Int) = automationLogRepository.getLogsForAutomation(automationId)
 

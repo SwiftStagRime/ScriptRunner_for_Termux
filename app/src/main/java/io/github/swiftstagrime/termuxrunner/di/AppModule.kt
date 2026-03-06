@@ -33,6 +33,8 @@ import io.github.swiftstagrime.termuxrunner.domain.repository.ScriptRepository
 import io.github.swiftstagrime.termuxrunner.domain.repository.ShortcutRepository
 import io.github.swiftstagrime.termuxrunner.domain.repository.TermuxRepository
 import io.github.swiftstagrime.termuxrunner.domain.repository.UserPreferencesRepository
+import io.github.swiftstagrime.termuxrunner.domain.usecase.TriggerGlanceAutomationUpdateUseCase
+import io.github.swiftstagrime.termuxrunner.domain.usecase.TriggerGlanceScriptUpdateUseCase
 import javax.inject.Singleton
 
 @Module
@@ -45,7 +47,8 @@ object AppModule {
         categoryDao: CategoryDao,
         automationDao: AutomationDao,
         @ApplicationContext context: Context,
-    ): ScriptRepository = ScriptRepositoryImpl(dao, categoryDao, automationDao, context)
+        triggerGlanceScriptUpdateUseCase: TriggerGlanceScriptUpdateUseCase
+    ): ScriptRepository = ScriptRepositoryImpl(dao, categoryDao, automationDao, context, triggerGlanceScriptUpdateUseCase)
 
     @Provides
     @Singleton
@@ -57,7 +60,9 @@ object AppModule {
     @Singleton
     fun provideUserPreferencesRepository(
         @ApplicationContext context: Context,
-    ): UserPreferencesRepository = UserPreferencesRepositoryImpl(context)
+        triggerGlanceScriptUpdateUseCase: TriggerGlanceScriptUpdateUseCase,
+        triggerGlanceAutomationUpdateUseCase: TriggerGlanceAutomationUpdateUseCase
+    ): UserPreferencesRepository = UserPreferencesRepositoryImpl(context,triggerGlanceScriptUpdateUseCase,triggerGlanceAutomationUpdateUseCase)
 
     @Provides
     @Singleton
@@ -92,10 +97,12 @@ object AppModule {
     fun provideAutomationRepository(
         automationDao: AutomationDao,
         scheduler: AutomationScheduler,
+        triggerGlanceAutomationUpdateUseCase: TriggerGlanceAutomationUpdateUseCase
     ): AutomationRepository =
         AutomationRepositoryImpl(
             automationDao,
             scheduler = scheduler,
+            triggerGlanceAutomationUpdateUseCase
         )
 
     @Provides
@@ -110,8 +117,8 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideAutomationLogRepository(automationLogDao: AutomationLogDao): AutomationLogRepository =
-        AutomationLogRepositoryImpl(automationLogDao)
+    fun provideAutomationLogRepository(automationLogDao: AutomationLogDao, triggerGlanceAutomationUpdateUseCase: TriggerGlanceAutomationUpdateUseCase): AutomationLogRepository =
+        AutomationLogRepositoryImpl(automationLogDao, triggerGlanceAutomationUpdateUseCase)
 
     @Provides
     @Singleton

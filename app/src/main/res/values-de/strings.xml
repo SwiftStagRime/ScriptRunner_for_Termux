@@ -95,6 +95,9 @@
     <string name="toggle_wrap">Zeilenumbruch umschalten</string>
     <string name="top">Anfang</string>
     <string name="bottom">Ende</string>
+    <string name="select_all">Alle auswählen</string>
+    <string name="paste">Einfügen</string>
+
 
     <!-- Config -->
     <string name="config_dialog_title">Skript-Konfiguration</string>
@@ -310,4 +313,24 @@
     <string name="day_sat">Sa</string>
     <string name="label_battery_threshold">Akku-Schwellenwert</string>
     <string name="battery_threshold_desc">Nur ausführen, wenn der Akku über %1$d%% liegt</string>
+
+    <!-- Automation Widget -->
+    <string name="automation_widget_title">Automatisierungen</string>
+    <string name="automation_active_count">%1$d Aktiv</string>
+    <string name="automation_no_script">Kein Skript</string>
+    <string name="automation_next_run">Nächste: %1$s</string>
+    <string name="automation_run_now_description">Jetzt ausführen</string>
+
+    <!-- Logs Widget -->
+    <string name="logs_widget_title">Letzte Ausführungen</string>
+    <string name="logs_no_activity">Noch keine Aktivität</string>
+    <string name="logs_status_success">Erfolg</string>
+    <string name="logs_status_failed">Fehlgeschlagen</string>
+    <string name="logs_unknown_automation">Unbekannt</string>
+    <string name="logs_unknown_date">Unbekanntes Datum</string>
+
+    <!-- Script Widget -->
+    <string name="script_widget_title">Skripte</string>
+    <string name="script_edit_description">Bearbeiten</string>
+    <string name="script_no_scripts">Keine Skripte zugewiesen</string>
 </resources>
