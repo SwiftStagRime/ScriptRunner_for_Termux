@@ -70,11 +70,17 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
@@ -444,50 +450,58 @@ private fun MainEditorArea(
                     .verticalScroll(scrollState)
                     .then(if (isWrappingEnabled) Modifier else Modifier.horizontalScroll(rememberScrollState())),
         ) {
-            BasicTextField(
-                value = code,
-                onValueChange = onCodeChange,
-                onTextLayout = onTextLayout,
-                textStyle =
-                    TextStyle(
-                        fontFamily = FontFamily.Monospace,
-                        fontSize = 14.sp,
-                        lineHeight = LINE_HEIGHT_SP.sp,
-                        color = MaterialTheme.colorScheme.onSurface,
-                    ),
-                cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
-                visualTransformation = visualTransformation,
-                modifier =
-                    Modifier
-                        .then(if (isWrappingEnabled) Modifier.fillMaxWidth() else Modifier)
-                        .padding(horizontal = 8.dp)
-                        .focusRequester(focusRequester)
-                        .testTag("code_editor_input"),
-                decorationBox = { inner ->
-                    Column(modifier = Modifier.fillMaxWidth()) {
-                        Box {
-                            if (code.text.isEmpty()) {
-                                Text(
-                                    stringResource(R.string.editor_placeholder),
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
-                                )
+            Column {
+                BasicTextField(
+                    value = code,
+                    onValueChange = onCodeChange,
+                    onTextLayout = onTextLayout,
+                    textStyle =
+                        TextStyle(
+                            fontFamily = FontFamily.Monospace,
+                            fontSize = 14.sp,
+                            lineHeight = LINE_HEIGHT_SP.sp,
+                            color = MaterialTheme.colorScheme.onSurface,
+                        ),
+                    cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+                    visualTransformation = visualTransformation,
+                    modifier =
+                        Modifier
+                            .then(if (isWrappingEnabled) Modifier.fillMaxWidth() else Modifier)
+                            .padding(horizontal = 8.dp)
+                            .focusRequester(focusRequester)
+                            .focusProperties {
+                                up = FocusRequester.Cancel
+                                down = FocusRequester.Cancel
                             }
-                            inner()
+                            .testTag("code_editor_input"),
+                    decorationBox = { inner ->
+                        Column(modifier = Modifier.fillMaxWidth()) {
+                            Box {
+                                if (code.text.isEmpty()) {
+                                    Text(
+                                        stringResource(R.string.editor_placeholder),
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(
+                                            alpha = 0.5f
+                                        ),
+                                    )
+                                }
+                                inner()
+                            }
                         }
-                        Spacer(
-                            modifier =
-                                Modifier.fillMaxWidth().height(bottomBuffer).clickable(
-                                    interactionSource =
-                                        remember {
-                                            MutableInteractionSource()
-                                        },
-                                    indication = null,
-                                    onClick = onBottomClick,
-                                ),
-                        )
-                    }
-                },
-            )
+                    },
+                )
+                Spacer(
+                    modifier =
+                        Modifier.fillMaxWidth().height(bottomBuffer).clickable(
+                            interactionSource =
+                                remember {
+                                    MutableInteractionSource()
+                                },
+                            indication = null,
+                            onClick = onBottomClick,
+                        ),
+                )
+            }
         }
     }
 }
