@@ -75,6 +75,13 @@
     <string name="msg_miui_shortcut_permission">MIUI 需要手动开启 “创建桌面快捷方式” 权限。</string>
     <string name="action_settings">去设置</string>
     <string name="msg_shortcut_denied_system">系统拒绝了快捷方式请求。</string>
+    <string name="shortcut_style_title">快捷方式样式</string>
+    <string name="shortcut_style_description">图标在您的主屏幕上应如何显示？</string>
+    <string name="shortcut_style_regular">常规</string>
+    <string name="shortcut_style_regular_desc">图片的原始颜色</string>
+    <string name="shortcut_style_monochrome">单色</string>
+    <string name="shortcut_style_monochrome_desc">适配系统强调色 (Android 13+)</string>
+    <string name="shortcut_style_select">选择样式</string>
 
     <!-- Editor -->
     <string name="editor_untitled">无标题</string>

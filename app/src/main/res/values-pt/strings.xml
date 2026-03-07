@@ -75,6 +75,13 @@
     <string name="msg_miui_shortcut_permission">MIUI requer permissão manual para criar atalhos na tela inicial.</string>
     <string name="action_settings">Configurações</string>
     <string name="msg_shortcut_denied_system">Solicitação de atalho negada pelo sistema.</string>
+    <string name="shortcut_style_title">Estilo de Atalho</string>
+    <string name="shortcut_style_description">Como o ícone deve aparecer na sua tela inicial?</string>
+    <string name="shortcut_style_regular">Normal</string>
+    <string name="shortcut_style_regular_desc">Cores originais da sua imagem</string>
+    <string name="shortcut_style_monochrome">Monocromático</string>
+    <string name="shortcut_style_monochrome_desc">Adapta-se às cores de destaque do sistema (Android 13+)</string>
+    <string name="shortcut_style_select">Selecionar estilo</string>
 
     <!-- Editor -->
     <string name="editor_untitled">Sem Título</string>

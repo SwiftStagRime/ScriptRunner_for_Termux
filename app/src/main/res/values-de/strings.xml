@@ -75,6 +75,13 @@
     <string name="msg_miui_shortcut_permission">MIUI erfordert manuelle Berechtigung zum Erstellen von Verknüpfungen.</string>
     <string name="action_settings">Einstellungen</string>
     <string name="msg_shortcut_denied_system">Verknüpfungsanfrage vom System abgelehnt.</string>
+    <string name="shortcut_style_title">Verknüpfungsstil</string>
+    <string name="shortcut_style_description">Wie soll das Icon auf Ihrem Startbildschirm aussehen?</string>
+    <string name="shortcut_style_regular">Normal</string>
+    <string name="shortcut_style_regular_desc">Originalfarben Ihres Bildes</string>
+    <string name="shortcut_style_monochrome">Monochrom</string>
+    <string name="shortcut_style_monochrome_desc">Passt sich den System-Akzentfarben an (Android 13+)</string>
+    <string name="shortcut_style_select">Stil auswählen</string>
 
     <!-- Editor -->
     <string name="editor_untitled">Unbenannt</string>

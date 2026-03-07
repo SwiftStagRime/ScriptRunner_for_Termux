@@ -75,6 +75,13 @@
     <string name="msg_miui_shortcut_permission">MIUI requiere permiso manual para crear accesos directos.</string>
     <string name="action_settings">Ajustes</string>
     <string name="msg_shortcut_denied_system">Solicitud de acceso directo denegada por el sistema.</string>
+    <string name="shortcut_style_title">Estilo de acceso directo</string>
+    <string name="shortcut_style_description">¿Cómo debe aparecer el icono en su pantalla de inicio?</string>
+    <string name="shortcut_style_regular">Regular</string>
+    <string name="shortcut_style_regular_desc">Colores originales de su imagen</string>
+    <string name="shortcut_style_monochrome">Monocromo</string>
+    <string name="shortcut_style_monochrome_desc">Se adapta a los colores de acento del sistema (Android 13+)</string>
+    <string name="shortcut_style_select">Seleccionar estilo</string>
 
     <!-- Editor -->
     <string name="editor_untitled">Sin título</string>

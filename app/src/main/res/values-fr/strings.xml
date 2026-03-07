@@ -75,6 +75,13 @@
     <string name="msg_miui_shortcut_permission">MIUI nécessite une permission manuelle pour créer des raccourcis.</string>
     <string name="action_settings">Paramètres</string>
     <string name="msg_shortcut_denied_system">Demande de raccourci refusée par le système.</string>
+    <string name="shortcut_style_title">Style de raccourci</string>
+    <string name="shortcut_style_description">Comment l\'icône doit-elle apparaître sur votre écran d\'accueil ?</string>
+    <string name="shortcut_style_regular">Classique</string>
+    <string name="shortcut_style_regular_desc">Couleurs originales de votre image</string>
+    <string name="shortcut_style_monochrome">Monochrome</string>
+    <string name="shortcut_style_monochrome_desc">S\'adapte aux couleurs d\'accentuation du système (Android 13+)</string>
+    <string name="shortcut_style_select">Sélectionner le style</string>
 
     <!-- Editor -->
     <string name="editor_untitled">Sans titre</string>

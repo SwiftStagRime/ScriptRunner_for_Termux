@@ -257,10 +257,10 @@ class HomeViewModel
             }
         }
 
-        fun createShortcut(script: Script) {
+        fun createShortcut(script: Script, useThemedIcon: Boolean) {
             viewModelScope.launch {
                 if (shortcutRepository.isPinningSupported()) {
-                    val info = shortcutRepository.createShortcutInfo(script)
+                    val info = shortcutRepository.createShortcutInfo(script, useThemedIcon)
                     if (info != null) {
                         sendEvent(HomeUiEvent.CreateShortcut(info))
                     } else {

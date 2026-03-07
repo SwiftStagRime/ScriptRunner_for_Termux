@@ -78,6 +78,13 @@
     <string name="msg_miui_shortcut_permission">MIUI requires manual permission to create shortcuts.</string>
     <string name="action_settings">Settings</string>
     <string name="msg_shortcut_denied_system">Shortcut request denied by system.</string>
+    <string name="shortcut_style_title">Shortcut Style</string>
+    <string name="shortcut_style_description">How should the icon appear on your home screen?</string>
+    <string name="shortcut_style_regular">Regular</string>
+    <string name="shortcut_style_regular_desc">Original colors of your image</string>
+    <string name="shortcut_style_monochrome">Monochrome</string>
+    <string name="shortcut_style_monochrome_desc">Adapts to system accent colors (Android 13+)</string>
+    <string name="shortcut_style_select">Select Style</string>
 
     <!-- Editor -->
     <string name="editor_untitled">Untitled</string>
