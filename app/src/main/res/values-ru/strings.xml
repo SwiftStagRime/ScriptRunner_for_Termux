@@ -74,6 +74,13 @@
     <string name="msg_miui_shortcut_permission">MIUI требует вручную выдать разрешение на создание ярлыков.</string>
     <string name="action_settings">Настройки</string>
     <string name="msg_shortcut_denied_system">Система отклонила создание ярлыка.</string>
+    <string name="shortcut_style_title">Стиль ярлыка</string>
+    <string name="shortcut_style_description">Как должен выглядеть значок на главном экране?</string>
+    <string name="shortcut_style_regular">Обычный</string>
+    <string name="shortcut_style_regular_desc">Оригинальные цвета вашего изображения</string>
+    <string name="shortcut_style_monochrome">Монохромный</string>
+    <string name="shortcut_style_monochrome_desc">Подстраивается под акцентные цвета системы (Android 13+)</string>
+    <string name="shortcut_style_select">Выбрать стиль</string>
 
     <!-- Editor -->
     <string name="editor_untitled">Без названия</string>
@@ -94,6 +101,8 @@
     <string name="toggle_wrap">Перенос строк</string>
     <string name="top">В начало</string>
     <string name="bottom">В конец</string>
+    <string name="select_all">Выбрать всё</string>
+    <string name="paste">Вставить</string>
 
     <!-- Config -->
     <string name="config_dialog_title">Настройки скрипта</string>
@@ -307,4 +316,27 @@
     <string name="day_sat">Суб</string>
     <string name="label_battery_threshold">Порог заряда батареи</string>
     <string name="battery_threshold_desc">Запускать, только если заряд батареи выше %1$d%%</string>
+    <string name="automation_type_boot">При запуске</string>
+    <string name="automation_boot_hint">Скрипт будет запускаться каждый раз при включении устройства.</string>
+    <string name="automation_boot_next_run">Запускается при каждом включении</string>
+
+    <!-- Automation Widget -->
+    <string name="automation_widget_title">Автоматизации</string>
+    <string name="automation_active_count">%1$d Активно</string>
+    <string name="automation_no_script">Нет скрипта</string>
+    <string name="automation_next_run">Далее: %1$s</string>
+    <string name="automation_run_now_description">Запустить сейчас</string>
+
+    <!-- Logs Widget -->
+    <string name="logs_widget_title">Последние запуски</string>
+    <string name="logs_no_activity">Пока нет активности</string>
+    <string name="logs_status_success">Успех</string>
+    <string name="logs_status_failed">Не удалось</string>
+    <string name="logs_unknown_automation">Неизвестно</string>
+    <string name="logs_unknown_date">Неизвестная дата</string>
+
+    <!-- Script Widget -->
+    <string name="script_widget_title">Скрипты</string>
+    <string name="script_edit_description">Редактировать</string>
+    <string name="script_no_scripts">Скрипты не назначены</string>
 </resources>

@@ -1,5 +1,17 @@
 # Script Runner for Termux
 
+<p>
+  <a href="https://apt.izzysoft.de/fdroid/index/apk/io.github.swiftstagrime.termuxrunner">
+    <img src="https://gitlab.com/IzzyOnDroid/repo/-/raw/master/assets/IzzyOnDroidButtonGreyBorder_nofont.png" height="80" alt="Get it at IzzyOnDroid">
+  </a>
+</p>
+
+<p>
+  <a href="https://apt.izzysoft.de/fdroid/index/apk/io.github.swiftstagrime.termuxrunner">
+    <img src="https://img.shields.io/badge/dynamic/json?url=https://dlstats.izzyondroid.org/iod-stats-collector/stats/basic/yearly/rolling.json&query=$.['io.github.swiftstagrime.termuxrunner']&label=IzzyOnDroid%20yearly%20downloads" alt="IzzyOnDroid Yearly Downloads">
+  </a>
+</p>
+
 A secure Android bridge for managing and executing scripts via Termux. This app allows you to automate tasks, manage environment variables, and create home screen shortcuts for your favorite scripts with a focus on security and ease of use.
 
 ## Features

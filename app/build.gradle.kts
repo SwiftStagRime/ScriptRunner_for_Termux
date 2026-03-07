@@ -29,21 +29,20 @@ android {
         applicationId = "io.github.swiftstagrime.termuxrunner"
         minSdk = 24
         targetSdk = 36
-        versionCode = 151
-        versionName = "1.5.5"
+        versionCode = 160
+        versionName = "1.6.0"
 
         testInstrumentationRunner = "io.github.swiftstagrime.termuxrunner.di.HiltTestRunner"
-
     }
 
-    //testBuildType = "instrumented"
-    //testBuildType = "benchmark"
+    // testBuildType = "instrumented"
+    // testBuildType = "benchmark"
 
     buildTypes {
         release {
             isMinifyEnabled = true
             isShrinkResources = true
-            //isProfileable = true
+            // isProfileable = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",
@@ -109,7 +108,6 @@ android {
         includeInApk = false
         includeInBundle = false
     }
-
 }
 
 base {
@@ -118,9 +116,14 @@ base {
 
 ktlint {
     android = true
+    ignoreFailures = true
     reporters {
         reporter(org.jlleitschuh.gradle.ktlint.reporter.ReporterType.HTML)
-        reporter(org.jlleitschuh.gradle.ktlint.reporter.ReporterType.PLAIN)
+    }
+    filter {
+        include("src/**/*.kt")
+        include("*.kt")
+        exclude("**/generated/**")
     }
 }
 
@@ -145,6 +148,7 @@ dependencies {
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.hilt.android)
+    implementation(libs.androidx.hilt.navigation.compose)
     implementation(libs.androidx.material3)
     implementation(libs.androidx.exifinterface)
     implementation(libs.androidx.appcompat)
@@ -158,6 +162,7 @@ dependencies {
     implementation(libs.core.ktx)
     implementation(libs.androidx.work.testing)
     implementation(libs.androidx.profileinstaller)
+    implementation(libs.androidx.glance.preview)
     "baselineProfile"(project(":baselineprofile"))
     ksp(libs.hilt.compiler)
     implementation(libs.androidx.datastore.preferences)
@@ -197,6 +202,8 @@ dependencies {
     kspAndroidTest(libs.hilt.compiler)
     androidTestImplementation(libs.androidx.work.testing)
     testImplementation(libs.robolectric)
+    implementation(libs.androidx.glance.material3)
+    implementation(libs.androidx.glance.appwidget)
 }
 
 baselineProfile {

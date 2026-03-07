@@ -28,7 +28,6 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.swiftstagrime.termuxrunner.domain.model.Automation
-import io.github.swiftstagrime.termuxrunner.domain.model.AutomationLog
 import io.github.swiftstagrime.termuxrunner.domain.model.AutomationType
 import io.github.swiftstagrime.termuxrunner.domain.model.Category
 import io.github.swiftstagrime.termuxrunner.domain.model.InteractionMode
@@ -192,9 +191,9 @@ private fun AutomationHistoryView(
 ) {
     if (selectedAutomation == null) return
 
-    val historyLogs by produceState(emptyList<AutomationLog>(), selectedAutomation) {
-        viewModel.getAutomationLogs(selectedAutomation.id).collect { value = it }
-    }
+    val historyLogs by remember(selectedAutomation.id) {
+        viewModel.getAutomationLogs(selectedAutomation.id)
+    }.collectAsStateWithLifecycle(initialValue = emptyList())
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,

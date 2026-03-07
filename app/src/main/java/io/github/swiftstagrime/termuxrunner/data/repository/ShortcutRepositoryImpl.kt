@@ -2,10 +2,17 @@ package io.github.swiftstagrime.termuxrunner.data.repository
 
 import android.content.Context
 import android.content.Intent
+import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.ColorMatrix
+import android.graphics.ColorMatrixColorFilter
 import android.graphics.Paint
+import android.graphics.PorterDuff
+import android.graphics.PorterDuffColorFilter
+import android.graphics.PorterDuffXfermode
 import android.graphics.RectF
 import android.os.Build
 import androidx.core.content.pm.ShortcutInfoCompat
@@ -17,7 +24,6 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import io.github.swiftstagrime.termuxrunner.R
 import io.github.swiftstagrime.termuxrunner.domain.model.Script
 import io.github.swiftstagrime.termuxrunner.domain.repository.ShortcutRepository
-import io.github.swiftstagrime.termuxrunner.ui.extensions.UiText
 import io.github.swiftstagrime.termuxrunner.ui.features.runner.ScriptRunnerActivity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -33,79 +39,153 @@ class ShortcutRepositoryImpl
     ) : ShortcutRepository {
         override fun isPinningSupported(): Boolean = ShortcutManagerCompat.isRequestPinShortcutSupported(context)
 
-        override suspend fun createShortcutInfo(script: Script): ShortcutInfoCompat? =
-            withContext(
-                Dispatchers.IO,
-            ) {
+        override suspend fun createShortcutInfo(
+            script: Script,
+            useThemedIcon: Boolean,
+        ): ShortcutInfoCompat? =
+            withContext(Dispatchers.IO) {
                 if (!isPinningSupported()) return@withContext null
-
-                // Configure intent to trigger the script execution activity via a deep link
-                val intent =
-                    Intent(context, ScriptRunnerActivity::class.java).apply {
-                        action = Intent.ACTION_VIEW
-                        putExtra("SCRIPT_ID", script.id)
-                        data = "scriptrunner://run/${script.id}".toUri()
-                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                        addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-                    }
 
                 val iconCompat =
                     try {
-                        if (script.iconPath != null) {
-                            createAdaptiveIcon(script.iconPath)
+                        val originalBitmap =
+                            script.iconPath?.let { path ->
+                                BitmapFactory.decodeFile(
+                                    path,
+                                    BitmapFactory.Options().apply {
+                                        inPreferredConfig = Bitmap.Config.ARGB_8888
+                                    },
+                                )
+                            }
+
+                        if (originalBitmap != null) {
+                            val finalBitmap =
+                                if (useThemedIcon) {
+                                    createThemedBitmap(originalBitmap, context)
+                                } else {
+                                    createStandardAdaptiveBitmap(originalBitmap)
+                                }
+
+                            IconCompat.createWithAdaptiveBitmap(finalBitmap).also {
+                                if (!originalBitmap.isRecycled) originalBitmap.recycle()
+                            }
                         } else {
                             IconCompat.createWithResource(context, R.drawable.ic_launcher_foreground)
                         }
-                    } catch (_: Exception) {
+                    } catch (e: Exception) {
                         IconCompat.createWithResource(context, R.drawable.ic_launcher_foreground)
                     }
 
-                return@withContext ShortcutInfoCompat
+                ShortcutInfoCompat
                     .Builder(context, "script_${script.id}")
                     .setShortLabel(script.name)
-                    .setLongLabel(script.name)
                     .setIcon(iconCompat)
-                    .setIntent(intent)
+                    .setIntent(createRunnerIntent(script))
                     .build()
             }
 
-        private fun createAdaptiveIcon(path: String): IconCompat {
-            val options = BitmapFactory.Options().apply { inPreferredConfig = Bitmap.Config.ARGB_8888 }
-            val originalBitmap =
-                BitmapFactory.decodeFile(path, options)
-                    ?: throw IllegalArgumentException(
-                        UiText.StringResource(R.string.error_decode_icon).asString(context),
+        private fun createStandardAdaptiveBitmap(src: Bitmap): Bitmap {
+            val targetSize = 256
+            val output = createBitmap(targetSize, targetSize)
+            val canvas = Canvas(output)
+
+            canvas.drawColor(Color.WHITE)
+
+            val paint = Paint(Paint.FILTER_BITMAP_FLAG or Paint.ANTI_ALIAS_FLAG)
+
+            val sourceWidth = src.width.toFloat()
+            val sourceHeight = src.height.toFloat()
+            val scale = targetSize.toFloat() / sourceWidth.coerceAtMost(sourceHeight)
+
+            val scaledWidth = scale * sourceWidth
+            val scaledHeight = scale * sourceHeight
+
+            val left = (targetSize - scaledWidth) / 2f
+            val top = (targetSize - scaledHeight) / 2f
+
+            val targetRect = RectF(left, top, left + scaledWidth, top + scaledHeight)
+
+            canvas.drawBitmap(src, null, targetRect, paint)
+
+            return output
+        }
+
+        private fun createRunnerIntent(script: Script): Intent =
+            Intent(context, ScriptRunnerActivity::class.java).apply {
+                action = Intent.ACTION_VIEW
+                putExtra("SCRIPT_ID", script.id)
+                data = "scriptrunner://run/${script.id}".toUri()
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+            }
+
+        /**
+         * This shit works like ass, but I'm out of ideas
+         */
+        private fun createThemedBitmap(
+            src: Bitmap,
+            context: Context,
+        ): Bitmap {
+            val targetSize = 256
+            val output = createBitmap(targetSize, targetSize)
+            val canvas = Canvas(output)
+
+            val (_, accentColor) = getThemeColors(context)
+
+            canvas.drawColor(Color.WHITE)
+
+            val paint = Paint(Paint.FILTER_BITMAP_FLAG or Paint.ANTI_ALIAS_FLAG)
+
+            val sourceWidth = src.width.toFloat()
+            val sourceHeight = src.height.toFloat()
+            val scale = targetSize.toFloat() / sourceWidth.coerceAtMost(sourceHeight)
+
+            val scaledWidth = scale * sourceWidth
+            val scaledHeight = scale * sourceHeight
+
+            val left = (targetSize - scaledWidth) / 2f
+            val top = (targetSize - scaledHeight) / 2f
+
+            val targetRect = RectF(left, top, left + scaledWidth, top + scaledHeight)
+
+            val grayscaleMatrix = ColorMatrix()
+            grayscaleMatrix.setSaturation(0f)
+            paint.colorFilter = ColorMatrixColorFilter(grayscaleMatrix)
+            canvas.drawBitmap(src, null, targetRect, paint)
+
+            val colorPaint = Paint(Paint.FILTER_BITMAP_FLAG or Paint.ANTI_ALIAS_FLAG)
+            colorPaint.colorFilter = PorterDuffColorFilter(accentColor, PorterDuff.Mode.MULTIPLY)
+            colorPaint.xfermode = PorterDuffXfermode(PorterDuff.Mode.MULTIPLY)
+
+            canvas.drawBitmap(src, null, targetRect, colorPaint)
+
+            return output
+        }
+
+        private fun getThemeColors(context: Context): Pair<Int, Int> {
+            val isDarkMode =
+                (
+                    context.resources.configuration.uiMode and
+                        Configuration.UI_MODE_NIGHT_MASK
+                ) == Configuration.UI_MODE_NIGHT_YES
+
+            return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                if (isDarkMode) {
+                    Pair(
+                        context.getColor(android.R.color.system_neutral1_800),
+                        context.getColor(android.R.color.system_accent1_100),
                     )
-
-            // Process the icon to meet Android's adaptive icon requirements (scaling and centering)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                val targetSize = 256
-
-                val output = createBitmap(targetSize, targetSize)
-                val canvas = Canvas(output)
-
-                val sourceWidth = originalBitmap.width
-                val sourceHeight = originalBitmap.height
-                val scale = (targetSize.toFloat() / sourceWidth.coerceAtMost(sourceHeight))
-
-                val scaledWidth = scale * sourceWidth
-                val scaledHeight = scale * sourceHeight
-
-                val left = (targetSize - scaledWidth) / 2
-                val top = (targetSize - scaledHeight) / 2
-
-                val targetRect = RectF(left, top, left + scaledWidth, top + scaledHeight)
-
-                val paint = Paint().apply { isFilterBitmap = true }
-                canvas.drawBitmap(originalBitmap, null, targetRect, paint)
-
-                if (originalBitmap != output) {
-                    originalBitmap.recycle()
+                } else {
+                    Pair(
+                        context.getColor(android.R.color.system_neutral1_100),
+                        context.getColor(android.R.color.system_accent1_800),
+                    )
                 }
-
-                return IconCompat.createWithAdaptiveBitmap(output)
             } else {
-                return IconCompat.createWithBitmap(originalBitmap)
+                if (isDarkMode) {
+                    Pair(Color.DKGRAY, Color.CYAN)
+                } else {
+                    Pair(Color.LTGRAY, Color.BLUE)
+                }
             }
         }
     }

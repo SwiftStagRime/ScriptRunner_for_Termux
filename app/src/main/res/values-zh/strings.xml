@@ -75,6 +75,13 @@
     <string name="msg_miui_shortcut_permission">MIUI 需要手动开启 “创建桌面快捷方式” 权限。</string>
     <string name="action_settings">去设置</string>
     <string name="msg_shortcut_denied_system">系统拒绝了快捷方式请求。</string>
+    <string name="shortcut_style_title">快捷方式样式</string>
+    <string name="shortcut_style_description">图标在您的主屏幕上应如何显示？</string>
+    <string name="shortcut_style_regular">常规</string>
+    <string name="shortcut_style_regular_desc">图片的原始颜色</string>
+    <string name="shortcut_style_monochrome">单色</string>
+    <string name="shortcut_style_monochrome_desc">适配系统强调色 (Android 13+)</string>
+    <string name="shortcut_style_select">选择样式</string>
 
     <!-- Editor -->
     <string name="editor_untitled">无标题</string>
@@ -95,6 +102,8 @@
     <string name="toggle_wrap">自动换行</string>
     <string name="top">顶部</string>
     <string name="bottom">底部</string>
+    <string name="select_all">全选</string>
+    <string name="paste">粘贴</string>
 
     <!-- Config -->
     <string name="config_dialog_title">脚本配置</string>
@@ -308,4 +317,27 @@
     <string name="day_sat">周六</string>
     <string name="label_battery_threshold">电池电量阈值</string>
     <string name="battery_threshold_desc">仅在电池电量高于 %1$d%% 时运行</string>
+    <string name="automation_type_boot">启动时</string>
+    <string name="automation_boot_hint">设备每次启动时都将运行脚本。</string>
+    <string name="automation_boot_next_run">每次启动时运行</string>
+
+    <!-- Automation Widget -->
+    <string name="automation_widget_title">自动化</string>
+    <string name="automation_active_count">%1$d 个活跃</string>
+    <string name="automation_no_script">无脚本</string>
+    <string name="automation_next_run">下次：%1$s</string>
+    <string name="automation_run_now_description">立即运行</string>
+
+    <!-- Logs Widget -->
+    <string name="logs_widget_title">最近运行</string>
+    <string name="logs_no_activity">暂无活动</string>
+    <string name="logs_status_success">成功</string>
+    <string name="logs_status_failed">失败</string>
+    <string name="logs_unknown_automation">未知</string>
+    <string name="logs_unknown_date">未知日期</string>
+
+    <!-- Script Widget -->
+    <string name="script_widget_title">脚本</string>
+    <string name="script_edit_description">编辑</string>
+    <string name="script_no_scripts">未分配脚本</string>
 </resources>

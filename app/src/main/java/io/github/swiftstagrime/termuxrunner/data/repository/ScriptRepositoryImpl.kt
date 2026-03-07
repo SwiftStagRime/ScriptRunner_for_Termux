@@ -60,7 +60,9 @@ class ScriptRepositoryImpl
 
         override suspend fun getScriptById(id: Int): Script? = dao.getScriptById(id)?.toScriptDomain()
 
-        override suspend fun insertScript(script: Script): Int = dao.insertScript(script.toScriptEntity()).toInt()
+        override suspend fun insertScript(script: Script): Int =
+            dao.insertScript(script.toScriptEntity()).toInt().also {
+            }
 
         override suspend fun deleteScript(script: Script) {
             dao.deleteScript(script.toScriptEntity())

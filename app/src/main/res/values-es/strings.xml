@@ -75,6 +75,13 @@
     <string name="msg_miui_shortcut_permission">MIUI requiere permiso manual para crear accesos directos.</string>
     <string name="action_settings">Ajustes</string>
     <string name="msg_shortcut_denied_system">Solicitud de acceso directo denegada por el sistema.</string>
+    <string name="shortcut_style_title">Estilo de acceso directo</string>
+    <string name="shortcut_style_description">¿Cómo debe aparecer el icono en su pantalla de inicio?</string>
+    <string name="shortcut_style_regular">Regular</string>
+    <string name="shortcut_style_regular_desc">Colores originales de su imagen</string>
+    <string name="shortcut_style_monochrome">Monocromo</string>
+    <string name="shortcut_style_monochrome_desc">Se adapta a los colores de acento del sistema (Android 13+)</string>
+    <string name="shortcut_style_select">Seleccionar estilo</string>
 
     <!-- Editor -->
     <string name="editor_untitled">Sin título</string>
@@ -95,6 +102,8 @@
     <string name="toggle_wrap">Ajuste de línea</string>
     <string name="top">Inicio</string>
     <string name="bottom">Fin</string>
+    <string name="select_all">Seleccionar todo</string>
+    <string name="paste">Pegar</string>
 
     <!-- Config -->
     <string name="config_dialog_title">Configuración del script</string>
@@ -308,4 +317,27 @@
     <string name="day_sat">Sáb</string>
     <string name="label_battery_threshold">Umbral de batería</string>
     <string name="battery_threshold_desc">Ejecutar solo si la batería está por encima del %1$d%%</string>
+    <string name="automation_type_boot">Al Arrancar</string>
+    <string name="automation_boot_hint">El script se ejecutará cada vez que el dispositivo se inicie.</string>
+    <string name="automation_boot_next_run">Se ejecuta en cada arranque</string>
+
+    <!-- Automation Widget -->
+    <string name="automation_widget_title">Automatizaciones</string>
+    <string name="automation_active_count">%1$d Activos</string>
+    <string name="automation_no_script">Sin script</string>
+    <string name="automation_next_run">Próximo: %1$s</string>
+    <string name="automation_run_now_description">Ejecutar ahora</string>
+
+    <!-- Logs Widget -->
+    <string name="logs_widget_title">Ejecuciones recientes</string>
+    <string name="logs_no_activity">Aún no hay actividad</string>
+    <string name="logs_status_success">Éxito</string>
+    <string name="logs_status_failed">Fallido</string>
+    <string name="logs_unknown_automation">Desconocido</string>
+    <string name="logs_unknown_date">Fecha desconocida</string>
+
+    <!-- Script Widget -->
+    <string name="script_widget_title">Scripts</string>
+    <string name="script_edit_description">Editar</string>
+    <string name="script_no_scripts">Sin scripts asignados</string>
 </resources>

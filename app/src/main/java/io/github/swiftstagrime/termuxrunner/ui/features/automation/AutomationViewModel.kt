@@ -13,6 +13,7 @@ import io.github.swiftstagrime.termuxrunner.domain.repository.CategoryRepository
 import io.github.swiftstagrime.termuxrunner.domain.repository.ScriptRepository
 import io.github.swiftstagrime.termuxrunner.domain.usecase.RunScriptUseCase
 import io.github.swiftstagrime.termuxrunner.domain.util.AutomationTimeCalculator
+import io.github.swiftstagrime.termuxrunner.ui.utils.WidgetManager
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
@@ -34,6 +35,7 @@ class AutomationViewModel
         categoryRepository: CategoryRepository,
         private val automationLogRepository: AutomationLogRepository,
         private val runScriptUseCase: RunScriptUseCase,
+        private val widgetManager: WidgetManager,
     ) : ViewModel() {
         val automations: StateFlow<List<Automation>> =
             automationRepository
@@ -54,24 +56,33 @@ class AutomationViewModel
             id: Int,
             enabled: Boolean,
         ) {
-            viewModelScope.launch { automationRepository.toggleAutomation(id, enabled) }
+            viewModelScope.launch {
+                automationRepository.toggleAutomation(id, enabled)
+                widgetManager.updateAutomationWidget()
+            }
         }
 
         fun deleteAutomation(automation: Automation) {
-            viewModelScope.launch { automationRepository.deleteAutomation(automation) }
+            viewModelScope.launch {
+                automationRepository.deleteAutomation(automation)
+                widgetManager.updateAutomationWidget()
+            }
         }
 
         fun runAutomationNow(automation: Automation) {
             viewModelScope.launch {
                 scriptRepository.getScriptById(automation.scriptId)?.let { script ->
+                    val scriptForAutomation = script.copy(notifyOnResult = true)
+
                     runScriptUseCase(
-                        script = script,
+                        script = scriptForAutomation,
                         runtimeArgs = automation.runtimeArgs,
                         runtimeEnv = automation.runtimeEnv,
                         runtimePrefix = automation.runtimePrefix,
                         automationId = automation.id,
                     )
                 }
+                widgetManager.updateLogsWidget()
             }
         }
 
@@ -126,6 +137,8 @@ class AutomationViewModel
                     )
 
                 automationRepository.saveAutomation(automation)
+
+                widgetManager.updateAutomationWidget()
             }
         }
     }

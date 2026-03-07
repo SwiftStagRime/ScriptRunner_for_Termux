@@ -33,6 +33,7 @@ import io.github.swiftstagrime.termuxrunner.domain.util.MiuiUtils
 import io.github.swiftstagrime.termuxrunner.ui.components.ScriptRuntimePromptDialog
 import io.github.swiftstagrime.termuxrunner.ui.extensions.ObserveAsEvents
 import io.github.swiftstagrime.termuxrunner.ui.extensions.UiText
+import io.github.swiftstagrime.termuxrunner.ui.features.home.components.ShortcutStylePickerDialog
 import kotlinx.coroutines.launch
 
 @Composable
@@ -48,6 +49,8 @@ fun HomeRoute(
 
     val selectedCategoryId by viewModel.selectedCategoryId.collectAsStateWithLifecycle()
     val sortOption by viewModel.sortOption.collectAsStateWithLifecycle()
+
+    var scriptForShortcutStyle by remember { mutableStateOf<Script?>(null) }
 
     val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
@@ -214,7 +217,9 @@ fun HomeRoute(
                     }
                 },
                 onDeleteScript = viewModel::deleteScript,
-                onCreateShortcutClick = viewModel::createShortcut,
+                onCreateShortcutClick = { script ->
+                    scriptForShortcutStyle = script
+                },
                 onUpdateScript = viewModel::updateScript,
                 onHeartbeatToggle = { if (it) requestNotifications() },
                 onRequestBatteryUnrestricted = { BatteryUtils.requestIgnoreBatteryOptimizations(context) },
@@ -241,6 +246,17 @@ fun HomeRoute(
         snackbarHostState = snackbarHostState,
         actions = actions,
     )
+
+    scriptForShortcutStyle?.let { script ->
+        ShortcutStylePickerDialog(
+            script = script,
+            onDismiss = { scriptForShortcutStyle = null },
+            onStyleSelected = { isThemed ->
+                viewModel.createShortcut(script, isThemed)
+                scriptForShortcutStyle = null
+            },
+        )
+    }
 
     scriptToPrompt?.let { script ->
         ScriptRuntimePromptDialog(

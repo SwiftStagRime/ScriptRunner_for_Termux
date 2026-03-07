@@ -1,6 +1,5 @@
 package io.github.swiftstagrime.termuxrunner.ui.features.onboarding
 
-import android.app.AlarmManager
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent

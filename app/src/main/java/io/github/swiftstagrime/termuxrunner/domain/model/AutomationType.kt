@@ -7,4 +7,5 @@ enum class AutomationType {
     ONE_TIME,
     PERIODIC,
     WEEKLY,
+    BOOT,
 }

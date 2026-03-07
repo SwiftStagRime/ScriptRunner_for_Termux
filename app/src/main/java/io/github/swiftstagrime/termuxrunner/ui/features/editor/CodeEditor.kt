@@ -43,9 +43,11 @@ import androidx.compose.material.icons.automirrored.filled.Redo
 import androidx.compose.material.icons.automirrored.filled.Undo
 import androidx.compose.material.icons.automirrored.filled.WrapText
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.ContentPaste
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.SelectAll
 import androidx.compose.material.icons.filled.VerticalAlignBottom
 import androidx.compose.material.icons.filled.VerticalAlignTop
 import androidx.compose.material3.HorizontalDivider
@@ -71,8 +73,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.platform.LocalClipboard
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
@@ -153,6 +158,9 @@ fun CodeEditor(
     val redoStack = rememberSaveable(saver = UndoStackSaver) { mutableStateListOf() }
     var lastUndoSave by rememberSaveable(stateSaver = TextFieldValueSaver) { mutableStateOf(code) }
 
+    val clipboardManager = LocalClipboard.current
+    val context = LocalContext.current
+
     LaunchedEffect(code.text) {
         delay(AUTO_SAVE_DELAY)
         if (lastUndoSave.text != code.text) {
@@ -231,6 +239,17 @@ fun CodeEditor(
                 onHide = { isAccessoryVisible = false },
                 onInsertSymbol = { actions.handleInsertSymbol(code, it) },
                 interpreter = interpreter,
+                onSelectAll = { actions.selectAll(code) },
+                onPaste = {
+                    val clipData = clipboardManager.nativeClipboard.primaryClip
+                    val text =
+                        if (clipData != null && clipData.itemCount > 0) {
+                            clipData.getItemAt(0).coerceToText(context).toString()
+                        } else {
+                            null
+                        }
+                    actions.handlePaste(code, text)
+                },
                 onToggleWrap = { isWrappingEnabled = !isWrappingEnabled },
                 isWrappingEnabled = isWrappingEnabled,
                 onScrollTop = { coroutineScope.launch { verticalScrollState.animateScrollTo(0) } },
@@ -299,6 +318,23 @@ private class EditorActions(
             val next = redoStack.removeAt(redoStack.size - 1)
             undoStack.add(next)
             update(next)
+        }
+    }
+
+    fun selectAll(current: TextFieldValue) {
+        onCodeChange(
+            current.copy(
+                selection = TextRange(0, current.text.length),
+            ),
+        )
+    }
+
+    fun handlePaste(
+        current: TextFieldValue,
+        clipboardText: String?,
+    ) {
+        if (!clipboardText.isNullOrEmpty()) {
+            onCodeChange(current.insert(clipboardText))
         }
     }
 
@@ -412,50 +448,58 @@ private fun MainEditorArea(
                     .verticalScroll(scrollState)
                     .then(if (isWrappingEnabled) Modifier else Modifier.horizontalScroll(rememberScrollState())),
         ) {
-            BasicTextField(
-                value = code,
-                onValueChange = onCodeChange,
-                onTextLayout = onTextLayout,
-                textStyle =
-                    TextStyle(
-                        fontFamily = FontFamily.Monospace,
-                        fontSize = 14.sp,
-                        lineHeight = LINE_HEIGHT_SP.sp,
-                        color = MaterialTheme.colorScheme.onSurface,
-                    ),
-                cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
-                visualTransformation = visualTransformation,
-                modifier =
-                    Modifier
-                        .then(if (isWrappingEnabled) Modifier.fillMaxWidth() else Modifier)
-                        .padding(horizontal = 8.dp)
-                        .focusRequester(focusRequester)
-                        .testTag("code_editor_input"),
-                decorationBox = { inner ->
-                    Column(modifier = Modifier.fillMaxWidth()) {
-                        Box {
-                            if (code.text.isEmpty()) {
-                                Text(
-                                    stringResource(R.string.editor_placeholder),
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
-                                )
+            Column {
+                BasicTextField(
+                    value = code,
+                    onValueChange = onCodeChange,
+                    onTextLayout = onTextLayout,
+                    textStyle =
+                        TextStyle(
+                            fontFamily = FontFamily.Monospace,
+                            fontSize = 14.sp,
+                            lineHeight = LINE_HEIGHT_SP.sp,
+                            color = MaterialTheme.colorScheme.onSurface,
+                        ),
+                    cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+                    visualTransformation = visualTransformation,
+                    modifier =
+                        Modifier
+                            .then(if (isWrappingEnabled) Modifier.fillMaxWidth() else Modifier)
+                            .padding(horizontal = 8.dp)
+                            .focusRequester(focusRequester)
+                            .focusProperties {
+                                up = FocusRequester.Cancel
+                                down = FocusRequester.Cancel
+                            }.testTag("code_editor_input"),
+                    decorationBox = { inner ->
+                        Column(modifier = Modifier.fillMaxWidth()) {
+                            Box {
+                                if (code.text.isEmpty()) {
+                                    Text(
+                                        stringResource(R.string.editor_placeholder),
+                                        color =
+                                            MaterialTheme.colorScheme.onSurfaceVariant.copy(
+                                                alpha = 0.5f,
+                                            ),
+                                    )
+                                }
+                                inner()
                             }
-                            inner()
                         }
-                        Spacer(
-                            modifier =
-                                Modifier.fillMaxWidth().height(bottomBuffer).clickable(
-                                    interactionSource =
-                                        remember {
-                                            MutableInteractionSource()
-                                        },
-                                    indication = null,
-                                    onClick = onBottomClick,
-                                ),
-                        )
-                    }
-                },
-            )
+                    },
+                )
+                Spacer(
+                    modifier =
+                        Modifier.fillMaxWidth().height(bottomBuffer).clickable(
+                            interactionSource =
+                                remember {
+                                    MutableInteractionSource()
+                                },
+                            indication = null,
+                            onClick = onBottomClick,
+                        ),
+                )
+            }
         }
     }
 }
@@ -717,6 +761,8 @@ private fun EditorAccessoryToolbar(
     onInsertSymbol: (String) -> Unit,
     onToggleWrap: () -> Unit,
     onScrollTop: () -> Unit,
+    onSelectAll: () -> Unit,
+    onPaste: () -> Unit,
     onScrollBottom: () -> Unit,
     isWrappingEnabled: Boolean,
     interpreter: String,
@@ -826,6 +872,21 @@ private fun EditorAccessoryToolbar(
                                 if (isWrappingEnabled) Icons.AutoMirrored.Filled.WrapText else Icons.AutoMirrored.Filled.FormatAlignLeft,
                                 contentDescription = stringResource(R.string.toggle_wrap),
                                 tint = if (isWrappingEnabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
+                            )
+                        }
+                        IconButton(onClick = onSelectAll) {
+                            Icon(
+                                Icons.Default.SelectAll,
+                                contentDescription = stringResource(R.string.select_all),
+                                tint = MaterialTheme.colorScheme.primary,
+                            )
+                        }
+
+                        IconButton(onClick = onPaste) {
+                            Icon(
+                                Icons.Default.ContentPaste,
+                                contentDescription = stringResource(R.string.paste),
+                                tint = MaterialTheme.colorScheme.primary,
                             )
                         }
                     }

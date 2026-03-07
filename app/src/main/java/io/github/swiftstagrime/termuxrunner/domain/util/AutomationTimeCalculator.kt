@@ -27,6 +27,10 @@ object AutomationTimeCalculator {
             AutomationType.WEEKLY -> {
                 calculateNextWeeklyTimestamp(automation.daysOfWeek, baseTime, fromTime)
             }
+
+            AutomationType.BOOT -> {
+                null
+            }
         }
     }
 

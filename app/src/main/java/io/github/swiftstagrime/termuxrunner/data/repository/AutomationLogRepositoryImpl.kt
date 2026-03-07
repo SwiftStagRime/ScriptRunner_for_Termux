@@ -30,4 +30,9 @@ class AutomationLogRepositoryImpl
         override suspend fun deleteOldLogs(threshold: Long) {
             logDao.deleteOldLogs(threshold)
         }
+
+        override fun getRecentLogs(i: Int): Flow<List<AutomationLog>> =
+            logDao.getLogs(i).map { entities ->
+                entities.map { it.toDomain() }
+            }
     }

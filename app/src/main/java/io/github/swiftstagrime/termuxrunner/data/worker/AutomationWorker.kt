@@ -47,7 +47,7 @@ class AutomationWorker
                 )
             automationDao.updateAutomation(updatedAutomation)
 
-            val scriptEntity = scriptDao.getScriptById(automation.scriptId)
+            val scriptEntity = scriptDao.getScriptById(automation.scriptId)?.copy(notifyOnResult = true)
             if (scriptEntity != null) {
                 runScriptUseCase(
                     script = scriptEntity.toScriptDomain(),
