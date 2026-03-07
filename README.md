@@ -1,9 +1,12 @@
 # Script Runner for Termux
 
-<p align="left">
+<p>
   <a href="https://apt.izzysoft.de/fdroid/index/apk/io.github.swiftstagrime.termuxrunner">
-    <img src="https://img.shields.io/endpoint?url=https://docs.izzysoft.de/live/apt.izzysoft.de/fdroid/repo/badges/io.github.swiftstagrime.termuxrunner.json" alt="IzzyOnDroid Status">
+    <img src="https://gitlab.com/IzzyOnDroid/repo/-/raw/master/assets/IzzyOnDroidButtonGreyBorder_nofont.png" height="80" alt="Get it at IzzyOnDroid">
   </a>
+</p>
+
+<p>
   <a href="https://apt.izzysoft.de/fdroid/index/apk/io.github.swiftstagrime.termuxrunner">
     <img src="https://img.shields.io/badge/dynamic/json?url=https://dlstats.izzyondroid.org/iod-stats-collector/stats/basic/yearly/rolling.json&query=$.['io.github.swiftstagrime.termuxrunner']&label=IzzyOnDroid%20yearly%20downloads" alt="IzzyOnDroid Yearly Downloads">
   </a>
