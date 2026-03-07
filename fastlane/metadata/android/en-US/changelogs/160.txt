@@ -1,0 +1,6 @@
+Added:
+1) Widgets for scripts and automation. Their theme depends on app, but update is somewhat awkward
+2) 2 buttons for selecting all and pasting in editor bar
+3) Automation that runs on each boot, which hopefully works
+4) Ability to add "monochrome" shortcuts, which in all honesty works bad
+5) Fixed focus for editor when used with hardware keyboard

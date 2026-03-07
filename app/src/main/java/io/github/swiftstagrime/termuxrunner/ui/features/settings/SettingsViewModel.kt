@@ -10,6 +10,7 @@ import io.github.swiftstagrime.termuxrunner.domain.repository.UserPreferencesRep
 import io.github.swiftstagrime.termuxrunner.ui.extensions.UiText
 import io.github.swiftstagrime.termuxrunner.ui.theme.AppTheme
 import io.github.swiftstagrime.termuxrunner.ui.theme.ThemeMode
+import io.github.swiftstagrime.termuxrunner.ui.utils.WidgetManager
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -25,6 +26,7 @@ class SettingsViewModel
     constructor(
         private val userPreferencesRepository: UserPreferencesRepository,
         private val scriptRepository: ScriptRepository,
+        private val widgetManager: WidgetManager,
     ) : ViewModel() {
         val selectedAccent =
             userPreferencesRepository.selectedAccent
@@ -51,12 +53,14 @@ class SettingsViewModel
         fun setAccent(accent: AppTheme) {
             viewModelScope.launch {
                 userPreferencesRepository.setAccent(accent)
+                widgetManager.updateAllWidgets()
             }
         }
 
         fun setMode(mode: ThemeMode) {
             viewModelScope.launch {
                 userPreferencesRepository.setMode(mode)
+                widgetManager.updateAllWidgets()
             }
         }
 

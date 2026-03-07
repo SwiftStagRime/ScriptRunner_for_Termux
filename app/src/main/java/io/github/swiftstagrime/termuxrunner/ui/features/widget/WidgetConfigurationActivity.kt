@@ -43,7 +43,6 @@ import io.github.swiftstagrime.termuxrunner.ui.features.widget.script.ScriptWidg
 import io.github.swiftstagrime.termuxrunner.ui.theme.ScriptRunnerForTermuxTheme
 import kotlinx.coroutines.launch
 
-
 @AndroidEntryPoint
 class WidgetConfigurationActivity : ComponentActivity() {
     private val viewModel: WidgetConfigurationViewModel by viewModels()
@@ -55,7 +54,8 @@ class WidgetConfigurationActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         if (intent.action == AppWidgetManager.ACTION_APPWIDGET_CONFIGURE ||
-            intent.hasExtra(AppWidgetManager.EXTRA_APPWIDGET_ID)) {
+            intent.hasExtra(AppWidgetManager.EXTRA_APPWIDGET_ID)
+        ) {
             appWidgetId = intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID)
         }
 
@@ -66,12 +66,14 @@ class WidgetConfigurationActivity : ComponentActivity() {
 
         lifecycleScope.launch {
             val glanceId = GlanceAppWidgetManager(this@WidgetConfigurationActivity).getGlanceIdBy(appWidgetId)
-            val prefs = getAppWidgetState(
-                context = this@WidgetConfigurationActivity,
-                definition = PreferencesGlanceStateDefinition,
-                glanceId = glanceId
-            )
-            val existing = prefs[ScriptWidget.ScriptsListKey]?.split(",")?.filter { it.isNotEmpty() }?.mapNotNull { it.toIntOrNull() } ?: emptyList()
+            val prefs =
+                getAppWidgetState(
+                    context = this@WidgetConfigurationActivity,
+                    definition = PreferencesGlanceStateDefinition,
+                    glanceId = glanceId,
+                )
+            val existing =
+                prefs[ScriptWidget.ScriptsListKey]?.split(",")?.filter { it.isNotEmpty() }?.mapNotNull { it.toIntOrNull() } ?: emptyList()
             selectedScriptIds.addAll(existing)
         }
         enableEdgeToEdge()
@@ -92,7 +94,7 @@ class WidgetConfigurationActivity : ComponentActivity() {
                         FloatingActionButton(onClick = { saveAndExit() }) {
                             Icon(Icons.Default.Check, contentDescription = "Done")
                         }
-                    }
+                    },
                 ) { padding ->
                     Column(modifier = Modifier.padding(padding).fillMaxSize()) {
                         Text("Selected Scripts (${selectedScriptIds.size}/5)", modifier = Modifier.padding(16.dp))
@@ -106,14 +108,14 @@ class WidgetConfigurationActivity : ComponentActivity() {
                                         IconButton(onClick = { selectedScriptIds.remove(id) }) {
                                             Icon(Icons.Default.Delete, contentDescription = "Remove")
                                         }
-                                    }
+                                    },
                                 )
                             }
                             if (selectedScriptIds.size < 5) {
                                 item {
                                     OutlinedButton(
                                         onClick = { showPicker = true },
-                                        modifier = Modifier.fillMaxWidth().padding(16.dp)
+                                        modifier = Modifier.fillMaxWidth().padding(16.dp),
                                     ) {
                                         Text("Add Script")
                                     }
@@ -132,7 +134,7 @@ class WidgetConfigurationActivity : ComponentActivity() {
                                     selectedScriptIds.add(script.id)
                                 }
                                 showPicker = false
-                            }
+                            },
                         )
                     }
                 }

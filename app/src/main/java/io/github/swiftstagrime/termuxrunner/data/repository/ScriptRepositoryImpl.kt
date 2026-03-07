@@ -19,7 +19,6 @@ import io.github.swiftstagrime.termuxrunner.data.local.entity.toAutomationDomain
 import io.github.swiftstagrime.termuxrunner.data.local.entity.toScriptEntity
 import io.github.swiftstagrime.termuxrunner.domain.model.Script
 import io.github.swiftstagrime.termuxrunner.domain.repository.ScriptRepository
-import io.github.swiftstagrime.termuxrunner.domain.usecase.TriggerGlanceScriptUpdateUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -45,7 +44,6 @@ class ScriptRepositoryImpl
         private val categoryDao: CategoryDao,
         private val automationDao: AutomationDao,
         @ApplicationContext private val context: Context,
-        private val triggerGlanceScriptUpdateUseCase: TriggerGlanceScriptUpdateUseCase
     ) : ScriptRepository {
         private val json =
             Json {
@@ -62,13 +60,12 @@ class ScriptRepositoryImpl
 
         override suspend fun getScriptById(id: Int): Script? = dao.getScriptById(id)?.toScriptDomain()
 
-        override suspend fun insertScript(script: Script): Int = dao.insertScript(script.toScriptEntity()).toInt().also {
-            triggerGlanceScriptUpdateUseCase.invoke()
-        }
+        override suspend fun insertScript(script: Script): Int =
+            dao.insertScript(script.toScriptEntity()).toInt().also {
+            }
 
         override suspend fun deleteScript(script: Script) {
             dao.deleteScript(script.toScriptEntity())
-            triggerGlanceScriptUpdateUseCase.invoke()
         }
 
         override suspend fun updateScriptsOrder(orders: List<Pair<Int, Int>>) {

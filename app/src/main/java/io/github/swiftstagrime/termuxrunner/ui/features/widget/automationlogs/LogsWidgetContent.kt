@@ -36,26 +36,27 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-
 @Composable
 fun LogsWidgetContent(
     logs: List<AutomationLog>,
-    automationMap: Map<Int, Automation>
+    automationMap: Map<Int, Automation>,
 ) {
     val context = LocalContext.current
     Column(
-        modifier = GlanceModifier
-            .fillMaxSize()
-            .background(GlanceTheme.colors.widgetBackground)
-            .padding(12.dp)
+        modifier =
+            GlanceModifier
+                .fillMaxSize()
+                .background(GlanceTheme.colors.widgetBackground)
+                .padding(12.dp),
     ) {
         Text(
             text = context.getString(R.string.logs_widget_title),
-            style = TextStyle(
-                color = GlanceTheme.colors.onSurface,
-                fontWeight = FontWeight.Bold,
-                fontSize = 14.sp
-            )
+            style =
+                TextStyle(
+                    color = GlanceTheme.colors.onSurface,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 14.sp,
+                ),
         )
 
         Spacer(modifier = GlanceModifier.height(8.dp))
@@ -63,10 +64,11 @@ fun LogsWidgetContent(
         if (logs.isEmpty()) {
             Text(
                 text = context.getString(R.string.logs_no_activity),
-                style = TextStyle(
-                    color = GlanceTheme.colors.onSurfaceVariant,
-                    fontSize = 12.sp
-                )
+                style =
+                    TextStyle(
+                        color = GlanceTheme.colors.onSurfaceVariant,
+                        fontSize = 12.sp,
+                    ),
             )
         } else {
             LazyColumn(modifier = GlanceModifier.fillMaxSize()) {
@@ -76,25 +78,28 @@ fun LogsWidgetContent(
                     val statusColor = if (isSuccess) GlanceTheme.colors.primary else GlanceTheme.colors.error
 
                     Box(
-                        modifier = GlanceModifier
-                            .fillMaxWidth()
-                            .padding(bottom = 8.dp)
+                        modifier =
+                            GlanceModifier
+                                .fillMaxWidth()
+                                .padding(bottom = 8.dp),
                     ) {
                         Row(
-                            modifier = GlanceModifier
-                                .fillMaxWidth()
-                                .background(GlanceTheme.colors.surfaceVariant)
-                                .cornerRadius(6.dp)
-                                .padding(6.dp),
-                            verticalAlignment = Alignment.Vertical.CenterVertically
+                            modifier =
+                                GlanceModifier
+                                    .fillMaxWidth()
+                                    .background(GlanceTheme.colors.surfaceVariant)
+                                    .cornerRadius(6.dp)
+                                    .padding(6.dp),
+                            verticalAlignment = Alignment.Vertical.CenterVertically,
                         ) {
                             Image(
-                                provider = ImageProvider(
-                                    if (isSuccess) R.drawable.ic_check_circle else R.drawable.ic_close
-                                ),
+                                provider =
+                                    ImageProvider(
+                                        if (isSuccess) R.drawable.ic_check_circle else R.drawable.ic_close,
+                                    ),
                                 contentDescription = null,
                                 modifier = GlanceModifier.size(16.dp),
-                                colorFilter = ColorFilter.tint(statusColor)
+                                colorFilter = ColorFilter.tint(statusColor),
                             )
 
                             Spacer(modifier = GlanceModifier.width(8.dp))
@@ -102,25 +107,28 @@ fun LogsWidgetContent(
                             Column(modifier = GlanceModifier.defaultWeight()) {
                                 Text(
                                     text = automation?.label ?: context.getString(R.string.logs_unknown_automation),
-                                    style = TextStyle(
-                                        color = GlanceTheme.colors.onSurface,
-                                        fontWeight = FontWeight.Medium,
-                                        fontSize = 11.sp
-                                    )
+                                    style =
+                                        TextStyle(
+                                            color = GlanceTheme.colors.onSurface,
+                                            fontWeight = FontWeight.Medium,
+                                            fontSize = 11.sp,
+                                        ),
                                 )
 
-                                val dateStr = try {
-                                    SimpleDateFormat("HH:mm, dd/MM", Locale.getDefault()).format(Date(log.timestamp))
-                                } catch (e: Exception) {
-                                    ""
-                                }
+                                val dateStr =
+                                    try {
+                                        SimpleDateFormat("HH:mm, dd/MM", Locale.getDefault()).format(Date(log.timestamp))
+                                    } catch (e: Exception) {
+                                        ""
+                                    }
 
                                 Text(
                                     text = dateStr,
-                                    style = TextStyle(
-                                        color = GlanceTheme.colors.onSurfaceVariant,
-                                        fontSize = 9.sp
-                                    )
+                                    style =
+                                        TextStyle(
+                                            color = GlanceTheme.colors.onSurfaceVariant,
+                                            fontSize = 9.sp,
+                                        ),
                                 )
                             }
                         }
@@ -131,70 +139,13 @@ fun LogsWidgetContent(
     }
 }
 
-
 @Preview(widthDp = 300, heightDp = 250)
 @Composable
 fun LogsWidgetPreview() {
     GlanceTheme {
         LogsWidgetContent(
             logs = WidgetMockData.logs,
-            automationMap = WidgetMockData.automations.associateBy { it.id }
+            automationMap = WidgetMockData.automations.associateBy { it.id },
         )
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -6,6 +6,6 @@ import dagger.hilt.android.AndroidEntryPoint
 import io.github.swiftstagrime.termuxrunner.ui.features.widget.automation.AutomationWidget
 
 @AndroidEntryPoint
-class AutomationWidgetReceiver : GlanceAppWidgetReceiver(){
+class AutomationWidgetReceiver : GlanceAppWidgetReceiver() {
     override val glanceAppWidget: GlanceAppWidget = AutomationWidget()
 }

@@ -254,7 +254,7 @@ fun HomeRoute(
             onStyleSelected = { isThemed ->
                 viewModel.createShortcut(script, isThemed)
                 scriptForShortcutStyle = null
-            }
+            },
         )
     }
 

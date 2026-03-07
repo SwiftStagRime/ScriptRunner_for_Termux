@@ -13,8 +13,12 @@ import io.github.swiftstagrime.termuxrunner.domain.usecase.RunScriptUseCase
 @InstallIn(SingletonComponent::class)
 interface WidgetEntryPoint {
     fun scriptRepository(): ScriptRepository
+
     fun automationRepository(): AutomationRepository
+
     fun automationLogRepository(): AutomationLogRepository
+
     fun userPreferencesRepository(): UserPreferencesRepository
+
     fun runScriptUseCase(): RunScriptUseCase
 }

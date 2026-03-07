@@ -24,7 +24,10 @@ class ScriptWidget : GlanceAppWidget() {
         val ScriptIdActionKey = ActionParameters.Key<Int>("script_id")
     }
 
-    override suspend fun provideGlance(context: Context, id: GlanceId) {
+    override suspend fun provideGlance(
+        context: Context,
+        id: GlanceId,
+    ) {
         val entryPoint = EntryPointAccessors.fromApplication(context, WidgetEntryPoint::class.java)
         val scriptRepo = entryPoint.scriptRepository()
         val prefsRepo = entryPoint.userPreferencesRepository()
@@ -38,18 +41,19 @@ class ScriptWidget : GlanceAppWidget() {
 
         provideContent {
             val prefs = currentState<Preferences>()
-            val ids = remember(prefs[ScriptsListKey]) {
-                prefs[ScriptsListKey]?.split(",")?.filter { it.isNotEmpty() }?.mapNotNull { it.toIntOrNull() } ?: emptyList()
-            }
+            val ids =
+                remember(prefs[ScriptsListKey]) {
+                    prefs[ScriptsListKey]?.split(",")?.filter { it.isNotEmpty() }?.mapNotNull { it.toIntOrNull() } ?: emptyList()
+                }
 
-            val scriptsState = produceState(initialValue = emptyList(), ids) {
-                value = ids.mapNotNull { scriptRepo.getScriptById(it) }
-            }
+            val scriptsState =
+                produceState(initialValue = emptyList(), ids) {
+                    value = ids.mapNotNull { scriptRepo.getScriptById(it) }
+                }
 
             GlanceTheme(colors = glanceColors) {
                 ScriptWidgetContent(scriptsState.value, appWidgetId)
             }
         }
     }
-
 }

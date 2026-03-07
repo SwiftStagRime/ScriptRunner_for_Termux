@@ -10,8 +10,6 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import dagger.hilt.android.qualifiers.ApplicationContext
 import io.github.swiftstagrime.termuxrunner.domain.repository.UserPreferencesRepository
-import io.github.swiftstagrime.termuxrunner.domain.usecase.TriggerGlanceAutomationUpdateUseCase
-import io.github.swiftstagrime.termuxrunner.domain.usecase.TriggerGlanceScriptUpdateUseCase
 import io.github.swiftstagrime.termuxrunner.ui.theme.AppTheme
 import io.github.swiftstagrime.termuxrunner.ui.theme.ThemeMode
 import kotlinx.coroutines.flow.Flow
@@ -26,8 +24,6 @@ class UserPreferencesRepositoryImpl
     @Inject
     constructor(
         @ApplicationContext private val context: Context,
-        private val triggerGlanceScriptUpdateUseCase: TriggerGlanceScriptUpdateUseCase,
-        private val triggerGlanceAutomationUpdateUseCase: TriggerGlanceAutomationUpdateUseCase
     ) : UserPreferencesRepository {
         private object Keys {
             val THEME_ACCENT = stringPreferencesKey("theme_accent")
@@ -51,14 +47,10 @@ class UserPreferencesRepositoryImpl
 
         override suspend fun setAccent(accent: AppTheme) {
             context.dataStore.edit { it[Keys.THEME_ACCENT] = accent.name }
-            triggerGlanceScriptUpdateUseCase.invoke()
-            triggerGlanceAutomationUpdateUseCase.invoke()
         }
 
         override suspend fun setMode(mode: ThemeMode) {
             context.dataStore.edit { it[Keys.THEME_MODE] = mode.name }
-            triggerGlanceScriptUpdateUseCase.invoke()
-            triggerGlanceAutomationUpdateUseCase.invoke()
         }
 
         override val hasCompletedOnboarding: Flow<Boolean> =

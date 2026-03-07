@@ -44,37 +44,43 @@ import io.github.swiftstagrime.termuxrunner.ui.features.widget.WidgetConfigurati
 import java.io.File
 
 @Composable
-fun ScriptWidgetContent(scripts: List<Script>, appWidgetId: Int) {
+fun ScriptWidgetContent(
+    scripts: List<Script>,
+    appWidgetId: Int,
+) {
     val context = LocalContext.current
 
     Column(
-        modifier = GlanceModifier
-            .fillMaxSize()
-            .background(GlanceTheme.colors.widgetBackground)
-            .appWidgetBackground()
-            .cornerRadius(20.dp)
-            .padding(12.dp)
+        modifier =
+            GlanceModifier
+                .fillMaxSize()
+                .background(GlanceTheme.colors.widgetBackground)
+                .appWidgetBackground()
+                .cornerRadius(20.dp)
+                .padding(12.dp),
     ) {
         Row(modifier = GlanceModifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             Text(
                 text = context.getString(R.string.script_widget_title),
                 style = TextStyle(color = GlanceTheme.colors.onSurface, fontWeight = FontWeight.Bold, fontSize = 16.sp),
-                modifier = GlanceModifier.defaultWeight()
+                modifier = GlanceModifier.defaultWeight(),
             )
 
-            val intent = Intent(context, WidgetConfigurationActivity::class.java).apply {
-                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
-                putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
-                action = AppWidgetManager.ACTION_APPWIDGET_CONFIGURE
-            }
+            val intent =
+                Intent(context, WidgetConfigurationActivity::class.java).apply {
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                    putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
+                    action = AppWidgetManager.ACTION_APPWIDGET_CONFIGURE
+                }
 
             Image(
                 provider = ImageProvider(R.drawable.ic_edit),
                 contentDescription = context.getString(R.string.script_edit_description),
-                modifier = GlanceModifier
-                    .size(24.dp)
-                    .clickable(actionStartActivity(intent)),
-                colorFilter = ColorFilter.tint(GlanceTheme.colors.onSurface)
+                modifier =
+                    GlanceModifier
+                        .size(24.dp)
+                        .clickable(actionStartActivity(intent)),
+                colorFilter = ColorFilter.tint(GlanceTheme.colors.onSurface),
             )
         }
 
@@ -84,7 +90,7 @@ fun ScriptWidgetContent(scripts: List<Script>, appWidgetId: Int) {
             Box(modifier = GlanceModifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 Text(
                     text = context.getString(R.string.script_no_scripts),
-                    style = TextStyle(color = GlanceTheme.colors.onSurface)
+                    style = TextStyle(color = GlanceTheme.colors.onSurface),
                 )
             }
         } else {
@@ -111,59 +117,70 @@ fun ScriptWidgetContent(scripts: List<Script>, appWidgetId: Int) {
 }
 
 @Composable
-private fun ScriptTile(script: Script, modifier: GlanceModifier) {
+private fun ScriptTile(
+    script: Script,
+    modifier: GlanceModifier,
+) {
     var useDefaultDrawable = true
-    val imageProvider = remember(script.iconPath) {
-        val file = script.iconPath?.let { File(it) }
-        if (file != null && file.exists()) {
-            ImageProvider(BitmapFactory.decodeFile(file.absolutePath))
-                .also {
-                    useDefaultDrawable = false
-                }
-        } else {
-            ImageProvider(R.drawable.ic_terminal_tile)
+    val imageProvider =
+        remember(script.iconPath) {
+            val file = script.iconPath?.let { File(it) }
+            if (file != null && file.exists()) {
+                ImageProvider(BitmapFactory.decodeFile(file.absolutePath))
+                    .also {
+                        useDefaultDrawable = false
+                    }
+            } else {
+                ImageProvider(R.drawable.ic_terminal_tile)
+            }
         }
-    }
     if (!useDefaultDrawable) {
         Image(
             provider = imageProvider,
             contentDescription = null,
             contentScale = ContentScale.FillBounds,
-            modifier = modifier.fillMaxHeight()
-                .cornerRadius(16.dp)
-                .clickable(actionRunCallback<RunScriptAction>(
-                    actionParametersOf(ScriptWidget.Companion.ScriptIdActionKey to script.id)
-                ))
+            modifier =
+                modifier
+                    .fillMaxHeight()
+                    .cornerRadius(16.dp)
+                    .clickable(
+                        actionRunCallback<RunScriptAction>(
+                            actionParametersOf(ScriptWidget.Companion.ScriptIdActionKey to script.id),
+                        ),
+                    ),
         )
     } else {
         Column(
-            modifier = modifier
-                .fillMaxHeight()
-                .background(GlanceTheme.colors.secondaryContainer)
-                .cornerRadius(16.dp)
-                .clickable(actionRunCallback<RunScriptAction>(
-                    actionParametersOf(ScriptWidget.Companion.ScriptIdActionKey to script.id)
-                ))
-                .padding(8.dp),
+            modifier =
+                modifier
+                    .fillMaxHeight()
+                    .background(GlanceTheme.colors.secondaryContainer)
+                    .cornerRadius(16.dp)
+                    .clickable(
+                        actionRunCallback<RunScriptAction>(
+                            actionParametersOf(ScriptWidget.Companion.ScriptIdActionKey to script.id),
+                        ),
+                    ).padding(8.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Image(
                 provider = imageProvider,
                 contentDescription = null,
                 modifier = GlanceModifier.size(32.dp),
-                colorFilter = ColorFilter.tint(GlanceTheme.colors.onSecondaryContainer)
+                colorFilter = ColorFilter.tint(GlanceTheme.colors.onSecondaryContainer),
             )
             Spacer(modifier = GlanceModifier.height(4.dp))
             Text(
                 text = script.name,
-                style = TextStyle(
-                    color = GlanceTheme.colors.onSecondaryContainer,
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Medium,
-                    textAlign = TextAlign.Center
-                ),
-                maxLines = 1
+                style =
+                    TextStyle(
+                        color = GlanceTheme.colors.onSecondaryContainer,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Medium,
+                        textAlign = TextAlign.Center,
+                    ),
+                maxLines = 1,
             )
         }
     }
@@ -172,11 +189,11 @@ private fun ScriptTile(script: Script, modifier: GlanceModifier) {
 @Preview(widthDp = 200, heightDp = 200)
 @Composable
 fun ScriptWidgetPreview() {
-    val mockScripts = listOf(
-        Script(id = 1, name = "Backup", code = ""),
-        Script(id = 2, name = "Server Status", code = ""),
-        Script(id = 3, name = "Clean Logs", code = "")
-    )
+    val mockScripts =
+        listOf(
+            Script(id = 1, name = "Backup", code = ""),
+            Script(id = 2, name = "Server Status", code = ""),
+            Script(id = 3, name = "Clean Logs", code = ""),
+        )
     ScriptWidgetContent(scripts = mockScripts, appWidgetId = 0)
 }
-

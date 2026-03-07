@@ -4,6 +4,7 @@ import io.github.swiftstagrime.termuxrunner.data.automation.AutomationNotificati
 import io.github.swiftstagrime.termuxrunner.data.local.dao.AutomationDao
 import io.github.swiftstagrime.termuxrunner.domain.repository.AutomationLogRepository
 import io.github.swiftstagrime.termuxrunner.domain.usecase.ProcessTermuxResultUseCase
+import io.github.swiftstagrime.termuxrunner.ui.utils.WidgetManager
 import io.mockk.coVerify
 import io.mockk.mockk
 import io.mockk.verify
@@ -14,8 +15,8 @@ class ProcessTermuxResultUseCaseTest {
     private val dao = mockk<AutomationDao>(relaxed = true)
     private val repo = mockk<AutomationLogRepository>(relaxed = true)
     private val notifier = mockk<AutomationNotificationHelper>(relaxed = true)
-
-    private val useCase = ProcessTermuxResultUseCase(dao, repo, notifier)
+    private val widgetManager = mockk<WidgetManager>(relaxed = true)
+    private val useCase = ProcessTermuxResultUseCase(dao, repo, notifier, widgetManager)
 
     @Test
     fun `execute updates db and shows notification`() =

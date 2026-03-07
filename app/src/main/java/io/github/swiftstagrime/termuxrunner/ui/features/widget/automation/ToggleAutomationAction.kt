@@ -8,7 +8,11 @@ import dagger.hilt.android.EntryPointAccessors
 import io.github.swiftstagrime.termuxrunner.di.WidgetEntryPoint
 
 class ToggleAutomationAction : ActionCallback {
-    override suspend fun onAction(context: Context, glanceId: GlanceId, parameters: ActionParameters) {
+    override suspend fun onAction(
+        context: Context,
+        glanceId: GlanceId,
+        parameters: ActionParameters,
+    ) {
         val id = parameters[WidgetActionKeys.ID] ?: return
         val enabled = parameters[WidgetActionKeys.ENABLED] ?: return
 

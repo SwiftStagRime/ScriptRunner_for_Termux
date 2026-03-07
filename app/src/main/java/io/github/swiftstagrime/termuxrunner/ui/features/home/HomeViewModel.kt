@@ -23,6 +23,7 @@ import io.github.swiftstagrime.termuxrunner.domain.usecase.RunScriptUseCase
 import io.github.swiftstagrime.termuxrunner.domain.usecase.UpdateScriptUseCase
 import io.github.swiftstagrime.termuxrunner.ui.extensions.UiText
 import io.github.swiftstagrime.termuxrunner.ui.features.scriptconfigdialog.ScriptConfigState
+import io.github.swiftstagrime.termuxrunner.ui.utils.WidgetManager
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -79,6 +80,7 @@ class HomeViewModel
         private val categoryRepository: CategoryRepository,
         private val scriptRepository: ScriptRepository,
         private val userPreferencesRepository: UserPreferencesRepository,
+        private val widgetManager: WidgetManager,
     ) : ViewModel() {
         private val _searchQuery = MutableStateFlow("")
         val searchQuery = _searchQuery.asStateFlow()
@@ -234,6 +236,7 @@ class HomeViewModel
             viewModelScope.launch {
                 deleteScriptUseCase(script)
                 sendEvent(HomeUiEvent.ShowSnackbar(UiText.StringResource(R.string.msg_script_deleted)))
+                widgetManager.updateScriptsWidget()
             }
         }
 
@@ -257,7 +260,10 @@ class HomeViewModel
             }
         }
 
-        fun createShortcut(script: Script, useThemedIcon: Boolean) {
+        fun createShortcut(
+            script: Script,
+            useThemedIcon: Boolean,
+        ) {
             viewModelScope.launch {
                 if (shortcutRepository.isPinningSupported()) {
                     val info = shortcutRepository.createShortcutInfo(script, useThemedIcon)

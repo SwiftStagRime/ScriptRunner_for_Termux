@@ -21,8 +21,10 @@ interface AutomationLogDao {
 
     @Query("DELETE FROM automation_logs WHERE timestamp < :threshold")
     suspend fun deleteOldLogs(threshold: Long)
+
     @Query("SELECT * FROM automation_logs ORDER BY timestamp DESC LIMIT :size")
     fun getLogs(size: Int): Flow<List<AutomationLogEntity>>
+
     @Delete
     suspend fun deleteLog(log: AutomationLogEntity)
 }

@@ -7,7 +7,6 @@ import androidx.compose.runtime.remember
 import androidx.glance.GlanceId
 import androidx.glance.GlanceTheme
 import androidx.glance.appwidget.GlanceAppWidget
-import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.glance.appwidget.provideContent
 import androidx.glance.material3.ColorProviders
 import dagger.hilt.android.EntryPointAccessors
@@ -16,7 +15,10 @@ import io.github.swiftstagrime.termuxrunner.ui.theme.pickColorScheme
 import kotlinx.coroutines.flow.first
 
 class AutomationLogsWidget : GlanceAppWidget() {
-    override suspend fun provideGlance(context: Context, id: GlanceId) {
+    override suspend fun provideGlance(
+        context: Context,
+        id: GlanceId,
+    ) {
         val entryPoint = EntryPointAccessors.fromApplication(context, WidgetEntryPoint::class.java)
         val prefsRepo = entryPoint.userPreferencesRepository()
         val accent = prefsRepo.selectedAccent.first()

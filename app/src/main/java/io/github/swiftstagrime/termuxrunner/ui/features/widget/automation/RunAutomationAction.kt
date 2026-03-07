@@ -8,7 +8,11 @@ import dagger.hilt.android.EntryPointAccessors
 import io.github.swiftstagrime.termuxrunner.di.WidgetEntryPoint
 
 class RunAutomationAction : ActionCallback {
-    override suspend fun onAction(context: Context, glanceId: GlanceId, parameters: ActionParameters) {
+    override suspend fun onAction(
+        context: Context,
+        glanceId: GlanceId,
+        parameters: ActionParameters,
+    ) {
         val id = parameters[WidgetActionKeys.ID] ?: return
 
         val entryPoint = EntryPointAccessors.fromApplication(context, WidgetEntryPoint::class.java)
@@ -20,7 +24,7 @@ class RunAutomationAction : ActionCallback {
             runtimeArgs = automation.runtimeArgs,
             runtimeEnv = automation.runtimeEnv,
             runtimePrefix = automation.runtimePrefix,
-            automationId = automation.id
+            automationId = automation.id,
         )
 
         AutomationWidget().update(context, glanceId)

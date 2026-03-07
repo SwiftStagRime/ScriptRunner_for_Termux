@@ -17,17 +17,18 @@ class RunScriptAction : ActionCallback {
     override suspend fun onAction(
         context: Context,
         glanceId: GlanceId,
-        parameters: ActionParameters
+        parameters: ActionParameters,
     ) {
         val scriptId = parameters[ScriptWidget.ScriptIdActionKey] ?: return
         if (scriptId == -1) {
             return
         }
 
-        val entryPoint = EntryPointAccessors.fromApplication(
-            context.applicationContext,
-            WidgetEntryPoint::class.java
-        )
+        val entryPoint =
+            EntryPointAccessors.fromApplication(
+                context.applicationContext,
+                WidgetEntryPoint::class.java,
+            )
 
         val scriptRepository = entryPoint.scriptRepository()
         val runScriptUseCase = entryPoint.runScriptUseCase()
@@ -37,10 +38,11 @@ class RunScriptAction : ActionCallback {
         val opensWindow = script.openNewSession
 
         if (requiresInput || opensWindow) {
-            val intent = Intent(context, ScriptRunnerActivity::class.java).apply {
-                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                putExtra("SCRIPT_ID", script.id)
-            }
+            val intent =
+                Intent(context, ScriptRunnerActivity::class.java).apply {
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    putExtra("SCRIPT_ID", script.id)
+                }
             context.startActivity(intent)
         } else {
             try {

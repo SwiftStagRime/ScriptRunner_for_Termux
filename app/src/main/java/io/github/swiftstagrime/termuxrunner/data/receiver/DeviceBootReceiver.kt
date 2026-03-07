@@ -17,53 +17,52 @@ import javax.inject.Inject
 
 @AndroidEntryPoint
 class DeviceBootReceiver : BroadcastReceiver() {
-    @Inject
-    lateinit var automationDao: AutomationDao
+    @Inject lateinit var automationDao: AutomationDao
 
-    @Inject
-    lateinit var scheduler: AutomationScheduler
+    @Inject lateinit var scheduler: AutomationScheduler
 
-    @Inject
-    lateinit var runScriptUseCase: RunScriptUseCase
+    @Inject lateinit var runScriptUseCase: RunScriptUseCase
 
-    @Inject
-    lateinit var scriptDao: ScriptDao
+    @Inject lateinit var scriptDao: ScriptDao
+    private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
-    override fun onReceive(context: Context, intent: Intent) {
+    override fun onReceive(
+        context: Context,
+        intent: Intent,
+    ) {
         if (intent.action == Intent.ACTION_BOOT_COMPLETED) {
-            CoroutineScope(Dispatchers.IO + SupervisorJob()).launch {
-                try {
-                    val allAutomations = automationDao.getEnabledAutomations()
+            val pendingResult = goAsync()
+            handleBoot(pendingResult)
+        }
+    }
 
-                    allAutomations.forEach { automation ->
-                        when (automation.type) {
-                            AutomationType.BOOT -> {
-                                val scriptEntity = scriptDao.getScriptById(automation.scriptId)
-                                if (scriptEntity != null) {
-                                    runScriptUseCase(
-                                        script = scriptEntity.toScriptDomain(),
-                                        runtimeArgs = automation.runtimeArgs,
-                                        runtimeEnv = automation.runtimeEnv,
-                                        runtimePrefix = automation.runtimePrefix,
-                                        automationId = automation.id,
-                                    )
-                                }
-
-                                automationDao.updateAutomation(
-                                    automation.copy(
-                                        lastRunTimestamp = System.currentTimeMillis(),
-                                    )
-                                )
-                            }
-
-                            else -> {
-                                scheduler.schedule(automation)
-                            }
+    internal fun handleBoot(pendingResult: PendingResult? = null) {
+        scope.launch {
+            try {
+                val allAutomations = automationDao.getEnabledAutomations()
+                allAutomations.forEach { automation ->
+                    if (automation.type == AutomationType.BOOT) {
+                        val scriptEntity = scriptDao.getScriptById(automation.scriptId)
+                        if (scriptEntity != null) {
+                            runScriptUseCase(
+                                script = scriptEntity.toScriptDomain(),
+                                runtimeArgs = automation.runtimeArgs,
+                                runtimeEnv = automation.runtimeEnv,
+                                runtimePrefix = automation.runtimePrefix,
+                                automationId = automation.id,
+                            )
                         }
+                        automationDao.updateAutomation(
+                            automation.copy(lastRunTimestamp = System.currentTimeMillis()),
+                        )
+                    } else {
+                        scheduler.schedule(automation)
                     }
-                } catch (e: Exception) {
-                    e.printStackTrace()
                 }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            } finally {
+                pendingResult?.finish()
             }
         }
     }

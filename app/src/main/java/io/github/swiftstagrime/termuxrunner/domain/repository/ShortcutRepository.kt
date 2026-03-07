@@ -6,5 +6,8 @@ import io.github.swiftstagrime.termuxrunner.domain.model.Script
 interface ShortcutRepository {
     fun isPinningSupported(): Boolean
 
-    suspend fun createShortcutInfo(script: Script, useThemedIcon: Boolean): ShortcutInfoCompat?
+    suspend fun createShortcutInfo(
+        script: Script,
+        useThemedIcon: Boolean,
+    ): ShortcutInfoCompat?
 }

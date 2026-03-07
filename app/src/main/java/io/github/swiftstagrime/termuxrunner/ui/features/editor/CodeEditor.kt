@@ -70,19 +70,13 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.input.key.Key
-import androidx.compose.ui.input.key.key
-import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.platform.LocalClipboard
-import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
@@ -248,11 +242,12 @@ fun CodeEditor(
                 onSelectAll = { actions.selectAll(code) },
                 onPaste = {
                     val clipData = clipboardManager.nativeClipboard.primaryClip
-                    val text = if (clipData != null && clipData.itemCount > 0) {
-                        clipData.getItemAt(0).coerceToText(context).toString()
-                    } else {
-                        null
-                    }
+                    val text =
+                        if (clipData != null && clipData.itemCount > 0) {
+                            clipData.getItemAt(0).coerceToText(context).toString()
+                        } else {
+                            null
+                        }
                     actions.handlePaste(code, text)
                 },
                 onToggleWrap = { isWrappingEnabled = !isWrappingEnabled },
@@ -329,12 +324,15 @@ private class EditorActions(
     fun selectAll(current: TextFieldValue) {
         onCodeChange(
             current.copy(
-                selection = TextRange(0, current.text.length)
-            )
+                selection = TextRange(0, current.text.length),
+            ),
         )
     }
 
-    fun handlePaste(current: TextFieldValue, clipboardText: String?) {
+    fun handlePaste(
+        current: TextFieldValue,
+        clipboardText: String?,
+    ) {
         if (!clipboardText.isNullOrEmpty()) {
             onCodeChange(current.insert(clipboardText))
         }
@@ -472,17 +470,17 @@ private fun MainEditorArea(
                             .focusProperties {
                                 up = FocusRequester.Cancel
                                 down = FocusRequester.Cancel
-                            }
-                            .testTag("code_editor_input"),
+                            }.testTag("code_editor_input"),
                     decorationBox = { inner ->
                         Column(modifier = Modifier.fillMaxWidth()) {
                             Box {
                                 if (code.text.isEmpty()) {
                                     Text(
                                         stringResource(R.string.editor_placeholder),
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(
-                                            alpha = 0.5f
-                                        ),
+                                        color =
+                                            MaterialTheme.colorScheme.onSurfaceVariant.copy(
+                                                alpha = 0.5f,
+                                            ),
                                     )
                                 }
                                 inner()
@@ -764,7 +762,7 @@ private fun EditorAccessoryToolbar(
     onToggleWrap: () -> Unit,
     onScrollTop: () -> Unit,
     onSelectAll: () -> Unit,
-    onPaste:() -> Unit,
+    onPaste: () -> Unit,
     onScrollBottom: () -> Unit,
     isWrappingEnabled: Boolean,
     interpreter: String,

@@ -28,15 +28,12 @@ import androidx.glance.layout.height
 import androidx.glance.layout.padding
 import androidx.glance.layout.size
 import androidx.glance.layout.width
-import androidx.glance.preview.ExperimentalGlancePreviewApi
-import androidx.glance.preview.Preview
 import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import io.github.swiftstagrime.termuxrunner.R
 import io.github.swiftstagrime.termuxrunner.domain.model.Automation
 import io.github.swiftstagrime.termuxrunner.domain.model.Script
-import io.github.swiftstagrime.termuxrunner.ui.preview.WidgetMockData
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -47,37 +44,40 @@ fun AutomationWidgetContent(
     scriptMap: Map<Int, Script>,
     maxItems: Int = 10,
     getToggleAction: (Int, Boolean) -> androidx.glance.action.Action,
-    getRunAction: (Int) -> androidx.glance.action.Action
+    getRunAction: (Int) -> androidx.glance.action.Action,
 ) {
     val context = LocalContext.current
     val activeCount = automations.count { it.isEnabled }
 
     Column(
-        modifier = GlanceModifier
-            .fillMaxSize()
-            .appWidgetBackground()
-            .background(GlanceTheme.colors.widgetBackground)
-            .padding(12.dp)
+        modifier =
+            GlanceModifier
+                .fillMaxSize()
+                .appWidgetBackground()
+                .background(GlanceTheme.colors.widgetBackground)
+                .padding(12.dp),
     ) {
         Row(
             modifier = GlanceModifier.fillMaxWidth(),
-            verticalAlignment = Alignment.Vertical.CenterVertically
+            verticalAlignment = Alignment.Vertical.CenterVertically,
         ) {
             Text(
                 text = context.getString(R.string.automation_widget_title),
-                style = TextStyle(
-                    color = GlanceTheme.colors.onSurface,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 14.sp
-                )
+                style =
+                    TextStyle(
+                        color = GlanceTheme.colors.onSurface,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 14.sp,
+                    ),
             )
             Spacer(modifier = GlanceModifier.defaultWeight())
             Text(
                 text = context.getString(R.string.automation_active_count, activeCount),
-                style = TextStyle(
-                    color = GlanceTheme.colors.onSurfaceVariant,
-                    fontSize = 12.sp
-                )
+                style =
+                    TextStyle(
+                        color = GlanceTheme.colors.onSurfaceVariant,
+                        fontSize = 12.sp,
+                    ),
             )
         }
 
@@ -90,7 +90,7 @@ fun AutomationWidgetContent(
                         automation = automation,
                         script = scriptMap[automation.scriptId],
                         onToggleAction = getToggleAction(automation.id, !automation.isEnabled),
-                        onRunAction = getRunAction(automation.id)
+                        onRunAction = getRunAction(automation.id),
                     )
                 }
             }
@@ -103,29 +103,32 @@ private fun AutomationRow(
     automation: Automation,
     script: Script?,
     onToggleAction: androidx.glance.action.Action,
-    onRunAction: androidx.glance.action.Action
+    onRunAction: androidx.glance.action.Action,
 ) {
     val context = LocalContext.current
     Row(
-        modifier = GlanceModifier
-            .fillMaxWidth()
-            .padding(vertical = 4.dp)
-            .background(GlanceTheme.colors.surfaceVariant)
-            .cornerRadius(8.dp)
-            .padding(8.dp),
-        verticalAlignment = Alignment.Vertical.CenterVertically
+        modifier =
+            GlanceModifier
+                .fillMaxWidth()
+                .padding(vertical = 4.dp)
+                .background(GlanceTheme.colors.surfaceVariant)
+                .cornerRadius(8.dp)
+                .padding(8.dp),
+        verticalAlignment = Alignment.Vertical.CenterVertically,
     ) {
-        val statusColor = when (automation.lastExitCode) {
-            0 -> GlanceTheme.colors.primary
-            null -> GlanceTheme.colors.outline
-            else -> GlanceTheme.colors.error
-        }
+        val statusColor =
+            when (automation.lastExitCode) {
+                0 -> GlanceTheme.colors.primary
+                null -> GlanceTheme.colors.outline
+                else -> GlanceTheme.colors.error
+            }
 
         Box(
-            modifier = GlanceModifier
-                .width(4.dp)
-                .fillMaxHeight()
-                .background(statusColor),
+            modifier =
+                GlanceModifier
+                    .width(4.dp)
+                    .fillMaxHeight()
+                    .background(statusColor),
         ) {}
 
         Spacer(modifier = GlanceModifier.width(8.dp))
@@ -134,30 +137,34 @@ private fun AutomationRow(
             Text(
                 text = automation.label,
                 maxLines = 1,
-                style = TextStyle(
-                    color = GlanceTheme.colors.onSurface,
-                    fontWeight = FontWeight.Medium,
-                    fontSize = 12.sp
-                )
+                style =
+                    TextStyle(
+                        color = GlanceTheme.colors.onSurface,
+                        fontWeight = FontWeight.Medium,
+                        fontSize = 12.sp,
+                    ),
             )
             Text(
                 text = script?.name ?: context.getString(R.string.automation_no_script),
                 maxLines = 1,
-                style = TextStyle(
-                    color = GlanceTheme.colors.onSurfaceVariant,
-                    fontSize = 10.sp
-                )
+                style =
+                    TextStyle(
+                        color = GlanceTheme.colors.onSurfaceVariant,
+                        fontSize = 10.sp,
+                    ),
             )
 
             if (automation.nextRunTimestamp != null) {
-                val timeStr = SimpleDateFormat("HH:mm", Locale.getDefault())
-                    .format(Date(automation.nextRunTimestamp))
+                val timeStr =
+                    SimpleDateFormat("HH:mm", Locale.getDefault())
+                        .format(Date(automation.nextRunTimestamp))
                 Text(
                     text = context.getString(R.string.automation_next_run, timeStr),
-                    style = TextStyle(
-                        color = GlanceTheme.colors.onSurfaceVariant,
-                        fontSize = 9.sp
-                    )
+                    style =
+                        TextStyle(
+                            color = GlanceTheme.colors.onSurfaceVariant,
+                            fontSize = 9.sp,
+                        ),
                 )
             }
         }
@@ -166,7 +173,7 @@ private fun AutomationRow(
             Switch(
                 checked = automation.isEnabled,
                 onCheckedChange = onToggleAction,
-                modifier = GlanceModifier.padding(0.dp)
+                modifier = GlanceModifier.padding(0.dp),
             )
 
             Spacer(modifier = GlanceModifier.width(8.dp))
@@ -174,10 +181,11 @@ private fun AutomationRow(
             Image(
                 provider = ImageProvider(R.drawable.ic_play),
                 contentDescription = context.getString(R.string.automation_run_now_description),
-                modifier = GlanceModifier
-                    .size(24.dp)
-                    .clickable(onRunAction),
-                colorFilter = ColorFilter.tint(GlanceTheme.colors.primary)
+                modifier =
+                    GlanceModifier
+                        .size(24.dp)
+                        .clickable(onRunAction),
+                colorFilter = ColorFilter.tint(GlanceTheme.colors.primary),
             )
         }
     }

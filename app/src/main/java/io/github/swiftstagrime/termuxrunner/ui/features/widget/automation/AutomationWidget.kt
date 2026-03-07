@@ -1,7 +1,6 @@
 package io.github.swiftstagrime.termuxrunner.ui.features.widget.automation
 
 import android.content.Context
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -10,16 +9,11 @@ import androidx.glance.GlanceTheme
 import androidx.glance.action.ActionParameters
 import androidx.glance.action.actionParametersOf
 import androidx.glance.appwidget.GlanceAppWidget
-import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.glance.appwidget.action.actionRunCallback
 import androidx.glance.appwidget.provideContent
 import androidx.glance.material3.ColorProviders
-import androidx.glance.preview.ExperimentalGlancePreviewApi
-import androidx.glance.preview.Preview
 import dagger.hilt.android.EntryPointAccessors
 import io.github.swiftstagrime.termuxrunner.di.WidgetEntryPoint
-import io.github.swiftstagrime.termuxrunner.ui.features.widget.automation.ToggleAutomationAction
-import io.github.swiftstagrime.termuxrunner.ui.preview.WidgetMockData
 import io.github.swiftstagrime.termuxrunner.ui.theme.pickColorScheme
 import kotlinx.coroutines.flow.first
 
@@ -29,7 +23,10 @@ object WidgetActionKeys {
 }
 
 class AutomationWidget : GlanceAppWidget() {
-    override suspend fun provideGlance(context: Context, id: GlanceId) {
+    override suspend fun provideGlance(
+        context: Context,
+        id: GlanceId,
+    ) {
         val entryPoint = EntryPointAccessors.fromApplication(context, WidgetEntryPoint::class.java)
         val prefsRepo = entryPoint.userPreferencesRepository()
         val accent = prefsRepo.selectedAccent.first()
@@ -51,15 +48,15 @@ class AutomationWidget : GlanceAppWidget() {
                         actionRunCallback<ToggleAutomationAction>(
                             actionParametersOf(
                                 WidgetActionKeys.ID to automationId,
-                                WidgetActionKeys.ENABLED to nextState
-                            )
+                                WidgetActionKeys.ENABLED to nextState,
+                            ),
                         )
                     },
                     getRunAction = { automationId ->
                         actionRunCallback<RunAutomationAction>(
-                            actionParametersOf(WidgetActionKeys.ID to automationId)
+                            actionParametersOf(WidgetActionKeys.ID to automationId),
                         )
-                    }
+                    },
                 )
             }
         }

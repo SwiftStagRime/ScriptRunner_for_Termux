@@ -4,6 +4,7 @@ import io.github.swiftstagrime.termuxrunner.data.automation.AutomationNotificati
 import io.github.swiftstagrime.termuxrunner.data.local.dao.AutomationDao
 import io.github.swiftstagrime.termuxrunner.domain.model.AutomationLog
 import io.github.swiftstagrime.termuxrunner.domain.repository.AutomationLogRepository
+import io.github.swiftstagrime.termuxrunner.ui.utils.WidgetManager
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -14,6 +15,7 @@ class ProcessTermuxResultUseCase
         private val automationDao: AutomationDao,
         private val logRepository: AutomationLogRepository,
         private val notificationHelper: AutomationNotificationHelper,
+        private val widgetManager: WidgetManager,
     ) {
         suspend fun execute(
             automationId: Int,
@@ -35,6 +37,8 @@ class ProcessTermuxResultUseCase
                         message = internalError,
                     ),
                 )
+
+                widgetManager.updateLogsWidget()
             }
 
             notificationHelper.showResultNotification(

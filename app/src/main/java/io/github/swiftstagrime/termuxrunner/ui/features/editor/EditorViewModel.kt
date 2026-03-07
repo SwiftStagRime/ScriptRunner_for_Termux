@@ -18,6 +18,7 @@ import io.github.swiftstagrime.termuxrunner.domain.repository.ScriptRepository
 import io.github.swiftstagrime.termuxrunner.domain.usecase.UpdateScriptUseCase
 import io.github.swiftstagrime.termuxrunner.ui.extensions.UiText
 import io.github.swiftstagrime.termuxrunner.ui.features.scriptconfigdialog.ScriptConfigState
+import io.github.swiftstagrime.termuxrunner.ui.utils.WidgetManager
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -43,6 +44,7 @@ class EditorViewModel
         private val categoryRepository: CategoryRepository,
         private val updateScriptUseCase: UpdateScriptUseCase,
         private val iconRepository: IconRepository,
+        private val widgetManager: WidgetManager,
     ) : ViewModel() {
         val categories =
             categoryRepository
@@ -108,6 +110,10 @@ class EditorViewModel
             viewModelScope.launch {
                 try {
                     updateScriptUseCase(script)
+                    try {
+                        widgetManager.updateScriptsWidget()
+                    } catch (_: Exception) {
+                    }
                     _uiEvent.send(EditorUiEvent.SaveSuccess)
                 } catch (_: Exception) {
                     _uiEvent.send(

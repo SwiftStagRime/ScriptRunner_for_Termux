@@ -41,9 +41,6 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.SegmentedButton
-import androidx.compose.material3.SegmentedButtonDefaults
-import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
@@ -178,12 +175,13 @@ private fun FrequencySection(state: AutomationConfigState) {
                 trailingIcon = {
                     ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
                 },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .menuAnchor(
-                        type = ExposedDropdownMenuAnchorType.PrimaryNotEditable,
-                        enabled = true,
-                    ),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .menuAnchor(
+                            type = ExposedDropdownMenuAnchorType.PrimaryNotEditable,
+                            enabled = true,
+                        ),
                 colors = transparentTextFieldColors(),
                 shape = RoundedCornerShape(12.dp),
             )
@@ -199,7 +197,7 @@ private fun FrequencySection(state: AutomationConfigState) {
                         text = {
                             Text(
                                 text = getAutomationTypeLabel(automationType),
-                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
+                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
                             )
                         },
                         onClick = {
@@ -207,18 +205,22 @@ private fun FrequencySection(state: AutomationConfigState) {
                             expanded = false
                         },
                         leadingIcon = {
-                            val icon = when (automationType) {
-                                AutomationType.ONE_TIME -> Icons.Default.Schedule
-                                AutomationType.PERIODIC -> Icons.Default.Repeat
-                                AutomationType.WEEKLY -> Icons.Default.CalendarMonth
-                                AutomationType.BOOT -> Icons.Default.Power
-                            }
+                            val icon =
+                                when (automationType) {
+                                    AutomationType.ONE_TIME -> Icons.Default.Schedule
+                                    AutomationType.PERIODIC -> Icons.Default.Repeat
+                                    AutomationType.WEEKLY -> Icons.Default.CalendarMonth
+                                    AutomationType.BOOT -> Icons.Default.Power
+                                }
                             Icon(
                                 imageVector = icon,
                                 contentDescription = null,
-                                tint = if (isSelected)
-                                    MaterialTheme.colorScheme.primary
-                                else MaterialTheme.colorScheme.onSurfaceVariant,
+                                tint =
+                                    if (isSelected) {
+                                        MaterialTheme.colorScheme.primary
+                                    } else {
+                                        MaterialTheme.colorScheme.onSurfaceVariant
+                                    },
                             )
                         },
                         trailingIcon = {
@@ -226,10 +228,10 @@ private fun FrequencySection(state: AutomationConfigState) {
                                 Icon(
                                     imageVector = Icons.Default.Check,
                                     contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.primary
+                                    tint = MaterialTheme.colorScheme.primary,
                                 )
                             }
-                        }
+                        },
                     )
                 }
             }

@@ -13,21 +13,28 @@ import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
 
 @HiltViewModel
-class WidgetConfigurationViewModel @Inject constructor(
-    private val scriptRepository: ScriptRepository,
-    private val userPreferencesRepository: UserPreferencesRepository,
-    private val categoryRepository: CategoryRepository
-) : ViewModel() {
+class WidgetConfigurationViewModel
+    @Inject
+    constructor(
+        private val scriptRepository: ScriptRepository,
+        private val userPreferencesRepository: UserPreferencesRepository,
+        private val categoryRepository: CategoryRepository,
+    ) : ViewModel() {
+        val selectedAccent =
+            userPreferencesRepository.selectedAccent
+                .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), AppTheme.GREEN)
 
-    val selectedAccent = userPreferencesRepository.selectedAccent
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), AppTheme.GREEN)
+        val selectedMode =
+            userPreferencesRepository.selectedMode
+                .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), ThemeMode.SYSTEM)
 
-    val selectedMode = userPreferencesRepository.selectedMode
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), ThemeMode.SYSTEM)
+        val allScripts =
+            scriptRepository
+                .getAllScripts()
+                .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    val allScripts = scriptRepository.getAllScripts()
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
-
-    val allCategories = categoryRepository.getAllCategories()
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
-}
+        val allCategories =
+            categoryRepository
+                .getAllCategories()
+                .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+    }

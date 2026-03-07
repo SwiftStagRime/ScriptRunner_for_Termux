@@ -7,7 +7,6 @@ import io.github.swiftstagrime.termuxrunner.data.local.entity.toEntity
 import io.github.swiftstagrime.termuxrunner.domain.model.Automation
 import io.github.swiftstagrime.termuxrunner.domain.model.AutomationType
 import io.github.swiftstagrime.termuxrunner.domain.repository.AutomationRepository
-import io.github.swiftstagrime.termuxrunner.domain.usecase.TriggerGlanceAutomationUpdateUseCase
 import io.github.swiftstagrime.termuxrunner.domain.util.AutomationTimeCalculator
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -18,7 +17,6 @@ class AutomationRepositoryImpl
     constructor(
         private val dao: AutomationDao,
         private val scheduler: AutomationScheduler,
-        private val triggerGlanceAutomationUpdateUseCase: TriggerGlanceAutomationUpdateUseCase,
     ) : AutomationRepository {
         override fun getAllAutomations(): Flow<List<Automation>> =
             dao.getAllAutomations().map { entities ->
@@ -38,20 +36,17 @@ class AutomationRepositoryImpl
                 }
             }
 
-
             val id = dao.insertAutomation(entity)
             val savedEntity = dao.getAutomationById(id.toInt())
             if (savedEntity != null) {
                 scheduler.schedule(savedEntity)
             }
-            triggerGlanceAutomationUpdateUseCase.invoke()
         }
 
         override suspend fun deleteAutomation(automation: Automation) {
             val entity = automation.toEntity()
             scheduler.cancel(entity)
             dao.deleteAutomation(entity)
-            triggerGlanceAutomationUpdateUseCase.invoke()
         }
 
         override suspend fun toggleAutomation(
@@ -67,7 +62,6 @@ class AutomationRepositoryImpl
             } else {
                 scheduler.cancel(updated)
             }
-            triggerGlanceAutomationUpdateUseCase.invoke()
         }
 
         override suspend fun getAutomationsForScript(scriptId: Int): List<Automation> =
