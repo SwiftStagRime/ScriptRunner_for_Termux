@@ -316,6 +316,9 @@
     <string name="day_sat">Суб</string>
     <string name="label_battery_threshold">Порог заряда батареи</string>
     <string name="battery_threshold_desc">Запускать, только если заряд батареи выше %1$d%%</string>
+    <string name="automation_type_boot">При запуске</string>
+    <string name="automation_boot_hint">Скрипт будет запускаться каждый раз при включении устройства.</string>
+    <string name="automation_boot_next_run">Запускается при каждом включении</string>
 
     <!-- Automation Widget -->
     <string name="automation_widget_title">Автоматизации</string>

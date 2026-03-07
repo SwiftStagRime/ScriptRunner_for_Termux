@@ -274,6 +274,7 @@ private fun FrequencyBadge(type: AutomationType) {
             AutomationType.ONE_TIME -> stringResource(R.string.automation_type_one_time)
             AutomationType.PERIODIC -> stringResource(R.string.automation_type_periodic)
             AutomationType.WEEKLY -> stringResource(R.string.automation_type_weekly)
+            AutomationType.BOOT -> stringResource(R.string.automation_type_boot)
         }
 
     Surface(

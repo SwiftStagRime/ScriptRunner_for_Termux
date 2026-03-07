@@ -19,7 +19,11 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccessTime
+import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.CalendarToday
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Power
+import androidx.compose.material.icons.filled.Repeat
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material3.AlertDialog
@@ -28,10 +32,15 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuAnchorType
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
@@ -152,19 +161,75 @@ private fun GeneralSection(state: AutomationConfigState) {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun FrequencySection(state: AutomationConfigState) {
+    var expanded by remember { mutableStateOf(false) }
+
     ConfigSection(title = stringResource(R.string.automation_section_frequency)) {
-        SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
-            AutomationType.entries.forEachIndexed { index, automationType ->
-                SegmentedButton(
-                    selected = state.type == automationType,
-                    onClick = { state.type = automationType },
-                    shape = SegmentedButtonDefaults.itemShape(index, AutomationType.entries.size),
-                ) {
-                    Text(
-                        text = getAutomationTypeLabel(automationType),
-                        style = MaterialTheme.typography.labelSmall,
+        ExposedDropdownMenuBox(
+            expanded = expanded,
+            onExpandedChange = { expanded = !expanded },
+        ) {
+            OutlinedTextField(
+                value = getAutomationTypeLabel(state.type),
+                onValueChange = {},
+                readOnly = true,
+                trailingIcon = {
+                    ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .menuAnchor(
+                        type = ExposedDropdownMenuAnchorType.PrimaryNotEditable,
+                        enabled = true,
+                    ),
+                colors = transparentTextFieldColors(),
+                shape = RoundedCornerShape(12.dp),
+            )
+
+            ExposedDropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false },
+            ) {
+                AutomationType.entries.forEach { automationType ->
+                    val isSelected = state.type == automationType
+
+                    DropdownMenuItem(
+                        text = {
+                            Text(
+                                text = getAutomationTypeLabel(automationType),
+                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
+                            )
+                        },
+                        onClick = {
+                            state.type = automationType
+                            expanded = false
+                        },
+                        leadingIcon = {
+                            val icon = when (automationType) {
+                                AutomationType.ONE_TIME -> Icons.Default.Schedule
+                                AutomationType.PERIODIC -> Icons.Default.Repeat
+                                AutomationType.WEEKLY -> Icons.Default.CalendarMonth
+                                AutomationType.BOOT -> Icons.Default.Power
+                            }
+                            Icon(
+                                imageVector = icon,
+                                contentDescription = null,
+                                tint = if (isSelected)
+                                    MaterialTheme.colorScheme.primary
+                                else MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        },
+                        trailingIcon = {
+                            if (isSelected) {
+                                Icon(
+                                    imageVector = Icons.Default.Check,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.primary
+                                )
+                            }
+                        }
                     )
                 }
             }
@@ -265,6 +330,17 @@ private fun UpcomingRunsSection(
     script: Script,
     state: AutomationConfigState,
 ) {
+    if (state.type == AutomationType.BOOT) {
+        ConfigSection(title = stringResource(R.string.automation_section_upcoming)) {
+            Text(
+                text = stringResource(R.string.automation_boot_next_run),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.primary,
+            )
+        }
+        return
+    }
+
     val upcomingRuns =
         remember(state.type, state.selectedDate, state.selectedHour, state.selectedMinute, state.intervalValue, state.selectedDays) {
             val temp =
@@ -424,6 +500,7 @@ private fun getAutomationTypeLabel(type: AutomationType) =
         AutomationType.ONE_TIME -> stringResource(R.string.automation_type_one_time)
         AutomationType.PERIODIC -> stringResource(R.string.automation_type_periodic)
         AutomationType.WEEKLY -> stringResource(R.string.automation_type_weekly)
+        AutomationType.BOOT -> stringResource(R.string.automation_type_boot)
     }
 
 @Composable

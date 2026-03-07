@@ -320,6 +320,9 @@
     <string name="day_sat">Sa</string>
     <string name="label_battery_threshold">Akku-Schwellenwert</string>
     <string name="battery_threshold_desc">Nur ausführen, wenn der Akku über %1$d%% liegt</string>
+    <string name="automation_type_boot">Beim Start</string>
+    <string name="automation_boot_hint">Das Skript wird jedes Mal ausgeführt, wenn das Gerät startet.</string>
+    <string name="automation_boot_next_run">Wird bei jedem Start ausgeführt</string>
 
     <!-- Automation Widget -->
     <string name="automation_widget_title">Automatisierungen</string>

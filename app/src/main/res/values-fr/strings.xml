@@ -318,6 +318,9 @@
     <string name="day_sat">Sam</string>
     <string name="label_battery_threshold">Seuil de batterie</string>
     <string name="battery_threshold_desc">Lancer uniquement si la batterie est supérieure à %1$d%%</string>
+    <string name="automation_type_boot">Au Démarrage</string>
+    <string name="automation_boot_hint">Le script s\'exécutera à chaque démarrage de l\'appareil.</string>
+    <string name="automation_boot_next_run">S\'exécute à chaque démarrage</string>
 
     <!-- Automation Widget -->
     <string name="automation_widget_title">Automatisations</string>

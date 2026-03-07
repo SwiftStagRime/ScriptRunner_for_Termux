@@ -318,6 +318,9 @@
     <string name="day_sat">Sáb</string>
     <string name="label_battery_threshold">Limite de bateria</string>
     <string name="battery_threshold_desc">Executar apenas se a bateria estiver acima de %1$d%%</string>
+    <string name="automation_type_boot">Na Inicialização</string>
+    <string name="automation_boot_hint">O script será executado sempre que o dispositivo for iniciado.</string>
+    <string name="automation_boot_next_run">Executa em cada inicialização</string>
 
     <!-- Automation Widget -->
     <string name="automation_widget_title">Automações</string>

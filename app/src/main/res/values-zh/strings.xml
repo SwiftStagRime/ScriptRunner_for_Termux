@@ -316,7 +316,10 @@
     <string name="day_fri">周五</string>
     <string name="day_sat">周六</string>
     <string name="label_battery_threshold">电池电量阈值</string>
-    <string name="battery_threshold_desc">仅在电池电量高于 %1$d%% 时运行</string>\
+    <string name="battery_threshold_desc">仅在电池电量高于 %1$d%% 时运行</string>
+    <string name="automation_type_boot">启动时</string>
+    <string name="automation_boot_hint">设备每次启动时都将运行脚本。</string>
+    <string name="automation_boot_next_run">每次启动时运行</string>
 
     <!-- Automation Widget -->
     <string name="automation_widget_title">自动化</string>

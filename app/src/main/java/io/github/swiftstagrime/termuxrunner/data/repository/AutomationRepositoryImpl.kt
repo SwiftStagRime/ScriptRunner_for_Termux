@@ -5,6 +5,7 @@ import io.github.swiftstagrime.termuxrunner.data.local.dao.AutomationDao
 import io.github.swiftstagrime.termuxrunner.data.local.entity.toAutomationDomain
 import io.github.swiftstagrime.termuxrunner.data.local.entity.toEntity
 import io.github.swiftstagrime.termuxrunner.domain.model.Automation
+import io.github.swiftstagrime.termuxrunner.domain.model.AutomationType
 import io.github.swiftstagrime.termuxrunner.domain.repository.AutomationRepository
 import io.github.swiftstagrime.termuxrunner.domain.usecase.TriggerGlanceAutomationUpdateUseCase
 import io.github.swiftstagrime.termuxrunner.domain.util.AutomationTimeCalculator
@@ -28,12 +29,15 @@ class AutomationRepositoryImpl
 
         override suspend fun saveAutomation(automation: Automation) {
             var entity = automation.toEntity()
-            val now = System.currentTimeMillis()
-            val triggerTime = entity.nextRunTimestamp ?: entity.scheduledTimestamp
-            if (triggerTime < now && !entity.runIfMissed) {
-                val nextRun = AutomationTimeCalculator.calculateNextRun(entity, now)
-                entity = entity.copy(nextRunTimestamp = nextRun)
+            if (entity.type != AutomationType.BOOT) {
+                val now = System.currentTimeMillis()
+                val triggerTime = entity.nextRunTimestamp ?: entity.scheduledTimestamp
+                if (triggerTime < now && !entity.runIfMissed) {
+                    val nextRun = AutomationTimeCalculator.calculateNextRun(entity, now)
+                    entity = entity.copy(nextRunTimestamp = nextRun)
+                }
             }
+
 
             val id = dao.insertAutomation(entity)
             val savedEntity = dao.getAutomationById(id.toInt())
