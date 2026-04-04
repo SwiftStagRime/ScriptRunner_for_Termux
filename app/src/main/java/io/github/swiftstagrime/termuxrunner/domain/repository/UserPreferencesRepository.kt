@@ -8,6 +8,7 @@ interface UserPreferencesRepository {
     val hasCompletedOnboarding: Flow<Boolean>
     val selectedAccent: Flow<AppTheme>
     val selectedMode: Flow<ThemeMode>
+    val selectedCustomThemeId: Flow<Int?>
 
     suspend fun setMode(mode: ThemeMode)
 
@@ -21,4 +22,6 @@ interface UserPreferencesRepository {
         tileIndex: Int,
         scriptId: Int?,
     )
+
+    suspend fun setCustomThemeId(id: Int)
 }

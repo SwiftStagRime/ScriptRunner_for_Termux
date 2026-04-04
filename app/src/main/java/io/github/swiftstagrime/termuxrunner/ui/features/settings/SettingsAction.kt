@@ -11,4 +11,5 @@ data class SettingsActions(
     val onTriggerScriptImport: () -> Unit,
     val onDeveloperClick: () -> Unit,
     val onBack: () -> Unit,
+    val onNavigateToCustomTheme: () -> Unit,
 )

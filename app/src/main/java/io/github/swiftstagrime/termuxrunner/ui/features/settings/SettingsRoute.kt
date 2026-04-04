@@ -19,6 +19,7 @@ private const val GITHUB_URL = "https://github.com/SwiftStagRime/ScriptRunner_fo
 fun SettingsRoute(
     onBack: () -> Unit,
     onNavigateToEditor: (Int) -> Unit,
+    onNavigateToCustomTheme: () -> Unit,
     viewModel: SettingsViewModel = hiltViewModel(),
 ) {
     val context = LocalContext.current
@@ -67,6 +68,7 @@ fun SettingsRoute(
             onTriggerScriptImport = { importFileLauncher.launch(arrayOf("*/*")) },
             onDeveloperClick = { uriHandler.openUri(GITHUB_URL) },
             onBack = onBack,
+            onNavigateToCustomTheme = onNavigateToCustomTheme
         )
 
     SettingsScreen(

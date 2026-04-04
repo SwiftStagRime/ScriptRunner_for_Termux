@@ -80,12 +80,13 @@ class WidgetConfigurationActivity : ComponentActivity() {
         setContent {
             val accent by viewModel.selectedAccent.collectAsStateWithLifecycle()
             val mode by viewModel.selectedMode.collectAsStateWithLifecycle()
+            val customTheme by viewModel.customTheme.collectAsStateWithLifecycle()
             val allScripts by viewModel.allScripts.collectAsStateWithLifecycle()
             val categories by viewModel.allCategories.collectAsStateWithLifecycle()
 
             var showPicker by remember { mutableStateOf(false) }
 
-            ScriptRunnerForTermuxTheme(accent = accent, mode = mode) {
+            ScriptRunnerForTermuxTheme(accent = accent, mode = mode, customTheme = customTheme) {
                 Scaffold(
                     topBar = {
                         Text("Widget Configuration", modifier = Modifier.padding(16.dp), style = MaterialTheme.typography.headlineSmall)

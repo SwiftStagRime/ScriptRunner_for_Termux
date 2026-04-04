@@ -5,12 +5,14 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.swiftstagrime.termuxrunner.R
+import io.github.swiftstagrime.termuxrunner.di.IoDispatcher
 import io.github.swiftstagrime.termuxrunner.domain.repository.ScriptRepository
 import io.github.swiftstagrime.termuxrunner.domain.repository.UserPreferencesRepository
 import io.github.swiftstagrime.termuxrunner.ui.extensions.UiText
 import io.github.swiftstagrime.termuxrunner.ui.theme.AppTheme
 import io.github.swiftstagrime.termuxrunner.ui.theme.ThemeMode
 import io.github.swiftstagrime.termuxrunner.ui.utils.WidgetManager
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -21,100 +23,98 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class SettingsViewModel
-    @Inject
-    constructor(
-        private val userPreferencesRepository: UserPreferencesRepository,
-        private val scriptRepository: ScriptRepository,
-        private val widgetManager: WidgetManager,
-    ) : ViewModel() {
-        val selectedAccent =
-            userPreferencesRepository.selectedAccent
-                .stateIn(
-                    scope = viewModelScope,
-                    started = SharingStarted.WhileSubscribed(5000),
-                    initialValue = AppTheme.GREEN,
-                )
+class SettingsViewModel @Inject constructor(
+    private val userPreferencesRepository: UserPreferencesRepository,
+    private val scriptRepository: ScriptRepository,
+    private val widgetManager: WidgetManager,
+    @IoDispatcher private val ioDispatcher: CoroutineDispatcher
+) : ViewModel() {
 
-        val selectedMode =
-            userPreferencesRepository.selectedMode
-                .stateIn(
-                    scope = viewModelScope,
-                    started = SharingStarted.WhileSubscribed(5000),
-                    initialValue = ThemeMode.SYSTEM,
-                )
+    val selectedAccent = userPreferencesRepository.selectedAccent
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = AppTheme.GREEN,
+        )
 
-        private val _ioState = MutableStateFlow<UiText?>(null)
-        val ioState = _ioState.asStateFlow()
+    val selectedMode = userPreferencesRepository.selectedMode
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = ThemeMode.SYSTEM,
+        )
 
-        private val _navEvents = Channel<SettingsNavEvent>()
-        val navEvents = _navEvents.receiveAsFlow()
+    private val _ioState = MutableStateFlow<UiText?>(null)
+    val ioState = _ioState.asStateFlow()
 
-        fun setAccent(accent: AppTheme) {
-            viewModelScope.launch {
-                userPreferencesRepository.setAccent(accent)
-                widgetManager.updateAllWidgets()
-            }
-        }
+    private val _navEvents = Channel<SettingsNavEvent>()
+    val navEvents = _navEvents.receiveAsFlow()
 
-        fun setMode(mode: ThemeMode) {
-            viewModelScope.launch {
-                userPreferencesRepository.setMode(mode)
-                widgetManager.updateAllWidgets()
-            }
-        }
-
-        fun exportData(uri: Uri) {
-            viewModelScope.launch {
-                _ioState.value = UiText.StringResource(R.string.exporting)
-                scriptRepository
-                    .exportScripts(uri)
-                    .onSuccess {
-                        _ioState.value = UiText.StringResource(R.string.export_success)
-                    }.onFailure {
-                        _ioState.value =
-                            UiText.StringResource(
-                                R.string.export_failed,
-                                it.localizedMessage ?: "Unknown Error",
-                            )
-                    }
-            }
-        }
-
-        fun importData(uri: Uri) {
-            viewModelScope.launch {
-                _ioState.value = UiText.StringResource(R.string.importing)
-                scriptRepository
-                    .importScripts(uri)
-                    .onSuccess {
-                        _ioState.value = UiText.StringResource(R.string.import_success)
-                    }.onFailure {
-                        _ioState.value =
-                            UiText.StringResource(
-                                R.string.import_failed,
-                                it.localizedMessage ?: "Unknown Error",
-                            )
-                    }
-            }
-        }
-
-        fun importSingleScript(uri: Uri) {
-            viewModelScope.launch {
-                scriptRepository
-                    .importSingleScript(uri)
-                    .onSuccess { parsedScript ->
-                        val newId = scriptRepository.insertScript(parsedScript)
-                        _navEvents.send(SettingsNavEvent.NavigateToEditor(newId))
-                    }.onFailure {
-                        _ioState.value = UiText.StringResource(R.string.import_failed, it.message ?: "")
-                    }
-            }
-        }
-
-        fun clearMessage() {
-            _ioState.value = null
+    fun setAccent(accent: AppTheme) {
+        viewModelScope.launch(ioDispatcher) {
+            userPreferencesRepository.setAccent(accent)
+            widgetManager.updateAllWidgets()
         }
     }
+
+    fun setMode(mode: ThemeMode) {
+        viewModelScope.launch(ioDispatcher) {
+            userPreferencesRepository.setMode(mode)
+            widgetManager.updateAllWidgets()
+        }
+    }
+
+    fun exportData(uri: Uri) {
+        viewModelScope.launch(ioDispatcher) {
+            _ioState.value = UiText.StringResource(R.string.exporting)
+
+            scriptRepository.exportScripts(uri)
+                .onSuccess {
+                    _ioState.value = UiText.StringResource(R.string.export_success)
+                }.onFailure {
+                    _ioState.value = UiText.StringResource(
+                        R.string.export_failed,
+                        it.localizedMessage ?: "Unknown Error",
+                    )
+                }
+        }
+    }
+
+    fun importData(uri: Uri) {
+        viewModelScope.launch(ioDispatcher) {
+            _ioState.value = UiText.StringResource(R.string.importing)
+
+            scriptRepository.importScripts(uri)
+                .onSuccess {
+                    _ioState.value = UiText.StringResource(R.string.import_success)
+                    widgetManager.updateAllWidgets()
+                }.onFailure {
+                    _ioState.value = UiText.StringResource(
+                        R.string.import_failed,
+                        it.localizedMessage ?: "Unknown Error",
+                    )
+                }
+        }
+    }
+
+    fun importSingleScript(uri: Uri) {
+        viewModelScope.launch(ioDispatcher) {
+            scriptRepository.importSingleScript(uri)
+                .onSuccess { parsedScript ->
+                    val newId = scriptRepository.insertScript(parsedScript)
+                    widgetManager.updateScriptsWidget()
+
+                    _navEvents.send(SettingsNavEvent.NavigateToEditor(newId))
+                }.onFailure {
+                    _ioState.value = UiText.StringResource(R.string.import_failed, it.message ?: "")
+                }
+        }
+    }
+
+    fun clearMessage() {
+        _ioState.value = null
+    }
+}
 
 sealed class SettingsNavEvent {
     data class NavigateToEditor(

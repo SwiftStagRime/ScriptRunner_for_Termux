@@ -12,10 +12,12 @@ import io.github.swiftstagrime.termuxrunner.data.local.ImageStorageManager
 import io.github.swiftstagrime.termuxrunner.data.local.dao.AutomationDao
 import io.github.swiftstagrime.termuxrunner.data.local.dao.AutomationLogDao
 import io.github.swiftstagrime.termuxrunner.data.local.dao.CategoryDao
+import io.github.swiftstagrime.termuxrunner.data.local.dao.CustomThemeDao
 import io.github.swiftstagrime.termuxrunner.data.local.dao.ScriptDao
 import io.github.swiftstagrime.termuxrunner.data.repository.AutomationLogRepositoryImpl
 import io.github.swiftstagrime.termuxrunner.data.repository.AutomationRepositoryImpl
 import io.github.swiftstagrime.termuxrunner.data.repository.CategoryRepositoryImpl
+import io.github.swiftstagrime.termuxrunner.data.repository.CustomThemeRepositoryImpl
 import io.github.swiftstagrime.termuxrunner.data.repository.IconRepositoryImpl
 import io.github.swiftstagrime.termuxrunner.data.repository.MonitoringRepositoryImpl
 import io.github.swiftstagrime.termuxrunner.data.repository.ScriptFileRepositoryImpl
@@ -26,6 +28,7 @@ import io.github.swiftstagrime.termuxrunner.data.repository.UserPreferencesRepos
 import io.github.swiftstagrime.termuxrunner.domain.repository.AutomationLogRepository
 import io.github.swiftstagrime.termuxrunner.domain.repository.AutomationRepository
 import io.github.swiftstagrime.termuxrunner.domain.repository.CategoryRepository
+import io.github.swiftstagrime.termuxrunner.domain.repository.CustomThemeRepository
 import io.github.swiftstagrime.termuxrunner.domain.repository.IconRepository
 import io.github.swiftstagrime.termuxrunner.domain.repository.MonitoringRepository
 import io.github.swiftstagrime.termuxrunner.domain.repository.ScriptFileRepository
@@ -112,6 +115,11 @@ object AppModule {
     @Singleton
     fun provideAutomationLogRepository(automationLogDao: AutomationLogDao): AutomationLogRepository =
         AutomationLogRepositoryImpl(automationLogDao)
+
+    @Provides
+    @Singleton
+    fun provideCustomThemeRepository(customThemeDao: CustomThemeDao): CustomThemeRepository =
+        CustomThemeRepositoryImpl(customThemeDao)
 
     @Provides
     @Singleton

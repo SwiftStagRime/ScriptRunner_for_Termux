@@ -349,4 +349,26 @@
     <string name="script_widget_title">Scripts</string>
     <string name="script_edit_description">Edit</string>
     <string name="script_no_scripts">No scripts assigned</string>
+
+    <!-- Custom theme -->
+    <string name="custom_themes_title">Custom Themes</string>
+    <string name="new_theme_label">New</string>
+    <string name="theme_name_label">Theme Name</string>
+    <string name="dark_mode_label">Dark Mode Palette</string>
+    <string name="colors_section_label">Palette Colors</string>
+    <string name="select_or_create_theme_hint">Select a theme to edit or tap + to create one</string>
+    <string name="color_primary">Primary</string>
+    <string name="color_on_primary">On Primary</string>
+    <string name="color_primary_container">Primary Container</string>
+    <string name="color_on_primary_container">On Primary Container</string>
+    <string name="color_secondary">Secondary</string>
+    <string name="color_on_secondary">On Secondary</string>
+    <string name="color_tertiary">Tertiary</string>
+    <string name="color_on_tertiary">On Tertiary</string>
+    <string name="color_background">Background</string>
+    <string name="color_on_background">On Background</string>
+    <string name="color_surface">Surface</string>
+    <string name="color_on_surface">On Surface</string>
+    <string name="color_error">Error</string>
+    <string name="theme_edit_label">Manage</string>
 </resources>

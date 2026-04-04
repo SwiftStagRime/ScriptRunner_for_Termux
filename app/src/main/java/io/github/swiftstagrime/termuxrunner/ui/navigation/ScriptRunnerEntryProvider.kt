@@ -8,6 +8,7 @@ import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.NavKey
 import io.github.swiftstagrime.termuxrunner.ui.MainViewModel
 import io.github.swiftstagrime.termuxrunner.ui.features.automation.AutomationRoute
+import io.github.swiftstagrime.termuxrunner.ui.features.customtheme.CustomThemeRoute
 import io.github.swiftstagrime.termuxrunner.ui.features.editor.EditorRoute
 import io.github.swiftstagrime.termuxrunner.ui.features.editor.EditorViewModel
 import io.github.swiftstagrime.termuxrunner.ui.features.home.HomeRoute
@@ -63,6 +64,9 @@ fun rememberEntryProvider(mainViewModel: MainViewModel): (NavKey) -> NavEntry<Na
                             onNavigateToEditor = { scriptId ->
                                 mainViewModel.navigateTo(Route.Editor(scriptId))
                             },
+                            onNavigateToCustomTheme = {
+                                mainViewModel.navigateTo(Route.CustomTheme)
+                            }
                         )
                     }
 
@@ -75,6 +79,12 @@ fun rememberEntryProvider(mainViewModel: MainViewModel): (NavKey) -> NavEntry<Na
                     is Route.Automation -> {
                         AutomationRoute(
                             onBackClick = { mainViewModel.goBack() },
+                        )
+                    }
+
+                    is Route.CustomTheme -> {
+                        CustomThemeRoute(
+                            onBack = {mainViewModel.goBack()}
                         )
                     }
 

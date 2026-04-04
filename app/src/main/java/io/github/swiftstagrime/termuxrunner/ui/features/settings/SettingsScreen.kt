@@ -27,6 +27,7 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Code
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Download
+import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Upload
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -132,6 +133,7 @@ private fun AppearanceSection(
     Spacer(modifier = Modifier.height(PADDING_MEDIUM))
 
     Text(stringResource(R.string.accent_color_label), style = MaterialTheme.typography.labelLarge)
+
     LazyRow(horizontalArrangement = Arrangement.spacedBy(PADDING_LARGE)) {
         items(AppTheme.entries) { accent ->
             ThemeSelectorItem(
@@ -140,12 +142,59 @@ private fun AppearanceSection(
                 onClick = { actions.onAccentChange(accent) },
             )
         }
+
+        item {
+            CustomThemeManagementItem(
+                onClick = actions.onNavigateToCustomTheme
+            )
+        }
     }
 
     Spacer(modifier = Modifier.height(PADDING_EXTRA_LARGE))
 
     Text(stringResource(R.string.display_mode_label), style = MaterialTheme.typography.labelLarge)
     DisplayModeSelector(selectedMode, actions.onModeChange)
+}
+
+@Composable
+private fun CustomThemeManagementItem(
+    onClick: () -> Unit,
+) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.width(64.dp),
+    ) {
+        Box(
+            modifier =
+                Modifier
+                    .size(CIRCLE_SIZE)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = SURFACE_ALPHA))
+                    .clickable { onClick() }
+                    .border(
+                        width = 1.dp,
+                        color = MaterialTheme.colorScheme.outlineVariant,
+                        shape = CircleShape,
+                    ),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(
+                imageVector = Icons.Default.Palette,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(CIRCLE_ICON_SIZE)
+            )
+        }
+
+        Spacer(modifier = Modifier.height(6.dp))
+
+        Text(
+            text = stringResource(R.string.theme_edit_label),
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurface,
+            maxLines = 1,
+        )
+    }
 }
 
 @Composable
@@ -385,6 +434,7 @@ private fun PreviewSettingsScreen() {
                     onTriggerScriptImport = {},
                     onDeveloperClick = {},
                     onBack = {},
+                    onNavigateToCustomTheme = {}
                 ),
         )
     }

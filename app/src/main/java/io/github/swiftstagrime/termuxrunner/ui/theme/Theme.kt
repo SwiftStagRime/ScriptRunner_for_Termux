@@ -14,9 +14,11 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.remember
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
+import io.github.swiftstagrime.termuxrunner.domain.model.CustomTheme
 
 // Green
 private val DarkGreenColorScheme =
@@ -312,6 +314,7 @@ private val LightColorfulAmoledColorScheme =
 @Composable
 fun ScriptRunnerForTermuxTheme(
     accent: AppTheme = AppTheme.GREEN,
+    customTheme: CustomTheme? = null,
     mode: ThemeMode = ThemeMode.DARK,
     content: @Composable () -> Unit,
 ) {
@@ -323,10 +326,9 @@ fun ScriptRunnerForTermuxTheme(
             ThemeMode.SYSTEM -> isSystemInDarkTheme()
         }
 
-    val colorScheme =
-        remember(accent, isDark) {
-            pickColorScheme(accent, isDark, context)
-        }
+    val colorScheme = remember(accent, isDark, customTheme) {
+        pickColorScheme(accent, isDark, context, customTheme)
+    }
 
     val view = LocalView.current
     if (!view.isInEditMode) {
@@ -349,6 +351,7 @@ fun pickColorScheme(
     accent: AppTheme,
     isDark: Boolean,
     context: Context,
+    customTheme: CustomTheme? = null,
 ): ColorScheme =
     when (accent) {
         AppTheme.DYNAMIC -> {
@@ -363,7 +366,70 @@ fun pickColorScheme(
         AppTheme.RED -> if (isDark) DarkRedColorScheme else LightRedColorScheme
         AppTheme.AMOLED -> if (isDark) DarkAmoledColorScheme else LightAmoledColorScheme
         AppTheme.CYBER -> if (isDark) DarkColorfulAmoledColorScheme else LightColorfulAmoledColorScheme
+        AppTheme.CUSTOM -> {
+            customTheme?.toColorScheme(isDark) ?: if (isDark) DarkGreenColorScheme else LightGreenColorScheme
+        }
     }
+
+fun CustomTheme.toColorScheme(isDark: Boolean): ColorScheme {
+    return if (isDark) {
+        darkColorScheme(
+            primary = Color(this.primary.toInt()),
+            onPrimary = Color(this.onPrimary.toInt()),
+            primaryContainer = Color(this.primaryContainer.toInt()),
+            onPrimaryContainer = Color(this.onPrimaryContainer.toInt()),
+            secondary = Color(this.secondary.toInt()),
+            onSecondary = Color(this.onSecondary.toInt()),
+            secondaryContainer = Color(this.secondaryContainer.toInt()),
+            onSecondaryContainer = Color(this.onSecondaryContainer.toInt()),
+            tertiary = Color(this.tertiary.toInt()),
+            onTertiary = Color(this.onTertiary.toInt()),
+            tertiaryContainer = Color(this.tertiaryContainer.toInt()),
+            onTertiaryContainer = Color(this.onTertiaryContainer.toInt()),
+            error = Color(this.error.toInt()),
+            onError = Color(this.onError.toInt()),
+            errorContainer = Color(this.errorContainer.toInt()),
+            onErrorContainer = Color(this.onErrorContainer.toInt()),
+            background = Color(this.background.toInt()),
+            onBackground = Color(this.onBackground.toInt()),
+            surface = Color(this.surface.toInt()),
+            onSurface = Color(this.onSurface.toInt()),
+            surfaceVariant = Color(this.surfaceVariant.toInt()),
+            onSurfaceVariant = Color(this.onSurfaceVariant.toInt()),
+            outline = Color(this.outline.toInt()),
+            outlineVariant = Color(this.outlineVariant.toInt()),
+            surfaceContainer = Color(this.surfaceContainer.toInt()),
+        )
+    } else {
+        lightColorScheme(
+            primary = Color(this.primary.toInt()),
+            onPrimary = Color(this.onPrimary.toInt()),
+            primaryContainer = Color(this.primaryContainer.toInt()),
+            onPrimaryContainer = Color(this.onPrimaryContainer.toInt()),
+            secondary = Color(this.secondary.toInt()),
+            onSecondary = Color(this.onSecondary.toInt()),
+            secondaryContainer = Color(this.secondaryContainer.toInt()),
+            onSecondaryContainer = Color(this.onSecondaryContainer.toInt()),
+            tertiary = Color(this.tertiary.toInt()),
+            onTertiary = Color(this.onTertiary.toInt()),
+            tertiaryContainer = Color(this.tertiaryContainer.toInt()),
+            onTertiaryContainer = Color(this.onTertiaryContainer.toInt()),
+            error = Color(this.error.toInt()),
+            onError = Color(this.onError.toInt()),
+            errorContainer = Color(this.errorContainer.toInt()),
+            onErrorContainer = Color(this.onErrorContainer.toInt()),
+            background = Color(this.background.toInt()),
+            onBackground = Color(this.onBackground.toInt()),
+            surface = Color(this.surface.toInt()),
+            onSurface = Color(this.onSurface.toInt()),
+            surfaceVariant = Color(this.surfaceVariant.toInt()),
+            onSurfaceVariant = Color(this.onSurfaceVariant.toInt()),
+            outline = Color(this.outline.toInt()),
+            outlineVariant = Color(this.outlineVariant.toInt()),
+            surfaceContainer = Color(this.surfaceContainer.toInt()),
+        )
+    }
+}
 
 tailrec fun Context.findActivity(): Activity? =
     when (this) {

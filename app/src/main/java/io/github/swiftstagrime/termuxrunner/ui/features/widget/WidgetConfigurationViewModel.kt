@@ -4,11 +4,15 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.swiftstagrime.termuxrunner.domain.repository.CategoryRepository
+import io.github.swiftstagrime.termuxrunner.domain.repository.CustomThemeRepository
 import io.github.swiftstagrime.termuxrunner.domain.repository.ScriptRepository
 import io.github.swiftstagrime.termuxrunner.domain.repository.UserPreferencesRepository
 import io.github.swiftstagrime.termuxrunner.ui.theme.AppTheme
 import io.github.swiftstagrime.termuxrunner.ui.theme.ThemeMode
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
 
@@ -19,6 +23,7 @@ class WidgetConfigurationViewModel
         private val scriptRepository: ScriptRepository,
         private val userPreferencesRepository: UserPreferencesRepository,
         private val categoryRepository: CategoryRepository,
+        private val customThemeRepository: CustomThemeRepository,
     ) : ViewModel() {
         val selectedAccent =
             userPreferencesRepository.selectedAccent
@@ -37,4 +42,15 @@ class WidgetConfigurationViewModel
             categoryRepository
                 .getAllCategories()
                 .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val customTheme = userPreferencesRepository.selectedCustomThemeId
+        .flatMapLatest { id ->
+            if (id != null) {
+                customThemeRepository.getThemeByIdFlow(id)
+            } else {
+                flowOf(null)
+            }
+        }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
     }

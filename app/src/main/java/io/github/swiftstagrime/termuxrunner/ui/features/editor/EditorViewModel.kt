@@ -10,6 +10,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.swiftstagrime.termuxrunner.R
+import io.github.swiftstagrime.termuxrunner.di.IoDispatcher
 import io.github.swiftstagrime.termuxrunner.domain.model.Category
 import io.github.swiftstagrime.termuxrunner.domain.model.Script
 import io.github.swiftstagrime.termuxrunner.domain.repository.CategoryRepository
@@ -19,6 +20,7 @@ import io.github.swiftstagrime.termuxrunner.domain.usecase.UpdateScriptUseCase
 import io.github.swiftstagrime.termuxrunner.ui.extensions.UiText
 import io.github.swiftstagrime.termuxrunner.ui.features.scriptconfigdialog.ScriptConfigState
 import io.github.swiftstagrime.termuxrunner.ui.utils.WidgetManager
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -26,6 +28,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 sealed interface EditorUiEvent {
@@ -37,112 +40,111 @@ sealed interface EditorUiEvent {
 }
 
 @HiltViewModel
-class EditorViewModel
-    @Inject
-    constructor(
-        private val scriptRepository: ScriptRepository,
-        private val categoryRepository: CategoryRepository,
-        private val updateScriptUseCase: UpdateScriptUseCase,
-        private val iconRepository: IconRepository,
-        private val widgetManager: WidgetManager,
-    ) : ViewModel() {
-        val categories =
-            categoryRepository
-                .getAllCategories()
-                .stateIn(
-                    scope = viewModelScope,
-                    started = SharingStarted.WhileSubscribed(5000),
-                    initialValue = emptyList(),
-                )
+class EditorViewModel @Inject constructor(
+    private val scriptRepository: ScriptRepository,
+    private val categoryRepository: CategoryRepository,
+    private val updateScriptUseCase: UpdateScriptUseCase,
+    private val iconRepository: IconRepository,
+    private val widgetManager: WidgetManager,
+    @IoDispatcher private val ioDispatcher: CoroutineDispatcher
+) : ViewModel() {
 
-        private val _currentScript = MutableStateFlow<Script?>(null)
-        val currentScript = _currentScript.asStateFlow()
+    val categories = categoryRepository
+        .getAllCategories()
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList(),
+        )
 
-        private val _uiEvent = Channel<EditorUiEvent>()
-        val uiEvent = _uiEvent.receiveAsFlow()
+    private val _currentScript = MutableStateFlow<Script?>(null)
+    val currentScript = _currentScript.asStateFlow()
 
-        var editingCode by mutableStateOf(TextFieldValue(""))
-            private set
+    private val _uiEvent = Channel<EditorUiEvent>()
+    val uiEvent = _uiEvent.receiveAsFlow()
 
-        var configState by mutableStateOf<ScriptConfigState?>(null)
-            private set
+    var editingCode by mutableStateOf(TextFieldValue(""))
+        private set
 
-        fun loadScript(id: Int) {
-            if (id == 0) {
-                _currentScript.value =
-                    Script(
-                        id = 0,
-                        name = "",
-                        code = "#!/bin/bash\n\n",
-                        interpreter = "bash",
-                    )
-                return
-            }
+    var configState by mutableStateOf<ScriptConfigState?>(null)
+        private set
 
-            viewModelScope.launch {
-                try {
-                    val script = scriptRepository.getScriptById(id)
-                    if (script != null) {
-                        _currentScript.value = script
-                        editingCode =
-                            TextFieldValue(
-                                text = script.code,
-                                selection = TextRange(script.code.length),
-                            )
-                    } else {
-                        _uiEvent.send(
-                            EditorUiEvent.ShowSnackbar(
-                                UiText.StringResource(R.string.error_script_not_found),
-                            ),
-                        )
-                    }
-                } catch (_: Exception) {
-                    _uiEvent.send(
-                        EditorUiEvent.ShowSnackbar(
-                            UiText.StringResource(R.string.error_loading_failed),
-                        ),
-                    )
-                }
-            }
+    fun loadScript(id: Int) {
+        if (id == 0) {
+            _currentScript.value = Script(
+                id = 0,
+                name = "",
+                code = "#!/bin/bash\n\n",
+                interpreter = "bash",
+            )
+            return
         }
 
-        fun saveScript(script: Script) {
-            viewModelScope.launch {
-                try {
-                    updateScriptUseCase(script)
-                    try {
-                        widgetManager.updateScriptsWidget()
-                    } catch (_: Exception) {
-                    }
-                    _uiEvent.send(EditorUiEvent.SaveSuccess)
-                } catch (_: Exception) {
-                    _uiEvent.send(
-                        EditorUiEvent.ShowSnackbar(
-                            UiText.StringResource(R.string.error_save_failed),
-                        ),
-                    )
-                }
-            }
-        }
-
-        fun openConfig(script: Script) {
-            configState = ScriptConfigState(script)
-        }
-
-        fun dismissConfig() {
-            configState = null
-        }
-
-        fun addCategory(name: String) {
-            viewModelScope.launch {
-                categoryRepository.upsertCategory(Category(name = name))
-            }
-        }
-
-        suspend fun processSelectedImage(uri: Uri): String? =
+        viewModelScope.launch(ioDispatcher) {
             try {
-                iconRepository.saveIcon(uri.toString())
+                val script = scriptRepository.getScriptById(id)
+                if (script != null) {
+                    _currentScript.value = script
+                    editingCode = TextFieldValue(
+                        text = script.code,
+                        selection = TextRange(script.code.length),
+                    )
+                } else {
+                    _uiEvent.send(
+                        EditorUiEvent.ShowSnackbar(
+                            UiText.StringResource(R.string.error_script_not_found),
+                        ),
+                    )
+                }
             } catch (_: Exception) {
-                null
+                _uiEvent.send(
+                    EditorUiEvent.ShowSnackbar(
+                        UiText.StringResource(R.string.error_loading_failed),
+                    ),
+                )
             }
+        }
     }
+
+    fun saveScript(script: Script) {
+        viewModelScope.launch(ioDispatcher) {
+            try {
+                updateScriptUseCase(script)
+
+                try {
+                    widgetManager.updateScriptsWidget()
+                } catch (_: Exception) { }
+
+                _uiEvent.send(EditorUiEvent.SaveSuccess)
+            } catch (_: Exception) {
+                _uiEvent.send(
+                    EditorUiEvent.ShowSnackbar(
+                        UiText.StringResource(R.string.error_save_failed),
+                    ),
+                )
+            }
+        }
+    }
+
+    fun openConfig(script: Script) {
+        configState = ScriptConfigState(script)
+    }
+
+    fun dismissConfig() {
+        configState = null
+    }
+
+    fun addCategory(name: String) {
+        viewModelScope.launch(ioDispatcher) {
+            categoryRepository.upsertCategory(Category(name = name))
+        }
+    }
+
+    suspend fun processSelectedImage(uri: Uri): String? = withContext(ioDispatcher) {
+        try {
+            iconRepository.saveIcon(uri.toString())
+        } catch (_: Exception) {
+            null
+        }
+    }
+}
