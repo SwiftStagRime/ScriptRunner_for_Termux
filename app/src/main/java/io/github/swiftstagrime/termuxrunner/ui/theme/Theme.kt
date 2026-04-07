@@ -319,12 +319,20 @@ fun ScriptRunnerForTermuxTheme(
     content: @Composable () -> Unit,
 ) {
     val context = LocalContext.current
-    val isDark =
-        when (mode) {
-            ThemeMode.LIGHT -> false
-            ThemeMode.DARK -> true
-            ThemeMode.SYSTEM -> isSystemInDarkTheme()
+    val isDark = remember(accent, mode, customTheme) {
+        if (accent == AppTheme.CUSTOM && customTheme != null) {
+            customTheme.isDark
+        } else {
+            when (mode) {
+                ThemeMode.LIGHT -> false
+                ThemeMode.DARK -> true
+                ThemeMode.SYSTEM -> {
+                    null
+                }
+            }
         }
+    } ?: isSystemInDarkTheme()
+
 
     val colorScheme = remember(accent, isDark, customTheme) {
         pickColorScheme(accent, isDark, context, customTheme)

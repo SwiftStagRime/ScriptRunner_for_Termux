@@ -343,4 +343,45 @@
     <string name="script_widget_title">Skripte</string>
     <string name="script_edit_description">Bearbeiten</string>
     <string name="script_no_scripts">Keine Skripte zugewiesen</string>
+
+    <!-- Custom theme -->
+    <string name="custom_themes_title">Benutzerdefinierte Themen</string>
+    <string name="new_theme_label">Neu</string>
+    <string name="theme_name_label">Themenname</string>
+    <string name="dark_mode_label">Dunkelmodus-Palette</string>
+    <string name="colors_section_label">Palettenfarben</string>
+    <string name="select_or_create_theme_hint">Wähle ein Thema zum Bearbeiten oder tippe auf +, um eines zu erstellen</string>
+    <string name="color_primary">Primär</string>
+    <string name="color_on_primary">On Primary</string>
+    <string name="color_primary_container">Primär-Container</string>
+    <string name="color_on_primary_container">On Primär-Container</string>
+    <string name="color_secondary">Sekundär</string>
+    <string name="color_on_secondary">On Sekundär</string>
+    <string name="color_tertiary">Tertiär</string>
+    <string name="color_on_tertiary">On Tertiär</string>
+    <string name="color_background">Hintergrund</string>
+    <string name="color_on_background">On Hintergrund</string>
+    <string name="color_surface">Oberfläche</string>
+    <string name="color_on_surface">On Oberfläche</string>
+    <string name="color_error">Fehler</string>
+    <string name="theme_edit_label">Verwalten</string>
+    <string name="pick_color_title">Farbe wählen\n</string>
+    <string name="saturation">Sättigung</string>
+    <string name="hue">Farbton</string>
+    <string name="hex_code">Hex-Code</string>
+    <string name="color_secondary_container">Sekundärer Container</string>
+    <string name="color_on_secondary_container">Auf sekundärem Container</string>
+    <string name="color_tertiary_container">Tertiärer Container</string>
+    <string name="color_on_tertiary_container">Auf tertiärem Container</string>
+    <string name="color_error_container">Fehler-Container</string>
+    <string name="color_on_error_container">Auf Fehler-Container</string>
+    <string name="color_on_surface_variant">Auf Oberflächenvariante</string>
+    <string name="color_outline">Umriss</string>
+    <string name="color_outline_variant">Umrissvariante</string>
+    <string name="color_surface_container">Oberflächen-Container</string>
+    <string name="color_surface_variant">Oberflächenvariante</string>
+    <string name="color_on_error">Auf Fehler</string>
+    <string name="brightness">Helligkeit</string>
+    <string name="surfaces_background"><![CDATA[Oberflächen & Hintergrund]]></string>
+    <string name="utility">Dienstprogramme</string>
 </resources>

@@ -339,4 +339,45 @@
     <string name="script_widget_title">Скрипты</string>
     <string name="script_edit_description">Редактировать</string>
     <string name="script_no_scripts">Скрипты не назначены</string>
+
+    <!-- Custom theme -->
+    <string name="custom_themes_title">Пользовательские темы</string>
+    <string name="new_theme_label">Новая Тема</string>
+    <string name="theme_name_label">Название темы</string>
+    <string name="dark_mode_label">Палитра темной темы</string>
+    <string name="colors_section_label">Цвета палитры</string>
+    <string name="select_or_create_theme_hint">Выберите тему для редактирования или нажмите +, чтобы создать новую</string>
+    <string name="color_primary">Основной</string>
+    <string name="color_on_primary">Текст на основном</string>
+    <string name="color_primary_container">Контейнер основного</string>
+    <string name="color_on_primary_container">Текст на контейнере основного</string>
+    <string name="color_secondary">Вторичный</string>
+    <string name="color_on_secondary">Текст на вторичном</string>
+    <string name="color_tertiary">Третичный</string>
+    <string name="color_on_tertiary">Текст на третичном</string>
+    <string name="color_background">Фон</string>
+    <string name="color_on_background">Текст на фоне</string>
+    <string name="color_surface">Поверхность</string>
+    <string name="color_on_surface">Текст на поверхности</string>
+    <string name="color_error">Ошибка</string>
+    <string name="theme_edit_label">Управление</string>
+    <string name="pick_color_title">Выбрать цвет\n</string>
+    <string name="saturation">Насыщенность</string>
+    <string name="hue">Оттенок</string>
+    <string name="hex_code">Hex-код</string>
+    <string name="color_secondary_container">Вторичный контейнер</string>
+    <string name="color_on_secondary_container">На вторичном контейнере</string>
+    <string name="color_tertiary_container">Третичный контейнер</string>
+    <string name="color_on_tertiary_container">На третичном контейнере</string>
+    <string name="color_error_container">Контейнер ошибки</string>
+    <string name="color_on_error_container">На контейнере ошибки</string>
+    <string name="color_on_surface_variant">На варианте поверхности</string>
+    <string name="color_outline">Контур</string>
+    <string name="color_outline_variant">Вариант контура</string>
+    <string name="color_surface_container">Контейнер поверхности</string>
+    <string name="color_surface_variant">Вариант поверхности</string>
+    <string name="color_on_error">На ошибке</string>
+    <string name="brightness">Яркость</string>
+    <string name="surfaces_background"><![CDATA[Поверхности и фон]]></string>
+    <string name="utility">Служебные</string>
 </resources>

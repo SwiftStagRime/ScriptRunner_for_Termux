@@ -342,4 +342,44 @@
     <string name="script_edit_description">Modifier</string>
     <string name="script_no_scripts">Aucun script assigné</string>
 
+    <!-- Custom theme -->
+    <string name="custom_themes_title">Thèmes personnalisés</string>
+    <string name="new_theme_label">Nouveau</string>
+    <string name="theme_name_label">Nom du thème</string>
+    <string name="dark_mode_label">Palette du mode sombre</string>
+    <string name="colors_section_label">Couleurs de la palette</string>
+    <string name="select_or_create_theme_hint">Sélectionnez un thème à modifier ou appuyez sur + pour en créer un</string>
+    <string name="color_primary">Primaire</string>
+    <string name="color_on_primary">Sur Primaire</string>
+    <string name="color_primary_container">Conteneur primaire</string>
+    <string name="color_on_primary_container">Sur Conteneur primaire</string>
+    <string name="color_secondary">Secondaire</string>
+    <string name="color_on_secondary">Sur Secondaire</string>
+    <string name="color_tertiary">Tertiaire</string>
+    <string name="color_on_tertiary">Sur Tertiaire</string>
+    <string name="color_background">Arrière-plan</string>
+    <string name="color_on_background">Sur Arrière-plan</string>
+    <string name="color_surface">Surface</string>
+    <string name="color_on_surface">Sur Surface</string>
+    <string name="color_error">Erreur</string>
+    <string name="theme_edit_label">Gérer</string>
+    <string name="pick_color_title">Choisir une couleur\n</string>
+    <string name="saturation">Saturation</string>
+    <string name="hue">Teinte</string>
+    <string name="hex_code">Code Hex</string>
+    <string name="color_secondary_container">Conteneur secondaire</string>
+    <string name="color_on_secondary_container">Sur le conteneur secondaire</string>
+    <string name="color_tertiary_container">Conteneur tertiaire</string>
+    <string name="color_on_tertiary_container">Sur le conteneur tertiaire</string>
+    <string name="color_error_container">Conteneur d\'erreur</string>
+    <string name="color_on_error_container">Sur le conteneur d\'erreur</string>
+    <string name="color_on_surface_variant">Sur la variante de surface</string>
+    <string name="color_outline">Contour</string>
+    <string name="color_outline_variant">Variante de contour</string>
+    <string name="color_surface_container">Conteneur de surface</string>
+    <string name="color_surface_variant">Variante de surface</string>
+    <string name="color_on_error">Sur erreur</string>
+    <string name="brightness">Luminosité</string>
+    <string name="surfaces_background"><![CDATA[Surfaces et arrière-plan]]></string>
+    <string name="utility">Utilitaire</string>
 </resources>

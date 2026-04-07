@@ -1,5 +1,6 @@
 package io.github.swiftstagrime.termuxrunner.ui.features.customtheme
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -21,11 +22,13 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Tag
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -52,12 +55,15 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.core.graphics.component1
+import androidx.core.graphics.toColorInt
 import io.github.swiftstagrime.termuxrunner.R
 import io.github.swiftstagrime.termuxrunner.domain.model.CustomTheme
+import io.github.swiftstagrime.termuxrunner.ui.components.StyledTextField
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -232,37 +238,76 @@ private fun ThemeEditorForm(
             }
         }
 
-        item {
-            Text(
-                text = stringResource(R.string.colors_section_label),
-                style = MaterialTheme.typography.titleSmall,
-                color = colorScheme.primary
-            )
-        }
-
-        val colorFields = listOf(
+        item { ColorGroupHeader(stringResource(R.string.color_primary)) }
+        val primaryGroup = listOf(
             "primary" to R.string.color_primary,
             "onPrimary" to R.string.color_on_primary,
             "primaryContainer" to R.string.color_primary_container,
-            "onPrimaryContainer" to R.string.color_on_primary_container,
+            "onPrimaryContainer" to R.string.color_on_primary_container
+        )
+        items(primaryGroup) { (key, label) ->
+            ColorRow(stringResource(label), getThemeColorByKey(theme, key)) { onColorChange(key, it) }
+        }
+
+        item { ColorGroupHeader(stringResource(R.string.color_secondary)) }
+        val secondaryGroup = listOf(
             "secondary" to R.string.color_secondary,
             "onSecondary" to R.string.color_on_secondary,
+            "secondaryContainer" to R.string.color_secondary_container,
+            "onSecondaryContainer" to R.string.color_on_secondary_container
+        )
+        items(secondaryGroup) { (key, label) ->
+            ColorRow(stringResource(label), getThemeColorByKey(theme, key)) { onColorChange(key, it) }
+        }
+
+        item { ColorGroupHeader(stringResource(R.string.color_tertiary)) }
+        val tertiaryGroup = listOf(
+            "tertiary" to R.string.color_tertiary,
+            "onTertiary" to R.string.color_on_tertiary,
+            "tertiaryContainer" to R.string.color_tertiary_container,
+            "onTertiaryContainer" to R.string.color_on_tertiary_container
+        )
+        items(tertiaryGroup) { (key, label) ->
+            ColorRow(stringResource(label), getThemeColorByKey(theme, key)) { onColorChange(key, it) }
+        }
+
+        item { ColorGroupHeader(stringResource(R.string.surfaces_background)) }
+        val surfaceGroup = listOf(
             "background" to R.string.color_background,
             "onBackground" to R.string.color_on_background,
             "surface" to R.string.color_surface,
             "onSurface" to R.string.color_on_surface,
-            "error" to R.string.color_error
+            "surfaceVariant" to R.string.color_surface_variant,
+            "onSurfaceVariant" to R.string.color_on_surface_variant,
+            "surfaceContainer" to R.string.color_surface_container
         )
+        items(surfaceGroup) { (key, label) ->
+            ColorRow(stringResource(label), getThemeColorByKey(theme, key)) { onColorChange(key, it) }
+        }
 
-        items(colorFields) { (key, labelRes) ->
-            val colorValue = getThemeColorByKey(theme, key)
-            ColorRow(
-                label = stringResource(labelRes),
-                color = colorValue,
-                onColorChange = { newColor -> onColorChange(key, newColor) }
-            )
+        item { ColorGroupHeader(stringResource(R.string.utility)) }
+        val utilGroup = listOf(
+            "outline" to R.string.color_outline,
+            "outlineVariant" to R.string.color_outline_variant,
+            "error" to R.string.color_error,
+            "errorContainer" to R.string.color_error_container,
+            "onError" to R.string.color_on_error,
+            "onErrorContainer" to R.string.color_on_error_container
+        )
+        items(utilGroup) { (key, label) ->
+            ColorRow(stringResource(label), getThemeColorByKey(theme, key)) { onColorChange(key, it) }
         }
     }
+}
+
+@Composable
+private fun ColorGroupHeader(title: String) {
+    Text(
+        text = title,
+        style = MaterialTheme.typography.titleSmall,
+        color = MaterialTheme.colorScheme.primary,
+        modifier = Modifier.padding(top = 8.dp)
+    )
 }
 
 @Composable
@@ -304,6 +349,7 @@ private fun ColorRow(
     }
 }
 
+@SuppressLint("UseKtx")
 @Composable
 fun SimpleColorPicker(
     initialColor: Color,
@@ -316,55 +362,100 @@ fun SimpleColorPicker(
         mutableStateOf(Triple(hsvArray[0], hsvArray[1], hsvArray[2]))
     }
 
+    val currentColor = remember(hsv) {
+        Color(android.graphics.Color.HSVToColor(floatArrayOf(hsv.first, hsv.second, hsv.third)))
+    }
+
+    var hexText by remember {
+        mutableStateOf(String.format("%06X", (0xFFFFFF and currentColor.toArgb())))
+    }
+
     AlertDialog(
         onDismissRequest = onDismiss,
         confirmButton = {
-            TextButton(onClick = {
-                onColorSelected(Color(android.graphics.Color.HSVToColor(floatArrayOf(hsv.first, hsv.second, hsv.third))))
-            }) {
-                Text("Select")
+            TextButton(onClick = { onColorSelected(currentColor) }) {
+                Text(stringResource(android.R.string.ok))
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Cancel") }
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(android.R.string.cancel))
+            }
         },
-        title = { Text("Pick Color") },
+        title = { Text(stringResource(R.string.pick_color_title)) },
         text = {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(80.dp)
                         .clip(RoundedCornerShape(8.dp))
-                        .background(Color(android.graphics.Color.HSVToColor(floatArrayOf(hsv.first, hsv.second, hsv.third))))
-                        .border(1.dp, colorScheme.outline, RoundedCornerShape(8.dp))
+                        .background(currentColor)
+                        .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(8.dp))
                 )
 
-                Spacer(modifier = Modifier.height(16.dp))
+                StyledTextField(
+                    value = hexText,
+                    label = stringResource(R.string.hex_code),
+                    placeholder = { Text("RRGGBB") },
+                    onValueChange = { newHex ->
+                        val filtered = newHex.filter { it.isDigit() || it.uppercaseChar() in 'A'..'F' }.take(6)
+                        hexText = filtered
 
-                Text("Hue", style = MaterialTheme.typography.labelMedium)
-                Slider(
-                    value = hsv.first,
-                    onValueChange = { hsv = hsv.copy(first = it) },
-                    valueRange = 0f..360f,
-                    modifier = Modifier.fillMaxWidth()
+                        if (filtered.length == 6) {
+                            try {
+                                val parsedColor = "#$filtered".toColorInt()
+                                val hsvArray = FloatArray(3)
+                                android.graphics.Color.colorToHSV(parsedColor, hsvArray)
+                                hsv = Triple(hsvArray[0], hsvArray[1], hsvArray[2])
+                            } catch (_: Exception) {}
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    leadingIcon = { Icon(Icons.Default.Tag, contentDescription = null) },
+                    keyboardOptions = KeyboardOptions(
+                        capitalization = KeyboardCapitalization.Characters,
+                        imeAction = ImeAction.Done
+                    )
                 )
 
-                Text("Saturation", style = MaterialTheme.typography.labelMedium)
-                Slider(
-                    value = hsv.second,
-                    onValueChange = { hsv = hsv.copy(second = it) },
-                    valueRange = 0f..1f,
-                    modifier = Modifier.fillMaxWidth()
-                )
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(stringResource(R.string.hue), style = MaterialTheme.typography.labelMedium)
+                    Slider(
+                        value = hsv.first,
+                        onValueChange = {
+                            hsv = hsv.copy(first = it)
+                            hexText = String.format("%06X", (0xFFFFFF and currentColor.toArgb()))
+                        },
+                        valueRange = 0f..360f,
+                        modifier = Modifier.fillMaxWidth()
+                    )
 
-                Text("Brightness", style = MaterialTheme.typography.labelMedium)
-                Slider(
-                    value = hsv.third,
-                    onValueChange = { hsv = hsv.copy(third = it) },
-                    valueRange = 0f..1f,
-                    modifier = Modifier.fillMaxWidth()
-                )
+                    Text(stringResource(R.string.saturation), style = MaterialTheme.typography.labelMedium)
+                    Slider(
+                        value = hsv.second,
+                        onValueChange = {
+                            hsv = hsv.copy(second = it)
+                            hexText = String.format("%06X", (0xFFFFFF and currentColor.toArgb()))
+                        },
+                        valueRange = 0f..1f,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+
+                    Text(stringResource(R.string.brightness), style = MaterialTheme.typography.labelMedium)
+                    Slider(
+                        value = hsv.third,
+                        onValueChange = {
+                            hsv = hsv.copy(third = it)
+                            hexText = String.format("%06X", (0xFFFFFF and currentColor.toArgb()))
+                        },
+                        valueRange = 0f..1f,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
             }
         }
     )
@@ -378,11 +469,25 @@ private fun getThemeColorByKey(theme: CustomTheme, key: String): Color {
         "onPrimaryContainer" -> theme.onPrimaryContainer
         "secondary" -> theme.secondary
         "onSecondary" -> theme.onSecondary
+        "secondaryContainer" -> theme.secondaryContainer
+        "onSecondaryContainer" -> theme.onSecondaryContainer
+        "tertiary" -> theme.tertiary
+        "onTertiary" -> theme.onTertiary
+        "tertiaryContainer" -> theme.tertiaryContainer
+        "onTertiaryContainer" -> theme.onTertiaryContainer
+        "error" -> theme.error
+        "onError" -> theme.onError
+        "errorContainer" -> theme.errorContainer
+        "onErrorContainer" -> theme.onErrorContainer
         "background" -> theme.background
         "onBackground" -> theme.onBackground
         "surface" -> theme.surface
         "onSurface" -> theme.onSurface
-        "error" -> theme.error
+        "surfaceVariant" -> theme.surfaceVariant
+        "onSurfaceVariant" -> theme.onSurfaceVariant
+        "outline" -> theme.outline
+        "outlineVariant" -> theme.outlineVariant
+        "surfaceContainer" -> theme.surfaceContainer
         else -> theme.primary
     }
     return Color(longVal.toInt())
@@ -421,7 +526,13 @@ private fun CustomThemeScreenPreview() {
             outlineVariant = 0xFF000000,
             surfaceContainer = 0xFF000000,
         ),
-        CustomTheme(id = 2, name = "Nord", primary = 0xFF88C0D0, isDark = true, onPrimary = 0xFF2E3440,primaryContainer = 0xFF000000,
+        CustomTheme(
+            id = 2,
+            name = "Nord",
+            primary = 0xFF88C0D0,
+            isDark = true,
+            onPrimary = 0xFF2E3440,
+            primaryContainer = 0xFF000000,
             onPrimaryContainer = 0xFF000000,
             secondary = 0xFF000000,
             onSecondary = 0xFF000000,
@@ -445,7 +556,13 @@ private fun CustomThemeScreenPreview() {
             outlineVariant = 0xFF000000,
             surfaceContainer = 0xFF000000,
         ),
-        CustomTheme(id = 3, name = "Solarized", primary = 0xFFB58900, isDark = false, onPrimary = 0xFFFFFFFF,primaryContainer = 0xFF000000,
+        CustomTheme(
+            id = 3,
+            name = "Solarized",
+            primary = 0xFFB58900,
+            isDark = false,
+            onPrimary = 0xFFFFFFFF,
+            primaryContainer = 0xFF000000,
             onPrimaryContainer = 0xFF000000,
             secondary = 0xFF000000,
             onSecondary = 0xFF000000,

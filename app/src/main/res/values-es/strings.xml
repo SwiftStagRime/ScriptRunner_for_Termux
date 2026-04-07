@@ -340,4 +340,45 @@
     <string name="script_widget_title">Scripts</string>
     <string name="script_edit_description">Editar</string>
     <string name="script_no_scripts">Sin scripts asignados</string>
+
+    <!-- Custom theme -->
+    <string name="custom_themes_title">Temas personalizados</string>
+    <string name="new_theme_label">Nuevo</string>
+    <string name="theme_name_label">Nombre del tema</string>
+    <string name="dark_mode_label">Paleta de modo oscuro</string>
+    <string name="colors_section_label">Colores de la paleta</string>
+    <string name="select_or_create_theme_hint">Selecciona un tema para editar o pulsa + para crear uno</string>
+    <string name="color_primary">Primario</string>
+    <string name="color_on_primary">On Primary</string>
+    <string name="color_primary_container">Contenedor primario</string>
+    <string name="color_on_primary_container">On Contenedor primario</string>
+    <string name="color_secondary">Secundario</string>
+    <string name="color_on_secondary">On Secundario</string>
+    <string name="color_tertiary">Terciario</string>
+    <string name="color_on_tertiary">On Terciario</string>
+    <string name="color_background">Fondo</string>
+    <string name="color_on_background">On Fondo</string>
+    <string name="color_surface">Superficie</string>
+    <string name="color_on_surface">On Superficie</string>
+    <string name="color_error">Error</string>
+    <string name="theme_edit_label">Administrar</string>
+    <string name="pick_color_title">Elegir color\n</string>
+    <string name="saturation">Saturación</string>
+    <string name="hue">Matiz</string>
+    <string name="hex_code">Código Hex</string>
+    <string name="color_secondary_container">Contenedor secundario</string>
+    <string name="color_on_secondary_container">En contenedor secundario</string>
+    <string name="color_tertiary_container">Contenedor terciario</string>
+    <string name="color_on_tertiary_container">En contenedor terciario</string>
+    <string name="color_error_container">Contenedor de error</string>
+    <string name="color_on_error_container">En contenedor de error</string>
+    <string name="color_on_surface_variant">En variante de superficie</string>
+    <string name="color_outline">Contorno</string>
+    <string name="color_outline_variant">Variante de contorno</string>
+    <string name="color_surface_container">Contenedor de superficie</string>
+    <string name="color_surface_variant">Variante de superficie</string>
+    <string name="color_on_error">En error</string>
+    <string name="brightness">Brillo</string>
+    <string name="surfaces_background"><![CDATA[Superficies y fondo]]></string>
+    <string name="utility">Utilidad</string>
 </resources>

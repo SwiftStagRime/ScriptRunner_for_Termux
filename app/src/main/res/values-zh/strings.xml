@@ -340,4 +340,45 @@
     <string name="script_widget_title">脚本</string>
     <string name="script_edit_description">编辑</string>
     <string name="script_no_scripts">未分配脚本</string>
+
+    <!-- Custom theme -->
+    <string name="custom_themes_title">自定义主题</string>
+    <string name="new_theme_label">新建</string>
+    <string name="theme_name_label">主题名称</string>
+    <string name="dark_mode_label">深色模式调色板</string>
+    <string name="colors_section_label">调色板颜色</string>
+    <string name="select_or_create_theme_hint">选择一个主题进行编辑，或点击 + 创建新主题</string>
+    <string name="color_primary">主要 (Primary)</string>
+    <string name="color_on_primary">主要文本色</string>
+    <string name="color_primary_container">主要容器</string>
+    <string name="color_on_primary_container">主要容器文本色</string>
+    <string name="color_secondary">次要 (Secondary)</string>
+    <string name="color_on_secondary">次要文本色</string>
+    <string name="color_tertiary">第三色 (Tertiary)</string>
+    <string name="color_on_tertiary">第三色文本色</string>
+    <string name="color_background">背景</string>
+    <string name="color_on_background">背景文本色</string>
+    <string name="color_surface">表面 (Surface)</string>
+    <string name="color_on_surface">表面文本色</string>
+    <string name="color_error">错误</string>
+    <string name="theme_edit_label">管理</string>
+    <string name="pick_color_title">选取颜色\n</string>
+    <string name="saturation">饱和度</string>
+    <string name="hue">色调</string>
+    <string name="hex_code">十六进制代码</string>
+    <string name="color_secondary_container">次要容器</string>
+    <string name="color_on_secondary_container">次要容器上层颜色</string>
+    <string name="color_tertiary_container">三级容器</string>
+    <string name="color_on_tertiary_container">三级容器上层颜色</string>
+    <string name="color_error_container">错误容器</string>
+    <string name="color_on_error_container">错误容器上层颜色</string>
+    <string name="color_on_surface_variant">表面变体上层颜色</string>
+    <string name="color_outline">轮廓</string>
+    <string name="color_outline_variant">轮廓变体</string>
+    <string name="color_surface_container">表面容器</string>
+    <string name="color_surface_variant">表面变体</string>
+    <string name="color_on_error">错误上层颜色</string>
+    <string name="brightness">亮度</string>
+    <string name="surfaces_background"><![CDATA[表面和背景]]></string>
+    <string name="utility">公用</string>
 </resources>

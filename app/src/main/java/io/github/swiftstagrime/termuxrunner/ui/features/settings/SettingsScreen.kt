@@ -51,6 +51,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import io.github.swiftstagrime.termuxrunner.R
 import io.github.swiftstagrime.termuxrunner.ui.components.LanguageSelectorButton
@@ -58,20 +59,6 @@ import io.github.swiftstagrime.termuxrunner.ui.preview.DevicePreviews
 import io.github.swiftstagrime.termuxrunner.ui.theme.AppTheme
 import io.github.swiftstagrime.termuxrunner.ui.theme.ScriptRunnerForTermuxTheme
 import io.github.swiftstagrime.termuxrunner.ui.theme.ThemeMode
-
-private const val SURFACE_ALPHA = 0.3f
-private const val SECONDARY_ALPHA = 0.7f
-private const val OVERLAY_ALPHA = 0.4f
-private const val DYNAMIC_ICON_ALPHA = 0.6f
-
-private val PADDING_MEDIUM = 12.dp
-private val PADDING_LARGE = 16.dp
-private val PADDING_EXTRA_LARGE = 24.dp
-
-private val RADIUS_MEDIUM = 12.dp
-private val CIRCLE_SIZE = 56.dp
-private val CIRCLE_ICON_SIZE = 28.dp
-private val CHECK_ICON_SIZE = 20.dp
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -88,12 +75,12 @@ fun SettingsScreen(
                 Modifier
                     .padding(padding)
                     .fillMaxSize()
-                    .padding(PADDING_LARGE),
+                    .padding(16.dp),
             verticalArrangement = Arrangement.SpaceBetween,
         ) {
             Column {
                 AppearanceSection(selectedAccent, selectedMode, actions)
-                Spacer(modifier = Modifier.height(PADDING_EXTRA_LARGE))
+                Spacer(modifier = Modifier.height(24.dp))
                 DataManagementSection(actions)
             }
             DeveloperCard(actions.onDeveloperClick)
@@ -130,11 +117,12 @@ private fun AppearanceSection(
     )
     Spacer(modifier = Modifier.height(8.dp))
     LanguageRow()
-    Spacer(modifier = Modifier.height(PADDING_MEDIUM))
+    Spacer(modifier = Modifier.height(12.dp))
 
     Text(stringResource(R.string.accent_color_label), style = MaterialTheme.typography.labelLarge)
 
-    LazyRow(horizontalArrangement = Arrangement.spacedBy(PADDING_LARGE)) {
+    // Spaced by 16.dp
+    LazyRow(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
         items(AppTheme.entries) { accent ->
             ThemeSelectorItem(
                 theme = accent,
@@ -150,7 +138,7 @@ private fun AppearanceSection(
         }
     }
 
-    Spacer(modifier = Modifier.height(PADDING_EXTRA_LARGE))
+    Spacer(modifier = Modifier.height(24.dp))
 
     Text(stringResource(R.string.display_mode_label), style = MaterialTheme.typography.labelLarge)
     DisplayModeSelector(selectedMode, actions.onModeChange)
@@ -167,9 +155,9 @@ private fun CustomThemeManagementItem(
         Box(
             modifier =
                 Modifier
-                    .size(CIRCLE_SIZE)
+                    .size(56.dp)
                     .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = SURFACE_ALPHA))
+                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
                     .clickable { onClick() }
                     .border(
                         width = 1.dp,
@@ -182,7 +170,7 @@ private fun CustomThemeManagementItem(
                 imageVector = Icons.Default.Palette,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.size(CIRCLE_ICON_SIZE)
+                modifier = Modifier.size(28.dp)
             )
         }
 
@@ -193,6 +181,8 @@ private fun CustomThemeManagementItem(
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.onSurface,
             maxLines = 1,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.fillMaxWidth()
         )
     }
 }
@@ -203,9 +193,9 @@ private fun LanguageRow() {
         modifier =
             Modifier
                 .fillMaxWidth()
-                .clip(RoundedCornerShape(RADIUS_MEDIUM))
-                .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = SURFACE_ALPHA))
-                .padding(PADDING_LARGE),
+                .clip(RoundedCornerShape(12.dp))
+                .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
+                .padding(16.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -251,7 +241,7 @@ private fun DataManagementSection(actions: SettingsActions) {
 
     Row(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(PADDING_LARGE),
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         ActionButton(
             onClick = actions.onTriggerImport,
@@ -287,7 +277,7 @@ private fun ActionButton(
     Button(
         onClick = onClick,
         modifier = modifier,
-        shape = RoundedCornerShape(RADIUS_MEDIUM),
+        shape = RoundedCornerShape(12.dp),
         colors = if (isTonal) ButtonDefaults.filledTonalButtonColors() else ButtonDefaults.buttonColors(),
     ) {
         Icon(icon, contentDescription = null)
@@ -309,7 +299,7 @@ private fun DeveloperCard(onClick: () -> Unit) {
             ),
     ) {
         Row(
-            modifier = Modifier.padding(PADDING_LARGE),
+            modifier = Modifier.padding(16.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Icon(
@@ -317,12 +307,12 @@ private fun DeveloperCard(onClick: () -> Unit) {
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.onSecondaryContainer,
             )
-            Spacer(modifier = Modifier.width(PADDING_LARGE))
+            Spacer(modifier = Modifier.width(16.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = stringResource(R.string.developed_by),
                     style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = SECONDARY_ALPHA),
+                    color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.7f),
                 )
                 Text(
                     text = "SwiftStagRime",
@@ -355,7 +345,7 @@ fun ThemeSelectorItem(
         Box(
             modifier =
                 Modifier
-                    .size(CIRCLE_SIZE)
+                    .size(56.dp)
                     .clip(CircleShape)
                     .background(circleColor)
                     .clickable { onClick() }
@@ -382,6 +372,8 @@ fun ThemeSelectorItem(
             color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
             fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
             maxLines = 1,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.fillMaxWidth()
         )
     }
 }
@@ -391,15 +383,15 @@ private fun SelectionOverlay() {
     Box(
         modifier =
             Modifier
-                .size(CIRCLE_ICON_SIZE)
-                .background(color = Color.Black.copy(alpha = OVERLAY_ALPHA), shape = CircleShape),
+                .size(28.dp)
+                .background(color = Color.Black.copy(alpha = 0.4f), shape = CircleShape),
         contentAlignment = Alignment.Center,
     ) {
         Icon(
             imageVector = Icons.Default.Check,
             contentDescription = null,
             tint = Color.White,
-            modifier = Modifier.size(CHECK_ICON_SIZE),
+            modifier = Modifier.size(20.dp),
         )
     }
 }
@@ -409,7 +401,7 @@ private fun BoxScope.DynamicThemeIcon() {
     Icon(
         imageVector = Icons.Default.AutoAwesome,
         contentDescription = null,
-        tint = Color.White.copy(alpha = DYNAMIC_ICON_ALPHA),
+        tint = Color.White.copy(alpha = 0.6f),
         modifier =
             Modifier
                 .size(16.dp)
