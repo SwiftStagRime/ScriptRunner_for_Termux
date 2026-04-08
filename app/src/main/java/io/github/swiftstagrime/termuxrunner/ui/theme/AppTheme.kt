@@ -14,7 +14,7 @@ enum class AppTheme(
     AMOLED(R.string.theme_amoled, Color(0xFF000000)),
     CYBER(R.string.theme_cyber, Color(0xFF00E5FF)),
 
-    CUSTOM(R.string.custom_themes_title, Color.Gray)
+    CUSTOM(R.string.custom_themes_title, Color.Gray),
 }
 
 enum class ThemeMode(

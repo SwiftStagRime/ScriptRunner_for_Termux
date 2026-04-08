@@ -48,6 +48,7 @@ private val DarkGreenColorScheme =
         outline = DarkGreenOutline,
         outlineVariant = DarkGreenOutlineVariant,
         surfaceContainer = DarkGreenSurfaceContainer,
+        surfaceContainerLowest = DarkGreenSurfaceContainerLowest,
     )
 
 private val LightGreenColorScheme =
@@ -77,6 +78,7 @@ private val LightGreenColorScheme =
         outline = LightGreenOutline,
         outlineVariant = LightGreenOutlineVariant,
         surfaceContainer = LightGreenSurfaceContainer,
+        surfaceContainerLowest = LightGreenSurfaceContainerLowest,
     )
 
 private val DarkBlueColorScheme =
@@ -106,6 +108,7 @@ private val DarkBlueColorScheme =
         outline = DarkBlueOutline,
         outlineVariant = DarkBlueOutlineVariant,
         surfaceContainer = DarkBlueSurfaceContainer,
+        surfaceContainerLowest = DarkBlueSurfaceContainerLowest,
     )
 
 private val LightBlueColorScheme =
@@ -135,6 +138,7 @@ private val LightBlueColorScheme =
         outline = LightBlueOutline,
         outlineVariant = LightBlueOutlineVariant,
         surfaceContainer = LightBlueSurfaceContainer,
+        surfaceContainerLowest = LightBlueSurfaceContainerLowest,
     )
 
 private val DarkRedColorScheme =
@@ -164,6 +168,7 @@ private val DarkRedColorScheme =
         outline = DarkRedOutline,
         outlineVariant = DarkRedOutlineVariant,
         surfaceContainer = DarkRedSurfaceContainer,
+        surfaceContainerLowest = DarkRedSurfaceContainerLowest,
     )
 
 private val LightRedColorScheme =
@@ -193,6 +198,7 @@ private val LightRedColorScheme =
         outline = LightRedOutline,
         outlineVariant = LightRedOutlineVariant,
         surfaceContainer = LightRedSurfaceContainer,
+        surfaceContainerLowest = LightRedSurfaceContainerLowest,
     )
 
 private val DarkAmoledColorScheme =
@@ -222,6 +228,7 @@ private val DarkAmoledColorScheme =
         outline = DarkAmoledOutline,
         outlineVariant = DarkAmoledOutlineVariant,
         surfaceContainer = DarkAmoledSurfaceContainer,
+        surfaceContainerLowest = DarkAmoledSurfaceContainerLowest,
     )
 
 private val LightAmoledColorScheme =
@@ -251,6 +258,7 @@ private val LightAmoledColorScheme =
         outline = LightAmoledOutline,
         outlineVariant = LightAmoledOutlineVariant,
         surfaceContainer = LightAmoledSurfaceContainer,
+        surfaceContainerLowest = LightAmoledSurfaceContainerLowest,
     )
 
 private val DarkColorfulAmoledColorScheme =
@@ -280,6 +288,7 @@ private val DarkColorfulAmoledColorScheme =
         outline = DarkColorfulAmoledOutline,
         outlineVariant = DarkColorfulAmoledOutlineVariant,
         surfaceContainer = DarkColorfulAmoledSurfaceContainer,
+        surfaceContainerLowest = DarkColorfulAmoledSurfaceContainerLowest,
     )
 
 private val LightColorfulAmoledColorScheme =
@@ -309,6 +318,7 @@ private val LightColorfulAmoledColorScheme =
         outline = LightColorfulAmoledOutline,
         outlineVariant = LightColorfulAmoledOutlineVariant,
         surfaceContainer = LightColorfulAmoledSurfaceContainer,
+        surfaceContainerLowest = LightColorfulAmoledSurfaceContainerLowest,
     )
 
 @Composable
@@ -319,24 +329,25 @@ fun ScriptRunnerForTermuxTheme(
     content: @Composable () -> Unit,
 ) {
     val context = LocalContext.current
-    val isDark = remember(accent, mode, customTheme) {
-        if (accent == AppTheme.CUSTOM && customTheme != null) {
-            customTheme.isDark
-        } else {
-            when (mode) {
-                ThemeMode.LIGHT -> false
-                ThemeMode.DARK -> true
-                ThemeMode.SYSTEM -> {
-                    null
+    val isDark =
+        remember(accent, mode, customTheme) {
+            if (accent == AppTheme.CUSTOM && customTheme != null) {
+                customTheme.isDark
+            } else {
+                when (mode) {
+                    ThemeMode.LIGHT -> false
+                    ThemeMode.DARK -> true
+                    ThemeMode.SYSTEM -> {
+                        null
+                    }
                 }
             }
+        } ?: isSystemInDarkTheme()
+
+    val colorScheme =
+        remember(accent, isDark, customTheme) {
+            pickColorScheme(accent, isDark, context, customTheme)
         }
-    } ?: isSystemInDarkTheme()
-
-
-    val colorScheme = remember(accent, isDark, customTheme) {
-        pickColorScheme(accent, isDark, context, customTheme)
-    }
 
     val view = LocalView.current
     if (!view.isInEditMode) {
@@ -379,8 +390,8 @@ fun pickColorScheme(
         }
     }
 
-fun CustomTheme.toColorScheme(isDark: Boolean): ColorScheme {
-    return if (isDark) {
+fun CustomTheme.toColorScheme(isDark: Boolean): ColorScheme =
+    if (isDark) {
         darkColorScheme(
             primary = Color(this.primary.toInt()),
             onPrimary = Color(this.onPrimary.toInt()),
@@ -407,6 +418,7 @@ fun CustomTheme.toColorScheme(isDark: Boolean): ColorScheme {
             outline = Color(this.outline.toInt()),
             outlineVariant = Color(this.outlineVariant.toInt()),
             surfaceContainer = Color(this.surfaceContainer.toInt()),
+            surfaceContainerLowest = Color(this.surfaceContainerLowest.toInt()),
         )
     } else {
         lightColorScheme(
@@ -435,9 +447,9 @@ fun CustomTheme.toColorScheme(isDark: Boolean): ColorScheme {
             outline = Color(this.outline.toInt()),
             outlineVariant = Color(this.outlineVariant.toInt()),
             surfaceContainer = Color(this.surfaceContainer.toInt()),
+            surfaceContainerLowest = Color(this.surfaceContainerLowest.toInt()),
         )
     }
-}
 
 tailrec fun Context.findActivity(): Activity? =
     when (this) {

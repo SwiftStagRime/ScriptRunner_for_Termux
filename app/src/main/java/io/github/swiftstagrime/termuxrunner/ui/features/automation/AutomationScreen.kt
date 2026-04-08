@@ -91,7 +91,7 @@ fun AutomationScreen(
                     Text(
                         stringResource(R.string.automation_title),
                         style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.SemiBold
+                        fontWeight = FontWeight.SemiBold,
                     )
                 },
                 navigationIcon = {
@@ -99,10 +99,11 @@ fun AutomationScreen(
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, null)
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color.Transparent,
-                    scrolledContainerColor = Color.Transparent
-                )
+                colors =
+                    TopAppBarDefaults.topAppBarColors(
+                        containerColor = Color.Transparent,
+                        scrolledContainerColor = Color.Transparent,
+                    ),
             )
         },
         floatingActionButton = {
@@ -111,21 +112,22 @@ fun AutomationScreen(
                 onClick = onAddAutomationClick,
                 containerColor = MaterialTheme.colorScheme.primaryContainer,
                 contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                elevation = FloatingActionButtonDefaults.elevation(defaultElevation = 4.dp)
+                elevation = FloatingActionButtonDefaults.elevation(defaultElevation = 4.dp),
             ) {
                 Icon(Icons.Default.AddAlarm, null)
             }
         },
     ) { padding ->
         Surface(
-            modifier = Modifier
-                .padding(padding)
-                .padding(horizontal = 8.dp)
-                .padding(bottom = 8.dp)
-                .fillMaxSize(),
+            modifier =
+                Modifier
+                    .padding(padding)
+                    .padding(horizontal = 8.dp)
+                    .padding(bottom = 8.dp)
+                    .fillMaxSize(),
             color = sheetContainerColor,
             shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp, bottomEnd = 32.dp, bottomStart = 32.dp),
-            shadowElevation = 1.dp
+            shadowElevation = 1.dp,
         ) {
             Column {
                 Spacer(modifier = Modifier.height(16.dp))
@@ -136,12 +138,13 @@ fun AutomationScreen(
                 }
 
                 LazyColumn(
-                    contentPadding = PaddingValues(
-                        start = 16.dp,
-                        end = 16.dp,
-                        bottom = 88.dp,
-                        top = 8.dp
-                    ),
+                    contentPadding =
+                        PaddingValues(
+                            start = 16.dp,
+                            end = 16.dp,
+                            bottom = 88.dp,
+                            top = 8.dp,
+                        ),
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
                     items(uiState.items, key = { it.automation.id }) { item ->

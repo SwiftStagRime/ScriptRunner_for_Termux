@@ -68,7 +68,7 @@ fun SettingsRoute(
             onTriggerScriptImport = { importFileLauncher.launch(arrayOf("*/*")) },
             onDeveloperClick = { uriHandler.openUri(GITHUB_URL) },
             onBack = onBack,
-            onNavigateToCustomTheme = onNavigateToCustomTheme
+            onNavigateToCustomTheme = onNavigateToCustomTheme,
         )
 
     SettingsScreen(

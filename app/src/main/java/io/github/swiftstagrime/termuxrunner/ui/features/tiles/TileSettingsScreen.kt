@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -84,22 +83,24 @@ fun TileSettingsScreen(
                         )
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color.Transparent,
-                    scrolledContainerColor = Color.Transparent,
-                ),
+                colors =
+                    TopAppBarDefaults.topAppBarColors(
+                        containerColor = Color.Transparent,
+                        scrolledContainerColor = Color.Transparent,
+                    ),
             )
         },
     ) { padding ->
         Surface(
-            modifier = Modifier
-                .padding(padding)
-                .padding(horizontal = 8.dp)
-                .padding(bottom = 8.dp)
-                .fillMaxSize(),
+            modifier =
+                Modifier
+                    .padding(padding)
+                    .padding(horizontal = 8.dp)
+                    .padding(bottom = 8.dp)
+                    .fillMaxSize(),
             color = sheetContainerColor,
             shape = RoundedCornerShape(32.dp),
-            shadowElevation = 1.dp
+            shadowElevation = 1.dp,
         ) {
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
@@ -108,10 +109,11 @@ fun TileSettingsScreen(
             ) {
                 item {
                     Card(
-                        colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.7f),
-                            contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                        ),
+                        colors =
+                            CardDefaults.cardColors(
+                                containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.7f),
+                                contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                            ),
                         shape = RoundedCornerShape(20.dp),
                         modifier = Modifier.padding(bottom = 4.dp),
                     ) {
@@ -126,11 +128,12 @@ fun TileSettingsScreen(
                             )
                             Spacer(modifier = Modifier.width(12.dp))
                             Text(
-                                text = stringResource(
-                                    R.string.assign_scripts_to_these_slots_you_can_then_trigger_them_directly_from_your_phone_s_quick_settings_panel,
-                                ),
+                                text =
+                                    stringResource(
+                                        R.string.assign_scripts_to_these_slots_you_can_then_trigger_them_directly_from_your_phone_s_quick_settings_panel,
+                                    ),
                                 style = MaterialTheme.typography.labelMedium,
-                                lineHeight = TextUnit(16f, TextUnitType.Sp)
+                                lineHeight = TextUnit(16f, TextUnitType.Sp),
                             )
                         }
                     }
@@ -144,40 +147,46 @@ fun TileSettingsScreen(
                     Card(
                         onClick = { onTileClicked(tileIndex) },
                         shape = RoundedCornerShape(20.dp),
-                        colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.surface,
-                        ),
+                        colors =
+                            CardDefaults.cardColors(
+                                containerColor = MaterialTheme.colorScheme.surface,
+                            ),
                         elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
-                        border = BorderStroke(
-                            1.dp,
-                            MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f),
-                        ),
+                        border =
+                            BorderStroke(
+                                1.dp,
+                                MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f),
+                            ),
                     ) {
                         Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(16.dp),
+                            modifier =
+                                Modifier
+                                    .fillMaxWidth()
+                                    .padding(16.dp),
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
                             Box(
-                                modifier = Modifier
-                                    .size(44.dp)
-                                    .clip(CircleShape)
-                                    .background(
-                                        if (isAssigned) {
-                                            MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f)
-                                        } else {
-                                            MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
-                                        },
-                                    ),
+                                modifier =
+                                    Modifier
+                                        .size(44.dp)
+                                        .clip(CircleShape)
+                                        .background(
+                                            if (isAssigned) {
+                                                MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f)
+                                            } else {
+                                                MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                                            },
+                                        ),
                                 contentAlignment = Alignment.Center,
                             ) {
                                 if (isAssigned && assignedScript.iconPath != null) {
                                     AsyncImage(
-                                        model = ImageRequest.Builder(LocalContext.current)
-                                            .data(File(assignedScript.iconPath))
-                                            .crossfade(true)
-                                            .build(),
+                                        model =
+                                            ImageRequest
+                                                .Builder(LocalContext.current)
+                                                .data(File(assignedScript.iconPath))
+                                                .crossfade(true)
+                                                .build(),
                                         contentDescription = null,
                                         modifier = Modifier.fillMaxSize(),
                                         contentScale = ContentScale.Crop,
@@ -187,11 +196,12 @@ fun TileSettingsScreen(
                                         text = tileIndex.toString(),
                                         style = MaterialTheme.typography.titleMedium,
                                         fontWeight = FontWeight.ExtraBold,
-                                        color = if (isAssigned) {
-                                            MaterialTheme.colorScheme.primary
-                                        } else {
-                                            MaterialTheme.colorScheme.onSurfaceVariant
-                                        },
+                                        color =
+                                            if (isAssigned) {
+                                                MaterialTheme.colorScheme.primary
+                                            } else {
+                                                MaterialTheme.colorScheme.onSurfaceVariant
+                                            },
                                     )
                                 }
                             }
@@ -203,31 +213,33 @@ fun TileSettingsScreen(
                                     text = stringResource(R.string.tile_slot_label, tileIndex),
                                     style = MaterialTheme.typography.labelSmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
-                                    fontWeight = FontWeight.Bold
+                                    fontWeight = FontWeight.Bold,
                                 )
                                 Text(
                                     text = assignedScript?.name ?: stringResource(R.string.tile_unassigned),
                                     style = MaterialTheme.typography.titleMedium,
                                     fontWeight = if (isAssigned) FontWeight.Bold else FontWeight.Medium,
-                                    color = if (isAssigned) {
-                                        MaterialTheme.colorScheme.onSurface
-                                    } else {
-                                        MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
-                                    },
+                                    color =
+                                        if (isAssigned) {
+                                            MaterialTheme.colorScheme.onSurface
+                                        } else {
+                                            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
+                                        },
                                 )
                             }
 
                             if (isAssigned) {
                                 IconButton(
                                     onClick = { onClearTile(tileIndex) },
-                                    colors = IconButtonDefaults.iconButtonColors(
-                                        contentColor = MaterialTheme.colorScheme.error,
-                                    ),
+                                    colors =
+                                        IconButtonDefaults.iconButtonColors(
+                                            contentColor = MaterialTheme.colorScheme.error,
+                                        ),
                                 ) {
                                     Icon(
                                         Icons.Default.Close,
                                         contentDescription = stringResource(R.string.clear),
-                                        modifier = Modifier.size(20.dp)
+                                        modifier = Modifier.size(20.dp),
                                     )
                                 }
                             } else {
@@ -244,6 +256,7 @@ fun TileSettingsScreen(
         }
     }
 }
+
 @DevicePreviews
 @Composable
 fun TileSettingsScreenPreview() {

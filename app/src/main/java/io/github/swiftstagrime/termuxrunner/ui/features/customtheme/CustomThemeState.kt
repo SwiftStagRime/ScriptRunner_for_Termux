@@ -7,7 +7,7 @@ data class CustomThemeUiState(
     val savedThemes: List<CustomTheme> = emptyList(),
     val selectedThemeId: Int? = null,
     val editingTheme: CustomTheme? = null,
-    val isNewTheme: Boolean = false
+    val isNewTheme: Boolean = false,
 )
 
 data class CustomThemeActions(

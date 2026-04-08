@@ -66,7 +66,7 @@ fun rememberEntryProvider(mainViewModel: MainViewModel): (NavKey) -> NavEntry<Na
                             },
                             onNavigateToCustomTheme = {
                                 mainViewModel.navigateTo(Route.CustomTheme)
-                            }
+                            },
                         )
                     }
 
@@ -84,7 +84,7 @@ fun rememberEntryProvider(mainViewModel: MainViewModel): (NavKey) -> NavEntry<Na
 
                     is Route.CustomTheme -> {
                         CustomThemeRoute(
-                            onBack = {mainViewModel.goBack()}
+                            onBack = { mainViewModel.goBack() },
                         )
                     }
 

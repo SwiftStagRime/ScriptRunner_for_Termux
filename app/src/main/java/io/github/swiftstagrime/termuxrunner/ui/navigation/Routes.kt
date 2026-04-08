@@ -20,7 +20,7 @@ sealed interface Route : NavKey {
     ) : Route
 
     @Serializable
-    data object CustomTheme: Route
+    data object CustomTheme : Route
 
     @Serializable
     data object TileSettings : Route

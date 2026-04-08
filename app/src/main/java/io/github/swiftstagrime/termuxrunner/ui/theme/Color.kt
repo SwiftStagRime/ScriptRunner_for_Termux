@@ -2,71 +2,62 @@ package io.github.swiftstagrime.termuxrunner.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-// Green Theme
+// --- GREEN THEME ---
 val LightGreenPrimary = Color(0xFF006C4C)
 val LightGreenOnPrimary = Color(0xFFFFFFFF)
 val LightGreenPrimaryContainer = Color(0xFF89F8C8)
 val LightGreenOnPrimaryContainer = Color(0xFF002114)
-
 val LightGreenSecondary = Color(0xFF4C6358)
 val LightGreenOnSecondary = Color(0xFFFFFFFF)
 val LightGreenSecondaryContainer = Color(0xFFCEE9DA)
 val LightGreenOnSecondaryContainer = Color(0xFF092016)
-
 val LightGreenTertiary = Color(0xFF3F6374)
 val LightGreenOnTertiary = Color(0xFFFFFFFF)
 val LightGreenTertiaryContainer = Color(0xFFC3E8FC)
 val LightGreenOnTertiaryContainer = Color(0xFF001F2A)
-
 val LightGreenError = Color(0xFFBA1A1A)
 val LightGreenOnError = Color(0xFFFFFFFF)
 val LightGreenErrorContainer = Color(0xFFFFDAD6)
 val LightGreenOnErrorContainer = Color(0xFF410002)
-
 val LightGreenBackground = Color(0xFFFBFDFA)
 val LightGreenOnBackground = Color(0xFF191C1B)
-
 val LightGreenSurface = Color(0xFFFBFDFA)
 val LightGreenOnSurface = Color(0xFF191C1B)
 val LightGreenSurfaceVariant = Color(0xFFDBE5DE)
 val LightGreenOnSurfaceVariant = Color(0xFF404944)
 val LightGreenOutline = Color(0xFF707974)
 val LightGreenOutlineVariant = Color(0xFFBFC9C2)
+val LightGreenSurfaceContainer = Color(0xFFECEEEB)
+val LightGreenSurfaceContainerLowest = Color(0xFFFFFFFF)
 
 val DarkGreenPrimary = Color(0xFF4CE2A7)
 val DarkGreenOnPrimary = Color(0xFF003825)
 val DarkGreenPrimaryContainer = Color(0xFF005239)
 val DarkGreenOnPrimaryContainer = Color(0xFF89F8C8)
-
 val DarkGreenSecondary = Color(0xFFB3CCBE)
 val DarkGreenOnSecondary = Color(0xFF1E352B)
 val DarkGreenSecondaryContainer = Color(0xFF354B41)
 val DarkGreenOnSecondaryContainer = Color(0xFFCEE9DA)
-
 val DarkGreenTertiary = Color(0xFFA7CCE0)
 val DarkGreenOnTertiary = Color(0xFF0B3444)
 val DarkGreenTertiaryContainer = Color(0xFF254B5C)
 val DarkGreenOnTertiaryContainer = Color(0xFFC3E8FC)
-
 val DarkGreenError = Color(0xFFFFB4AB)
 val DarkGreenOnError = Color(0xFF690005)
 val DarkGreenErrorContainer = Color(0xFF93000A)
 val DarkGreenOnErrorContainer = Color(0xFFFFDAD6)
-
 val DarkGreenBackground = Color(0xFF191C1B)
 val DarkGreenOnBackground = Color(0xFFE1E3DF)
-
 val DarkGreenSurface = Color(0xFF191C1B)
 val DarkGreenOnSurface = Color(0xFFE1E3DF)
 val DarkGreenSurfaceVariant = Color(0xFF404944)
 val DarkGreenOnSurfaceVariant = Color(0xFFBFC9C2)
 val DarkGreenOutline = Color(0xFF8A938D)
 val DarkGreenOutlineVariant = Color(0xFF404944)
-
-val LightGreenSurfaceContainer = Color(0xFFECEEEB)
 val DarkGreenSurfaceContainer = Color(0xFF1E211F)
+val DarkGreenSurfaceContainerLowest = Color(0xFF0C0F0E)
 
-// Blue Theme - Light
+// --- BLUE THEME ---
 val LightBluePrimary = Color(0xFF36618E)
 val LightBlueOnPrimary = Color(0xFFFFFFFF)
 val LightBluePrimaryContainer = Color(0xFFD1E4FF)
@@ -92,8 +83,8 @@ val LightBlueOnSurfaceVariant = Color(0xFF43474E)
 val LightBlueOutline = Color(0xFF73777F)
 val LightBlueOutlineVariant = Color(0xFFC3C6CF)
 val LightBlueSurfaceContainer = Color(0xFFECEEF4)
+val LightBlueSurfaceContainerLowest = Color(0xFFFFFFFF)
 
-// Blue Theme - Dark
 val DarkBluePrimary = Color(0xFFA0CAFD)
 val DarkBlueOnPrimary = Color(0xFF003258)
 val DarkBluePrimaryContainer = Color(0xFF1A4975)
@@ -119,8 +110,9 @@ val DarkBlueOnSurfaceVariant = Color(0xFFC3C6CF)
 val DarkBlueOutline = Color(0xFF8D9199)
 val DarkBlueOutlineVariant = Color(0xFF43474E)
 val DarkBlueSurfaceContainer = Color(0xFF1D2024)
+val DarkBlueSurfaceContainerLowest = Color(0xFF0B0E11)
 
-// Red Theme - Light
+// --- RED THEME ---
 val LightRedPrimary = Color(0xFF904A45)
 val LightRedOnPrimary = Color(0xFFFFFFFF)
 val LightRedPrimaryContainer = Color(0xFFFFDAD6)
@@ -146,8 +138,8 @@ val LightRedOnSurfaceVariant = Color(0xFF534342)
 val LightRedOutline = Color(0xFF857371)
 val LightRedOutlineVariant = Color(0xFFD8C2BF)
 val LightRedSurfaceContainer = Color(0xFFFCEAE8)
+val LightRedSurfaceContainerLowest = Color(0xFFFFFFFF)
 
-// Red Theme - Dark
 val DarkRedPrimary = Color(0xFFFFB3AC)
 val DarkRedOnPrimary = Color(0xFF571E1B)
 val DarkRedPrimaryContainer = Color(0xFF73332F)
@@ -173,6 +165,7 @@ val DarkRedOnSurfaceVariant = Color(0xFFD8C2BF)
 val DarkRedOutline = Color(0xFFA08C8A)
 val DarkRedOutlineVariant = Color(0xFF534342)
 val DarkRedSurfaceContainer = Color(0xFF271D1C)
+val DarkRedSurfaceContainerLowest = Color(0xFF0F0807)
 
 // --- AMOLED BLACK-WHITE COLORS ---
 val LightAmoledPrimary = Color(0xFF000000)
@@ -200,6 +193,7 @@ val LightAmoledOnSurfaceVariant = Color(0xFF444444)
 val LightAmoledOutline = Color(0xFF777777)
 val LightAmoledOutlineVariant = Color(0xFFCCCCCC)
 val LightAmoledSurfaceContainer = Color(0xFFF2F2F2)
+val LightAmoledSurfaceContainerLowest = Color(0xFFFFFFFF)
 
 val DarkAmoledPrimary = Color(0xFFFFFFFF)
 val DarkAmoledOnPrimary = Color(0xFF000000)
@@ -219,13 +213,14 @@ val DarkAmoledErrorContainer = Color(0xFF93000A)
 val DarkAmoledOnErrorContainer = Color(0xFFFFDAD6)
 val DarkAmoledBackground = Color(0xFF000000)
 val DarkAmoledOnBackground = Color(0xFFFFFFFF)
-val DarkAmoledSurface = Color(0xFF000000)
+val DarkAmoledSurface = Color(0xFF121212)
 val DarkAmoledOnSurface = Color(0xFFFFFFFF)
 val DarkAmoledSurfaceVariant = Color(0xFF1A1A1A)
 val DarkAmoledOnSurfaceVariant = Color(0xFFCCCCCC)
 val DarkAmoledOutline = Color(0xFF444444)
 val DarkAmoledOutlineVariant = Color(0xFF222222)
-val DarkAmoledSurfaceContainer = Color(0xFF080808)
+val DarkAmoledSurfaceContainer = Color(0xFF121212)
+val DarkAmoledSurfaceContainerLowest = Color(0xFF000000)
 
 // --- COLORFUL AMOLED COLORS ---
 val LightColorfulAmoledPrimary = Color(0xFF006874)
@@ -248,6 +243,7 @@ val LightColorfulAmoledSurfaceVariant = Color(0xFFDBE4E6)
 val LightColorfulAmoledOnSurfaceVariant = Color(0xFF3F484A)
 val LightColorfulAmoledOutline = Color(0xFF6F797A)
 val LightColorfulAmoledSurfaceContainer = Color(0xFFEDF4F5)
+val LightColorfulAmoledSurfaceContainerLowest = Color(0xFFFFFFFF)
 val LightColorfulAmoledErrorContainer = Color(0xFFFFDAD6)
 val LightColorfulAmoledOnErrorContainer = Color(0xFF410002)
 val LightColorfulAmoledOnBackground = Color(0xFF171C1D)
@@ -272,10 +268,11 @@ val DarkColorfulAmoledErrorContainer = Color(0xFF93000A)
 val DarkColorfulAmoledOnErrorContainer = Color(0xFFFFDAD6)
 val DarkColorfulAmoledBackground = Color(0xFF000000)
 val DarkColorfulAmoledOnBackground = Color(0xFFE1E3E3)
-val DarkColorfulAmoledSurface = Color(0xFF000000)
+val DarkColorfulAmoledSurface = Color(0xFF121212)
 val DarkColorfulAmoledOnSurface = Color(0xFFE1E3E3)
 val DarkColorfulAmoledSurfaceVariant = Color(0xFF121212)
 val DarkColorfulAmoledOnSurfaceVariant = Color(0xFFBFC8CA)
 val DarkColorfulAmoledOutline = Color(0xFF00E5FF).copy(alpha = 0.5f)
 val DarkColorfulAmoledOutlineVariant = Color(0xFF3F484A)
-val DarkColorfulAmoledSurfaceContainer = Color(0xFF0A0A0A)
+val DarkColorfulAmoledSurfaceContainer = Color(0xFF000000)
+val DarkColorfulAmoledSurfaceContainerLowest = Color(0xFF000000)

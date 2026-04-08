@@ -47,6 +47,29 @@
     <string name="setup_step_7_desc">Recommandé pour surveiller le statut d\'exécution des scripts et recevoir des notifications sur les résultats.</string>
     <string name="grant_notification_permission_label">Activer les notifications</string>
     <string name="notification_permission_not_needed">Les notifications sont activées automatiquement sur les anciennes versions d\'Android.</string>
+    <string name="onboarding_welcome_title">Bienvenue sur Script Runner</string>
+    <string name="onboarding_welcome_desc">Le moyen le plus simple de relier votre interface Android à la puissance du terminal Termux.</string>
+    <string name="back_label">Retour</string>
+    <string name="next_label">Suivant</string>
+    <string name="to_run_scripts_in_the_background_without_interruptions_termux_needs_to_be_exempted_from_battery_optimization">Pour exécuter des scripts en arrière-plan sans interruption, Termux doit être exclu de l\'optimisation de la batterie.</string>
+    <string name="reliability_settings">Paramètres de fiabilité</string>
+    <string name="android_may_stop_background_scripts_if_battery_optimization_is_enabled_for_termux">Android peut arrêter les scripts en arrière-plan si l\'optimisation de la batterie est activée pour Termux.</string>
+    <string name="check_settings_again">Vérifier à nouveau les paramètres</string>
+    <string name="onboarding_battery_optimization">Note : Recherchez \'Batterie\' et \'Afficher sur d\'autres applications\' dans les paramètres de l\'application Termux.</string>
+    <string name="termux_install_warning">Termux est introuvable. Veuillez l\'installer pour continuer.</string>
+    <string name="title_manage_your_scripts">Gérez vos scripts</string>
+    <string name="body_manage_your_scripts">Gérez vos scripts sur l\'écran d\'accueil \n Changez leur ordre par simple glisser-déposer</string>
+    <string name="title_powerful_editor">Éditeur puissant</string>
+    <string name="body_powerful_editor">Éditeur avec des fonctionnalités améliorant le confort d\'utilisation</string>
+    <string name="title_automation">Automatisation</string>
+    <string name="body_automation">Quelques capacités d\'automatisation de base pour vos scripts</string>
+    <string name="title_quick_access_tiles">Tuiles d\'accès rapide</string>
+    <string name="body_quick_access_tiles">Tuiles d\'accès personnalisables depuis l\'application</string>
+    <string name="title_rice">Entièrement personnalisable</string>
+    <string name="body_rice">Vous pouvez créer vos propres thèmes de couleurs personnalisés</string>
+    <string name="termux_permission_warning">Cette autorisation est essentielle au fonctionnement de l\'application.</string>
+    <string name="title_promo">Simple. Puissant. Automatisé.</string>
+    <string name="surface_container_lowest">Conteneur de surface le plus bas</string>
 
     <!--Home -->
     <string name="home_title">Mes Scripts</string>

@@ -6,7 +6,6 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -39,7 +38,6 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuAnchorType
 import androidx.compose.material3.ExposedDropdownMenuBox
@@ -139,14 +137,15 @@ fun ScriptConfigDialog(
             },
         ) { padding ->
             Surface(
-                modifier = Modifier
-                    .padding(padding)
-                    .padding(horizontal = 8.dp)
-                    .padding(bottom = 8.dp)
-                    .fillMaxSize(),
+                modifier =
+                    Modifier
+                        .padding(padding)
+                        .padding(horizontal = 8.dp)
+                        .padding(bottom = 8.dp)
+                        .fillMaxSize(),
                 color = sheetContainerColor,
                 shape = RoundedCornerShape(32.dp),
-                shadowElevation = 1.dp
+                shadowElevation = 1.dp,
             ) {
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
@@ -401,9 +400,10 @@ private fun ConfigSection(
             modifier = Modifier.padding(start = 8.dp, bottom = 8.dp),
         )
         Card(
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surface,
-            ),
+            colors =
+                CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surface,
+                ),
             shape = RoundedCornerShape(24.dp),
         ) {
             Column(
@@ -413,6 +413,7 @@ private fun ConfigSection(
         }
     }
 }
+
 @Composable
 private fun PresetListManager(
     title: String,
@@ -538,9 +539,10 @@ private fun ConfigTopBar(
                 Icon(Icons.Default.Save, stringResource(R.string.cd_save))
             }
         },
-        colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = Color.Transparent
-        )
+        colors =
+            TopAppBarDefaults.topAppBarColors(
+                containerColor = Color.Transparent,
+            ),
     )
 }
 

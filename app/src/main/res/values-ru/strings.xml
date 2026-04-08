@@ -46,6 +46,29 @@
     <string name="setup_step_7_desc">Рекомендуется для мониторинга статуса выполнения скрипта и получения уведомлений о результатах.</string>
     <string name="grant_notification_permission_label">Включить уведомления</string>
     <string name="notification_permission_not_needed">Уведомления включены автоматически на более старых версиях Android.</string>
+    <string name="onboarding_welcome_title">Добро пожаловать в Script Runner</string>
+    <string name="onboarding_welcome_desc">Самый простой способ объединить интерфейс Android с мощью терминала Termux.</string>
+    <string name="back_label">Назад</string>
+    <string name="next_label">Далее</string>
+    <string name="to_run_scripts_in_the_background_without_interruptions_termux_needs_to_be_exempted_from_battery_optimization">Для бесперебойной работы скриптов в фоновом режиме необходимо исключить Termux из списка оптимизации заряда батареи.</string>
+    <string name="reliability_settings">Настройки надежности</string>
+    <string name="android_may_stop_background_scripts_if_battery_optimization_is_enabled_for_termux">Android может остановить фоновые скрипты, если для Termux включена оптимизация батареи.</string>
+    <string name="check_settings_again">Проверите настройки еще раз</string>
+    <string name="onboarding_battery_optimization">Примечание: Ищите разделы «Батарея» и «Поверх других приложений» в настройках приложения Termux.</string>
+    <string name="termux_install_warning">Termux не найден. Пожалуйста, установите его, чтобы продолжить.</string>
+    <string name="title_manage_your_scripts">Управление скриптами</string>
+    <string name="body_manage_your_scripts">Управляйте своими скриптами на главном экране \n Меняйте их порядок простым перетаскиванием</string>
+    <string name="title_powerful_editor">Мощный редактор</string>
+    <string name="body_powerful_editor">Редактор с функциями для удобства работы</string>
+    <string name="title_automation">Автоматизация</string>
+    <string name="body_automation">Базовые возможности автоматизации для ваших скриптов</string>
+    <string name="title_quick_access_tiles">Быстрые настройки</string>
+    <string name="body_quick_access_tiles">Настраиваемые плитки быстрого доступа из приложения</string>
+    <string name="title_rice">Полная кастомизация</string>
+    <string name="body_rice">Вы можете создавать свои собственные цветовые темы</string>
+    <string name="termux_permission_warning">Это разрешение необходимо для работы приложения.</string>
+    <string name="title_promo">Просто. Мощно. Автоматизировано.</string>
+    <string name="surface_container_lowest">Минимальный уровень контейнера поверхности</string>
 
     <!--Home -->
     <string name="home_title">Мои скрипты</string>

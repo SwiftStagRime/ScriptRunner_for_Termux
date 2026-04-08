@@ -288,15 +288,16 @@ private fun EditorAccessoryWrapper(
             Surface(
                 color = MaterialTheme.colorScheme.surfaceContainer,
                 shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable(onClick = onShow),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .clickable(onClick = onShow),
             ) {
                 Box(modifier = Modifier.height(36.dp), contentAlignment = Alignment.Center) {
                     Icon(
                         Icons.Default.KeyboardArrowUp,
                         stringResource(R.string.cd_show_toolbar),
-                        tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f)
+                        tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f),
                     )
                 }
             }
@@ -440,9 +441,10 @@ private fun MainEditorArea(
     focusRequester: FocusRequester,
     onBottomClick: () -> Unit,
 ) {
-    val bottomBuffer = with(LocalDensity.current) {
-        (TOOLBAR_HEIGHT_DP.dp + (EXTRA_LINES_COUNT * LINE_HEIGHT_SP).sp.toDp() + 120.dp)
-    }
+    val bottomBuffer =
+        with(LocalDensity.current) {
+            (TOOLBAR_HEIGHT_DP.dp + (EXTRA_LINES_COUNT * LINE_HEIGHT_SP).sp.toDp() + 120.dp)
+        }
 
     Row(modifier = Modifier.fillMaxWidth().background(Color.Transparent)) {
         LineNumberGutter(code.text, textLayoutResult, scrollState, EXTRA_LINES_COUNT, TOOLBAR_HEIGHT_DP.dp)
@@ -469,15 +471,16 @@ private fun MainEditorArea(
                         ),
                     cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
                     visualTransformation = visualTransformation,
-                    modifier = Modifier
-                        .then(if (isWrappingEnabled) Modifier.fillMaxWidth() else Modifier)
-                        .padding(horizontal = 12.dp)
-                        .padding(top = 16.dp)
-                        .focusRequester(focusRequester)
-                        .focusProperties {
-                            up = FocusRequester.Cancel
-                            down = FocusRequester.Cancel
-                        }.testTag("code_editor_input"),
+                    modifier =
+                        Modifier
+                            .then(if (isWrappingEnabled) Modifier.fillMaxWidth() else Modifier)
+                            .padding(horizontal = 12.dp)
+                            .padding(top = 16.dp)
+                            .focusRequester(focusRequester)
+                            .focusProperties {
+                                up = FocusRequester.Cancel
+                                down = FocusRequester.Cancel
+                            }.testTag("code_editor_input"),
                     decorationBox = { inner ->
                         Column(modifier = Modifier.fillMaxWidth()) {
                             Box {
@@ -563,7 +566,7 @@ fun EditorSearchBar(
         Surface(
             color = MaterialTheme.colorScheme.surfaceContainer,
             modifier = Modifier.fillMaxWidth(),
-            shadowElevation = 1.dp
+            shadowElevation = 1.dp,
         ) {
             Row(
                 modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
@@ -676,12 +679,13 @@ private fun LineNumberGutter(
     val lineHeight = 20.sp
 
     Column(
-        modifier = modifier
-            .width(48.dp)
-            .fillMaxHeight()
-            .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f))
-            .verticalScroll(scrollState)
-            .padding(top = 16.dp),
+        modifier =
+            modifier
+                .width(48.dp)
+                .fillMaxHeight()
+                .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f))
+                .verticalScroll(scrollState)
+                .padding(top = 16.dp),
         horizontalAlignment = Alignment.End,
     ) {
         if (layoutResult != null) {
@@ -804,7 +808,7 @@ private fun EditorAccessoryToolbar(
         Surface(
             color = MaterialTheme.colorScheme.surfaceContainer,
             shadowElevation = 4.dp,
-            shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)
+            shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
         ) {
             Column {
                 Row(

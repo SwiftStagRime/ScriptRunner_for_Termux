@@ -36,7 +36,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.colorScheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
@@ -84,7 +83,7 @@ fun CustomThemeScreen(
                     Text(
                         stringResource(R.string.custom_themes_title),
                         style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.SemiBold
+                        fontWeight = FontWeight.SemiBold,
                     )
                 },
                 navigationIcon = {
@@ -102,41 +101,44 @@ fun CustomThemeScreen(
                         }
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color.Transparent,
-                    scrolledContainerColor = Color.Transparent
-                )
+                colors =
+                    TopAppBarDefaults.topAppBarColors(
+                        containerColor = Color.Transparent,
+                        scrolledContainerColor = Color.Transparent,
+                    ),
             )
-        }
+        },
     ) { padding ->
         Surface(
-            modifier = Modifier
-                .padding(padding)
-                .padding(horizontal = 8.dp)
-                .padding(bottom = 8.dp)
-                .fillMaxSize(),
+            modifier =
+                Modifier
+                    .padding(padding)
+                    .padding(horizontal = 8.dp)
+                    .padding(bottom = 8.dp)
+                    .fillMaxSize(),
             color = sheetContainerColor,
             shape = RoundedCornerShape(32.dp),
-            shadowElevation = 1.dp
+            shadowElevation = 1.dp,
         ) {
             Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(vertical = 16.dp)
+                modifier =
+                    Modifier
+                        .fillMaxSize()
+                        .padding(vertical = 16.dp),
             ) {
                 Box(modifier = Modifier.padding(horizontal = 16.dp)) {
                     ThemeSelectionRow(
                         savedThemes = state.savedThemes,
                         selectedThemeId = state.selectedThemeId,
                         onNewTheme = actions.onNewTheme,
-                        onThemeSelect = actions.onThemeSelect
+                        onThemeSelect = actions.onThemeSelect,
                     )
                 }
 
                 HorizontalDivider(
                     modifier = Modifier.padding(vertical = 16.dp, horizontal = 24.dp),
                     thickness = 1.dp,
-                    color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)
+                    color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f),
                 )
 
                 if (state.editingTheme != null) {
@@ -144,19 +146,20 @@ fun CustomThemeScreen(
                         theme = state.editingTheme,
                         onNameChange = actions.onNameChange,
                         onColorChange = actions.onColorChange,
-                        onToggleDarkMode = actions.onToggleDarkMode
+                        onToggleDarkMode = actions.onToggleDarkMode,
                     )
                 } else {
                     Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(bottom = 32.dp),
-                        contentAlignment = Alignment.Center
+                        modifier =
+                            Modifier
+                                .fillMaxSize()
+                                .padding(bottom = 32.dp),
+                        contentAlignment = Alignment.Center,
                     ) {
                         Text(
                             text = stringResource(R.string.select_or_create_theme_hint),
                             style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }
                 }
@@ -170,23 +173,24 @@ private fun ThemeSelectionRow(
     savedThemes: List<CustomTheme>,
     selectedThemeId: Int?,
     onNewTheme: () -> Unit,
-    onThemeSelect: (CustomTheme) -> Unit
+    onThemeSelect: (CustomTheme) -> Unit,
 ) {
     LazyRow(
         contentPadding = PaddingValues(16.dp),
         horizontalArrangement = Arrangement.spacedBy(16.dp),
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         item {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Box(
-                    modifier = Modifier
-                        .size(56.dp)
-                        .clip(CircleShape)
-                        .background(colorScheme.surfaceVariant)
-                        .clickable { onNewTheme() }
-                        .border(1.dp, colorScheme.outline, CircleShape),
-                    contentAlignment = Alignment.Center
+                    modifier =
+                        Modifier
+                            .size(56.dp)
+                            .clip(CircleShape)
+                            .background(colorScheme.surfaceVariant)
+                            .clickable { onNewTheme() }
+                            .border(1.dp, colorScheme.outline, CircleShape),
+                    contentAlignment = Alignment.Center,
                 ) {
                     Icon(Icons.Default.Add, contentDescription = null)
                 }
@@ -200,7 +204,7 @@ private fun ThemeSelectionRow(
             ThemeCircleItem(
                 theme = theme,
                 isSelected = isSelected,
-                onClick = { onThemeSelect(theme) }
+                onClick = { onThemeSelect(theme) },
             )
         }
     }
@@ -210,24 +214,25 @@ private fun ThemeSelectionRow(
 private fun ThemeCircleItem(
     theme: CustomTheme,
     isSelected: Boolean,
-    onClick: () -> Unit
+    onClick: () -> Unit,
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.width(64.dp)
+        modifier = Modifier.width(64.dp),
     ) {
         Box(
-            modifier = Modifier
-                .size(56.dp)
-                .clip(CircleShape)
-                .background(Color(theme.primary))
-                .clickable { onClick() }
-                .border(
-                    width = if (isSelected) 3.dp else 1.dp,
-                    color = if (isSelected) colorScheme.primary else MaterialTheme.outlineVariant(),
-                    shape = CircleShape
-                ),
-            contentAlignment = Alignment.Center
+            modifier =
+                Modifier
+                    .size(56.dp)
+                    .clip(CircleShape)
+                    .background(Color(theme.primary))
+                    .clickable { onClick() }
+                    .border(
+                        width = if (isSelected) 3.dp else 1.dp,
+                        color = if (isSelected) colorScheme.primary else MaterialTheme.outlineVariant(),
+                        shape = CircleShape,
+                    ),
+            contentAlignment = Alignment.Center,
         ) {
             if (isSelected) {
                 Icon(Icons.Default.Check, contentDescription = null, tint = Color.White)
@@ -238,7 +243,7 @@ private fun ThemeCircleItem(
             text = theme.name,
             style = MaterialTheme.typography.labelMedium,
             maxLines = 1,
-            overflow = TextOverflow.Ellipsis
+            overflow = TextOverflow.Ellipsis,
         )
     }
 }
@@ -248,12 +253,12 @@ private fun ThemeEditorForm(
     theme: CustomTheme,
     onNameChange: (String) -> Unit,
     onColorChange: (String, Color) -> Unit,
-    onToggleDarkMode: (Boolean) -> Unit
+    onToggleDarkMode: (Boolean) -> Unit,
 ) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+        verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         item {
             StyledTextField(
@@ -261,7 +266,7 @@ private fun ThemeEditorForm(
                 onValueChange = onNameChange,
                 label = stringResource(R.string.theme_name_label),
                 modifier = Modifier.fillMaxWidth(),
-                singleLine = true
+                singleLine = true,
             )
         }
 
@@ -269,7 +274,7 @@ private fun ThemeEditorForm(
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
+                horizontalArrangement = Arrangement.SpaceBetween,
             ) {
                 Text(stringResource(R.string.dark_mode_label), style = MaterialTheme.typography.titleMedium)
                 Switch(checked = theme.isDark, onCheckedChange = onToggleDarkMode)
@@ -277,61 +282,67 @@ private fun ThemeEditorForm(
         }
 
         item { ColorGroupHeader(stringResource(R.string.color_primary)) }
-        val primaryGroup = listOf(
-            "primary" to R.string.color_primary,
-            "onPrimary" to R.string.color_on_primary,
-            "primaryContainer" to R.string.color_primary_container,
-            "onPrimaryContainer" to R.string.color_on_primary_container
-        )
+        val primaryGroup =
+            listOf(
+                "primary" to R.string.color_primary,
+                "onPrimary" to R.string.color_on_primary,
+                "primaryContainer" to R.string.color_primary_container,
+                "onPrimaryContainer" to R.string.color_on_primary_container,
+            )
         items(primaryGroup) { (key, label) ->
             ColorRow(stringResource(label), getThemeColorByKey(theme, key)) { onColorChange(key, it) }
         }
 
         item { ColorGroupHeader(stringResource(R.string.color_secondary)) }
-        val secondaryGroup = listOf(
-            "secondary" to R.string.color_secondary,
-            "onSecondary" to R.string.color_on_secondary,
-            "secondaryContainer" to R.string.color_secondary_container,
-            "onSecondaryContainer" to R.string.color_on_secondary_container
-        )
+        val secondaryGroup =
+            listOf(
+                "secondary" to R.string.color_secondary,
+                "onSecondary" to R.string.color_on_secondary,
+                "secondaryContainer" to R.string.color_secondary_container,
+                "onSecondaryContainer" to R.string.color_on_secondary_container,
+            )
         items(secondaryGroup) { (key, label) ->
             ColorRow(stringResource(label), getThemeColorByKey(theme, key)) { onColorChange(key, it) }
         }
 
         item { ColorGroupHeader(stringResource(R.string.color_tertiary)) }
-        val tertiaryGroup = listOf(
-            "tertiary" to R.string.color_tertiary,
-            "onTertiary" to R.string.color_on_tertiary,
-            "tertiaryContainer" to R.string.color_tertiary_container,
-            "onTertiaryContainer" to R.string.color_on_tertiary_container
-        )
+        val tertiaryGroup =
+            listOf(
+                "tertiary" to R.string.color_tertiary,
+                "onTertiary" to R.string.color_on_tertiary,
+                "tertiaryContainer" to R.string.color_tertiary_container,
+                "onTertiaryContainer" to R.string.color_on_tertiary_container,
+            )
         items(tertiaryGroup) { (key, label) ->
             ColorRow(stringResource(label), getThemeColorByKey(theme, key)) { onColorChange(key, it) }
         }
 
         item { ColorGroupHeader(stringResource(R.string.surfaces_background)) }
-        val surfaceGroup = listOf(
-            "background" to R.string.color_background,
-            "onBackground" to R.string.color_on_background,
-            "surface" to R.string.color_surface,
-            "onSurface" to R.string.color_on_surface,
-            "surfaceVariant" to R.string.color_surface_variant,
-            "onSurfaceVariant" to R.string.color_on_surface_variant,
-            "surfaceContainer" to R.string.color_surface_container
-        )
+        val surfaceGroup =
+            listOf(
+                "background" to R.string.color_background,
+                "onBackground" to R.string.color_on_background,
+                "surface" to R.string.color_surface,
+                "onSurface" to R.string.color_on_surface,
+                "surfaceVariant" to R.string.color_surface_variant,
+                "onSurfaceVariant" to R.string.color_on_surface_variant,
+                "surfaceContainer" to R.string.color_surface_container,
+                "surfaceContainerLowest" to R.string.surface_container_lowest,
+            )
         items(surfaceGroup) { (key, label) ->
             ColorRow(stringResource(label), getThemeColorByKey(theme, key)) { onColorChange(key, it) }
         }
 
         item { ColorGroupHeader(stringResource(R.string.utility)) }
-        val utilGroup = listOf(
-            "outline" to R.string.color_outline,
-            "outlineVariant" to R.string.color_outline_variant,
-            "error" to R.string.color_error,
-            "errorContainer" to R.string.color_error_container,
-            "onError" to R.string.color_on_error,
-            "onErrorContainer" to R.string.color_on_error_container
-        )
+        val utilGroup =
+            listOf(
+                "outline" to R.string.color_outline,
+                "outlineVariant" to R.string.color_outline_variant,
+                "error" to R.string.color_error,
+                "errorContainer" to R.string.color_error_container,
+                "onError" to R.string.color_on_error,
+                "onErrorContainer" to R.string.color_on_error_container,
+            )
         items(utilGroup) { (key, label) ->
             ColorRow(stringResource(label), getThemeColorByKey(theme, key)) { onColorChange(key, it) }
         }
@@ -344,7 +355,7 @@ private fun ColorGroupHeader(title: String) {
         text = title,
         style = MaterialTheme.typography.titleSmall,
         color = MaterialTheme.colorScheme.primary,
-        modifier = Modifier.padding(top = 8.dp)
+        modifier = Modifier.padding(top = 8.dp),
     )
 }
 
@@ -352,18 +363,19 @@ private fun ColorGroupHeader(title: String) {
 private fun ColorRow(
     label: String,
     color: Color,
-    onColorChange: (Color) -> Unit
+    onColorChange: (Color) -> Unit,
 ) {
     var showPicker by remember { mutableStateOf(false) }
 
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(8.dp))
-            .clickable { showPicker = true }
-            .padding(vertical = 12.dp, horizontal = 8.dp),
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(8.dp))
+                .clickable { showPicker = true }
+                .padding(vertical = 12.dp, horizontal = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
+        horizontalArrangement = Arrangement.SpaceBetween,
     ) {
         Text(text = label, style = MaterialTheme.typography.bodyLarge)
 
@@ -371,7 +383,7 @@ private fun ColorRow(
             modifier = Modifier.size(40.dp),
             shape = RoundedCornerShape(8.dp),
             color = color,
-            border = BorderStroke(1.dp, colorScheme.outlineVariant)
+            border = BorderStroke(1.dp, colorScheme.outlineVariant),
         ) {}
     }
 
@@ -382,7 +394,7 @@ private fun ColorRow(
             onColorSelected = {
                 onColorChange(it)
                 showPicker = false
-            }
+            },
         )
     }
 }
@@ -392,7 +404,7 @@ private fun ColorRow(
 fun SimpleColorPicker(
     initialColor: Color,
     onDismiss: () -> Unit,
-    onColorSelected: (Color) -> Unit
+    onColorSelected: (Color) -> Unit,
 ) {
     var hsv by remember {
         val hsvArray = FloatArray(3)
@@ -400,9 +412,10 @@ fun SimpleColorPicker(
         mutableStateOf(Triple(hsvArray[0], hsvArray[1], hsvArray[2]))
     }
 
-    val currentColor = remember(hsv) {
-        Color(android.graphics.Color.HSVToColor(floatArrayOf(hsv.first, hsv.second, hsv.third)))
-    }
+    val currentColor =
+        remember(hsv) {
+            Color(android.graphics.Color.HSVToColor(floatArrayOf(hsv.first, hsv.second, hsv.third)))
+        }
 
     var hexText by remember {
         mutableStateOf(String.format("%06X", (0xFFFFFF and currentColor.toArgb())))
@@ -424,15 +437,16 @@ fun SimpleColorPicker(
         text = {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+                verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
                 Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(80.dp)
-                        .clip(RoundedCornerShape(8.dp))
-                        .background(currentColor)
-                        .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(8.dp))
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .height(80.dp)
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(currentColor)
+                            .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(8.dp)),
                 )
 
                 StyledTextField(
@@ -449,15 +463,17 @@ fun SimpleColorPicker(
                                 val hsvArray = FloatArray(3)
                                 android.graphics.Color.colorToHSV(parsedColor, hsvArray)
                                 hsv = Triple(hsvArray[0], hsvArray[1], hsvArray[2])
-                            } catch (_: Exception) {}
+                            } catch (_: Exception) {
+                            }
                         }
                     },
                     modifier = Modifier.fillMaxWidth(),
                     leadingIcon = { Icon(Icons.Default.Tag, contentDescription = null) },
-                    keyboardOptions = KeyboardOptions(
-                        capitalization = KeyboardCapitalization.Characters,
-                        imeAction = ImeAction.Done
-                    )
+                    keyboardOptions =
+                        KeyboardOptions(
+                            capitalization = KeyboardCapitalization.Characters,
+                            imeAction = ImeAction.Done,
+                        ),
                 )
 
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -469,7 +485,7 @@ fun SimpleColorPicker(
                             hexText = String.format("%06X", (0xFFFFFF and currentColor.toArgb()))
                         },
                         valueRange = 0f..360f,
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
                     )
 
                     Text(stringResource(R.string.saturation), style = MaterialTheme.typography.labelMedium)
@@ -480,7 +496,7 @@ fun SimpleColorPicker(
                             hexText = String.format("%06X", (0xFFFFFF and currentColor.toArgb()))
                         },
                         valueRange = 0f..1f,
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
                     )
 
                     Text(stringResource(R.string.brightness), style = MaterialTheme.typography.labelMedium)
@@ -491,43 +507,47 @@ fun SimpleColorPicker(
                             hexText = String.format("%06X", (0xFFFFFF and currentColor.toArgb()))
                         },
                         valueRange = 0f..1f,
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
                     )
                 }
             }
-        }
+        },
     )
 }
 
-private fun getThemeColorByKey(theme: CustomTheme, key: String): Color {
-    val longVal = when (key) {
-        "primary" -> theme.primary
-        "onPrimary" -> theme.onPrimary
-        "primaryContainer" -> theme.primaryContainer
-        "onPrimaryContainer" -> theme.onPrimaryContainer
-        "secondary" -> theme.secondary
-        "onSecondary" -> theme.onSecondary
-        "secondaryContainer" -> theme.secondaryContainer
-        "onSecondaryContainer" -> theme.onSecondaryContainer
-        "tertiary" -> theme.tertiary
-        "onTertiary" -> theme.onTertiary
-        "tertiaryContainer" -> theme.tertiaryContainer
-        "onTertiaryContainer" -> theme.onTertiaryContainer
-        "error" -> theme.error
-        "onError" -> theme.onError
-        "errorContainer" -> theme.errorContainer
-        "onErrorContainer" -> theme.onErrorContainer
-        "background" -> theme.background
-        "onBackground" -> theme.onBackground
-        "surface" -> theme.surface
-        "onSurface" -> theme.onSurface
-        "surfaceVariant" -> theme.surfaceVariant
-        "onSurfaceVariant" -> theme.onSurfaceVariant
-        "outline" -> theme.outline
-        "outlineVariant" -> theme.outlineVariant
-        "surfaceContainer" -> theme.surfaceContainer
-        else -> theme.primary
-    }
+private fun getThemeColorByKey(
+    theme: CustomTheme,
+    key: String,
+): Color {
+    val longVal =
+        when (key) {
+            "primary" -> theme.primary
+            "onPrimary" -> theme.onPrimary
+            "primaryContainer" -> theme.primaryContainer
+            "onPrimaryContainer" -> theme.onPrimaryContainer
+            "secondary" -> theme.secondary
+            "onSecondary" -> theme.onSecondary
+            "secondaryContainer" -> theme.secondaryContainer
+            "onSecondaryContainer" -> theme.onSecondaryContainer
+            "tertiary" -> theme.tertiary
+            "onTertiary" -> theme.onTertiary
+            "tertiaryContainer" -> theme.tertiaryContainer
+            "onTertiaryContainer" -> theme.onTertiaryContainer
+            "error" -> theme.error
+            "onError" -> theme.onError
+            "errorContainer" -> theme.errorContainer
+            "onErrorContainer" -> theme.onErrorContainer
+            "background" -> theme.background
+            "onBackground" -> theme.onBackground
+            "surface" -> theme.surface
+            "onSurface" -> theme.onSurface
+            "surfaceVariant" -> theme.surfaceVariant
+            "onSurfaceVariant" -> theme.onSurfaceVariant
+            "outline" -> theme.outline
+            "outlineVariant" -> theme.outlineVariant
+            "surfaceContainer" -> theme.surfaceContainer
+            else -> theme.primary
+        }
     return Color(longVal.toInt())
 }
 
@@ -537,116 +557,126 @@ fun MaterialTheme.outlineVariant() = colorScheme.outlineVariant
 @Preview(showBackground = true, name = "Custom Theme Editor")
 @Composable
 private fun CustomThemeScreenPreview() {
-    val mockThemes = listOf(
-        CustomTheme(
-            id = 1, name = "Matrix", primary = 0xFF00FF00, isDark = true, onPrimary = 0xFF000000,
-            primaryContainer = 0xFF000000,
-            onPrimaryContainer = 0xFF000000,
-            secondary = 0xFF000000,
-            onSecondary = 0xFF000000,
-            secondaryContainer = 0xFF000000,
-            onSecondaryContainer = 0xFF000000,
-            tertiary = 0xFF000000,
-            onTertiary = 0xFF000000,
-            tertiaryContainer = 0xFF000000,
-            onTertiaryContainer = 0xFF000000,
-            error = 0xFF000000,
-            onError = 0xFF000000,
-            errorContainer = 0xFF000000,
-            onErrorContainer = 0xFF000000,
-            background = 0xFF000000,
-            onBackground = 0xFF000000,
-            surface = 0xFF000000,
-            onSurface = 0xFF000000,
-            surfaceVariant = 0xFF000000,
-            onSurfaceVariant = 0xFF000000,
-            outline = 0xFF000000,
-            outlineVariant = 0xFF000000,
-            surfaceContainer = 0xFF000000,
-        ),
-        CustomTheme(
-            id = 2,
-            name = "Nord",
-            primary = 0xFF88C0D0,
-            isDark = true,
-            onPrimary = 0xFF2E3440,
-            primaryContainer = 0xFF000000,
-            onPrimaryContainer = 0xFF000000,
-            secondary = 0xFF000000,
-            onSecondary = 0xFF000000,
-            secondaryContainer = 0xFF000000,
-            onSecondaryContainer = 0xFF000000,
-            tertiary = 0xFF000000,
-            onTertiary = 0xFF000000,
-            tertiaryContainer = 0xFF000000,
-            onTertiaryContainer = 0xFF000000,
-            error = 0xFF000000,
-            onError = 0xFF000000,
-            errorContainer = 0xFF000000,
-            onErrorContainer = 0xFF000000,
-            background = 0xFF000000,
-            onBackground = 0xFF000000,
-            surface = 0xFF000000,
-            onSurface = 0xFF000000,
-            surfaceVariant = 0xFF000000,
-            onSurfaceVariant = 0xFF000000,
-            outline = 0xFF000000,
-            outlineVariant = 0xFF000000,
-            surfaceContainer = 0xFF000000,
-        ),
-        CustomTheme(
-            id = 3,
-            name = "Solarized",
-            primary = 0xFFB58900,
-            isDark = false,
-            onPrimary = 0xFFFFFFFF,
-            primaryContainer = 0xFF000000,
-            onPrimaryContainer = 0xFF000000,
-            secondary = 0xFF000000,
-            onSecondary = 0xFF000000,
-            secondaryContainer = 0xFF000000,
-            onSecondaryContainer = 0xFF000000,
-            tertiary = 0xFF000000,
-            onTertiary = 0xFF000000,
-            tertiaryContainer = 0xFF000000,
-            onTertiaryContainer = 0xFF000000,
-            error = 0xFF000000,
-            onError = 0xFF000000,
-            errorContainer = 0xFF000000,
-            onErrorContainer = 0xFF000000,
-            background = 0xFF000000,
-            onBackground = 0xFF000000,
-            surface = 0xFF000000,
-            onSurface = 0xFF000000,
-            surfaceVariant = 0xFF000000,
-            onSurfaceVariant = 0xFF000000,
-            outline = 0xFF000000,
-            outlineVariant = 0xFF000000,
-            surfaceContainer = 0xFF000000,
+    val mockThemes =
+        listOf(
+            CustomTheme(
+                id = 1,
+                name = "Matrix",
+                primary = 0xFF00FF00,
+                isDark = true,
+                onPrimary = 0xFF000000,
+                primaryContainer = 0xFF000000,
+                onPrimaryContainer = 0xFF000000,
+                secondary = 0xFF000000,
+                onSecondary = 0xFF000000,
+                secondaryContainer = 0xFF000000,
+                onSecondaryContainer = 0xFF000000,
+                tertiary = 0xFF000000,
+                onTertiary = 0xFF000000,
+                tertiaryContainer = 0xFF000000,
+                onTertiaryContainer = 0xFF000000,
+                error = 0xFF000000,
+                onError = 0xFF000000,
+                errorContainer = 0xFF000000,
+                onErrorContainer = 0xFF000000,
+                background = 0xFF000000,
+                onBackground = 0xFF000000,
+                surface = 0xFF000000,
+                onSurface = 0xFF000000,
+                surfaceVariant = 0xFF000000,
+                onSurfaceVariant = 0xFF000000,
+                outline = 0xFF000000,
+                outlineVariant = 0xFF000000,
+                surfaceContainer = 0xFF000000,
+                surfaceContainerLowest = 0xFF00000,
+            ),
+            CustomTheme(
+                id = 2,
+                name = "Nord",
+                primary = 0xFF88C0D0,
+                isDark = true,
+                onPrimary = 0xFF2E3440,
+                primaryContainer = 0xFF000000,
+                onPrimaryContainer = 0xFF000000,
+                secondary = 0xFF000000,
+                onSecondary = 0xFF000000,
+                secondaryContainer = 0xFF000000,
+                onSecondaryContainer = 0xFF000000,
+                tertiary = 0xFF000000,
+                onTertiary = 0xFF000000,
+                tertiaryContainer = 0xFF000000,
+                onTertiaryContainer = 0xFF000000,
+                error = 0xFF000000,
+                onError = 0xFF000000,
+                errorContainer = 0xFF000000,
+                onErrorContainer = 0xFF000000,
+                background = 0xFF000000,
+                onBackground = 0xFF000000,
+                surface = 0xFF000000,
+                onSurface = 0xFF000000,
+                surfaceVariant = 0xFF000000,
+                onSurfaceVariant = 0xFF000000,
+                outline = 0xFF000000,
+                outlineVariant = 0xFF000000,
+                surfaceContainer = 0xFF000000,
+                surfaceContainerLowest = 0xFF00000,
+            ),
+            CustomTheme(
+                id = 3,
+                name = "Solarized",
+                primary = 0xFFB58900,
+                isDark = false,
+                onPrimary = 0xFFFFFFFF,
+                primaryContainer = 0xFF000000,
+                onPrimaryContainer = 0xFF000000,
+                secondary = 0xFF000000,
+                onSecondary = 0xFF000000,
+                secondaryContainer = 0xFF000000,
+                onSecondaryContainer = 0xFF000000,
+                tertiary = 0xFF000000,
+                onTertiary = 0xFF000000,
+                tertiaryContainer = 0xFF000000,
+                onTertiaryContainer = 0xFF000000,
+                error = 0xFF000000,
+                onError = 0xFF000000,
+                errorContainer = 0xFF000000,
+                onErrorContainer = 0xFF000000,
+                background = 0xFF000000,
+                onBackground = 0xFF000000,
+                surface = 0xFF000000,
+                onSurface = 0xFF000000,
+                surfaceVariant = 0xFF000000,
+                onSurfaceVariant = 0xFF000000,
+                outline = 0xFF000000,
+                outlineVariant = 0xFF000000,
+                surfaceContainer = 0xFF000000,
+                surfaceContainerLowest = 0xFF00000,
+            ),
         )
-    )
 
-    val state = CustomThemeUiState(
-        savedThemes = mockThemes,
-        selectedThemeId = 2,
-        editingTheme = mockThemes[1]
-    )
+    val state =
+        CustomThemeUiState(
+            savedThemes = mockThemes,
+            selectedThemeId = 2,
+            editingTheme = mockThemes[1],
+        )
 
-    val actions = CustomThemeActions(
-        onBack = {},
-        onNewTheme = {},
-        onThemeSelect = {},
-        onNameChange = {},
-        onColorChange = { _, _ -> },
-        onSave = {},
-        onDelete = {},
-        onToggleDarkMode = {}
-    )
+    val actions =
+        CustomThemeActions(
+            onBack = {},
+            onNewTheme = {},
+            onThemeSelect = {},
+            onNameChange = {},
+            onColorChange = { _, _ -> },
+            onSave = {},
+            onDelete = {},
+            onToggleDarkMode = {},
+        )
 
     MaterialTheme {
         CustomThemeScreen(
             state = state,
-            actions = actions
+            actions = actions,
         )
     }
 }

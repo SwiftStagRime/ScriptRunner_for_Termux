@@ -41,19 +41,18 @@ class MainViewModel
             userPreferencesRepository.selectedMode
                 .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), ThemeMode.SYSTEM)
 
-    @OptIn(ExperimentalCoroutinesApi::class)
-    val customTheme = userPreferencesRepository.selectedCustomThemeId
-        .flatMapLatest { id ->
-            if (id != null) {
-                customThemeRepository.getThemeByIdFlow(id)
-            } else {
-                flowOf(null)
-            }
-        }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
+        @OptIn(ExperimentalCoroutinesApi::class)
+        val customTheme =
+            userPreferencesRepository.selectedCustomThemeId
+                .flatMapLatest { id ->
+                    if (id != null) {
+                        customThemeRepository.getThemeByIdFlow(id)
+                    } else {
+                        flowOf(null)
+                    }
+                }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
 
-
-    init {
+        init {
             viewModelScope.launch {
                 userPreferencesRepository.hasCompletedOnboarding.take(1).collect { completed ->
                     if (_backStack.isEmpty()) {

@@ -69,7 +69,6 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
-import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -172,25 +171,27 @@ fun HomeScreen(
         floatingActionButton = {
             FloatingActionButton(
                 onClick = actions.onAddClick,
-                modifier = Modifier
-                    .testTag("fab_add_script")
-                    .padding(end = 8.dp, bottom = 8.dp),
+                modifier =
+                    Modifier
+                        .testTag("fab_add_script")
+                        .padding(end = 8.dp, bottom = 8.dp),
                 containerColor = MaterialTheme.colorScheme.primaryContainer,
-                elevation = FloatingActionButtonDefaults.elevation(defaultElevation = 4.dp)
+                elevation = FloatingActionButtonDefaults.elevation(defaultElevation = 4.dp),
             ) {
                 Icon(Icons.Default.Add, stringResource(R.string.cd_add_script))
             }
         },
     ) { padding ->
         Surface(
-            modifier = Modifier
-                .padding(padding)
-                .padding(horizontal = 8.dp)
-                .padding(bottom = 8.dp)
-                .fillMaxSize(),
+            modifier =
+                Modifier
+                    .padding(padding)
+                    .padding(horizontal = 8.dp)
+                    .padding(bottom = 8.dp)
+                    .fillMaxSize(),
             color = sheetContainerColor,
             shape = RoundedCornerShape(32.dp),
-            shadowElevation = 1.dp
+            shadowElevation = 1.dp,
         ) {
             Box(modifier = Modifier.fillMaxSize()) {
                 when (uiState) {
@@ -261,23 +262,27 @@ private fun CollapsingHomeTopBar(
                         }
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color.Transparent,
-                    titleContentColor = MaterialTheme.colorScheme.onSurface,
-                ),
+                colors =
+                    TopAppBarDefaults.topAppBarColors(
+                        containerColor = Color.Transparent,
+                        titleContentColor = MaterialTheme.colorScheme.onSurface,
+                    ),
             )
         } else {
             LargeTopAppBar(
                 scrollBehavior = scrollBehavior,
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color.Transparent,
-                    scrolledContainerColor = appBarBgColor,
-                    titleContentColor = MaterialTheme.colorScheme.onSurface,
-                ),
+                colors =
+                    TopAppBarDefaults.topAppBarColors(
+                        containerColor = Color.Transparent,
+                        scrolledContainerColor = Color.Transparent,
+                        navigationIconContentColor = MaterialTheme.colorScheme.onSurface,
+                        titleContentColor = MaterialTheme.colorScheme.onSurface,
+                        actionIconContentColor = MaterialTheme.colorScheme.onSurface,
+                    ),
                 title = {
                     Text(
                         stringResource(R.string.home_title),
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
                     )
                 },
                 actions = {
@@ -896,7 +901,7 @@ private fun CategoryChip(
         if (isSelected) {
             MaterialTheme.colorScheme.primary
         } else {
-            MaterialTheme.colorScheme.onSurfaceVariant
+            MaterialTheme.colorScheme.onPrimaryContainer
         }
 
     val borderColor =

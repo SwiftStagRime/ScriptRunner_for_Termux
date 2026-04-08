@@ -16,46 +16,47 @@ import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
-class OnboardingViewModel @Inject constructor(
-    private val termuxRepository: TermuxRepository,
-    private val userPreferencesRepository: UserPreferencesRepository,
-    @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
-) : ViewModel() {
+class OnboardingViewModel
+    @Inject
+    constructor(
+        private val termuxRepository: TermuxRepository,
+        private val userPreferencesRepository: UserPreferencesRepository,
+        @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
+    ) : ViewModel() {
+        private val _uiState = MutableStateFlow(OnboardingUiState())
+        val uiState = _uiState.asStateFlow()
 
-    private val _uiState = MutableStateFlow(OnboardingUiState())
-    val uiState = _uiState.asStateFlow()
+        init {
+            checkStatus()
+        }
 
-    init {
-        checkStatus()
-    }
+        fun checkStatus() {
+            viewModelScope.launch(ioDispatcher) {
+                val installed = termuxRepository.isTermuxInstalled()
+                val permitted = termuxRepository.isPermissionGranted()
+                val batteryUnrestricted = termuxRepository.isTermuxBatteryOptimized()
 
-    fun checkStatus() {
-        viewModelScope.launch(ioDispatcher) {
-            val installed = termuxRepository.isTermuxInstalled()
-            val permitted = termuxRepository.isPermissionGranted()
-            val batteryUnrestricted = termuxRepository.isTermuxBatteryOptimized()
+                _uiState.update {
+                    it.copy(
+                        isTermuxInstalled = installed,
+                        isPermissionGranted = permitted,
+                        isBatteryUnrestricted = batteryUnrestricted,
+                        isLoading = false,
+                    )
+                }
+            }
+        }
 
-            _uiState.update {
-                it.copy(
-                    isTermuxInstalled = installed,
-                    isPermissionGranted = permitted,
-                    isBatteryUnrestricted = batteryUnrestricted,
-                    isLoading = false
-                )
+        fun requestTermuxOverlay() {
+            termuxRepository.requestTermuxOverlay()
+        }
+
+        fun completeOnboarding(onFinished: () -> Unit) {
+            viewModelScope.launch(ioDispatcher) {
+                userPreferencesRepository.setOnboardingCompleted(true)
+                withContext(Dispatchers.Main) {
+                    onFinished()
+                }
             }
         }
     }
-
-    fun requestTermuxOverlay() {
-        termuxRepository.requestTermuxOverlay()
-    }
-
-    fun completeOnboarding(onFinished: () -> Unit) {
-        viewModelScope.launch(ioDispatcher) {
-            userPreferencesRepository.setOnboardingCompleted(true)
-            withContext(Dispatchers.Main) {
-                onFinished()
-            }
-        }
-    }
-}

@@ -46,6 +46,30 @@
     <string name="setup_step_7_desc">建议启用以监控脚本执行状态并接收脚本结果的通知。</string>
     <string name="grant_notification_permission_label">启用通知</string>
     <string name="notification_permission_not_needed">在较旧的 Android 版本上，通知会自动启用。</string>
+    <string name="onboarding_welcome_title">欢迎使用 Script Runner</string>
+    <string name="onboarding_welcome_desc">将 Android 界面与 Termux 终端强大功能连接的最简便方法。</string>
+    <string name="back_label">返回</string>
+    <string name="next_label">下一步</string>
+    <string name="to_run_scripts_in_the_background_without_interruptions_termux_needs_to_be_exempted_from_battery_optimization">为了在后台无中断地运行脚本，需要将 Termux 排除在电池优化之外。</string>
+    <string name="reliability_settings">可靠性设置</string>
+    <string name="android_may_stop_background_scripts_if_battery_optimization_is_enabled_for_termux">如果 Termux 开启了电池优化，Android 可能会停止其后台脚本。</string>
+    <string name="check_settings_again">再次检查设置</string>
+    <string name="onboarding_battery_optimization">注意：请在 Termux 应用设置中查找“电池”和“显示在其他应用上”。</string>
+    <string name="termux_install_warning">未找到 Termux。请先安装以继续。</string>
+    <string name="title_manage_your_scripts">管理您的脚本</string>
+    <string name="body_manage_your_scripts">在主屏幕管理您的脚本 \n 通过简单拖动即可更改顺序</string>
+    <string name="title_powerful_editor">强大的编辑器</string>
+    <string name="body_powerful_editor">包含提升易用性功能的编辑器</string>
+    <string name="title_automation">自动化</string>
+    <string name="body_automation">为您的脚本提供基础自动化功能</string>
+    <string name="title_quick_access_tiles">快速设置磁贴</string>
+    <string name="body_quick_access_tiles">可从应用自定义的访问磁贴</string>
+    <string name="title_rice">高度可自定义</string>
+    <string name="body_rice">您可以创建自定义配色主题</string>
+    <string name="termux_permission_warning">此权限对应用正常运行至关重要。</string>
+    <string name="title_promo">简单、强大、自动。</string>
+    <string name="surface_container_lowest">表面容器最低层 (Surface Container Lowest)</string>
+
 
 
     <!--Home -->

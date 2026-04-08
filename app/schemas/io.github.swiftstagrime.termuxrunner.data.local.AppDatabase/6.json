@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 6,
-    "identityHash": "1b75dffb81f582a48cedd2fd3c0f154b",
+    "identityHash": "7c8411b6c6560a83942388bc972c7a2e",
     "entities": [
       {
         "tableName": "scripts",
@@ -399,7 +399,7 @@
       },
       {
         "tableName": "custom_themes",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL, `isDark` INTEGER NOT NULL, `primary` INTEGER NOT NULL, `onPrimary` INTEGER NOT NULL, `primaryContainer` INTEGER NOT NULL, `onPrimaryContainer` INTEGER NOT NULL, `secondary` INTEGER NOT NULL, `onSecondary` INTEGER NOT NULL, `secondaryContainer` INTEGER NOT NULL, `onSecondaryContainer` INTEGER NOT NULL, `tertiary` INTEGER NOT NULL, `onTertiary` INTEGER NOT NULL, `tertiaryContainer` INTEGER NOT NULL, `onTertiaryContainer` INTEGER NOT NULL, `error` INTEGER NOT NULL, `onError` INTEGER NOT NULL, `errorContainer` INTEGER NOT NULL, `onErrorContainer` INTEGER NOT NULL, `background` INTEGER NOT NULL, `onBackground` INTEGER NOT NULL, `surface` INTEGER NOT NULL, `onSurface` INTEGER NOT NULL, `surfaceVariant` INTEGER NOT NULL, `onSurfaceVariant` INTEGER NOT NULL, `outline` INTEGER NOT NULL, `outlineVariant` INTEGER NOT NULL, `surfaceContainer` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL, `isDark` INTEGER NOT NULL, `primary` INTEGER NOT NULL, `onPrimary` INTEGER NOT NULL, `primaryContainer` INTEGER NOT NULL, `onPrimaryContainer` INTEGER NOT NULL, `secondary` INTEGER NOT NULL, `onSecondary` INTEGER NOT NULL, `secondaryContainer` INTEGER NOT NULL, `onSecondaryContainer` INTEGER NOT NULL, `tertiary` INTEGER NOT NULL, `onTertiary` INTEGER NOT NULL, `tertiaryContainer` INTEGER NOT NULL, `onTertiaryContainer` INTEGER NOT NULL, `error` INTEGER NOT NULL, `onError` INTEGER NOT NULL, `errorContainer` INTEGER NOT NULL, `onErrorContainer` INTEGER NOT NULL, `background` INTEGER NOT NULL, `onBackground` INTEGER NOT NULL, `surface` INTEGER NOT NULL, `onSurface` INTEGER NOT NULL, `surfaceVariant` INTEGER NOT NULL, `onSurfaceVariant` INTEGER NOT NULL, `outline` INTEGER NOT NULL, `outlineVariant` INTEGER NOT NULL, `surfaceContainer` INTEGER NOT NULL, `surfaceContainerLowest` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "id",
@@ -568,6 +568,12 @@
             "columnName": "surfaceContainer",
             "affinity": "INTEGER",
             "notNull": true
+          },
+          {
+            "fieldPath": "surfaceContainerLowest",
+            "columnName": "surfaceContainerLowest",
+            "affinity": "INTEGER",
+            "notNull": true
           }
         ],
         "primaryKey": {
@@ -580,7 +586,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '1b75dffb81f582a48cedd2fd3c0f154b')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '7c8411b6c6560a83942388bc972c7a2e')"
     ]
   }
 }

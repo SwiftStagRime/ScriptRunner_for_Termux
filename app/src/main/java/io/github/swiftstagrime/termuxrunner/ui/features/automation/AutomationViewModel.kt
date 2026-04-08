@@ -29,106 +29,116 @@ data class AutomationUiState(
 )
 
 @HiltViewModel
-class AutomationViewModel @Inject constructor(
-    private val automationRepository: AutomationRepository,
-    private val scriptRepository: ScriptRepository,
-    categoryRepository: CategoryRepository,
-    private val automationLogRepository: AutomationLogRepository,
-    private val runScriptUseCase: RunScriptUseCase,
-    private val widgetManager: WidgetManager,
-    @IoDispatcher private val ioDispatcher: CoroutineDispatcher
-) : ViewModel() {
+class AutomationViewModel
+    @Inject
+    constructor(
+        private val automationRepository: AutomationRepository,
+        private val scriptRepository: ScriptRepository,
+        categoryRepository: CategoryRepository,
+        private val automationLogRepository: AutomationLogRepository,
+        private val runScriptUseCase: RunScriptUseCase,
+        private val widgetManager: WidgetManager,
+        @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
+    ) : ViewModel() {
+        val automations: StateFlow<List<Automation>> =
+            automationRepository
+                .getAllAutomations()
+                .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    val automations: StateFlow<List<Automation>> = automationRepository
-        .getAllAutomations()
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+        val allScripts: StateFlow<List<Script>> =
+            scriptRepository
+                .getAllScripts()
+                .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    val allScripts: StateFlow<List<Script>> = scriptRepository
-        .getAllScripts()
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+        val allCategories: StateFlow<List<Category>> =
+            categoryRepository
+                .getAllCategories()
+                .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    val allCategories: StateFlow<List<Category>> = categoryRepository
-        .getAllCategories()
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
-
-    fun toggleAutomation(id: Int, enabled: Boolean) {
-        viewModelScope.launch(ioDispatcher) {
-            automationRepository.toggleAutomation(id, enabled)
-            widgetManager.updateAutomationWidget()
-        }
-    }
-
-    fun deleteAutomation(automation: Automation) {
-        viewModelScope.launch(ioDispatcher) {
-            automationRepository.deleteAutomation(automation)
-            widgetManager.updateAutomationWidget()
-        }
-    }
-
-    fun runAutomationNow(automation: Automation) {
-        viewModelScope.launch(ioDispatcher) {
-            scriptRepository.getScriptById(automation.scriptId)?.let { script ->
-                runScriptUseCase(
-                    script = script.copy(notifyOnResult = true),
-                    runtimeArgs = automation.runtimeArgs,
-                    runtimeEnv = automation.runtimeEnv,
-                    runtimePrefix = automation.runtimePrefix,
-                    automationId = automation.id,
-                )
+        fun toggleAutomation(
+            id: Int,
+            enabled: Boolean,
+        ) {
+            viewModelScope.launch(ioDispatcher) {
+                automationRepository.toggleAutomation(id, enabled)
+                widgetManager.updateAutomationWidget()
             }
-            widgetManager.updateLogsWidget()
         }
-    }
 
-    fun saveAutomation(params: AutomationSaveParams) {
-        viewModelScope.launch(ioDispatcher) {
-            val now = System.currentTimeMillis()
-
-            val tempEntity = AutomationEntity(
-                id = 0,
-                scriptId = params.scriptId,
-                label = params.label,
-                type = params.type,
-                scheduledTimestamp = params.timestamp,
-                intervalMillis = params.interval,
-                daysOfWeek = params.days,
-                isEnabled = true,
-                runIfMissed = params.runIfMissed,
-                requireWifi = params.requireWifi,
-                requireCharging = params.requireCharging,
-                batteryThreshold = params.batteryThreshold,
-            )
-
-            val nextRun = AutomationTimeCalculator.calculateNextRun(
-                automation = tempEntity,
-                fromTime = now,
-            )
-
-            val automation = Automation(
-                id = 0,
-                scriptId = params.scriptId,
-                label = params.label,
-                type = params.type,
-                scheduledTimestamp = params.timestamp,
-                intervalMillis = params.interval,
-                daysOfWeek = params.days,
-                isEnabled = true,
-                runIfMissed = params.runIfMissed,
-                nextRunTimestamp = nextRun,
-                runtimeArgs = params.runtime.arguments,
-                runtimePrefix = params.runtime.prefix,
-                runtimeEnv = params.runtime.envVars,
-                requireWifi = params.requireWifi,
-                requireCharging = params.requireCharging,
-                batteryThreshold = params.batteryThreshold,
-                lastRunTimestamp = null,
-                lastExitCode = null,
-            )
-
-            automationRepository.saveAutomation(automation)
-            widgetManager.updateAutomationWidget()
+        fun deleteAutomation(automation: Automation) {
+            viewModelScope.launch(ioDispatcher) {
+                automationRepository.deleteAutomation(automation)
+                widgetManager.updateAutomationWidget()
+            }
         }
-    }
 
-    fun getAutomationLogs(automationId: Int) = automationLogRepository.getLogsForAutomation(automationId)
-}
+        fun runAutomationNow(automation: Automation) {
+            viewModelScope.launch(ioDispatcher) {
+                scriptRepository.getScriptById(automation.scriptId)?.let { script ->
+                    runScriptUseCase(
+                        script = script.copy(notifyOnResult = true),
+                        runtimeArgs = automation.runtimeArgs,
+                        runtimeEnv = automation.runtimeEnv,
+                        runtimePrefix = automation.runtimePrefix,
+                        automationId = automation.id,
+                    )
+                }
+                widgetManager.updateLogsWidget()
+            }
+        }
+
+        fun saveAutomation(params: AutomationSaveParams) {
+            viewModelScope.launch(ioDispatcher) {
+                val now = System.currentTimeMillis()
+
+                val tempEntity =
+                    AutomationEntity(
+                        id = 0,
+                        scriptId = params.scriptId,
+                        label = params.label,
+                        type = params.type,
+                        scheduledTimestamp = params.timestamp,
+                        intervalMillis = params.interval,
+                        daysOfWeek = params.days,
+                        isEnabled = true,
+                        runIfMissed = params.runIfMissed,
+                        requireWifi = params.requireWifi,
+                        requireCharging = params.requireCharging,
+                        batteryThreshold = params.batteryThreshold,
+                    )
+
+                val nextRun =
+                    AutomationTimeCalculator.calculateNextRun(
+                        automation = tempEntity,
+                        fromTime = now,
+                    )
+
+                val automation =
+                    Automation(
+                        id = 0,
+                        scriptId = params.scriptId,
+                        label = params.label,
+                        type = params.type,
+                        scheduledTimestamp = params.timestamp,
+                        intervalMillis = params.interval,
+                        daysOfWeek = params.days,
+                        isEnabled = true,
+                        runIfMissed = params.runIfMissed,
+                        nextRunTimestamp = nextRun,
+                        runtimeArgs = params.runtime.arguments,
+                        runtimePrefix = params.runtime.prefix,
+                        runtimeEnv = params.runtime.envVars,
+                        requireWifi = params.requireWifi,
+                        requireCharging = params.requireCharging,
+                        batteryThreshold = params.batteryThreshold,
+                        lastRunTimestamp = null,
+                        lastExitCode = null,
+                    )
+
+                automationRepository.saveAutomation(automation)
+                widgetManager.updateAutomationWidget()
+            }
+        }
+
+        fun getAutomationLogs(automationId: Int) = automationLogRepository.getLogsForAutomation(automationId)
+    }

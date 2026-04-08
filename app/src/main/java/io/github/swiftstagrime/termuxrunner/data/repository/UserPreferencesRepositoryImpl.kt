@@ -46,8 +46,8 @@ class UserPreferencesRepositoryImpl
                     ThemeMode.valueOf(name)
                 }
 
-    override val selectedCustomThemeId: Flow<Int?> =
-        context.dataStore.data.map { it[Keys.SELECTED_CUSTOM_THEME_ID] }
+        override val selectedCustomThemeId: Flow<Int?> =
+            context.dataStore.data.map { it[Keys.SELECTED_CUSTOM_THEME_ID] }
 
         override suspend fun setAccent(accent: AppTheme) {
             context.dataStore.edit { it[Keys.THEME_ACCENT] = accent.name }
@@ -85,9 +85,9 @@ class UserPreferencesRepositoryImpl
             }
         }
 
-    override suspend fun setCustomThemeId(id: Int) {
-        context.dataStore.edit { it[Keys.SELECTED_CUSTOM_THEME_ID] = id }
-    }
+        override suspend fun setCustomThemeId(id: Int) {
+            context.dataStore.edit { it[Keys.SELECTED_CUSTOM_THEME_ID] = id }
+        }
     }
 
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "app_settings")

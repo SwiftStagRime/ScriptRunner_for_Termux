@@ -31,71 +31,79 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class TileSettingsViewModel @Inject constructor(
-    private val prefs: UserPreferencesRepository,
-    private val scriptRepo: ScriptRepository,
-    private val categoryRepository: CategoryRepository,
-    @ApplicationContext private val context: Context,
-    @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
-    @DefaultDispatcher private val defaultDispatcher: CoroutineDispatcher
-) : ViewModel() {
+class TileSettingsViewModel
+    @Inject
+    constructor(
+        private val prefs: UserPreferencesRepository,
+        private val scriptRepo: ScriptRepository,
+        private val categoryRepository: CategoryRepository,
+        @ApplicationContext private val context: Context,
+        @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
+        @DefaultDispatcher private val defaultDispatcher: CoroutineDispatcher,
+    ) : ViewModel() {
+        val allScripts: StateFlow<List<Script>> =
+            scriptRepo
+                .getAllScripts()
+                .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    val allScripts: StateFlow<List<Script>> = scriptRepo
-        .getAllScripts()
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+        val allCategories: StateFlow<List<Category>> =
+            categoryRepository
+                .getAllCategories()
+                .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    val allCategories: StateFlow<List<Category>> = categoryRepository
-        .getAllCategories()
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+        private val tileIdMappings: Flow<Map<Int, Int?>> =
+            combine(
+                (1..5).map { idx -> prefs.getScriptIdForTile(idx).map { idx to it } },
+            ) { array -> array.toMap() }
 
-    private val tileIdMappings: Flow<Map<Int, Int?>> = combine(
-        (1..5).map { idx -> prefs.getScriptIdForTile(idx).map { idx to it } }
-    ) { array -> array.toMap() }
+        val tileMappings: StateFlow<Map<Int, Script?>> =
+            combine(
+                tileIdMappings,
+                allScripts,
+            ) { idMap, scripts ->
+                idMap.mapValues { (_, id) ->
+                    if (id != null) scripts.find { it.id == id } else null
+                }
+            }.flowOn(defaultDispatcher)
+                .stateIn(
+                    scope = viewModelScope,
+                    started = SharingStarted.WhileSubscribed(5000),
+                    initialValue = emptyMap(),
+                )
 
-    val tileMappings: StateFlow<Map<Int, Script?>> = combine(
-        tileIdMappings,
-        allScripts
-    ) { idMap, scripts ->
-        idMap.mapValues { (_, id) ->
-            if (id != null) scripts.find { it.id == id } else null
+        fun assignScript(
+            tileIndex: Int,
+            scriptId: Int,
+        ) {
+            viewModelScope.launch(ioDispatcher) {
+                prefs.setScriptIdForTile(tileIndex, scriptId)
+                requestTileUpdate(tileIndex)
+            }
+        }
+
+        fun clearTile(tileIndex: Int) {
+            viewModelScope.launch(ioDispatcher) {
+                prefs.setScriptIdForTile(tileIndex, null)
+                requestTileUpdate(tileIndex)
+            }
+        }
+
+        private fun requestTileUpdate(index: Int) {
+            val clazz =
+                when (index) {
+                    1 -> ScriptTileService1::class.java
+                    2 -> ScriptTileService2::class.java
+                    3 -> ScriptTileService3::class.java
+                    4 -> ScriptTileService4::class.java
+                    5 -> ScriptTileService5::class.java
+                    else -> null
+                }
+
+            clazz?.let {
+                TileService.requestListeningState(
+                    context,
+                    ComponentName(context, it),
+                )
+            }
         }
     }
-        .flowOn(defaultDispatcher)
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = emptyMap()
-        )
-
-    fun assignScript(tileIndex: Int, scriptId: Int) {
-        viewModelScope.launch(ioDispatcher) {
-            prefs.setScriptIdForTile(tileIndex, scriptId)
-            requestTileUpdate(tileIndex)
-        }
-    }
-
-    fun clearTile(tileIndex: Int) {
-        viewModelScope.launch(ioDispatcher) {
-            prefs.setScriptIdForTile(tileIndex, null)
-            requestTileUpdate(tileIndex)
-        }
-    }
-
-    private fun requestTileUpdate(index: Int) {
-        val clazz = when (index) {
-            1 -> ScriptTileService1::class.java
-            2 -> ScriptTileService2::class.java
-            3 -> ScriptTileService3::class.java
-            4 -> ScriptTileService4::class.java
-            5 -> ScriptTileService5::class.java
-            else -> null
-        }
-
-        clazz?.let {
-            TileService.requestListeningState(
-                context,
-                ComponentName(context, it),
-            )
-        }
-    }
-}

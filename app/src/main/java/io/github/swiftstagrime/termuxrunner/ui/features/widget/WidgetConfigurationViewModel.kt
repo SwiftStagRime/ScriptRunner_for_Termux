@@ -43,14 +43,14 @@ class WidgetConfigurationViewModel
                 .getAllCategories()
                 .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    @OptIn(ExperimentalCoroutinesApi::class)
-    val customTheme = userPreferencesRepository.selectedCustomThemeId
-        .flatMapLatest { id ->
-            if (id != null) {
-                customThemeRepository.getThemeByIdFlow(id)
-            } else {
-                flowOf(null)
-            }
-        }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
+        @OptIn(ExperimentalCoroutinesApi::class)
+        val customTheme =
+            userPreferencesRepository.selectedCustomThemeId
+                .flatMapLatest { id ->
+                    if (id != null) {
+                        customThemeRepository.getThemeByIdFlow(id)
+                    } else {
+                        flowOf(null)
+                    }
+                }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
     }

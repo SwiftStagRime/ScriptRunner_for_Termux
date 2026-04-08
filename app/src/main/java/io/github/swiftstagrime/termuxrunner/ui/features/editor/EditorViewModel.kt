@@ -40,111 +40,117 @@ sealed interface EditorUiEvent {
 }
 
 @HiltViewModel
-class EditorViewModel @Inject constructor(
-    private val scriptRepository: ScriptRepository,
-    private val categoryRepository: CategoryRepository,
-    private val updateScriptUseCase: UpdateScriptUseCase,
-    private val iconRepository: IconRepository,
-    private val widgetManager: WidgetManager,
-    @IoDispatcher private val ioDispatcher: CoroutineDispatcher
-) : ViewModel() {
+class EditorViewModel
+    @Inject
+    constructor(
+        private val scriptRepository: ScriptRepository,
+        private val categoryRepository: CategoryRepository,
+        private val updateScriptUseCase: UpdateScriptUseCase,
+        private val iconRepository: IconRepository,
+        private val widgetManager: WidgetManager,
+        @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
+    ) : ViewModel() {
+        val categories =
+            categoryRepository
+                .getAllCategories()
+                .stateIn(
+                    scope = viewModelScope,
+                    started = SharingStarted.WhileSubscribed(5000),
+                    initialValue = emptyList(),
+                )
 
-    val categories = categoryRepository
-        .getAllCategories()
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = emptyList(),
-        )
+        private val _currentScript = MutableStateFlow<Script?>(null)
+        val currentScript = _currentScript.asStateFlow()
 
-    private val _currentScript = MutableStateFlow<Script?>(null)
-    val currentScript = _currentScript.asStateFlow()
+        private val _uiEvent = Channel<EditorUiEvent>()
+        val uiEvent = _uiEvent.receiveAsFlow()
 
-    private val _uiEvent = Channel<EditorUiEvent>()
-    val uiEvent = _uiEvent.receiveAsFlow()
+        var editingCode by mutableStateOf(TextFieldValue(""))
+            private set
 
-    var editingCode by mutableStateOf(TextFieldValue(""))
-        private set
+        var configState by mutableStateOf<ScriptConfigState?>(null)
+            private set
 
-    var configState by mutableStateOf<ScriptConfigState?>(null)
-        private set
-
-    fun loadScript(id: Int) {
-        if (id == 0) {
-            _currentScript.value = Script(
-                id = 0,
-                name = "",
-                code = "#!/bin/bash\n\n",
-                interpreter = "bash",
-            )
-            return
-        }
-
-        viewModelScope.launch(ioDispatcher) {
-            try {
-                val script = scriptRepository.getScriptById(id)
-                if (script != null) {
-                    _currentScript.value = script
-                    editingCode = TextFieldValue(
-                        text = script.code,
-                        selection = TextRange(script.code.length),
+        fun loadScript(id: Int) {
+            if (id == 0) {
+                _currentScript.value =
+                    Script(
+                        id = 0,
+                        name = "",
+                        code = "#!/bin/bash\n\n",
+                        interpreter = "bash",
                     )
-                } else {
+                return
+            }
+
+            viewModelScope.launch(ioDispatcher) {
+                try {
+                    val script = scriptRepository.getScriptById(id)
+                    if (script != null) {
+                        _currentScript.value = script
+                        editingCode =
+                            TextFieldValue(
+                                text = script.code,
+                                selection = TextRange(script.code.length),
+                            )
+                    } else {
+                        _uiEvent.send(
+                            EditorUiEvent.ShowSnackbar(
+                                UiText.StringResource(R.string.error_script_not_found),
+                            ),
+                        )
+                    }
+                } catch (_: Exception) {
                     _uiEvent.send(
                         EditorUiEvent.ShowSnackbar(
-                            UiText.StringResource(R.string.error_script_not_found),
+                            UiText.StringResource(R.string.error_loading_failed),
                         ),
                     )
                 }
-            } catch (_: Exception) {
-                _uiEvent.send(
-                    EditorUiEvent.ShowSnackbar(
-                        UiText.StringResource(R.string.error_loading_failed),
-                    ),
-                )
             }
         }
-    }
 
-    fun saveScript(script: Script) {
-        viewModelScope.launch(ioDispatcher) {
-            try {
-                updateScriptUseCase(script)
-
+        fun saveScript(script: Script) {
+            viewModelScope.launch(ioDispatcher) {
                 try {
-                    widgetManager.updateScriptsWidget()
-                } catch (_: Exception) { }
+                    updateScriptUseCase(script)
 
-                _uiEvent.send(EditorUiEvent.SaveSuccess)
-            } catch (_: Exception) {
-                _uiEvent.send(
-                    EditorUiEvent.ShowSnackbar(
-                        UiText.StringResource(R.string.error_save_failed),
-                    ),
-                )
+                    try {
+                        widgetManager.updateScriptsWidget()
+                    } catch (_: Exception) {
+                    }
+
+                    _uiEvent.send(EditorUiEvent.SaveSuccess)
+                } catch (_: Exception) {
+                    _uiEvent.send(
+                        EditorUiEvent.ShowSnackbar(
+                            UiText.StringResource(R.string.error_save_failed),
+                        ),
+                    )
+                }
             }
         }
-    }
 
-    fun openConfig(script: Script) {
-        configState = ScriptConfigState(script)
-    }
-
-    fun dismissConfig() {
-        configState = null
-    }
-
-    fun addCategory(name: String) {
-        viewModelScope.launch(ioDispatcher) {
-            categoryRepository.upsertCategory(Category(name = name))
+        fun openConfig(script: Script) {
+            configState = ScriptConfigState(script)
         }
-    }
 
-    suspend fun processSelectedImage(uri: Uri): String? = withContext(ioDispatcher) {
-        try {
-            iconRepository.saveIcon(uri.toString())
-        } catch (_: Exception) {
-            null
+        fun dismissConfig() {
+            configState = null
         }
+
+        fun addCategory(name: String) {
+            viewModelScope.launch(ioDispatcher) {
+                categoryRepository.upsertCategory(Category(name = name))
+            }
+        }
+
+        suspend fun processSelectedImage(uri: Uri): String? =
+            withContext(ioDispatcher) {
+                try {
+                    iconRepository.saveIcon(uri.toString())
+                } catch (_: Exception) {
+                    null
+                }
+            }
     }
-}

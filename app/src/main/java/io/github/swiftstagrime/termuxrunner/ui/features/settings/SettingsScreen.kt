@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -54,6 +55,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import io.github.swiftstagrime.termuxrunner.R
 import io.github.swiftstagrime.termuxrunner.ui.components.LanguageSelectorButton
@@ -79,23 +81,24 @@ fun SettingsScreen(
         },
     ) { padding ->
         Surface(
-            modifier = Modifier
-                .padding(padding)
-                .padding(horizontal = 8.dp)
-                .padding(bottom = 8.dp)
-                .fillMaxSize(),
+            modifier =
+                Modifier
+                    .padding(padding)
+                    .padding(horizontal = 8.dp)
+                    .padding(bottom = 8.dp)
+                    .fillMaxSize(),
             color = sheetContainerColor,
             shape = RoundedCornerShape(32.dp),
-            shadowElevation = 1.dp
+            shadowElevation = 1.dp,
         ) {
             Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(20.dp),
+                modifier =
+                    Modifier
+                        .fillMaxSize()
+                        .padding(20.dp),
                 verticalArrangement = Arrangement.SpaceBetween,
             ) {
                 Column {
-
                     AppearanceSection(selectedAccent, selectedMode, actions)
 
                     Spacer(modifier = Modifier.height(24.dp))
@@ -103,7 +106,7 @@ fun SettingsScreen(
                     HorizontalDivider(
                         modifier = Modifier.padding(horizontal = 4.dp),
                         thickness = 1.dp,
-                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)
+                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f),
                     )
 
                     Spacer(modifier = Modifier.height(24.dp))
@@ -150,7 +153,6 @@ private fun AppearanceSection(
 
     Text(stringResource(R.string.accent_color_label), style = MaterialTheme.typography.labelLarge)
 
-    // Spaced by 16.dp
     LazyRow(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
         items(AppTheme.entries) { accent ->
             ThemeSelectorItem(
@@ -162,7 +164,7 @@ private fun AppearanceSection(
 
         item {
             CustomThemeManagementItem(
-                onClick = actions.onNavigateToCustomTheme
+                onClick = actions.onNavigateToCustomTheme,
             )
         }
     }
@@ -174,9 +176,7 @@ private fun AppearanceSection(
 }
 
 @Composable
-private fun CustomThemeManagementItem(
-    onClick: () -> Unit,
-) {
+private fun CustomThemeManagementItem(onClick: () -> Unit) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.width(64.dp),
@@ -199,7 +199,7 @@ private fun CustomThemeManagementItem(
                 imageVector = Icons.Default.Palette,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.size(28.dp)
+                modifier = Modifier.size(28.dp),
             )
         }
 
@@ -211,7 +211,7 @@ private fun CustomThemeManagementItem(
             color = MaterialTheme.colorScheme.onSurface,
             maxLines = 1,
             textAlign = TextAlign.Center,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
         )
     }
 }
@@ -270,7 +270,7 @@ private fun DataManagementSection(actions: SettingsActions) {
 
     Row(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(16.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         ActionButton(
             onClick = actions.onTriggerImport,
@@ -308,10 +308,21 @@ private fun ActionButton(
         modifier = modifier,
         shape = RoundedCornerShape(12.dp),
         colors = if (isTonal) ButtonDefaults.filledTonalButtonColors() else ButtonDefaults.buttonColors(),
+        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 10.dp),
     ) {
-        Icon(icon, contentDescription = null)
-        Spacer(modifier = Modifier.width(8.dp))
-        Text(label)
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            modifier = Modifier.size(18.dp),
+        )
+        Spacer(modifier = Modifier.width(6.dp))
+        Text(
+            text = label,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            softWrap = false,
+            style = MaterialTheme.typography.labelLarge,
+        )
     }
 }
 
@@ -402,7 +413,7 @@ fun ThemeSelectorItem(
             fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
             maxLines = 1,
             textAlign = TextAlign.Center,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
         )
     }
 }
@@ -455,7 +466,7 @@ fun PreviewSettingsScreen() {
                     onTriggerScriptImport = {},
                     onDeveloperClick = {},
                     onBack = {},
-                    onNavigateToCustomTheme = {}
+                    onNavigateToCustomTheme = {},
                 ),
         )
     }

@@ -118,8 +118,7 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideCustomThemeRepository(customThemeDao: CustomThemeDao): CustomThemeRepository =
-        CustomThemeRepositoryImpl(customThemeDao)
+    fun provideCustomThemeRepository(customThemeDao: CustomThemeDao): CustomThemeRepository = CustomThemeRepositoryImpl(customThemeDao)
 
     @Provides
     @Singleton
