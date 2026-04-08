@@ -51,6 +51,7 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -146,6 +147,9 @@ fun HomeScreen(
     var isSearchActive by rememberSaveable { mutableStateOf(false) }
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
 
+    val outerBackgroundColor = MaterialTheme.colorScheme.surface
+    val sheetContainerColor = MaterialTheme.colorScheme.surfaceContainerLowest
+
     BackHandler(enabled = isSearchActive) {
         isSearchActive = false
         actions.onSearchQueryChange("")
@@ -153,7 +157,7 @@ fun HomeScreen(
 
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
-        containerColor = MaterialTheme.colorScheme.background,
+        containerColor = outerBackgroundColor,
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             CollapsingHomeTopBar(
@@ -168,25 +172,39 @@ fun HomeScreen(
         floatingActionButton = {
             FloatingActionButton(
                 onClick = actions.onAddClick,
-                modifier = Modifier.testTag("fab_add_script"),
+                modifier = Modifier
+                    .testTag("fab_add_script")
+                    .padding(end = 8.dp, bottom = 8.dp),
                 containerColor = MaterialTheme.colorScheme.primaryContainer,
+                elevation = FloatingActionButtonDefaults.elevation(defaultElevation = 4.dp)
             ) {
                 Icon(Icons.Default.Add, stringResource(R.string.cd_add_script))
             }
         },
     ) { padding ->
-        Box(modifier = Modifier.padding(padding).fillMaxSize()) {
-            when (uiState) {
-                is HomeUiState.Loading -> CircularProgressIndicator(Modifier.align(Alignment.Center))
-                is HomeUiState.Success -> {
-                    ScriptList(
-                        uiState = uiState,
-                        searchQuery = searchQuery,
-                        selectedCategoryId = selectedCategoryId,
-                        sortOption = sortOption,
-                        isSearchActive = isSearchActive,
-                        actions = actions,
-                    )
+        Surface(
+            modifier = Modifier
+                .padding(padding)
+                .padding(horizontal = 8.dp)
+                .padding(bottom = 8.dp)
+                .fillMaxSize(),
+            color = sheetContainerColor,
+            shape = RoundedCornerShape(32.dp),
+            shadowElevation = 1.dp
+        ) {
+            Box(modifier = Modifier.fillMaxSize()) {
+                when (uiState) {
+                    is HomeUiState.Loading -> CircularProgressIndicator(Modifier.align(Alignment.Center))
+                    is HomeUiState.Success -> {
+                        ScriptList(
+                            uiState = uiState,
+                            searchQuery = searchQuery,
+                            selectedCategoryId = selectedCategoryId,
+                            sortOption = sortOption,
+                            isSearchActive = isSearchActive,
+                            actions = actions,
+                        )
+                    }
                 }
             }
         }
@@ -222,12 +240,12 @@ private fun CollapsingHomeTopBar(
     onToggleSearch: (Boolean) -> Unit,
     actions: HomeActions,
 ) {
-    Column(modifier = Modifier.background(MaterialTheme.colorScheme.background)) {
+    val appBarBgColor = MaterialTheme.colorScheme.surface
+
+    Column(modifier = Modifier.background(appBarBgColor)) {
         if (isSearchActive) {
             TopAppBar(
-                title = {
-                    SearchField(searchQuery, actions.onSearchQueryChange)
-                },
+                title = { SearchField(searchQuery, actions.onSearchQueryChange) },
                 navigationIcon = {
                     IconButton(onClick = {
                         onToggleSearch(false)
@@ -243,23 +261,24 @@ private fun CollapsingHomeTopBar(
                         }
                     }
                 },
-                colors =
-                    TopAppBarDefaults.topAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.background,
-                        titleContentColor = MaterialTheme.colorScheme.onBackground,
-                    ),
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color.Transparent,
+                    titleContentColor = MaterialTheme.colorScheme.onSurface,
+                ),
             )
         } else {
             LargeTopAppBar(
                 scrollBehavior = scrollBehavior,
-                colors =
-                    TopAppBarDefaults.topAppBarColors(
-                        containerColor = Color.Transparent,
-                        scrolledContainerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp),
-                        titleContentColor = MaterialTheme.colorScheme.onBackground,
-                    ),
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color.Transparent,
+                    scrolledContainerColor = appBarBgColor,
+                    titleContentColor = MaterialTheme.colorScheme.onSurface,
+                ),
                 title = {
-                    Text(stringResource(R.string.home_title))
+                    Text(
+                        stringResource(R.string.home_title),
+                        fontWeight = FontWeight.Bold
+                    )
                 },
                 actions = {
                     AppBarActions(sortOption, actions, onToggleSearch)
@@ -447,7 +466,7 @@ private fun ScriptList(
                         modifier =
                             Modifier
                                 .fillMaxWidth()
-                                .background(MaterialTheme.colorScheme.background)
+                                .background(MaterialTheme.colorScheme.surfaceContainerLowest)
                                 .padding(vertical = 8.dp),
                     ) {
                         CategoryTabs(
@@ -459,7 +478,7 @@ private fun ScriptList(
                     }
 
                     val fadeHeight = 16.dp
-                    val backgroundColor = MaterialTheme.colorScheme.background
+                    val backgroundColor = MaterialTheme.colorScheme.surfaceContainerLowest
 
                     Box(
                         modifier =
@@ -923,7 +942,7 @@ private fun CategoryChip(
 
 @DevicePreviews
 @Composable
-private fun PreviewHomeScreen() {
+fun PreviewHomeScreen() {
     ScriptRunnerForTermuxTheme {
         HomeScreen(
             uiState = HomeUiState.Success(sampleScripts, emptyList(), emptyMap()),

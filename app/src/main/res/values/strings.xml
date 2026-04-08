@@ -390,4 +390,14 @@
     <string name="brightness">Brightness</string>
     <string name="surfaces_background"><![CDATA[Surfaces & Background]]></string>
     <string name="utility">Utility</string>
+
+    <string name="onboarding_welcome_title">Welcome to Script Runner</string>
+    <string name="onboarding_welcome_desc">The easiest way to bridge your Android UI with the power of the Termux terminal.</string>
+    <string name="back_label">Back</string>
+    <string name="next_label">Next</string>
+    <string name="to_run_scripts_in_the_background_without_interruptions_termux_needs_to_be_exempted_from_battery_optimization">To run scripts in the background without interruptions, Termux needs to be exempted from battery optimization.</string>
+    <string name="reliability_settings">Reliability Settings</string>
+    <string name="android_may_stop_background_scripts_if_battery_optimization_is_enabled_for_termux">Android may stop background scripts if battery optimization is enabled for Termux.</string>
+    <string name="check_settings_again">Check Settings Again</string>
+    <string name="onboarding_battery_optimization">Note: Look for \'Battery\' and \'Display over other apps\' in the Termux app settings.</string>
 </resources>

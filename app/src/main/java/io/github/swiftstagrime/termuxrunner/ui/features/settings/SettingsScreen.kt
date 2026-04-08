@@ -34,6 +34,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -41,6 +42,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -67,23 +69,50 @@ fun SettingsScreen(
     selectedMode: ThemeMode,
     actions: SettingsActions,
 ) {
+    val outerBackgroundColor = MaterialTheme.colorScheme.surface
+    val sheetContainerColor = MaterialTheme.colorScheme.surfaceContainerLowest
+
     Scaffold(
-        topBar = { SettingsTopBar(actions.onBack) },
+        containerColor = outerBackgroundColor,
+        topBar = {
+            SettingsTopBar(onBack = actions.onBack)
+        },
     ) { padding ->
-        Column(
-            modifier =
-                Modifier
-                    .padding(padding)
-                    .fillMaxSize()
-                    .padding(16.dp),
-            verticalArrangement = Arrangement.SpaceBetween,
+        Surface(
+            modifier = Modifier
+                .padding(padding)
+                .padding(horizontal = 8.dp)
+                .padding(bottom = 8.dp)
+                .fillMaxSize(),
+            color = sheetContainerColor,
+            shape = RoundedCornerShape(32.dp),
+            shadowElevation = 1.dp
         ) {
-            Column {
-                AppearanceSection(selectedAccent, selectedMode, actions)
-                Spacer(modifier = Modifier.height(24.dp))
-                DataManagementSection(actions)
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(20.dp),
+                verticalArrangement = Arrangement.SpaceBetween,
+            ) {
+                Column {
+
+                    AppearanceSection(selectedAccent, selectedMode, actions)
+
+                    Spacer(modifier = Modifier.height(24.dp))
+
+                    HorizontalDivider(
+                        modifier = Modifier.padding(horizontal = 4.dp),
+                        thickness = 1.dp,
+                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)
+                    )
+
+                    Spacer(modifier = Modifier.height(24.dp))
+
+                    DataManagementSection(actions)
+                }
+
+                DeveloperCard(actions.onDeveloperClick)
             }
-            DeveloperCard(actions.onDeveloperClick)
         }
     }
 }
@@ -412,7 +441,7 @@ private fun BoxScope.DynamicThemeIcon() {
 
 @DevicePreviews
 @Composable
-private fun PreviewSettingsScreen() {
+fun PreviewSettingsScreen() {
     ScriptRunnerForTermuxTheme {
         SettingsScreen(
             selectedAccent = AppTheme.GREEN,

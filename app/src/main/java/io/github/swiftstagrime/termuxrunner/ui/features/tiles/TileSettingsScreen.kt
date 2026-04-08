@@ -30,6 +30,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -37,10 +38,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.TextUnit
+import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
@@ -58,12 +62,17 @@ fun TileSettingsScreen(
     onClearTile: (Int) -> Unit,
     onTileClicked: (Int) -> Unit,
 ) {
+    val outerBackgroundColor = MaterialTheme.colorScheme.surface
+    val sheetContainerColor = MaterialTheme.colorScheme.surfaceContainerLowest
+
     Scaffold(
+        containerColor = outerBackgroundColor,
         topBar = {
             TopAppBar(
                 title = {
                     Text(
                         stringResource(R.string.title_tile_settings),
+                        style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.SemiBold,
                     )
                 },
@@ -75,165 +84,159 @@ fun TileSettingsScreen(
                         )
                     }
                 },
-                colors =
-                    TopAppBarDefaults.topAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.background,
-                        scrolledContainerColor = MaterialTheme.colorScheme.background,
-                    ),
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color.Transparent,
+                    scrolledContainerColor = Color.Transparent,
+                ),
             )
         },
-        containerColor = MaterialTheme.colorScheme.background,
     ) { padding ->
-        LazyColumn(
-            modifier =
-                Modifier
-                    .padding(padding)
-                    .fillMaxSize(),
-            contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+        Surface(
+            modifier = Modifier
+                .padding(padding)
+                .padding(horizontal = 8.dp)
+                .padding(bottom = 8.dp)
+                .fillMaxSize(),
+            color = sheetContainerColor,
+            shape = RoundedCornerShape(32.dp),
+            shadowElevation = 1.dp
         ) {
-            item {
-                Card(
-                    colors =
-                        CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.6f),
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(16.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                item {
+                    Card(
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.7f),
                             contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
                         ),
-                    shape = RoundedCornerShape(16.dp),
-                    modifier = Modifier.padding(bottom = 8.dp),
-                ) {
-                    Row(
-                        modifier = Modifier.padding(16.dp),
-                        verticalAlignment = Alignment.CenterVertically,
+                        shape = RoundedCornerShape(20.dp),
+                        modifier = Modifier.padding(bottom = 4.dp),
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.Info,
-                            contentDescription = null,
-                            modifier = Modifier.size(24.dp),
-                        )
-                        Spacer(modifier = Modifier.width(12.dp))
-                        Text(
-                            text =
-                                stringResource(
+                        Row(
+                            modifier = Modifier.padding(16.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Info,
+                                contentDescription = null,
+                                modifier = Modifier.size(20.dp),
+                            )
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Text(
+                                text = stringResource(
                                     R.string.assign_scripts_to_these_slots_you_can_then_trigger_them_directly_from_your_phone_s_quick_settings_panel,
                                 ),
-                            style = MaterialTheme.typography.bodyMedium,
-                        )
+                                style = MaterialTheme.typography.labelMedium,
+                                lineHeight = TextUnit(16f, TextUnitType.Sp)
+                            )
+                        }
                     }
                 }
-            }
 
-            items(5) { index ->
-                val tileIndex = index + 1
-                val assignedScript = tileMappings[tileIndex]
-                val isAssigned = assignedScript != null
+                items(5) { index ->
+                    val tileIndex = index + 1
+                    val assignedScript = tileMappings[tileIndex]
+                    val isAssigned = assignedScript != null
 
-                Card(
-                    onClick = { onTileClicked(tileIndex) },
-                    shape = RoundedCornerShape(16.dp),
-                    colors =
-                        CardDefaults.cardColors(
+                    Card(
+                        onClick = { onTileClicked(tileIndex) },
+                        shape = RoundedCornerShape(20.dp),
+                        colors = CardDefaults.cardColors(
                             containerColor = MaterialTheme.colorScheme.surface,
-                            contentColor = MaterialTheme.colorScheme.onSurface,
                         ),
-                    elevation = CardDefaults.elevatedCardElevation(defaultElevation = 2.dp),
-                    border =
-                        BorderStroke(
+                        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+                        border = BorderStroke(
                             1.dp,
-                            MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
+                            MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f),
                         ),
-                ) {
-                    Row(
-                        modifier =
-                            Modifier
+                    ) {
+                        Row(
+                            modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(16.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Box(
-                            modifier =
-                                Modifier
-                                    .size(48.dp)
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(44.dp)
                                     .clip(CircleShape)
                                     .background(
                                         if (isAssigned) {
-                                            MaterialTheme.colorScheme.primaryContainer
+                                            MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f)
                                         } else {
-                                            MaterialTheme.colorScheme.surfaceVariant
+                                            MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
                                         },
                                     ),
-                            contentAlignment = Alignment.Center,
-                        ) {
-                            if (isAssigned && assignedScript.iconPath != null) {
-                                AsyncImage(
-                                    model =
-                                        ImageRequest
-                                            .Builder(LocalContext.current)
+                                contentAlignment = Alignment.Center,
+                            ) {
+                                if (isAssigned && assignedScript.iconPath != null) {
+                                    AsyncImage(
+                                        model = ImageRequest.Builder(LocalContext.current)
                                             .data(File(assignedScript.iconPath))
                                             .crossfade(true)
                                             .build(),
-                                    contentDescription = null,
-                                    modifier = Modifier.fillMaxSize(),
-                                    contentScale = ContentScale.Crop,
-                                )
-                            } else {
-                                Text(
-                                    text = tileIndex.toString(),
-                                    style = MaterialTheme.typography.titleLarge,
-                                    fontWeight = FontWeight.Bold,
-                                    color =
-                                        if (isAssigned) {
-                                            MaterialTheme.colorScheme.onPrimaryContainer
+                                        contentDescription = null,
+                                        modifier = Modifier.fillMaxSize(),
+                                        contentScale = ContentScale.Crop,
+                                    )
+                                } else {
+                                    Text(
+                                        text = tileIndex.toString(),
+                                        style = MaterialTheme.typography.titleMedium,
+                                        fontWeight = FontWeight.ExtraBold,
+                                        color = if (isAssigned) {
+                                            MaterialTheme.colorScheme.primary
                                         } else {
                                             MaterialTheme.colorScheme.onSurfaceVariant
                                         },
+                                    )
+                                }
+                            }
+
+                            Spacer(modifier = Modifier.width(16.dp))
+
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = stringResource(R.string.tile_slot_label, tileIndex),
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                                    fontWeight = FontWeight.Bold
+                                )
+                                Text(
+                                    text = assignedScript?.name ?: stringResource(R.string.tile_unassigned),
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = if (isAssigned) FontWeight.Bold else FontWeight.Medium,
+                                    color = if (isAssigned) {
+                                        MaterialTheme.colorScheme.onSurface
+                                    } else {
+                                        MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
+                                    },
                                 )
                             }
-                        }
 
-                        Spacer(modifier = Modifier.width(16.dp))
-
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(
-                                text = stringResource(R.string.tile_slot_label, tileIndex),
-                                style = MaterialTheme.typography.labelMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                            Spacer(modifier = Modifier.height(2.dp))
-                            Text(
-                                text =
-                                    assignedScript?.name
-                                        ?: stringResource(R.string.tile_unassigned),
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = if (isAssigned) FontWeight.Bold else FontWeight.Normal,
-                                color =
-                                    if (isAssigned) {
-                                        MaterialTheme.colorScheme.primary
-                                    } else {
-                                        MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
-                                    },
-                            )
-                        }
-
-                        if (isAssigned) {
-                            IconButton(
-                                onClick = { onClearTile(tileIndex) },
-                                colors =
-                                    IconButtonDefaults.iconButtonColors(
+                            if (isAssigned) {
+                                IconButton(
+                                    onClick = { onClearTile(tileIndex) },
+                                    colors = IconButtonDefaults.iconButtonColors(
                                         contentColor = MaterialTheme.colorScheme.error,
                                     ),
-                            ) {
+                                ) {
+                                    Icon(
+                                        Icons.Default.Close,
+                                        contentDescription = stringResource(R.string.clear),
+                                        modifier = Modifier.size(20.dp)
+                                    )
+                                }
+                            } else {
                                 Icon(
-                                    Icons.Default.Close,
-                                    contentDescription = stringResource(R.string.clear),
+                                    imageVector = Icons.Default.ChevronRight,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.outlineVariant,
                                 )
                             }
-                        } else {
-                            Icon(
-                                imageVector = Icons.Default.ChevronRight,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.outline,
-                            )
                         }
                     }
                 }
@@ -241,7 +244,6 @@ fun TileSettingsScreen(
         }
     }
 }
-
 @DevicePreviews
 @Composable
 fun TileSettingsScreenPreview() {

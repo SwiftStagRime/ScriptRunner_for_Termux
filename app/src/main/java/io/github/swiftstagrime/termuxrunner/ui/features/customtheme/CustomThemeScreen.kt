@@ -44,6 +44,7 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -55,6 +56,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.style.TextOverflow
@@ -71,10 +73,20 @@ fun CustomThemeScreen(
     state: CustomThemeUiState,
     actions: CustomThemeActions,
 ) {
+    val outerBackgroundColor = MaterialTheme.colorScheme.surface
+    val sheetContainerColor = MaterialTheme.colorScheme.surfaceContainerLowest
+
     Scaffold(
+        containerColor = outerBackgroundColor,
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(R.string.custom_themes_title)) },
+                title = {
+                    Text(
+                        stringResource(R.string.custom_themes_title),
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                },
                 navigationIcon = {
                     IconButton(onClick = actions.onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
@@ -89,38 +101,64 @@ fun CustomThemeScreen(
                             Icon(Icons.Default.Check, contentDescription = "Save")
                         }
                     }
-                }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color.Transparent,
+                    scrolledContainerColor = Color.Transparent
+                )
             )
         }
     ) { padding ->
-        Column(
+        Surface(
             modifier = Modifier
                 .padding(padding)
-                .fillMaxSize()
+                .padding(horizontal = 8.dp)
+                .padding(bottom = 8.dp)
+                .fillMaxSize(),
+            color = sheetContainerColor,
+            shape = RoundedCornerShape(32.dp),
+            shadowElevation = 1.dp
         ) {
-            ThemeSelectionRow(
-                savedThemes = state.savedThemes,
-                selectedThemeId = state.selectedThemeId,
-                onNewTheme = actions.onNewTheme,
-                onThemeSelect = actions.onThemeSelect
-            )
-
-            HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
-
-            if (state.editingTheme != null) {
-                ThemeEditorForm(
-                    theme = state.editingTheme,
-                    onNameChange = actions.onNameChange,
-                    onColorChange = actions.onColorChange,
-                    onToggleDarkMode = actions.onToggleDarkMode
-                )
-            } else {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text(
-                        text = stringResource(R.string.select_or_create_theme_hint),
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = colorScheme.onSurfaceVariant
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(vertical = 16.dp)
+            ) {
+                Box(modifier = Modifier.padding(horizontal = 16.dp)) {
+                    ThemeSelectionRow(
+                        savedThemes = state.savedThemes,
+                        selectedThemeId = state.selectedThemeId,
+                        onNewTheme = actions.onNewTheme,
+                        onThemeSelect = actions.onThemeSelect
                     )
+                }
+
+                HorizontalDivider(
+                    modifier = Modifier.padding(vertical = 16.dp, horizontal = 24.dp),
+                    thickness = 1.dp,
+                    color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)
+                )
+
+                if (state.editingTheme != null) {
+                    ThemeEditorForm(
+                        theme = state.editingTheme,
+                        onNameChange = actions.onNameChange,
+                        onColorChange = actions.onColorChange,
+                        onToggleDarkMode = actions.onToggleDarkMode
+                    )
+                } else {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(bottom = 32.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = stringResource(R.string.select_or_create_theme_hint),
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
                 }
             }
         }
@@ -218,10 +256,10 @@ private fun ThemeEditorForm(
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         item {
-            OutlinedTextField(
+            StyledTextField(
                 value = theme.name,
                 onValueChange = onNameChange,
-                label = { Text(stringResource(R.string.theme_name_label)) },
+                label = stringResource(R.string.theme_name_label),
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true
             )

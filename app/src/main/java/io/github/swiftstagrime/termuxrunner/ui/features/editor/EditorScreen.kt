@@ -2,7 +2,9 @@ package io.github.swiftstagrime.termuxrunner.ui.features.editor
 
 import android.net.Uri
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Save
@@ -13,18 +15,23 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
 import io.github.swiftstagrime.termuxrunner.R
 import io.github.swiftstagrime.termuxrunner.domain.model.Category
 import io.github.swiftstagrime.termuxrunner.domain.model.Script
@@ -55,21 +62,32 @@ fun EditorScreen(
     onProcessImage: suspend (Uri) -> String?,
 ) {
     var showConfigDialog by rememberSaveable { mutableStateOf(false) }
+
+    val outerBackgroundColor = MaterialTheme.colorScheme.surface
+    val sheetContainerColor = MaterialTheme.colorScheme.surfaceContainerLowest
+
     Scaffold(
+        containerColor = outerBackgroundColor,
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color.Transparent,
+                    scrolledContainerColor = Color.Transparent
+                ),
                 title = {
                     Column {
                         Text(
                             scriptDraft.name.ifBlank { stringResource(R.string.editor_untitled) },
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
                         )
                         Text(
                             "${scriptDraft.interpreter} • ${scriptDraft.fileExtension}",
                             style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            color = MaterialTheme.colorScheme.primary,
                         )
                     }
                 },
@@ -89,12 +107,24 @@ fun EditorScreen(
             )
         },
     ) { padding ->
-        CodeEditor(
-            code = codeState,
-            onCodeChange = onCodeChange,
-            interpreter = scriptDraft.interpreter,
-            modifier = Modifier.padding(padding),
-        )
+        Surface(
+            modifier = Modifier
+                .padding(padding)
+                .padding(horizontal = 8.dp)
+                .padding(bottom = 8.dp)
+                .fillMaxSize(),
+            color = sheetContainerColor,
+            shape = RoundedCornerShape(32.dp),
+            shadowElevation = 1.dp,
+        ) {
+            CodeEditor(
+                code = codeState,
+                onCodeChange = onCodeChange,
+                interpreter = scriptDraft.interpreter,
+                modifier = Modifier
+                    .fillMaxSize()
+            )
+        }
 
         if (showConfigDialog) {
             ScriptConfigDialog(
@@ -124,7 +154,7 @@ fun EditorScreen(
 
 @DevicePreviews
 @Composable
-private fun PreviewEditorNewRaw() {
+fun PreviewEditorNewRaw() {
     val sampleCode =
         """
         #!/bin/bash
