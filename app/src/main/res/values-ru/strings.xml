@@ -68,7 +68,6 @@
     <string name="body_rice">Вы можете создавать свои собственные цветовые темы</string>
     <string name="termux_permission_warning">Это разрешение необходимо для работы приложения.</string>
     <string name="title_promo">Просто. Мощно. Автоматизировано.</string>
-    <string name="surface_container_lowest">Минимальный уровень контейнера поверхности</string>
 
     <!--Home -->
     <string name="home_title">Мои скрипты</string>
@@ -403,4 +402,6 @@
     <string name="brightness">Яркость</string>
     <string name="surfaces_background"><![CDATA[Поверхности и фон]]></string>
     <string name="utility">Служебные</string>
+    <string name="surface_container_lowest">Минимальный уровень контейнера поверхности</string>
+
 </resources>

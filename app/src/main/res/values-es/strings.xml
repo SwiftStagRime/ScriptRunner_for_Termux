@@ -69,7 +69,6 @@
     <string name="body_rice">Puedes crear tus propios temas de color personalizados</string>
     <string name="termux_permission_warning">Este permiso es esencial para que la aplicación funcione.</string>
     <string name="title_promo">Simple. Potente. Automatizado.</string>
-    <string name="surface_container_lowest">Contenedor de superficie más bajo</string>
 
     <!--Home -->
     <string name="home_title">Mis Scripts</string>
@@ -404,4 +403,6 @@
     <string name="brightness">Brillo</string>
     <string name="surfaces_background"><![CDATA[Superficies y fondo]]></string>
     <string name="utility">Utilidad</string>
+    <string name="surface_container_lowest">Contenedor de superficie más bajo</string>
+
 </resources>

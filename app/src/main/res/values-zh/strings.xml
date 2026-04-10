@@ -68,8 +68,6 @@
     <string name="body_rice">您可以创建自定义配色主题</string>
     <string name="termux_permission_warning">此权限对应用正常运行至关重要。</string>
     <string name="title_promo">简单、强大、自动。</string>
-    <string name="surface_container_lowest">表面容器最低层 (Surface Container Lowest)</string>
-
 
 
     <!--Home -->
@@ -405,4 +403,6 @@
     <string name="brightness">亮度</string>
     <string name="surfaces_background"><![CDATA[表面和背景]]></string>
     <string name="utility">公用</string>
+    <string name="surface_container_lowest">表面容器最低层 (Surface Container Lowest)</string>
+
 </resources>

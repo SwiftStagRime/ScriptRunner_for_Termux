@@ -70,7 +70,6 @@
     <string name="body_rice">Sie können Ihre eigenen Farbschemata erstellen</string>
     <string name="termux_permission_warning">Diese Berechtigung ist für die Funktion der App erforderlich.</string>
     <string name="title_promo">Einfach. Leistungsstark. Automatisiert.</string>
-    <string name="surface_container_lowest">Oberflächencontainer am niedrigsten</string>
 
     <!--Home -->
     <string name="home_title">Meine Skripte</string>
@@ -408,4 +407,6 @@
     <string name="brightness">Helligkeit</string>
     <string name="surfaces_background"><![CDATA[Oberflächen & Hintergrund]]></string>
     <string name="utility">Dienstprogramme</string>
+    <string name="surface_container_lowest">Oberflächencontainer am niedrigsten</string>
+
 </resources>

@@ -50,6 +50,28 @@
     <string name="setup_step_7_desc">Recommended for monitoring script execution status and receiving notifications about script results.</string>
     <string name="grant_notification_permission_label">Enable Notifications</string>
     <string name="notification_permission_not_needed">Notifications are enabled automatically on older Android versions.</string>
+    <string name="onboarding_welcome_title">Welcome to Script Runner</string>
+    <string name="onboarding_welcome_desc">The easiest way to bridge your Android UI with the power of the Termux terminal.</string>
+    <string name="back_label">Back</string>
+    <string name="next_label">Next</string>
+    <string name="to_run_scripts_in_the_background_without_interruptions_termux_needs_to_be_exempted_from_battery_optimization">To run scripts in the background without interruptions, Termux needs to be exempted from battery optimization.</string>
+    <string name="reliability_settings">Reliability Settings</string>
+    <string name="android_may_stop_background_scripts_if_battery_optimization_is_enabled_for_termux">Android may stop background scripts if battery optimization is enabled for Termux.</string>
+    <string name="check_settings_again">Check Settings Again</string>
+    <string name="onboarding_battery_optimization">Note: Look for \'Battery\' and \'Display over other apps\' in the Termux app settings.</string>
+    <string name="termux_install_warning">Termux not found. Please install it to continue.</string>
+    <string name="title_manage_your_scripts">Manage Your Scripts</string>
+    <string name="body_manage_your_scripts">Manage your scripts on home screen \n Change their order by simply dragging them</string>
+    <string name="title_powerful_editor">Powerful Editor</string>
+    <string name="body_powerful_editor">Editor with some quality of life features</string>
+    <string name="title_automation">Automation</string>
+    <string name="body_automation">Some basic automation capabilities for your scripts</string>
+    <string name="title_quick_access_tiles">Quick Access Tiles</string>
+    <string name="body_quick_access_tiles">Customizable access tiles from the app</string>
+    <string name="title_rice">Fully Customizable</string>
+    <string name="body_rice">You can create your own custom color themes</string>
+    <string name="termux_permission_warning">This permission is essential for the app to function.</string>
+    <string name="title_promo">Simple. Powerful. Automated.</string>
 
     <!--Home -->
     <string name="home_title">My Scripts</string>
@@ -390,28 +412,5 @@
     <string name="brightness">Brightness</string>
     <string name="surfaces_background"><![CDATA[Surfaces & Background]]></string>
     <string name="utility">Utility</string>
-
-    <string name="onboarding_welcome_title">Welcome to Script Runner</string>
-    <string name="onboarding_welcome_desc">The easiest way to bridge your Android UI with the power of the Termux terminal.</string>
-    <string name="back_label">Back</string>
-    <string name="next_label">Next</string>
-    <string name="to_run_scripts_in_the_background_without_interruptions_termux_needs_to_be_exempted_from_battery_optimization">To run scripts in the background without interruptions, Termux needs to be exempted from battery optimization.</string>
-    <string name="reliability_settings">Reliability Settings</string>
-    <string name="android_may_stop_background_scripts_if_battery_optimization_is_enabled_for_termux">Android may stop background scripts if battery optimization is enabled for Termux.</string>
-    <string name="check_settings_again">Check Settings Again</string>
-    <string name="onboarding_battery_optimization">Note: Look for \'Battery\' and \'Display over other apps\' in the Termux app settings.</string>
-    <string name="termux_install_warning">Termux not found. Please install it to continue.</string>
-    <string name="title_manage_your_scripts">Manage Your Scripts</string>
-    <string name="body_manage_your_scripts">Manage your scripts on home screen \n Change their order by simply dragging them</string>
-    <string name="title_powerful_editor">Powerful Editor</string>
-    <string name="body_powerful_editor">Editor with some quality of life features</string>
-    <string name="title_automation">Automation</string>
-    <string name="body_automation">Some basic automation capabilities for your scripts</string>
-    <string name="title_quick_access_tiles">Quick Access Tiles</string>
-    <string name="body_quick_access_tiles">Customizable access tiles from the app</string>
-    <string name="title_rice">Fully Customizable</string>
-    <string name="body_rice">You can create your own custom color themes</string>
-    <string name="termux_permission_warning">This permission is essential for the app to function.</string>
-    <string name="title_promo">Simple. Powerful. Automated.</string>
     <string name="surface_container_lowest">Surface Container Lowest</string>
 </resources>
