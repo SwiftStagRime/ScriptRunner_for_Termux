@@ -47,6 +47,28 @@
     <string name="setup_step_7_desc">Recommandé pour surveiller le statut d\'exécution des scripts et recevoir des notifications sur les résultats.</string>
     <string name="grant_notification_permission_label">Activer les notifications</string>
     <string name="notification_permission_not_needed">Les notifications sont activées automatiquement sur les anciennes versions d\'Android.</string>
+    <string name="onboarding_welcome_title">Bienvenue sur Script Runner</string>
+    <string name="onboarding_welcome_desc">Le moyen le plus simple de relier votre interface Android à la puissance du terminal Termux.</string>
+    <string name="back_label">Retour</string>
+    <string name="next_label">Suivant</string>
+    <string name="to_run_scripts_in_the_background_without_interruptions_termux_needs_to_be_exempted_from_battery_optimization">Pour exécuter des scripts en arrière-plan sans interruption, Termux doit être exclu de l\'optimisation de la batterie.</string>
+    <string name="reliability_settings">Paramètres de fiabilité</string>
+    <string name="android_may_stop_background_scripts_if_battery_optimization_is_enabled_for_termux">Android peut arrêter les scripts en arrière-plan si l\'optimisation de la batterie est activée pour Termux.</string>
+    <string name="check_settings_again">Vérifier à nouveau les paramètres</string>
+    <string name="onboarding_battery_optimization">Note : Recherchez \'Batterie\' et \'Afficher sur d\'autres applications\' dans les paramètres de l\'application Termux.</string>
+    <string name="termux_install_warning">Termux est introuvable. Veuillez l\'installer pour continuer.</string>
+    <string name="title_manage_your_scripts">Gérez vos scripts</string>
+    <string name="body_manage_your_scripts">Gérez vos scripts sur l\'écran d\'accueil \n Changez leur ordre par simple glisser-déposer</string>
+    <string name="title_powerful_editor">Éditeur puissant</string>
+    <string name="body_powerful_editor">Éditeur avec des fonctionnalités améliorant le confort d\'utilisation</string>
+    <string name="title_automation">Automatisation</string>
+    <string name="body_automation">Quelques capacités d\'automatisation de base pour vos scripts</string>
+    <string name="title_quick_access_tiles">Tuiles d\'accès rapide</string>
+    <string name="body_quick_access_tiles">Tuiles d\'accès personnalisables depuis l\'application</string>
+    <string name="title_rice">Entièrement personnalisable</string>
+    <string name="body_rice">Vous pouvez créer vos propres thèmes de couleurs personnalisés</string>
+    <string name="termux_permission_warning">Cette autorisation est essentielle au fonctionnement de l\'application.</string>
+    <string name="title_promo">Simple. Puissant. Automatisé.</string>
 
     <!--Home -->
     <string name="home_title">Mes Scripts</string>
@@ -341,5 +363,47 @@
     <string name="script_widget_title">Scripts</string>
     <string name="script_edit_description">Modifier</string>
     <string name="script_no_scripts">Aucun script assigné</string>
+
+    <!-- Custom theme -->
+    <string name="custom_themes_title">Thèmes personnalisés</string>
+    <string name="new_theme_label">Nouveau</string>
+    <string name="theme_name_label">Nom du thème</string>
+    <string name="dark_mode_label">Palette du mode sombre</string>
+    <string name="colors_section_label">Couleurs de la palette</string>
+    <string name="select_or_create_theme_hint">Sélectionnez un thème à modifier ou appuyez sur + pour en créer un</string>
+    <string name="color_primary">Primaire</string>
+    <string name="color_on_primary">Sur Primaire</string>
+    <string name="color_primary_container">Conteneur primaire</string>
+    <string name="color_on_primary_container">Sur Conteneur primaire</string>
+    <string name="color_secondary">Secondaire</string>
+    <string name="color_on_secondary">Sur Secondaire</string>
+    <string name="color_tertiary">Tertiaire</string>
+    <string name="color_on_tertiary">Sur Tertiaire</string>
+    <string name="color_background">Arrière-plan</string>
+    <string name="color_on_background">Sur Arrière-plan</string>
+    <string name="color_surface">Surface</string>
+    <string name="color_on_surface">Sur Surface</string>
+    <string name="color_error">Erreur</string>
+    <string name="theme_edit_label">Gérer</string>
+    <string name="pick_color_title">Choisir une couleur\n</string>
+    <string name="saturation">Saturation</string>
+    <string name="hue">Teinte</string>
+    <string name="hex_code">Code Hex</string>
+    <string name="color_secondary_container">Conteneur secondaire</string>
+    <string name="color_on_secondary_container">Sur le conteneur secondaire</string>
+    <string name="color_tertiary_container">Conteneur tertiaire</string>
+    <string name="color_on_tertiary_container">Sur le conteneur tertiaire</string>
+    <string name="color_error_container">Conteneur d\'erreur</string>
+    <string name="color_on_error_container">Sur le conteneur d\'erreur</string>
+    <string name="color_on_surface_variant">Sur la variante de surface</string>
+    <string name="color_outline">Contour</string>
+    <string name="color_outline_variant">Variante de contour</string>
+    <string name="color_surface_container">Conteneur de surface</string>
+    <string name="color_surface_variant">Variante de surface</string>
+    <string name="color_on_error">Sur erreur</string>
+    <string name="brightness">Luminosité</string>
+    <string name="surfaces_background"><![CDATA[Surfaces et arrière-plan]]></string>
+    <string name="utility">Utilitaire</string>
+    <string name="surface_container_lowest">Conteneur de surface le plus bas</string>
 
 </resources>

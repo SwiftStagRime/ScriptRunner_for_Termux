@@ -45,6 +45,7 @@ class ScriptRunnerActivity : ComponentActivity() {
         setContent {
             val accent by viewModel.selectedAccent.collectAsStateWithLifecycle()
             val mode by viewModel.selectedMode.collectAsStateWithLifecycle()
+            val customTheme by viewModel.customTheme.collectAsStateWithLifecycle()
 
             val showPicker by viewModel.showScriptPicker.collectAsStateWithLifecycle()
             val scripts by viewModel.allScripts.collectAsStateWithLifecycle()
@@ -52,7 +53,7 @@ class ScriptRunnerActivity : ComponentActivity() {
 
             val scriptToPrompt by viewModel.scriptToPrompt.collectAsStateWithLifecycle()
 
-            ScriptRunnerForTermuxTheme(accent = accent, mode = mode) {
+            ScriptRunnerForTermuxTheme(accent = accent, mode = mode, customTheme = customTheme) {
                 if (showPicker) {
                     ScriptPickerDialog(
                         scripts = scripts,

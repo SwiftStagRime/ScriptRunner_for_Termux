@@ -75,6 +75,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalContext
@@ -285,14 +286,19 @@ private fun EditorAccessoryWrapper(
             content()
         } else {
             Surface(
-                tonalElevation = 8.dp,
-                shadowElevation = 4.dp,
                 color = MaterialTheme.colorScheme.surfaceContainer,
-                shape = RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp),
-                modifier = Modifier.fillMaxWidth().clickable(onClick = onShow),
+                shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .clickable(onClick = onShow),
             ) {
-                Box(modifier = Modifier.height(32.dp), contentAlignment = Alignment.Center) {
-                    Icon(Icons.Default.KeyboardArrowUp, stringResource(R.string.cd_show_toolbar), tint = MaterialTheme.colorScheme.primary)
+                Box(modifier = Modifier.height(36.dp), contentAlignment = Alignment.Center) {
+                    Icon(
+                        Icons.Default.KeyboardArrowUp,
+                        stringResource(R.string.cd_show_toolbar),
+                        tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f),
+                    )
                 }
             }
         }
@@ -435,9 +441,12 @@ private fun MainEditorArea(
     focusRequester: FocusRequester,
     onBottomClick: () -> Unit,
 ) {
-    val bottomBuffer = with(LocalDensity.current) { (TOOLBAR_HEIGHT_DP.dp + (EXTRA_LINES_COUNT * LINE_HEIGHT_SP).sp.toDp() + 100.dp) }
+    val bottomBuffer =
+        with(LocalDensity.current) {
+            (TOOLBAR_HEIGHT_DP.dp + (EXTRA_LINES_COUNT * LINE_HEIGHT_SP).sp.toDp() + 120.dp)
+        }
 
-    Row(modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surface)) {
+    Row(modifier = Modifier.fillMaxWidth().background(Color.Transparent)) {
         LineNumberGutter(code.text, textLayoutResult, scrollState, EXTRA_LINES_COUNT, TOOLBAR_HEIGHT_DP.dp)
 
         Box(
@@ -465,7 +474,8 @@ private fun MainEditorArea(
                     modifier =
                         Modifier
                             .then(if (isWrappingEnabled) Modifier.fillMaxWidth() else Modifier)
-                            .padding(horizontal = 8.dp)
+                            .padding(horizontal = 12.dp)
+                            .padding(top = 16.dp)
                             .focusRequester(focusRequester)
                             .focusProperties {
                                 up = FocusRequester.Cancel
@@ -477,10 +487,8 @@ private fun MainEditorArea(
                                 if (code.text.isEmpty()) {
                                     Text(
                                         stringResource(R.string.editor_placeholder),
-                                        color =
-                                            MaterialTheme.colorScheme.onSurfaceVariant.copy(
-                                                alpha = 0.5f,
-                                            ),
+                                        modifier = Modifier.padding(top = 2.dp),
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
                                     )
                                 }
                                 inner()
@@ -557,12 +565,11 @@ fun EditorSearchBar(
     ) {
         Surface(
             color = MaterialTheme.colorScheme.surfaceContainer,
-            tonalElevation = 3.dp,
-            shadowElevation = 2.dp,
             modifier = Modifier.fillMaxWidth(),
+            shadowElevation = 1.dp,
         ) {
             Row(
-                modifier = Modifier.padding(8.dp),
+                modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Icon(
@@ -676,8 +683,9 @@ private fun LineNumberGutter(
             modifier
                 .width(48.dp)
                 .fillMaxHeight()
-                .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
-                .verticalScroll(scrollState),
+                .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f))
+                .verticalScroll(scrollState)
+                .padding(top = 16.dp),
         horizontalAlignment = Alignment.End,
     ) {
         if (layoutResult != null) {
@@ -798,9 +806,9 @@ private fun EditorAccessoryToolbar(
 
     Column {
         Surface(
-            tonalElevation = 8.dp,
-            shadowElevation = 8.dp,
             color = MaterialTheme.colorScheme.surfaceContainer,
+            shadowElevation = 4.dp,
+            shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
         ) {
             Column {
                 Row(

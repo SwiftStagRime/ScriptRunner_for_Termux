@@ -11,6 +11,7 @@ import io.github.swiftstagrime.termuxrunner.data.local.AppDatabase
 import io.github.swiftstagrime.termuxrunner.data.local.dao.AutomationDao
 import io.github.swiftstagrime.termuxrunner.data.local.dao.AutomationLogDao
 import io.github.swiftstagrime.termuxrunner.data.local.dao.CategoryDao
+import io.github.swiftstagrime.termuxrunner.data.local.dao.CustomThemeDao
 import io.github.swiftstagrime.termuxrunner.data.local.dao.ScriptDao
 import javax.inject.Singleton
 
@@ -48,4 +49,8 @@ object DatabaseModule {
     @Provides
     @Singleton
     fun provideAutomationLogDao(db: AppDatabase): AutomationLogDao = db.automationLogDao()
+
+    @Provides
+    @Singleton
+    fun provideCustomThemeDao(db: AppDatabase): CustomThemeDao = db.customThemeDao()
 }

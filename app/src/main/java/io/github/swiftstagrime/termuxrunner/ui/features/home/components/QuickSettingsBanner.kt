@@ -3,10 +3,11 @@ package io.github.swiftstagrime.termuxrunner.ui.features.home.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -15,6 +16,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -56,9 +58,7 @@ fun QuickSettingsBanner(
     modifier: Modifier = Modifier,
 ) {
     Card(
-        modifier =
-            modifier
-                .fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(24.dp),
         colors =
             CardDefaults.cardColors(
@@ -67,9 +67,7 @@ fun QuickSettingsBanner(
             ),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
     ) {
-        Column(
-            modifier = Modifier.padding(16.dp),
-        ) {
+        Column(modifier = Modifier.padding(16.dp)) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
@@ -78,56 +76,86 @@ fun QuickSettingsBanner(
                     imageVector = Icons.Default.Bolt,
                     contentDescription = null,
                     modifier = Modifier.size(18.dp),
-                    tint = MaterialTheme.colorScheme.onTertiaryContainer,
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
                     text = stringResource(R.string.title_tile_settings),
                     style = MaterialTheme.typography.labelLarge,
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onTertiaryContainer,
                 )
             }
 
             Spacer(modifier = Modifier.height(12.dp))
 
             Row(
-                modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 8.dp, vertical = 0.dp),
+                modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.Top,
             ) {
-                Row(
-                    modifier = Modifier.weight(1f),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                ) {
-                    for (i in 1..5) {
-                        val script = tileMappings[i]
-                        TileCircleItem(
-                            index = i,
-                            script = script,
-                            onClick = {
-                                if (script != null) onTileClick(script) else onEmptyTileClick()
+                BoxWithConstraints(modifier = Modifier.weight(1f)) {
+                    val minItemWidth = 56.dp
+                    val spacing = 8.dp
+                    val totalMinWidth = (minItemWidth * 5) + (spacing * 4)
+                    val canFitAll = maxWidth >= totalMinWidth
+
+                    Row(
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .then(
+                                    if (canFitAll) {
+                                        Modifier
+                                    } else {
+                                        Modifier.horizontalScroll(rememberScrollState())
+                                    },
+                                ),
+                        horizontalArrangement =
+                            if (canFitAll) {
+                                Arrangement.SpaceBetween
+                            } else {
+                                Arrangement.spacedBy(spacing)
                             },
-                        )
+                        verticalAlignment = Alignment.Top,
+                    ) {
+                        for (i in 1..5) {
+                            TileCircleItem(
+                                index = i,
+                                script = tileMappings[i],
+                                onClick = {
+                                    val script = tileMappings[i]
+                                    if (script != null) onTileClick(script) else onEmptyTileClick()
+                                },
+                            )
+                        }
                     }
                 }
 
-                Spacer(modifier = Modifier.width(16.dp))
-
-                Box(
+                Row(
                     modifier = Modifier.height(48.dp),
-                    contentAlignment = Alignment.Center,
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
+                    Box(
+                        modifier =
+                            Modifier
+                                .padding(horizontal = 8.dp)
+                                .width(1.dp)
+                                .height(24.dp)
+                                .background(MaterialTheme.colorScheme.onTertiaryContainer.copy(alpha = 0.15f)),
+                    )
+
                     IconButton(
                         onClick = onSettingsClick,
-                        modifier = Modifier.size(32.dp),
+                        modifier =
+                            Modifier
+                                .size(40.dp)
+                                .background(
+                                    MaterialTheme.colorScheme.onTertiaryContainer.copy(alpha = 0.05f),
+                                    CircleShape,
+                                ),
                     ) {
                         Icon(
                             imageVector = Icons.Default.Settings,
                             contentDescription = "Configure Tiles",
-                            modifier = Modifier.size(22.dp),
+                            modifier = Modifier.size(20.dp),
                             tint = MaterialTheme.colorScheme.onTertiaryContainer.copy(alpha = 0.7f),
                         )
                     }
@@ -147,7 +175,7 @@ fun TileCircleItem(
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.width(IntrinsicSize.Min),
+        modifier = Modifier.width(56.dp),
     ) {
         Box(
             modifier =
@@ -164,9 +192,9 @@ fun TileCircleItem(
                     ).then(
                         if (!isAssigned) {
                             Modifier.border(
-                                width = 1.dp,
-                                color = MaterialTheme.colorScheme.onTertiaryContainer.copy(alpha = 0.3f),
-                                shape = CircleShape,
+                                1.dp,
+                                MaterialTheme.colorScheme.onTertiaryContainer.copy(alpha = 0.2f),
+                                CircleShape,
                             )
                         } else {
                             Modifier
@@ -191,34 +219,31 @@ fun TileCircleItem(
                     Text(
                         text = index.toString(),
                         style = MaterialTheme.typography.titleSmall,
-                        fontWeight = FontWeight.Bold,
+                        fontWeight = FontWeight.ExtraBold,
                         color = MaterialTheme.colorScheme.primary,
                     )
                 }
             } else {
                 Icon(
-                    imageVector = Icons.Default.Add,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onTertiaryContainer.copy(alpha = 0.5f),
-                    modifier = Modifier.size(18.dp),
+                    Icons.Default.Add,
+                    null,
+                    tint = MaterialTheme.colorScheme.onTertiaryContainer.copy(alpha = 0.4f),
+                    modifier = Modifier.size(20.dp),
                 )
             }
         }
 
-        if (script != null) {
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = script.name,
-                style = MaterialTheme.typography.labelSmall,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                textAlign = TextAlign.Center,
-                color = MaterialTheme.colorScheme.onTertiaryContainer,
-                modifier = Modifier.width(52.dp),
-            )
-        } else {
-            Spacer(modifier = Modifier.height(16.dp))
-        }
+        Spacer(modifier = Modifier.height(4.dp))
+
+        Text(
+            text = script?.name ?: "",
+            style = MaterialTheme.typography.labelSmall,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            textAlign = TextAlign.Center,
+            color = MaterialTheme.colorScheme.onTertiaryContainer,
+            modifier = Modifier.fillMaxWidth(),
+        )
     }
 }
 

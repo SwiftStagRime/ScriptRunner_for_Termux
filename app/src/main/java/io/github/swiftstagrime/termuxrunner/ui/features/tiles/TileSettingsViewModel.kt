@@ -12,17 +12,19 @@ import io.github.swiftstagrime.termuxrunner.data.service.ScriptTileService2
 import io.github.swiftstagrime.termuxrunner.data.service.ScriptTileService3
 import io.github.swiftstagrime.termuxrunner.data.service.ScriptTileService4
 import io.github.swiftstagrime.termuxrunner.data.service.ScriptTileService5
+import io.github.swiftstagrime.termuxrunner.di.DefaultDispatcher
+import io.github.swiftstagrime.termuxrunner.di.IoDispatcher
 import io.github.swiftstagrime.termuxrunner.domain.model.Category
 import io.github.swiftstagrime.termuxrunner.domain.model.Script
 import io.github.swiftstagrime.termuxrunner.domain.repository.CategoryRepository
 import io.github.swiftstagrime.termuxrunner.domain.repository.ScriptRepository
 import io.github.swiftstagrime.termuxrunner.domain.repository.UserPreferencesRepository
-import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -36,6 +38,8 @@ class TileSettingsViewModel
         private val scriptRepo: ScriptRepository,
         private val categoryRepository: CategoryRepository,
         @ApplicationContext private val context: Context,
+        @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
+        @DefaultDispatcher private val defaultDispatcher: CoroutineDispatcher,
     ) : ViewModel() {
         val allScripts: StateFlow<List<Script>> =
             scriptRepo
@@ -43,40 +47,42 @@ class TileSettingsViewModel
                 .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
         val allCategories: StateFlow<List<Category>> =
-            categoryRepository.getAllCategories().stateIn(
-                scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(5000),
-                initialValue = emptyList(),
-            )
+            categoryRepository
+                .getAllCategories()
+                .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-        @OptIn(ExperimentalCoroutinesApi::class)
-        val tileMappings =
+        private val tileIdMappings: Flow<Map<Int, Int?>> =
             combine(
                 (1..5).map { idx -> prefs.getScriptIdForTile(idx).map { idx to it } },
-            ) { array ->
-                array.toMap()
-            }.flatMapLatest { map ->
-                flow {
-                    val result = mutableMapOf<Int, Script?>()
-                    map.forEach { (idx, scriptId) ->
-                        result[idx] = if (scriptId != null) scriptRepo.getScriptById(scriptId) else null
-                    }
-                    emit(result)
+            ) { array -> array.toMap() }
+
+        val tileMappings: StateFlow<Map<Int, Script?>> =
+            combine(
+                tileIdMappings,
+                allScripts,
+            ) { idMap, scripts ->
+                idMap.mapValues { (_, id) ->
+                    if (id != null) scripts.find { it.id == id } else null
                 }
-            }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyMap())
+            }.flowOn(defaultDispatcher)
+                .stateIn(
+                    scope = viewModelScope,
+                    started = SharingStarted.WhileSubscribed(5000),
+                    initialValue = emptyMap(),
+                )
 
         fun assignScript(
             tileIndex: Int,
             scriptId: Int,
         ) {
-            viewModelScope.launch {
+            viewModelScope.launch(ioDispatcher) {
                 prefs.setScriptIdForTile(tileIndex, scriptId)
                 requestTileUpdate(tileIndex)
             }
         }
 
         fun clearTile(tileIndex: Int) {
-            viewModelScope.launch {
+            viewModelScope.launch(ioDispatcher) {
                 prefs.setScriptIdForTile(tileIndex, null)
                 requestTileUpdate(tileIndex)
             }

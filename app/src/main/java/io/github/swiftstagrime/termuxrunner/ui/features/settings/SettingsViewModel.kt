@@ -5,12 +5,14 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.swiftstagrime.termuxrunner.R
+import io.github.swiftstagrime.termuxrunner.di.IoDispatcher
 import io.github.swiftstagrime.termuxrunner.domain.repository.ScriptRepository
 import io.github.swiftstagrime.termuxrunner.domain.repository.UserPreferencesRepository
 import io.github.swiftstagrime.termuxrunner.ui.extensions.UiText
 import io.github.swiftstagrime.termuxrunner.ui.theme.AppTheme
 import io.github.swiftstagrime.termuxrunner.ui.theme.ThemeMode
 import io.github.swiftstagrime.termuxrunner.ui.utils.WidgetManager
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -27,6 +29,7 @@ class SettingsViewModel
         private val userPreferencesRepository: UserPreferencesRepository,
         private val scriptRepository: ScriptRepository,
         private val widgetManager: WidgetManager,
+        @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
     ) : ViewModel() {
         val selectedAccent =
             userPreferencesRepository.selectedAccent
@@ -51,22 +54,23 @@ class SettingsViewModel
         val navEvents = _navEvents.receiveAsFlow()
 
         fun setAccent(accent: AppTheme) {
-            viewModelScope.launch {
+            viewModelScope.launch(ioDispatcher) {
                 userPreferencesRepository.setAccent(accent)
                 widgetManager.updateAllWidgets()
             }
         }
 
         fun setMode(mode: ThemeMode) {
-            viewModelScope.launch {
+            viewModelScope.launch(ioDispatcher) {
                 userPreferencesRepository.setMode(mode)
                 widgetManager.updateAllWidgets()
             }
         }
 
         fun exportData(uri: Uri) {
-            viewModelScope.launch {
+            viewModelScope.launch(ioDispatcher) {
                 _ioState.value = UiText.StringResource(R.string.exporting)
+
                 scriptRepository
                     .exportScripts(uri)
                     .onSuccess {
@@ -82,12 +86,14 @@ class SettingsViewModel
         }
 
         fun importData(uri: Uri) {
-            viewModelScope.launch {
+            viewModelScope.launch(ioDispatcher) {
                 _ioState.value = UiText.StringResource(R.string.importing)
+
                 scriptRepository
                     .importScripts(uri)
                     .onSuccess {
                         _ioState.value = UiText.StringResource(R.string.import_success)
+                        widgetManager.updateAllWidgets()
                     }.onFailure {
                         _ioState.value =
                             UiText.StringResource(
@@ -99,11 +105,13 @@ class SettingsViewModel
         }
 
         fun importSingleScript(uri: Uri) {
-            viewModelScope.launch {
+            viewModelScope.launch(ioDispatcher) {
                 scriptRepository
                     .importSingleScript(uri)
                     .onSuccess { parsedScript ->
                         val newId = scriptRepository.insertScript(parsedScript)
+                        widgetManager.updateScriptsWidget()
+
                         _navEvents.send(SettingsNavEvent.NavigateToEditor(newId))
                     }.onFailure {
                         _ioState.value = UiText.StringResource(R.string.import_failed, it.message ?: "")

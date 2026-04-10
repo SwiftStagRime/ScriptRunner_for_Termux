@@ -29,6 +29,7 @@ class UserPreferencesRepositoryImpl
             val THEME_ACCENT = stringPreferencesKey("theme_accent")
             val THEME_MODE = stringPreferencesKey("theme_mode")
             val ONBOARDING_COMPLETED = booleanPreferencesKey("onboarding_completed")
+            val SELECTED_CUSTOM_THEME_ID = intPreferencesKey("selected_custom_theme_id")
         }
 
         override val selectedAccent: Flow<AppTheme> =
@@ -44,6 +45,9 @@ class UserPreferencesRepositoryImpl
                     val name = prefs[Keys.THEME_MODE] ?: ThemeMode.SYSTEM.name
                     ThemeMode.valueOf(name)
                 }
+
+        override val selectedCustomThemeId: Flow<Int?> =
+            context.dataStore.data.map { it[Keys.SELECTED_CUSTOM_THEME_ID] }
 
         override suspend fun setAccent(accent: AppTheme) {
             context.dataStore.edit { it[Keys.THEME_ACCENT] = accent.name }
@@ -79,6 +83,10 @@ class UserPreferencesRepositoryImpl
                     preferences[key] = scriptId
                 }
             }
+        }
+
+        override suspend fun setCustomThemeId(id: Int) {
+            context.dataStore.edit { it[Keys.SELECTED_CUSTOM_THEME_ID] = id }
         }
     }
 

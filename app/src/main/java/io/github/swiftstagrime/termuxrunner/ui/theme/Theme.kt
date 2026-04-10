@@ -14,9 +14,11 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.remember
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
+import io.github.swiftstagrime.termuxrunner.domain.model.CustomTheme
 
 // Green
 private val DarkGreenColorScheme =
@@ -46,6 +48,7 @@ private val DarkGreenColorScheme =
         outline = DarkGreenOutline,
         outlineVariant = DarkGreenOutlineVariant,
         surfaceContainer = DarkGreenSurfaceContainer,
+        surfaceContainerLowest = DarkGreenSurfaceContainerLowest,
     )
 
 private val LightGreenColorScheme =
@@ -75,6 +78,7 @@ private val LightGreenColorScheme =
         outline = LightGreenOutline,
         outlineVariant = LightGreenOutlineVariant,
         surfaceContainer = LightGreenSurfaceContainer,
+        surfaceContainerLowest = LightGreenSurfaceContainerLowest,
     )
 
 private val DarkBlueColorScheme =
@@ -104,6 +108,7 @@ private val DarkBlueColorScheme =
         outline = DarkBlueOutline,
         outlineVariant = DarkBlueOutlineVariant,
         surfaceContainer = DarkBlueSurfaceContainer,
+        surfaceContainerLowest = DarkBlueSurfaceContainerLowest,
     )
 
 private val LightBlueColorScheme =
@@ -133,6 +138,7 @@ private val LightBlueColorScheme =
         outline = LightBlueOutline,
         outlineVariant = LightBlueOutlineVariant,
         surfaceContainer = LightBlueSurfaceContainer,
+        surfaceContainerLowest = LightBlueSurfaceContainerLowest,
     )
 
 private val DarkRedColorScheme =
@@ -162,6 +168,7 @@ private val DarkRedColorScheme =
         outline = DarkRedOutline,
         outlineVariant = DarkRedOutlineVariant,
         surfaceContainer = DarkRedSurfaceContainer,
+        surfaceContainerLowest = DarkRedSurfaceContainerLowest,
     )
 
 private val LightRedColorScheme =
@@ -191,6 +198,7 @@ private val LightRedColorScheme =
         outline = LightRedOutline,
         outlineVariant = LightRedOutlineVariant,
         surfaceContainer = LightRedSurfaceContainer,
+        surfaceContainerLowest = LightRedSurfaceContainerLowest,
     )
 
 private val DarkAmoledColorScheme =
@@ -220,6 +228,7 @@ private val DarkAmoledColorScheme =
         outline = DarkAmoledOutline,
         outlineVariant = DarkAmoledOutlineVariant,
         surfaceContainer = DarkAmoledSurfaceContainer,
+        surfaceContainerLowest = DarkAmoledSurfaceContainerLowest,
     )
 
 private val LightAmoledColorScheme =
@@ -249,6 +258,7 @@ private val LightAmoledColorScheme =
         outline = LightAmoledOutline,
         outlineVariant = LightAmoledOutlineVariant,
         surfaceContainer = LightAmoledSurfaceContainer,
+        surfaceContainerLowest = LightAmoledSurfaceContainerLowest,
     )
 
 private val DarkColorfulAmoledColorScheme =
@@ -278,6 +288,7 @@ private val DarkColorfulAmoledColorScheme =
         outline = DarkColorfulAmoledOutline,
         outlineVariant = DarkColorfulAmoledOutlineVariant,
         surfaceContainer = DarkColorfulAmoledSurfaceContainer,
+        surfaceContainerLowest = DarkColorfulAmoledSurfaceContainerLowest,
     )
 
 private val LightColorfulAmoledColorScheme =
@@ -307,25 +318,35 @@ private val LightColorfulAmoledColorScheme =
         outline = LightColorfulAmoledOutline,
         outlineVariant = LightColorfulAmoledOutlineVariant,
         surfaceContainer = LightColorfulAmoledSurfaceContainer,
+        surfaceContainerLowest = LightColorfulAmoledSurfaceContainerLowest,
     )
 
 @Composable
 fun ScriptRunnerForTermuxTheme(
     accent: AppTheme = AppTheme.GREEN,
+    customTheme: CustomTheme? = null,
     mode: ThemeMode = ThemeMode.DARK,
     content: @Composable () -> Unit,
 ) {
     val context = LocalContext.current
     val isDark =
-        when (mode) {
-            ThemeMode.LIGHT -> false
-            ThemeMode.DARK -> true
-            ThemeMode.SYSTEM -> isSystemInDarkTheme()
-        }
+        remember(accent, mode, customTheme) {
+            if (accent == AppTheme.CUSTOM && customTheme != null) {
+                customTheme.isDark
+            } else {
+                when (mode) {
+                    ThemeMode.LIGHT -> false
+                    ThemeMode.DARK -> true
+                    ThemeMode.SYSTEM -> {
+                        null
+                    }
+                }
+            }
+        } ?: isSystemInDarkTheme()
 
     val colorScheme =
-        remember(accent, isDark) {
-            pickColorScheme(accent, isDark, context)
+        remember(accent, isDark, customTheme) {
+            pickColorScheme(accent, isDark, context, customTheme)
         }
 
     val view = LocalView.current
@@ -349,6 +370,7 @@ fun pickColorScheme(
     accent: AppTheme,
     isDark: Boolean,
     context: Context,
+    customTheme: CustomTheme? = null,
 ): ColorScheme =
     when (accent) {
         AppTheme.DYNAMIC -> {
@@ -363,6 +385,70 @@ fun pickColorScheme(
         AppTheme.RED -> if (isDark) DarkRedColorScheme else LightRedColorScheme
         AppTheme.AMOLED -> if (isDark) DarkAmoledColorScheme else LightAmoledColorScheme
         AppTheme.CYBER -> if (isDark) DarkColorfulAmoledColorScheme else LightColorfulAmoledColorScheme
+        AppTheme.CUSTOM -> {
+            customTheme?.toColorScheme(isDark) ?: if (isDark) DarkGreenColorScheme else LightGreenColorScheme
+        }
+    }
+
+fun CustomTheme.toColorScheme(isDark: Boolean): ColorScheme =
+    if (isDark) {
+        darkColorScheme(
+            primary = Color(this.primary.toInt()),
+            onPrimary = Color(this.onPrimary.toInt()),
+            primaryContainer = Color(this.primaryContainer.toInt()),
+            onPrimaryContainer = Color(this.onPrimaryContainer.toInt()),
+            secondary = Color(this.secondary.toInt()),
+            onSecondary = Color(this.onSecondary.toInt()),
+            secondaryContainer = Color(this.secondaryContainer.toInt()),
+            onSecondaryContainer = Color(this.onSecondaryContainer.toInt()),
+            tertiary = Color(this.tertiary.toInt()),
+            onTertiary = Color(this.onTertiary.toInt()),
+            tertiaryContainer = Color(this.tertiaryContainer.toInt()),
+            onTertiaryContainer = Color(this.onTertiaryContainer.toInt()),
+            error = Color(this.error.toInt()),
+            onError = Color(this.onError.toInt()),
+            errorContainer = Color(this.errorContainer.toInt()),
+            onErrorContainer = Color(this.onErrorContainer.toInt()),
+            background = Color(this.background.toInt()),
+            onBackground = Color(this.onBackground.toInt()),
+            surface = Color(this.surface.toInt()),
+            onSurface = Color(this.onSurface.toInt()),
+            surfaceVariant = Color(this.surfaceVariant.toInt()),
+            onSurfaceVariant = Color(this.onSurfaceVariant.toInt()),
+            outline = Color(this.outline.toInt()),
+            outlineVariant = Color(this.outlineVariant.toInt()),
+            surfaceContainer = Color(this.surfaceContainer.toInt()),
+            surfaceContainerLowest = Color(this.surfaceContainerLowest.toInt()),
+        )
+    } else {
+        lightColorScheme(
+            primary = Color(this.primary.toInt()),
+            onPrimary = Color(this.onPrimary.toInt()),
+            primaryContainer = Color(this.primaryContainer.toInt()),
+            onPrimaryContainer = Color(this.onPrimaryContainer.toInt()),
+            secondary = Color(this.secondary.toInt()),
+            onSecondary = Color(this.onSecondary.toInt()),
+            secondaryContainer = Color(this.secondaryContainer.toInt()),
+            onSecondaryContainer = Color(this.onSecondaryContainer.toInt()),
+            tertiary = Color(this.tertiary.toInt()),
+            onTertiary = Color(this.onTertiary.toInt()),
+            tertiaryContainer = Color(this.tertiaryContainer.toInt()),
+            onTertiaryContainer = Color(this.onTertiaryContainer.toInt()),
+            error = Color(this.error.toInt()),
+            onError = Color(this.onError.toInt()),
+            errorContainer = Color(this.errorContainer.toInt()),
+            onErrorContainer = Color(this.onErrorContainer.toInt()),
+            background = Color(this.background.toInt()),
+            onBackground = Color(this.onBackground.toInt()),
+            surface = Color(this.surface.toInt()),
+            onSurface = Color(this.onSurface.toInt()),
+            surfaceVariant = Color(this.surfaceVariant.toInt()),
+            onSurfaceVariant = Color(this.onSurfaceVariant.toInt()),
+            outline = Color(this.outline.toInt()),
+            outlineVariant = Color(this.outlineVariant.toInt()),
+            surfaceContainer = Color(this.surfaceContainer.toInt()),
+            surfaceContainerLowest = Color(this.surfaceContainerLowest.toInt()),
+        )
     }
 
 tailrec fun Context.findActivity(): Activity? =

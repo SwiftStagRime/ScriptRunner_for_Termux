@@ -1,0 +1,5 @@
+Changes:
+1) Moved most of the work to background threads
+2) Redesign the look of the app
+3) Ricing is available using custom themes
+4) Overhaul for the onboarding

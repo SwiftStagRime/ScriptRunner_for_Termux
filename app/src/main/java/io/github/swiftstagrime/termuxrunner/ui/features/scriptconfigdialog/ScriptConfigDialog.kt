@@ -35,9 +35,9 @@ import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuAnchorType
 import androidx.compose.material3.ExposedDropdownMenuBox
@@ -47,10 +47,12 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -104,7 +106,8 @@ fun ScriptConfigDialog(
     onProcessImage: suspend (Uri) -> String?,
 ) {
     val scope = rememberCoroutineScope()
-
+    val outerBackgroundColor = MaterialTheme.colorScheme.surface
+    val sheetContainerColor = MaterialTheme.colorScheme.surfaceContainerLowest
     val photoPickerLauncher =
         rememberLauncherForActivityResult(
             contract = ActivityResultContracts.PickVisualMedia(),
@@ -121,6 +124,7 @@ fun ScriptConfigDialog(
         properties = DialogProperties(usePlatformDefaultWidth = false),
     ) {
         Scaffold(
+            containerColor = outerBackgroundColor,
             topBar = {
                 ConfigTopBar(
                     onDismiss = onDismiss,
@@ -132,38 +136,36 @@ fun ScriptConfigDialog(
                 )
             },
         ) { padding ->
-            LazyColumn(
+            Surface(
                 modifier =
                     Modifier
-                        .fillMaxSize()
                         .padding(padding)
-                        .padding(horizontal = PADDING_STANDARD.dp),
-                verticalArrangement = Arrangement.spacedBy(PADDING_STANDARD.dp),
-                contentPadding = PaddingValues(bottom = 24.dp),
+                        .padding(horizontal = 8.dp)
+                        .padding(bottom = 8.dp)
+                        .fillMaxSize(),
+                color = sheetContainerColor,
+                shape = RoundedCornerShape(32.dp),
+                shadowElevation = 1.dp,
             ) {
-                item {
-                    IdentitySection(state, photoPickerLauncher)
-                }
-                item {
-                    ExecutionSection(state, categories)
-                }
-                item {
-                    InteractivitySection(state)
-                }
-                item {
-                    BehaviorSection(state)
-                }
-                item {
-                    ReliabilitySection(
-                        state = state,
-                        isBatteryUnrestricted = isBatteryUnrestricted,
-                        onRequestBatteryUnrestricted = onRequestBatteryUnrestricted,
-                        onHeartbeatToggle = onHeartbeatToggle,
-                        onRequestNotificationPermission = onRequestNotificationPermission,
-                    )
-                }
-                item {
-                    EnvironmentSection(state)
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    verticalArrangement = Arrangement.spacedBy(24.dp), // Increased spacing between sections
+                    contentPadding = PaddingValues(16.dp),
+                ) {
+                    item { IdentitySection(state, photoPickerLauncher) }
+                    item { ExecutionSection(state, categories) }
+                    item { InteractivitySection(state) }
+                    item { BehaviorSection(state) }
+                    item {
+                        ReliabilitySection(
+                            state = state,
+                            isBatteryUnrestricted = isBatteryUnrestricted,
+                            onRequestBatteryUnrestricted = onRequestBatteryUnrestricted,
+                            onHeartbeatToggle = onHeartbeatToggle,
+                            onRequestNotificationPermission = onRequestNotificationPermission,
+                        )
+                    }
+                    item { EnvironmentSection(state) }
                 }
             }
         }
@@ -391,19 +393,18 @@ private fun ConfigSection(
 ) {
     Column {
         Text(
-            text = title,
-            style = MaterialTheme.typography.titleMedium,
+            text = title.uppercase(),
+            style = MaterialTheme.typography.labelLarge,
+            fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.padding(start = 4.dp, bottom = 8.dp),
+            modifier = Modifier.padding(start = 8.dp, bottom = 8.dp),
         )
-        ElevatedCard(
+        Card(
             colors =
-                CardDefaults.elevatedCardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceContainer,
-                    contentColor = MaterialTheme.colorScheme.onSurface,
+                CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surface,
                 ),
-            shape = RoundedCornerShape(16.dp),
-            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+            shape = RoundedCornerShape(24.dp),
         ) {
             Column(
                 modifier = Modifier.padding(16.dp),
@@ -538,6 +539,10 @@ private fun ConfigTopBar(
                 Icon(Icons.Default.Save, stringResource(R.string.cd_save))
             }
         },
+        colors =
+            TopAppBarDefaults.topAppBarColors(
+                containerColor = Color.Transparent,
+            ),
     )
 }
 

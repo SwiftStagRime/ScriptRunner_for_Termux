@@ -49,11 +49,12 @@ class MainActivity : AppCompatActivity() {
         setContent {
             val accent by mainViewModel.selectedAccent.collectAsStateWithLifecycle()
             val mode by mainViewModel.selectedMode.collectAsStateWithLifecycle()
+            val customTheme by mainViewModel.customTheme.collectAsStateWithLifecycle()
             val backStack by mainViewModel.backStack.collectAsStateWithLifecycle()
             CompositionLocalProvider(
                 LocalInspectionMode provides false,
             ) {
-                ScriptRunnerForTermuxTheme(accent = accent, mode = mode) {
+                ScriptRunnerForTermuxTheme(accent = accent, mode = mode, customTheme = customTheme) {
                     Surface(
                         modifier =
                             Modifier

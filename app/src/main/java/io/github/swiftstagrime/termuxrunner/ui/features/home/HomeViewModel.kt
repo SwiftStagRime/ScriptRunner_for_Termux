@@ -11,6 +11,8 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.swiftstagrime.termuxrunner.R
 import io.github.swiftstagrime.termuxrunner.data.repository.TermuxException
 import io.github.swiftstagrime.termuxrunner.data.repository.TermuxPermissionException
+import io.github.swiftstagrime.termuxrunner.di.DefaultDispatcher
+import io.github.swiftstagrime.termuxrunner.di.IoDispatcher
 import io.github.swiftstagrime.termuxrunner.domain.model.Category
 import io.github.swiftstagrime.termuxrunner.domain.model.Script
 import io.github.swiftstagrime.termuxrunner.domain.repository.CategoryRepository
@@ -24,6 +26,8 @@ import io.github.swiftstagrime.termuxrunner.domain.usecase.UpdateScriptUseCase
 import io.github.swiftstagrime.termuxrunner.ui.extensions.UiText
 import io.github.swiftstagrime.termuxrunner.ui.features.scriptconfigdialog.ScriptConfigState
 import io.github.swiftstagrime.termuxrunner.ui.utils.WidgetManager
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -31,11 +35,15 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 sealed interface HomeUiState {
@@ -81,6 +89,8 @@ class HomeViewModel
         private val scriptRepository: ScriptRepository,
         private val userPreferencesRepository: UserPreferencesRepository,
         private val widgetManager: WidgetManager,
+        @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
+        @DefaultDispatcher private val defaultDispatcher: CoroutineDispatcher,
     ) : ViewModel() {
         private val _searchQuery = MutableStateFlow("")
         val searchQuery = _searchQuery.asStateFlow()
@@ -112,9 +122,15 @@ class HomeViewModel
                 },
             ) { pairs -> pairs.toMap() }
 
+        @OptIn(FlowPreview::class)
+        private val debouncedSearchQuery =
+            _searchQuery
+                .debounce(300L)
+                .distinctUntilChanged()
+
         private val filterState =
             combine(
-                _searchQuery,
+                debouncedSearchQuery,
                 _selectedCategoryId,
                 _sortOption,
             ) { query, categoryId, sort ->
@@ -162,7 +178,8 @@ class HomeViewModel
                     categories = categories,
                     tileMappings = finalTileMap,
                 ) as HomeUiState
-            }.onStart { emit(HomeUiState.Loading) }
+            }.flowOn(defaultDispatcher)
+                .onStart { emit(HomeUiState.Loading) }
                 .stateIn(
                     scope = viewModelScope,
                     started = SharingStarted.WhileSubscribed(5000),
@@ -187,19 +204,10 @@ class HomeViewModel
             runtimePrefix: String? = null,
             runtimeEnv: Map<String, String>? = null,
         ) {
-            viewModelScope.launch {
+            viewModelScope.launch(ioDispatcher) {
                 try {
-                    runScriptUseCase(
-                        script = script,
-                        runtimeArgs = runtimeArgs,
-                        runtimePrefix = runtimePrefix,
-                        runtimeEnv = runtimeEnv,
-                    )
-                    sendEvent(
-                        HomeUiEvent.ShowSnackbar(
-                            UiText.StringResource(R.string.msg_running_script, script.name),
-                        ),
-                    )
+                    runScriptUseCase(script = script, runtimeArgs = runtimeArgs, runtimePrefix = runtimePrefix, runtimeEnv = runtimeEnv)
+                    sendEvent(HomeUiEvent.ShowSnackbar(UiText.StringResource(R.string.msg_running_script, script.name)))
                     clearPendingRun()
                 } catch (_: TermuxPermissionException) {
                     pendingScript = script
@@ -225,7 +233,7 @@ class HomeViewModel
         }
 
         fun updateScript(script: Script) {
-            viewModelScope.launch {
+            viewModelScope.launch(ioDispatcher) {
                 updateScriptUseCase(script)
                 dismissConfig()
                 sendEvent(HomeUiEvent.ShowSnackbar(UiText.StringResource(R.string.msg_config_saved)))
@@ -233,7 +241,7 @@ class HomeViewModel
         }
 
         fun deleteScript(script: Script) {
-            viewModelScope.launch {
+            viewModelScope.launch(ioDispatcher) {
                 deleteScriptUseCase(script)
                 sendEvent(HomeUiEvent.ShowSnackbar(UiText.StringResource(R.string.msg_script_deleted)))
                 widgetManager.updateScriptsWidget()
@@ -247,15 +255,12 @@ class HomeViewModel
             val currentState = homeUiState.value
             if (currentState !is HomeUiState.Success) return
 
-            viewModelScope.launch {
+            viewModelScope.launch(ioDispatcher) {
                 val list = currentState.scripts.toMutableList()
                 val item = list.removeAt(fromIndex)
                 list.add(toIndex, item)
 
-                val updates =
-                    list.mapIndexed { index, script ->
-                        script.id to index
-                    }
+                val updates = list.mapIndexed { index, script -> script.id to index }
                 scriptRepository.updateScriptsOrder(updates)
             }
         }
@@ -264,7 +269,7 @@ class HomeViewModel
             script: Script,
             useThemedIcon: Boolean,
         ) {
-            viewModelScope.launch {
+            viewModelScope.launch(ioDispatcher) {
                 if (shortcutRepository.isPinningSupported()) {
                     val info = shortcutRepository.createShortcutInfo(script, useThemedIcon)
                     if (info != null) {
@@ -283,28 +288,19 @@ class HomeViewModel
             configState = ScriptConfigState(script)
         }
 
-        fun saveConfig() {
-            val state = configState ?: return
-            val original = originalScriptForConfig ?: return
-            if (state.validate()) {
-                updateScript(state.toScript(original))
-                dismissConfig()
-            }
-        }
-
         fun dismissConfig() {
             configState = null
             originalScriptForConfig = null
         }
 
         fun addCategory(name: String) {
-            viewModelScope.launch {
+            viewModelScope.launch(ioDispatcher) {
                 categoryRepository.upsertCategory(Category(name = name))
             }
         }
 
         fun deleteCategory(category: Category) {
-            viewModelScope.launch {
+            viewModelScope.launch(ioDispatcher) {
                 val currentScripts = (homeUiState.value as? HomeUiState.Success)?.scripts ?: emptyList()
                 val scriptsToNullify = currentScripts.filter { it.categoryId == category.id }
 
@@ -320,7 +316,14 @@ class HomeViewModel
             }
         }
 
-        suspend fun processImage(uri: Uri): String? = iconRepository.saveIcon(uri.toString())
+        suspend fun processImage(uri: Uri): String? =
+            withContext(ioDispatcher) {
+                try {
+                    iconRepository.saveIcon(uri.toString())
+                } catch (_: Exception) {
+                    null
+                }
+            }
 
         private fun sendEvent(event: HomeUiEvent) {
             viewModelScope.launch { _uiEvent.send(event) }

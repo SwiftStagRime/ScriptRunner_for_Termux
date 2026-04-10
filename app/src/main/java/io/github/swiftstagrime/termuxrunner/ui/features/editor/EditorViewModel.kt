@@ -10,6 +10,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.swiftstagrime.termuxrunner.R
+import io.github.swiftstagrime.termuxrunner.di.IoDispatcher
 import io.github.swiftstagrime.termuxrunner.domain.model.Category
 import io.github.swiftstagrime.termuxrunner.domain.model.Script
 import io.github.swiftstagrime.termuxrunner.domain.repository.CategoryRepository
@@ -19,6 +20,7 @@ import io.github.swiftstagrime.termuxrunner.domain.usecase.UpdateScriptUseCase
 import io.github.swiftstagrime.termuxrunner.ui.extensions.UiText
 import io.github.swiftstagrime.termuxrunner.ui.features.scriptconfigdialog.ScriptConfigState
 import io.github.swiftstagrime.termuxrunner.ui.utils.WidgetManager
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -26,6 +28,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 sealed interface EditorUiEvent {
@@ -45,6 +48,7 @@ class EditorViewModel
         private val updateScriptUseCase: UpdateScriptUseCase,
         private val iconRepository: IconRepository,
         private val widgetManager: WidgetManager,
+        @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
     ) : ViewModel() {
         val categories =
             categoryRepository
@@ -79,7 +83,7 @@ class EditorViewModel
                 return
             }
 
-            viewModelScope.launch {
+            viewModelScope.launch(ioDispatcher) {
                 try {
                     val script = scriptRepository.getScriptById(id)
                     if (script != null) {
@@ -107,13 +111,15 @@ class EditorViewModel
         }
 
         fun saveScript(script: Script) {
-            viewModelScope.launch {
+            viewModelScope.launch(ioDispatcher) {
                 try {
                     updateScriptUseCase(script)
+
                     try {
                         widgetManager.updateScriptsWidget()
                     } catch (_: Exception) {
                     }
+
                     _uiEvent.send(EditorUiEvent.SaveSuccess)
                 } catch (_: Exception) {
                     _uiEvent.send(
@@ -134,15 +140,17 @@ class EditorViewModel
         }
 
         fun addCategory(name: String) {
-            viewModelScope.launch {
+            viewModelScope.launch(ioDispatcher) {
                 categoryRepository.upsertCategory(Category(name = name))
             }
         }
 
         suspend fun processSelectedImage(uri: Uri): String? =
-            try {
-                iconRepository.saveIcon(uri.toString())
-            } catch (_: Exception) {
-                null
+            withContext(ioDispatcher) {
+                try {
+                    iconRepository.saveIcon(uri.toString())
+                } catch (_: Exception) {
+                    null
+                }
             }
     }

@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.swiftstagrime.termuxrunner.data.local.entity.AutomationEntity
+import io.github.swiftstagrime.termuxrunner.di.IoDispatcher
 import io.github.swiftstagrime.termuxrunner.domain.model.Automation
 import io.github.swiftstagrime.termuxrunner.domain.model.Category
 import io.github.swiftstagrime.termuxrunner.domain.model.Script
@@ -14,6 +15,7 @@ import io.github.swiftstagrime.termuxrunner.domain.repository.ScriptRepository
 import io.github.swiftstagrime.termuxrunner.domain.usecase.RunScriptUseCase
 import io.github.swiftstagrime.termuxrunner.domain.util.AutomationTimeCalculator
 import io.github.swiftstagrime.termuxrunner.ui.utils.WidgetManager
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
@@ -36,6 +38,7 @@ class AutomationViewModel
         private val automationLogRepository: AutomationLogRepository,
         private val runScriptUseCase: RunScriptUseCase,
         private val widgetManager: WidgetManager,
+        @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
     ) : ViewModel() {
         val automations: StateFlow<List<Automation>> =
             automationRepository
@@ -56,26 +59,24 @@ class AutomationViewModel
             id: Int,
             enabled: Boolean,
         ) {
-            viewModelScope.launch {
+            viewModelScope.launch(ioDispatcher) {
                 automationRepository.toggleAutomation(id, enabled)
                 widgetManager.updateAutomationWidget()
             }
         }
 
         fun deleteAutomation(automation: Automation) {
-            viewModelScope.launch {
+            viewModelScope.launch(ioDispatcher) {
                 automationRepository.deleteAutomation(automation)
                 widgetManager.updateAutomationWidget()
             }
         }
 
         fun runAutomationNow(automation: Automation) {
-            viewModelScope.launch {
+            viewModelScope.launch(ioDispatcher) {
                 scriptRepository.getScriptById(automation.scriptId)?.let { script ->
-                    val scriptForAutomation = script.copy(notifyOnResult = true)
-
                     runScriptUseCase(
-                        script = scriptForAutomation,
+                        script = script.copy(notifyOnResult = true),
                         runtimeArgs = automation.runtimeArgs,
                         runtimeEnv = automation.runtimeEnv,
                         runtimePrefix = automation.runtimePrefix,
@@ -86,10 +87,8 @@ class AutomationViewModel
             }
         }
 
-        fun getAutomationLogs(automationId: Int) = automationLogRepository.getLogsForAutomation(automationId)
-
         fun saveAutomation(params: AutomationSaveParams) {
-            viewModelScope.launch {
+            viewModelScope.launch(ioDispatcher) {
                 val now = System.currentTimeMillis()
 
                 val tempEntity =
@@ -137,8 +136,9 @@ class AutomationViewModel
                     )
 
                 automationRepository.saveAutomation(automation)
-
                 widgetManager.updateAutomationWidget()
             }
         }
+
+        fun getAutomationLogs(automationId: Int) = automationLogRepository.getLogsForAutomation(automationId)
     }

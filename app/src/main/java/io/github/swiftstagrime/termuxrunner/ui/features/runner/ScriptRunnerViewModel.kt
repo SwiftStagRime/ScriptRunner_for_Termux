@@ -5,18 +5,24 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.swiftstagrime.termuxrunner.data.repository.TermuxPermissionException
+import io.github.swiftstagrime.termuxrunner.di.IoDispatcher
 import io.github.swiftstagrime.termuxrunner.domain.model.InteractionMode
 import io.github.swiftstagrime.termuxrunner.domain.model.Script
 import io.github.swiftstagrime.termuxrunner.domain.repository.CategoryRepository
+import io.github.swiftstagrime.termuxrunner.domain.repository.CustomThemeRepository
 import io.github.swiftstagrime.termuxrunner.domain.repository.ScriptRepository
 import io.github.swiftstagrime.termuxrunner.domain.repository.UserPreferencesRepository
 import io.github.swiftstagrime.termuxrunner.domain.usecase.RunScriptUseCase
 import io.github.swiftstagrime.termuxrunner.ui.theme.AppTheme
 import io.github.swiftstagrime.termuxrunner.ui.theme.ThemeMode
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -30,7 +36,9 @@ class ScriptRunnerViewModel
         private val runScriptUseCase: RunScriptUseCase,
         private val categoryRepository: CategoryRepository,
         private val userPreferencesRepository: UserPreferencesRepository,
+        private val customThemeRepository: CustomThemeRepository,
         savedStateHandle: SavedStateHandle,
+        @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
     ) : ViewModel() {
         private val scriptId: Int = savedStateHandle.get<Int>("SCRIPT_ID") ?: -1
 
@@ -42,11 +50,20 @@ class ScriptRunnerViewModel
             userPreferencesRepository.selectedMode
                 .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), ThemeMode.SYSTEM)
 
-        // State for the Picker Dialog
+        @OptIn(ExperimentalCoroutinesApi::class)
+        val customTheme =
+            userPreferencesRepository.selectedCustomThemeId
+                .flatMapLatest { id ->
+                    if (id != null) {
+                        customThemeRepository.getThemeByIdFlow(id)
+                    } else {
+                        flowOf(null)
+                    }
+                }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
+
         private val _showScriptPicker = MutableStateFlow(false)
         val showScriptPicker = _showScriptPicker.asStateFlow()
 
-        // Data for the Picker
         val allScripts =
             scriptRepository
                 .getAllScripts()
@@ -77,7 +94,7 @@ class ScriptRunnerViewModel
         }
 
         private fun fetchAndRunScript(id: Int) {
-            viewModelScope.launch {
+            viewModelScope.launch(ioDispatcher) {
                 val script = scriptRepository.getScriptById(id)
                 if (script == null) {
                     sendEvent(ScriptRunnerEvent.Finish)
@@ -106,7 +123,7 @@ class ScriptRunnerViewModel
             runtimePrefix: String? = null,
             runtimeEnv: Map<String, String>? = null,
         ) {
-            viewModelScope.launch {
+            viewModelScope.launch(ioDispatcher) {
                 try {
                     runScriptUseCase(
                         script = script,

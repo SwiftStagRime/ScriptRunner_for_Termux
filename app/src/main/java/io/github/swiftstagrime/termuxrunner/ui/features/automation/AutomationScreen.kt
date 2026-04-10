@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -35,6 +36,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
@@ -44,6 +46,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -77,41 +80,82 @@ fun AutomationScreen(
     onShowHistory: (Automation) -> Unit,
     onRequestPermission: () -> Unit,
 ) {
+    val outerBackgroundColor = MaterialTheme.colorScheme.surface
+    val sheetContainerColor = MaterialTheme.colorScheme.surfaceContainerLowest
+
     Scaffold(
-        containerColor = MaterialTheme.colorScheme.background,
+        containerColor = outerBackgroundColor,
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(R.string.automation_title)) },
+                title = {
+                    Text(
+                        stringResource(R.string.automation_title),
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.SemiBold,
+                    )
+                },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, null)
                     }
                 },
+                colors =
+                    TopAppBarDefaults.topAppBarColors(
+                        containerColor = Color.Transparent,
+                        scrolledContainerColor = Color.Transparent,
+                    ),
             )
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = onAddAutomationClick) {
+            FloatingActionButton(
+                modifier = Modifier.padding(end = 8.dp, bottom = 8.dp),
+                onClick = onAddAutomationClick,
+                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                elevation = FloatingActionButtonDefaults.elevation(defaultElevation = 4.dp),
+            ) {
                 Icon(Icons.Default.AddAlarm, null)
             }
         },
     ) { padding ->
-        Column(modifier = Modifier.padding(padding)) {
-            if (!uiState.isExactAlarmPermissionGranted) {
-                PermissionWarningBanner(onClick = onRequestPermission)
-            }
+        Surface(
+            modifier =
+                Modifier
+                    .padding(padding)
+                    .padding(horizontal = 8.dp)
+                    .padding(bottom = 8.dp)
+                    .fillMaxSize(),
+            color = sheetContainerColor,
+            shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp, bottomEnd = 32.dp, bottomStart = 32.dp),
+            shadowElevation = 1.dp,
+        ) {
+            Column {
+                Spacer(modifier = Modifier.height(16.dp))
 
-            LazyColumn(
-                contentPadding = PaddingValues(16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-            ) {
-                items(uiState.items, key = { it.automation.id }) { item ->
-                    AutomationItem(
-                        item = item,
-                        onToggle = { onToggleAutomation(item.automation.id, it) },
-                        onDelete = { onDeleteAutomation(item.automation) },
-                        onRunNow = { onRunNow(item.automation) },
-                        onShowHistory = { onShowHistory(item.automation) },
-                    )
+                if (!uiState.isExactAlarmPermissionGranted) {
+                    PermissionWarningBanner(onClick = onRequestPermission)
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
+
+                LazyColumn(
+                    contentPadding =
+                        PaddingValues(
+                            start = 16.dp,
+                            end = 16.dp,
+                            bottom = 88.dp,
+                            top = 8.dp,
+                        ),
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                    items(uiState.items, key = { it.automation.id }) { item ->
+                        AutomationItem(
+                            item = item,
+                            onToggle = { onToggleAutomation(item.automation.id, it) },
+                            onDelete = { onDeleteAutomation(item.automation) },
+                            onRunNow = { onRunNow(item.automation) },
+                            onShowHistory = { onShowHistory(item.automation) },
+                        )
+                    }
                 }
             }
         }
