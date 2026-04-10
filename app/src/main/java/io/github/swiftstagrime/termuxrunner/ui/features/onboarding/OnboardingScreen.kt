@@ -66,6 +66,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.ClipEntry
 import androidx.compose.ui.platform.LocalClipboard
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -177,7 +178,7 @@ fun OnboardingScreen(
                         val isLastPage = pagerState.currentPage == pagerState.pageCount - 1
                         Button(
                             onClick = onNextClick,
-                            modifier = Modifier.weight(2f),
+                            modifier = Modifier.weight(2f).testTag("onboarding_next_button"),
                             shape = RoundedCornerShape(16.dp),
                             contentPadding = PaddingValues(16.dp),
                         ) {
@@ -245,8 +246,8 @@ private fun OnboardingPageContent(
 }
 
 @Composable
-fun TermuxInstallStep(isInstalled: Boolean) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(16.dp)) {
+private fun TermuxInstallStep(isInstalled: Boolean) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(16.dp), modifier = Modifier.fillMaxSize()) {
         StepIcon(Icons.Default.InstallMobile, isDone = isInstalled)
         Text(stringResource(R.string.setup_step_1_title), style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
         Text(stringResource(R.string.setup_step_1_desc), textAlign = TextAlign.Center, color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -258,7 +259,7 @@ fun TermuxInstallStep(isInstalled: Boolean) {
 }
 
 @Composable
-fun TermuxConfigStep() {
+private fun TermuxConfigStep() {
     Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(16.dp)) {
         StepIcon(Icons.Default.SettingsSuggest, isDone = false)
         Text(stringResource(R.string.setup_step_2_title), style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
@@ -270,7 +271,7 @@ fun TermuxConfigStep() {
 }
 
 @Composable
-fun PermissionStep(
+private fun PermissionStep(
     isPermissionGranted: Boolean,
     onGrantPermission: () -> Unit,
 ) {
@@ -289,7 +290,7 @@ fun PermissionStep(
 }
 
 @Composable
-fun OptimizationStep(
+private fun OptimizationStep(
     isBatteryUnrestricted: Boolean,
     onOpenSettings: () -> Unit,
 ) {
@@ -323,7 +324,7 @@ fun OptimizationStep(
 }
 
 @Composable
-fun PagerIndicator(
+private fun PagerIndicator(
     count: Int,
     currentPage: Int,
 ) {
@@ -348,7 +349,7 @@ fun PagerIndicator(
 }
 
 @Composable
-fun StepIcon(
+private fun StepIcon(
     imageVector: ImageVector,
     isDone: Boolean,
     modifier: Modifier = Modifier,
@@ -402,7 +403,7 @@ fun StepIcon(
 }
 
 @Composable
-fun WelcomeStep() {
+private fun WelcomeStep() {
     Column(
         modifier =
             Modifier
@@ -477,7 +478,7 @@ fun WelcomeStep() {
 }
 
 @Composable
-fun CodeBlock(
+private fun CodeBlock(
     code: String,
     onCopy: (String) -> Unit = {},
 ) {
@@ -521,7 +522,7 @@ fun CodeBlock(
 }
 
 @Composable
-fun RequirementWarning(
+private fun RequirementWarning(
     message: String,
     modifier: Modifier = Modifier,
 ) {
@@ -550,7 +551,7 @@ fun RequirementWarning(
 }
 
 @Composable
-fun DeviceFrame(
+private fun DeviceFrame(
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit,
 ) {
@@ -575,7 +576,7 @@ fun DeviceFrame(
 }
 
 @Composable
-fun FeatureShowcaseStep(
+private fun FeatureShowcaseStep(
     title: String,
     description: String,
     preview: @Composable () -> Unit,

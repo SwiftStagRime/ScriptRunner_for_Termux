@@ -45,65 +45,33 @@ class BaselineProfileGenerator {
 
     @Test
     fun generate() {
-        var run = 1
         val targetPackage = InstrumentationRegistry.getArguments().getString("targetAppId")
             ?: "io.github.swiftstagrime.termuxrunner"
 
-        val device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
-        rule.collect(packageName = targetPackage,
-            includeInStartupProfile = true) {
+        rule.collect(
+            packageName = targetPackage,
+            includeInStartupProfile = true,
+            maxIterations = 4
+        ) {
             pressHome()
             startActivityAndWait()
 
-            // 1. Wait for Splash/Initialization
-            android.os.SystemClock.sleep(3000)
+            device.waitForIdle()
 
+            handleOnboarding(device, targetPackage)
 
-            // 2. Onboarding: Scroll and Click
-            if (run == 1) {
-                var maxSwipes = 5
-                val onboardingTag = "onboarding_complete_button"
-                while (maxSwipes > 0) {
-                    if (device.hasObject(By.res(targetPackage, onboardingTag)) || device.hasObject(
-                            By.res(onboardingTag)
-                        )
-                    ) {
-                        break
-                    }
-                    device.swipe(
-                        device.displayWidth / 2, (device.displayHeight * 0.8).toInt(),
-                        device.displayWidth / 2, (device.displayHeight * 0.2).toInt(), 20
-                    )
-                    maxSwipes--
-                }
-                findAndClick(device, targetPackage, onboardingTag, "Finish Setup")
-                run++
-            }
-            // 3. Home -> Editor (FAB)
+            val scriptList = device.wait(Until.findObject(By.res(targetPackage, "script_list")), 5000)
             repeat(3) {
                 device.swipe(
-                    device.displayWidth / 2,
-                    (device.displayHeight * 0.8).toInt(),
-                    device.displayWidth / 2,
-                    (device.displayHeight * 0.2).toInt(),
-                    10
-                )
-                device.waitForIdle()
-                device.swipe(
-                    device.displayWidth / 2,
-                    (device.displayHeight * 0.2).toInt(),
-                    device.displayWidth / 2,
-                    (device.displayHeight * 0.8).toInt(),
-                    10
+                    device.displayWidth / 2, (device.displayHeight * 0.7).toInt(),
+                    device.displayWidth / 2, (device.displayHeight * 0.3).toInt(), 15
                 )
                 device.waitForIdle()
             }
             findAndClick(device, targetPackage, "fab_add_script", "Add Script")
 
-            // 4. Editor -> Open Save Dialog
             findAndClick(device, targetPackage, "editor_save_btn", "Save")
 
-            // 5. Config Dialog: Input Name
             val nameField = device.wait(Until.findObject(By.res(targetPackage, "config_name_input")), 5000)
                 ?: device.wait(Until.findObject(By.res("config_name_input")), 2000)
                 ?: device.wait(Until.findObject(By.text("Script Name")), 2000)
@@ -124,7 +92,6 @@ class BaselineProfileGenerator {
                 throw RuntimeException("Could not find the Script Name input field")
             }
 
-            // 6. Config Dialog: Final Save
             device.waitForIdle()
             findAndClick(device, targetPackage, "config_save_btn", "Save")
 
@@ -132,19 +99,38 @@ class BaselineProfileGenerator {
         }
     }
 
-    //I found out that only the text description works reliably
+    private fun handleOnboarding(device: UiDevice, pkg: String) {
+        val nextButtonTag = "onboarding_next_button"
+
+        for (i in 0..11) {
+            val nextBtn = device.wait(Until.findObject(By.res(pkg, nextButtonTag)), 3000)
+                ?: device.wait(Until.findObject(By.text("Next")), 1000)
+                ?: device.wait(Until.findObject(By.text("Finish Setup")), 1000)
+
+            if (nextBtn == null) break
+
+            nextBtn.click()
+            device.waitForIdle()
+
+            if (nextBtn.text?.contains("Finish", ignoreCase = true) == true) {
+                break
+            }
+        }
+    }
+
     private fun findAndClick(device: UiDevice, pkg: String, tag: String, label: String) {
-        val obj = device.wait(Until.findObject(By.res(pkg, tag)), 3000)
-            ?: device.wait(Until.findObject(By.res(tag)), 2000)
+        val selector = By.res(pkg, tag)
+        val obj = device.wait(Until.findObject(selector), 5000)
             ?: device.wait(Until.findObject(By.desc(label)), 2000)
-            ?: device.wait(Until.findObject(By.text(label)), 2000)
-            ?: device.wait(Until.findObject(By.text(label.uppercase())), 2000)
+            ?: device.wait(Until.findObject(By.desc(label.uppercase())), 1000)
+            ?: device.wait(Until.findObject(By.text(label)), 1000)
 
         if (obj != null) {
             obj.click()
             device.waitForIdle()
         } else {
-            throw RuntimeException("Could not find element [$tag / $label]")
+            device.dumpWindowHierarchy(System.out)
+            throw RuntimeException("Could not find element [Tag: $tag | Label: $label]")
         }
     }
 }
