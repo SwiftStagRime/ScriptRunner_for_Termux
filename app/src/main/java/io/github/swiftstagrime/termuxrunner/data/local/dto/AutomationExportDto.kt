@@ -1,5 +1,6 @@
 package io.github.swiftstagrime.termuxrunner.data.local.dto
 
+import io.github.swiftstagrime.termuxrunner.data.local.entity.AutomationEntity
 import io.github.swiftstagrime.termuxrunner.domain.model.Automation
 import io.github.swiftstagrime.termuxrunner.domain.model.AutomationType
 import kotlinx.serialization.Serializable
@@ -22,6 +23,27 @@ data class AutomationExportDto(
     val requireCharging: Boolean,
     val batteryThreshold: Int,
 )
+fun AutomationExportDto.toEntity(newScriptId: Int): AutomationEntity {
+    return AutomationEntity(
+        scriptId = newScriptId,
+        label = this.label,
+        type = this.type,
+        scheduledTimestamp = this.scheduledTimestamp,
+        intervalMillis = this.intervalMillis,
+        daysOfWeek = this.daysOfWeek,
+        isEnabled = false,
+        runIfMissed = this.runIfMissed,
+        lastExitCode = this.lastExitCode,
+        runtimeArgs = this.runtimeArgs,
+        runtimeEnv = this.runtimeEnv ?: emptyMap(),
+        runtimePrefix = this.runtimePrefix,
+        requireWifi = this.requireWifi,
+        requireCharging = this.requireCharging,
+        batteryThreshold = this.batteryThreshold,
+        lastRunTimestamp = null,
+        nextRunTimestamp = null
+    )
+}
 
 fun Automation.toExportDto() =
     AutomationExportDto(

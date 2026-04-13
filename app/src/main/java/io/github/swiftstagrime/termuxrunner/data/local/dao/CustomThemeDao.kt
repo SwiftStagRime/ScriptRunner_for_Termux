@@ -24,4 +24,7 @@ interface CustomThemeDao {
 
     @Query("SELECT * FROM custom_themes WHERE id = :id")
     fun getThemeByIdFlow(id: Int): Flow<CustomThemeEntity?>
+
+    @Query("SELECT * FROM custom_themes")
+    suspend fun getAllThemesOneShot(): List<CustomThemeEntity>
 }
