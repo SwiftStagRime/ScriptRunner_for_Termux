@@ -8,6 +8,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import io.github.swiftstagrime.termuxrunner.data.automation.AutomationNotificationHelper
 import io.github.swiftstagrime.termuxrunner.data.automation.AutomationScheduler
+import io.github.swiftstagrime.termuxrunner.data.local.AppDatabase
 import io.github.swiftstagrime.termuxrunner.data.local.ImageStorageManager
 import io.github.swiftstagrime.termuxrunner.data.local.dao.AutomationDao
 import io.github.swiftstagrime.termuxrunner.data.local.dao.AutomationLogDao
@@ -47,8 +48,10 @@ object AppModule {
         dao: ScriptDao,
         categoryDao: CategoryDao,
         automationDao: AutomationDao,
+        customThemeDao: CustomThemeDao,
+        appDatabase: AppDatabase,
         @ApplicationContext context: Context,
-    ): ScriptRepository = ScriptRepositoryImpl(dao, categoryDao, automationDao, context)
+    ): ScriptRepository = ScriptRepositoryImpl(dao, categoryDao, automationDao,customThemeDao, appDatabase,context)
 
     @Provides
     @Singleton

@@ -3,9 +3,12 @@ package io.github.swiftstagrime.termuxrunner
 import android.content.Context
 import android.net.Uri
 import android.util.Base64
+import androidx.room.withTransaction
 import androidx.test.core.app.ApplicationProvider
+import io.github.swiftstagrime.termuxrunner.data.local.AppDatabase
 import io.github.swiftstagrime.termuxrunner.data.local.dao.AutomationDao
 import io.github.swiftstagrime.termuxrunner.data.local.dao.CategoryDao
+import io.github.swiftstagrime.termuxrunner.data.local.dao.CustomThemeDao
 import io.github.swiftstagrime.termuxrunner.data.local.dao.ScriptDao
 import io.github.swiftstagrime.termuxrunner.data.local.dto.FullBackupDto
 import io.github.swiftstagrime.termuxrunner.data.local.entity.AutomationEntity
@@ -16,6 +19,7 @@ import io.github.swiftstagrime.termuxrunner.domain.model.InteractionMode
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
+import io.mockk.mockkStatic
 import io.mockk.slot
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertFalse
@@ -38,6 +42,8 @@ class ScriptRepositoryImplTest {
     private val scriptDao = mockk<ScriptDao>(relaxed = true)
     private val categoryDao = mockk<CategoryDao>(relaxed = true)
     private val automationDao = mockk<AutomationDao>(relaxed = true)
+    private val appDatabase = mockk<AppDatabase>(relaxed = true)
+    private val customThemeDao = mockk<CustomThemeDao>(relaxed = true)
     private val context = ApplicationProvider.getApplicationContext<Context>()
 
     private val capturedScript = slot<ScriptEntity>()
@@ -62,9 +68,15 @@ class ScriptRepositoryImplTest {
         "requireWifi": false, "requireCharging": false, "batteryThreshold": 0
         """.trimIndent()
 
+    @Suppress("UNCHECKED_CAST")
     @Before
     fun setup() {
-        repository = ScriptRepositoryImpl(scriptDao, categoryDao, automationDao, context)
+        mockkStatic("androidx.room.RoomDatabaseKt")
+        coEvery { any<AppDatabase>().withTransaction<Any>(any()) } coAnswers {
+            val block = it.invocation.args[1] as suspend () -> Any
+            block()
+        }
+        repository = ScriptRepositoryImpl(scriptDao, categoryDao, automationDao, customThemeDao, appDatabase, context)
         java.io.File(context.filesDir, "script_icons").deleteRecursively()
         Robolectric.setupContentProvider(TestFileProvider::class.java, "io.github.swiftstagrime.provider")
     }
@@ -549,35 +561,78 @@ class ScriptRepositoryImplTest {
         }
 
     @Test
-    fun `exportScripts produces JSON compatible with Version 3 specification`() =
+    fun `exportScripts produces JSON compatible with Version 4 specification`() =
         runTest {
-            val script =
-                ScriptEntity(
-                    name = "ExportTest",
-                    code = "pwd",
-                    interpreter = "sh",
-                    envVars = emptyMap(),
-                    runInBackground = false,
-                    openNewSession = true,
-                    executionParams = "",
-                    keepSessionOpen = false,
-                    iconPath = null,
-                )
+            val script = ScriptEntity(
+                name = "ExportTest",
+                code = "pwd",
+                interpreter = "sh",
+                envVars = emptyMap(),
+                runInBackground = false,
+                openNewSession = true,
+                executionParams = "",
+                keepSessionOpen = false,
+                iconPath = null,
+            )
 
             coEvery { scriptDao.getAllScriptsOneShot() } returns listOf(script)
             coEvery { categoryDao.getAllCategoriesOneShot() } returns emptyList()
             coEvery { automationDao.getAllAutomationsOneShot() } returns emptyList()
+            coEvery { customThemeDao.getAllThemesOneShot() } returns emptyList()
 
-            val outputFile = java.io.File(context.cacheDir, "v3_export.json")
+            val outputFile = java.io.File(context.cacheDir, "v4_export.json")
             val uri = Uri.fromFile(outputFile)
 
             repository.exportScripts(uri)
 
             val jsonString = outputFile.readText()
-            assertTrue(jsonString.contains("\"version\": 3"))
+
+            assertTrue(jsonString.contains("\"version\": 4"))
+            assertTrue(jsonString.contains("\"themes\": []"))
+
             assertTrue(jsonString.contains("\"categories\": []"))
             assertTrue(jsonString.contains("\"scripts\":"))
             assertTrue(jsonString.contains("\"automations\": []"))
+        }
+
+    @Test
+    fun `importScripts handles Version 3 format by providing default empty themes`() =
+        runTest {
+            val v3Json = """
+            {
+                "version": 3,
+                "categories": [
+                    {"id": 1, "name": "System", "orderIndex": 0}
+                ],
+                "scripts": [{
+                    "id": 10,
+                    "name": "V3Script",
+                    "code": "echo hello",
+                    "interpreter": "bash",
+                    "fileExtension": "sh",
+                    "envVars": {},
+                    "categoryId": 1
+                }],
+                "automations": []
+            }
+        """.trimIndent()
+
+            val uri = setupMockFile("v3_backup.json", v3Json)
+
+            // Mock DAO responses for the import logic
+            coEvery { customThemeDao.getAllThemesOneShot() } returns emptyList()
+            coEvery { categoryDao.getAllCategoriesOneShot() } returns emptyList()
+            coEvery { categoryDao.insertCategory(any()) } returns 1L
+            coEvery { scriptDao.insertScript(capture(capturedScript)) } returns 100L
+
+            val result = repository.importScripts(uri)
+
+            assertTrue("Import of V3 failed: ${result.exceptionOrNull()}", result.isSuccess)
+
+            assertEquals("V3Script", capturedScript.captured.name)
+
+            coVerify(exactly = 1) { customThemeDao.getAllThemesOneShot() }
+            coVerify(exactly = 0) { customThemeDao.insertTheme(any()) }
         }
 
     @Test

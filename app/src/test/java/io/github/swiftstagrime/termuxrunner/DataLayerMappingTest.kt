@@ -2,14 +2,17 @@ package io.github.swiftstagrime.termuxrunner
 
 import io.github.swiftstagrime.termuxrunner.data.local.dto.AutomationExportDto
 import io.github.swiftstagrime.termuxrunner.data.local.dto.CategoryExportDto
+import io.github.swiftstagrime.termuxrunner.data.local.dto.CustomThemeExportDto
 import io.github.swiftstagrime.termuxrunner.data.local.dto.ScriptExportDto
 import io.github.swiftstagrime.termuxrunner.data.local.entity.AutomationEntity
 import io.github.swiftstagrime.termuxrunner.data.local.entity.AutomationLogEntity
 import io.github.swiftstagrime.termuxrunner.data.local.entity.CategoryEntity
+import io.github.swiftstagrime.termuxrunner.data.local.entity.CustomThemeEntity
 import io.github.swiftstagrime.termuxrunner.data.local.entity.ScriptEntity
 import io.github.swiftstagrime.termuxrunner.domain.model.Automation
 import io.github.swiftstagrime.termuxrunner.domain.model.AutomationLog
 import io.github.swiftstagrime.termuxrunner.domain.model.Category
+import io.github.swiftstagrime.termuxrunner.domain.model.CustomTheme
 import io.github.swiftstagrime.termuxrunner.domain.model.Script
 import junit.framework.TestCase.fail
 import org.junit.Test
@@ -95,6 +98,32 @@ class DataLayerMappingTest {
             destination = AutomationLogEntity::class,
         )
     }
+
+    @Test
+    fun `CustomTheme - All entity fields are mapped to domain and DTO`() {
+        assertAllPropertiesMapped(
+            source = CustomThemeEntity::class,
+            destination = CustomTheme::class,
+        )
+
+        assertAllPropertiesMapped(
+            source = CustomTheme::class,
+            destination = CustomThemeEntity::class,
+        )
+
+        assertAllPropertiesMapped(
+            source = CustomThemeEntity::class,
+            destination = CustomThemeExportDto::class,
+            ignoreProperties = setOf("id")
+        )
+
+        assertAllPropertiesMapped(
+            source = CustomThemeExportDto::class,
+            destination = CustomThemeEntity::class,
+            ignoreProperties = setOf("id")
+        )
+    }
+
 
     private fun assertAllPropertiesMapped(
         source: KClass<*>,

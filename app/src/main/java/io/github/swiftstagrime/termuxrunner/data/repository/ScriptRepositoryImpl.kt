@@ -4,9 +4,12 @@ import android.content.Context
 import android.net.Uri
 import android.provider.OpenableColumns
 import android.util.Base64
+import androidx.room.withTransaction
 import dagger.hilt.android.qualifiers.ApplicationContext
+import io.github.swiftstagrime.termuxrunner.data.local.AppDatabase
 import io.github.swiftstagrime.termuxrunner.data.local.dao.AutomationDao
 import io.github.swiftstagrime.termuxrunner.data.local.dao.CategoryDao
+import io.github.swiftstagrime.termuxrunner.data.local.dao.CustomThemeDao
 import io.github.swiftstagrime.termuxrunner.data.local.dao.ScriptDao
 import io.github.swiftstagrime.termuxrunner.data.local.dto.CategoryExportDto
 import io.github.swiftstagrime.termuxrunner.data.local.dto.FullBackupDto
@@ -43,6 +46,8 @@ class ScriptRepositoryImpl
         private val dao: ScriptDao,
         private val categoryDao: CategoryDao,
         private val automationDao: AutomationDao,
+        private val customThemeDao: CustomThemeDao,
+        private val appDatabase: AppDatabase,
         @ApplicationContext private val context: Context,
     ) : ScriptRepository {
         private val json =
@@ -61,8 +66,7 @@ class ScriptRepositoryImpl
         override suspend fun getScriptById(id: Int): Script? = dao.getScriptById(id)?.toScriptDomain()
 
         override suspend fun insertScript(script: Script): Int =
-            dao.insertScript(script.toScriptEntity()).toInt().also {
-            }
+            dao.insertScript(script.toScriptEntity()).toInt()
 
         override suspend fun deleteScript(script: Script) {
             dao.deleteScript(script.toScriptEntity())
@@ -72,128 +76,97 @@ class ScriptRepositoryImpl
             dao.updateScriptsOrder(orders)
         }
 
-        override suspend fun exportScripts(uri: Uri): Result<Unit> =
-            runCatching {
-                withContext(Dispatchers.IO) {
-                    val categories =
-                        categoryDao.getAllCategoriesOneShot().map {
-                            CategoryExportDto(it.id, it.name, it.orderIndex)
-                        }
+    override suspend fun exportScripts(uri: Uri): Result<Unit> = runCatching {
+        val backup = withContext(Dispatchers.IO) {
+            appDatabase.withTransaction {
+                val categories = categoryDao.getAllCategoriesOneShot()
+                val scriptEntities = dao.getAllScriptsOneShot()
+                val automations = automationDao.getAllAutomationsOneShot()
+                val themes = customThemeDao.getAllThemesOneShot()
 
-                    val scripts =
-                        dao.getAllScriptsOneShot().map { entity ->
-                            val script = entity.toScriptDomain()
-                            var base64Icon: String? = null
-                            script.iconPath?.let { path ->
-                                val file = File(path)
-                                if (file.exists()) {
-                                    val bytes = file.readBytes()
-                                    base64Icon = Base64.encodeToString(bytes, Base64.NO_WRAP)
-                                }
-                            }
-                            script.toExportDto(base64Icon).copy(id = entity.id)
-                        }
+                Triple(categories, scriptEntities, Pair(automations, themes))
+            }
+        }
 
-                    val automations =
-                        automationDao.getAllAutomationsOneShot().map {
-                            it.toAutomationDomain().toExportDto()
-                        }
+        val (catEnt, scriptEnt, others) = backup
 
-                    val backup =
-                        FullBackupDto(
-                            version = 3,
-                            categories = categories,
-                            scripts = scripts,
-                            automations = automations,
-                        )
-
-                    context.contentResolver.openOutputStream(uri)?.use { outputStream ->
-                        outputStream.write(json.encodeToString(backup).toByteArray())
-                    } ?: throw ExportStreamException()
+        val scripts = scriptEnt.map { entity ->
+            val script = entity.toScriptDomain()
+            var base64Icon: String? = null
+            script.iconPath?.let { path ->
+                val file = File(path)
+                if (file.exists()) {
+                    val bytes = file.readBytes()
+                    base64Icon = Base64.encodeToString(bytes, Base64.NO_WRAP)
                 }
             }
+            script.toExportDto(base64Icon).copy(id = entity.id)
+        }
 
-        override suspend fun importScripts(uri: Uri): Result<Unit> =
-            runCatching {
-                withContext(Dispatchers.IO) {
-                    val inputStream =
-                        context.contentResolver.openInputStream(uri)
-                            ?: throw ImportStreamException()
+        val finalBackup = FullBackupDto(
+            version = 4,
+            categories = catEnt.map { CategoryExportDto(it.id, it.name, it.orderIndex) },
+            scripts = scripts,
+            automations = others.first.map { it.toAutomationDomain().toExportDto() },
+            themes = others.second.map { it.toExportDto() }
+        )
 
-                    val backup =
-                        inputStream.use { stream ->
-                            val jsonString = stream.bufferedReader().readText()
-                            val jsonElement = json.parseToJsonElement(jsonString)
+        withContext(Dispatchers.IO) {
+            context.contentResolver.openOutputStream(uri)?.use { outputStream ->
+                outputStream.write(json.encodeToString(finalBackup).toByteArray())
+            } ?: throw ExportStreamException()
+        }
+    }
 
-                            if (jsonElement is JsonArray) {
-                                FullBackupDto(
-                                    categories = emptyList(),
-                                    scripts = json.decodeFromJsonElement<List<ScriptExportDto>>(jsonElement),
-                                    automations = emptyList(),
-                                )
-                            } else {
-                                json.decodeFromJsonElement<FullBackupDto>(jsonElement)
-                            }
-                        }
-
-                    val existingCategoryMap = categoryDao.getAllCategoriesOneShot().associate { it.name to it.id }
-                    val categoryIdMap = mutableMapOf<Int, Int?>()
-
-                    backup.categories.forEach { dto ->
-                        val existingId = existingCategoryMap[dto.name]
-                        if (existingId != null) {
-                            categoryIdMap[dto.id] = existingId
-                        } else {
-                            val newId =
-                                categoryDao.insertCategory(
-                                    CategoryEntity(
-                                        name = dto.name,
-                                        orderIndex = dto.orderIndex,
-                                    ),
-                                )
-                            categoryIdMap[dto.id] = newId.toInt()
-                        }
-                    }
-
-                    val scriptIdMap = mutableMapOf<Int, Int>()
-                    backup.scripts.forEach { dto ->
-                        val newIconPath = saveBase64Icon(dto.iconBase64)
-                        val mappedCategoryId = dto.categoryId?.let { categoryIdMap[it] }
-
-                        val entity = dto.toEntity(newIconPath, mappedCategoryId)
-
-                        val newId = dao.insertScript(entity)
-                        scriptIdMap[dto.id] = newId.toInt()
-                    }
-
-                    val automationEntities =
-                        backup.automations.mapNotNull { dto ->
-                            val newScriptId = scriptIdMap[dto.scriptId] ?: return@mapNotNull null
-
-                            AutomationEntity(
-                                scriptId = newScriptId,
-                                label = dto.label,
-                                type = dto.type,
-                                scheduledTimestamp = dto.scheduledTimestamp,
-                                intervalMillis = dto.intervalMillis,
-                                daysOfWeek = dto.daysOfWeek,
-                                isEnabled = false,
-                                runIfMissed = dto.runIfMissed,
-                                lastExitCode = dto.lastExitCode,
-                                runtimeArgs = dto.runtimeArgs,
-                                runtimeEnv = dto.runtimeEnv ?: emptyMap(),
-                                runtimePrefix = dto.runtimePrefix,
-                                requireWifi = dto.requireWifi,
-                                requireCharging = dto.requireCharging,
-                                batteryThreshold = dto.batteryThreshold,
-                                lastRunTimestamp = null,
-                                nextRunTimestamp = null,
-                            )
-                        }
-
-                    automationEntities.forEach { automationDao.insertAutomation(it) }
+    override suspend fun importScripts(uri: Uri): Result<Unit> = runCatching {
+        withContext(Dispatchers.IO) {
+            val backup = context.contentResolver.openInputStream(uri)?.use { stream ->
+                val jsonString = stream.bufferedReader().readText()
+                val jsonElement = json.parseToJsonElement(jsonString)
+                if (jsonElement is JsonArray) {
+                    FullBackupDto(scripts = json.decodeFromJsonElement<List<ScriptExportDto>>(jsonElement))
+                } else {
+                    json.decodeFromJsonElement<FullBackupDto>(jsonElement)
                 }
+            } ?: throw ImportStreamException()
+
+            appDatabase.withTransaction {
+                val existingThemes = customThemeDao.getAllThemesOneShot().map { it.name }.toSet()
+                backup.themes.forEach { themeDto ->
+                    if (!existingThemes.contains(themeDto.name)) {
+                        customThemeDao.insertTheme(themeDto.toEntity())
+                    }
+                }
+
+                val existingCategoryMap = categoryDao.getAllCategoriesOneShot().associate { it.name to it.id }
+                val categoryIdMap = mutableMapOf<Int, Int?>()
+                backup.categories.forEach { dto ->
+                    val existingId = existingCategoryMap[dto.name]
+                    if (existingId != null) {
+                        categoryIdMap[dto.id] = existingId
+                    } else {
+                        val newId = categoryDao.insertCategory(CategoryEntity(name = dto.name, orderIndex = dto.orderIndex))
+                        categoryIdMap[dto.id] = newId.toInt()
+                    }
+                }
+
+                val scriptIdMap = mutableMapOf<Int, Int>()
+                backup.scripts.forEach { dto ->
+                    val newIconPath = saveBase64Icon(dto.iconBase64)
+                    val mappedCategoryId = dto.categoryId?.let { categoryIdMap[it] }
+                    val entity = dto.toEntity(newIconPath, mappedCategoryId)
+                    val newId = dao.insertScript(entity)
+                    scriptIdMap[dto.id] = newId.toInt()
+                }
+
+                val automationEntities = backup.automations.mapNotNull { dto ->
+                    val newScriptId = scriptIdMap[dto.scriptId] ?: return@mapNotNull null
+                    dto.toEntity(newScriptId)
+                }
+                automationEntities.forEach { automationDao.insertAutomation(it) }
             }
+        }
+    }
 
         override suspend fun importSingleScript(uri: Uri): Result<Script> =
             runCatching {
