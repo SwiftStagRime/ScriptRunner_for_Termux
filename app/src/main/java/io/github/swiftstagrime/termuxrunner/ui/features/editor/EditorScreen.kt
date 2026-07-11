@@ -72,6 +72,7 @@ fun EditorScreen(
     pageToDeleteIndex: Int? = null,
     onConfirmDeletePage: () -> Unit = {},
     onDismissDeletePage: () -> Unit = {},
+    defaultWrapEnabled: Boolean = false,
 ) {
     var showConfigDialog by rememberSaveable { mutableStateOf(false) }
 
@@ -149,6 +150,7 @@ fun EditorScreen(
                     code = codeState,
                     onCodeChange = onCodeChange,
                     interpreter = scriptDraft.interpreter,
+                    defaultWrapEnabled = defaultWrapEnabled,
                     modifier =
                         Modifier
                             .fillMaxSize(),

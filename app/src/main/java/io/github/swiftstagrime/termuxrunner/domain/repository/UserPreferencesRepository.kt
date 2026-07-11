@@ -9,12 +9,15 @@ interface UserPreferencesRepository {
     val selectedAccent: Flow<AppTheme>
     val selectedMode: Flow<ThemeMode>
     val selectedCustomThemeId: Flow<Int?>
+    val editorLineWrappingEnabled: Flow<Boolean>
 
     suspend fun setMode(mode: ThemeMode)
 
     suspend fun setAccent(accent: AppTheme)
 
     suspend fun setOnboardingCompleted(completed: Boolean)
+
+    suspend fun setEditorLineWrappingEnabled(enabled: Boolean)
 
     fun getScriptIdForTile(tileIndex: Int): Flow<Int?>
 

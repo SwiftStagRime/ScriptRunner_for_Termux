@@ -30,6 +30,7 @@ class UserPreferencesRepositoryImpl
             val THEME_MODE = stringPreferencesKey("theme_mode")
             val ONBOARDING_COMPLETED = booleanPreferencesKey("onboarding_completed")
             val SELECTED_CUSTOM_THEME_ID = intPreferencesKey("selected_custom_theme_id")
+            val EDITOR_LINE_WRAPPING_ENABLED = booleanPreferencesKey("editor_line_wrapping_enabled")
         }
 
         override val selectedAccent: Flow<AppTheme> =
@@ -87,6 +88,14 @@ class UserPreferencesRepositoryImpl
 
         override suspend fun setCustomThemeId(id: Int) {
             context.dataStore.edit { it[Keys.SELECTED_CUSTOM_THEME_ID] = id }
+        }
+
+        override val editorLineWrappingEnabled: Flow<Boolean> =
+            context.dataStore.data
+                .map { preferences -> preferences[Keys.EDITOR_LINE_WRAPPING_ENABLED] ?: false }
+
+        override suspend fun setEditorLineWrappingEnabled(enabled: Boolean) {
+            context.dataStore.edit { it[Keys.EDITOR_LINE_WRAPPING_ENABLED] = enabled }
         }
     }
 

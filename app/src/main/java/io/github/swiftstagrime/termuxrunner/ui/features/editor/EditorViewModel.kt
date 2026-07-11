@@ -17,6 +17,7 @@ import io.github.swiftstagrime.termuxrunner.domain.model.Script
 import io.github.swiftstagrime.termuxrunner.domain.repository.CategoryRepository
 import io.github.swiftstagrime.termuxrunner.domain.repository.IconRepository
 import io.github.swiftstagrime.termuxrunner.domain.repository.ScriptRepository
+import io.github.swiftstagrime.termuxrunner.domain.repository.UserPreferencesRepository
 import io.github.swiftstagrime.termuxrunner.domain.usecase.UpdateScriptUseCase
 import io.github.swiftstagrime.termuxrunner.ui.extensions.UiText
 import io.github.swiftstagrime.termuxrunner.ui.features.scriptconfigdialog.ScriptConfigState
@@ -46,6 +47,7 @@ class EditorViewModel
     constructor(
         private val scriptRepository: ScriptRepository,
         private val categoryRepository: CategoryRepository,
+        private val userPreferencesRepository: UserPreferencesRepository,
         private val updateScriptUseCase: UpdateScriptUseCase,
         private val iconRepository: IconRepository,
         private val widgetManager: WidgetManager,
@@ -58,6 +60,14 @@ class EditorViewModel
                     scope = viewModelScope,
                     started = SharingStarted.WhileSubscribed(5000),
                     initialValue = emptyList(),
+                )
+
+        val lineWrappingEnabled =
+            userPreferencesRepository.editorLineWrappingEnabled
+                .stateIn(
+                    scope = viewModelScope,
+                    started = SharingStarted.WhileSubscribed(5000),
+                    initialValue = false,
                 )
 
         private val _currentScript = MutableStateFlow<Script?>(null)

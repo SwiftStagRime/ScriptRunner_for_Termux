@@ -6,6 +6,7 @@ import io.github.swiftstagrime.termuxrunner.ui.theme.ThemeMode
 data class SettingsActions(
     val onAccentChange: (AppTheme) -> Unit,
     val onModeChange: (ThemeMode) -> Unit,
+    val onLineWrappingToggle: (Boolean) -> Unit,
     val onTriggerExport: () -> Unit,
     val onTriggerImport: () -> Unit,
     val onTriggerScriptImport: () -> Unit,

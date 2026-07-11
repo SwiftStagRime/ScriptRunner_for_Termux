@@ -47,6 +47,7 @@ fun EditorRoute(
 
     val script by viewModel.currentScript.collectAsStateWithLifecycle()
     val categories by viewModel.categories.collectAsStateWithLifecycle()
+    val lineWrappingEnabled by viewModel.lineWrappingEnabled.collectAsStateWithLifecycle()
 
     var scriptDraft by rememberSaveable(script?.id) {
         mutableStateOf(script)
@@ -199,6 +200,7 @@ fun EditorRoute(
             pageToDeleteIndex = viewModel.pageToDeleteIndex,
             onConfirmDeletePage = viewModel::confirmDeletePage,
             onDismissDeletePage = viewModel::dismissDeletePageDialog,
+            defaultWrapEnabled = lineWrappingEnabled,
         )
     }
 }

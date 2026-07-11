@@ -109,6 +109,8 @@
     <string name="shortcut_style_select">Select Style</string>
 
     <!-- Editor -->
+    <string name="editor_label">Editor</string>
+    <string name="wrap_lines_label">Wrap Lines</string>
     <string name="editor_untitled">Untitled</string>
     <string name="editor_placeholder"># Start coding…</string>
     <string name="editor_search_placeholder">Find…</string>

@@ -101,6 +101,7 @@ import io.github.swiftstagrime.termuxrunner.ui.extensions.toggleComment
 import io.github.swiftstagrime.termuxrunner.ui.preview.DevicePreviews
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlin.time.Duration.Companion.milliseconds
 
 private const val UNDO_LIMIT = 30
 private const val AUTO_SAVE_DELAY = 1000L
@@ -142,13 +143,14 @@ fun CodeEditor(
     code: TextFieldValue,
     onCodeChange: (TextFieldValue) -> Unit,
     interpreter: String,
+    defaultWrapEnabled: Boolean = false,
     modifier: Modifier = Modifier,
 ) {
     var isSearchVisible by rememberSaveable { mutableStateOf(false) }
     var searchQuery by rememberSaveable { mutableStateOf("") }
     var currentMatchIndex by rememberSaveable { mutableIntStateOf(-1) }
     var isAccessoryVisible by rememberSaveable { mutableStateOf(true) }
-    var isWrappingEnabled by rememberSaveable { mutableStateOf(false) }
+    var isWrappingEnabled by rememberSaveable { mutableStateOf(defaultWrapEnabled) }
 
     val verticalScrollState = rememberScrollState()
     val focusRequester = remember { FocusRequester() }
@@ -163,7 +165,7 @@ fun CodeEditor(
     val context = LocalContext.current
 
     LaunchedEffect(code.text) {
-        delay(AUTO_SAVE_DELAY)
+        delay(AUTO_SAVE_DELAY.milliseconds)
         if (lastUndoSave.text != code.text) {
             undoStack.add(code)
             if (undoStack.size > UNDO_LIMIT) undoStack.removeAt(0)

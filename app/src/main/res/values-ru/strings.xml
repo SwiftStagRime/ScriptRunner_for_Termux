@@ -105,6 +105,8 @@
     <string name="shortcut_style_select">Выбрать стиль</string>
 
     <!-- Editor -->
+    <string name="editor_label">Редактор</string>
+    <string name="wrap_lines_label">Перенос строк</string>
     <string name="editor_untitled">Без названия</string>
     <string name="editor_placeholder"># Начните кодить…</string>
     <string name="editor_search_placeholder">Найти…</string>

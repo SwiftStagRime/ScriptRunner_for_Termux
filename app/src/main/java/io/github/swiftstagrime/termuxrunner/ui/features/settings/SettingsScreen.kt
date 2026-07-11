@@ -43,6 +43,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -69,6 +70,7 @@ import io.github.swiftstagrime.termuxrunner.ui.theme.ThemeMode
 fun SettingsScreen(
     selectedAccent: AppTheme,
     selectedMode: ThemeMode,
+    lineWrappingEnabled: Boolean,
     actions: SettingsActions,
 ) {
     val outerBackgroundColor = MaterialTheme.colorScheme.surface
@@ -100,6 +102,18 @@ fun SettingsScreen(
             ) {
                 Column {
                     AppearanceSection(selectedAccent, selectedMode, actions)
+
+                    Spacer(modifier = Modifier.height(24.dp))
+
+                    HorizontalDivider(
+                        modifier = Modifier.padding(horizontal = 4.dp),
+                        thickness = 1.dp,
+                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f),
+                    )
+
+                    Spacer(modifier = Modifier.height(24.dp))
+
+                    EditorSection(lineWrappingEnabled, actions)
 
                     Spacer(modifier = Modifier.height(24.dp))
 
@@ -256,6 +270,39 @@ private fun DisplayModeSelector(
                 Text(stringResource(mode.labelRes))
             }
         }
+    }
+}
+
+@Composable
+private fun EditorSection(
+    lineWrappingEnabled: Boolean,
+    actions: SettingsActions,
+) {
+    Text(
+        text = stringResource(R.string.editor_label),
+        style = MaterialTheme.typography.labelLarge,
+        color = MaterialTheme.colorScheme.primary,
+    )
+    Spacer(modifier = Modifier.height(8.dp))
+
+    Row(
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(12.dp))
+                .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
+                .padding(16.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            text = stringResource(R.string.wrap_lines_label),
+            style = MaterialTheme.typography.titleMedium,
+        )
+        Switch(
+            checked = lineWrappingEnabled,
+            onCheckedChange = actions.onLineWrappingToggle,
+        )
     }
 }
 
@@ -457,10 +504,12 @@ fun PreviewSettingsScreen() {
         SettingsScreen(
             selectedAccent = AppTheme.GREEN,
             selectedMode = ThemeMode.SYSTEM,
+            lineWrappingEnabled = false,
             actions =
                 SettingsActions(
                     onAccentChange = {},
                     onModeChange = {},
+                    onLineWrappingToggle = {},
                     onTriggerExport = {},
                     onTriggerImport = {},
                     onTriggerScriptImport = {},

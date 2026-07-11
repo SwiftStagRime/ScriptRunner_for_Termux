@@ -47,6 +47,14 @@ class SettingsViewModel
                     initialValue = ThemeMode.SYSTEM,
                 )
 
+        val lineWrappingEnabled =
+            userPreferencesRepository.editorLineWrappingEnabled
+                .stateIn(
+                    scope = viewModelScope,
+                    started = SharingStarted.WhileSubscribed(5000),
+                    initialValue = false,
+                )
+
         private val _ioState = MutableStateFlow<UiText?>(null)
         val ioState = _ioState.asStateFlow()
 
@@ -64,6 +72,12 @@ class SettingsViewModel
             viewModelScope.launch(ioDispatcher) {
                 userPreferencesRepository.setMode(mode)
                 widgetManager.updateAllWidgets()
+            }
+        }
+
+        fun setLineWrappingEnabled(enabled: Boolean) {
+            viewModelScope.launch(ioDispatcher) {
+                userPreferencesRepository.setEditorLineWrappingEnabled(enabled)
             }
         }
 

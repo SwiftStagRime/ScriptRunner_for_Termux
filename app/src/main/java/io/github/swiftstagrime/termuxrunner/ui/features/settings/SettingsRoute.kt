@@ -26,6 +26,7 @@ fun SettingsRoute(
     val uriHandler = LocalUriHandler.current
     val selectedAccent by viewModel.selectedAccent.collectAsStateWithLifecycle()
     val selectedMode by viewModel.selectedMode.collectAsStateWithLifecycle()
+    val lineWrappingEnabled by viewModel.lineWrappingEnabled.collectAsStateWithLifecycle()
     val ioMessage by viewModel.ioState.collectAsStateWithLifecycle()
     val exportFilename = stringResource(R.string.export_filename)
 
@@ -63,6 +64,7 @@ fun SettingsRoute(
         SettingsActions(
             onAccentChange = viewModel::setAccent,
             onModeChange = viewModel::setMode,
+            onLineWrappingToggle = viewModel::setLineWrappingEnabled,
             onTriggerExport = { exportLauncher.launch(exportFilename) },
             onTriggerImport = { importBackupLauncher.launch(arrayOf("application/json")) },
             onTriggerScriptImport = { importFileLauncher.launch(arrayOf("*/*")) },
@@ -74,6 +76,7 @@ fun SettingsRoute(
     SettingsScreen(
         selectedAccent = selectedAccent,
         selectedMode = selectedMode,
+        lineWrappingEnabled = lineWrappingEnabled,
         actions = actions,
     )
 }

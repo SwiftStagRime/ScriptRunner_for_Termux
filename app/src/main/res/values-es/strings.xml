@@ -106,6 +106,8 @@
     <string name="shortcut_style_select">Seleccionar estilo</string>
 
     <!-- Editor -->
+    <string name="editor_label">Editor</string>
+    <string name="wrap_lines_label">Ajustar líneas</string>
     <string name="editor_untitled">Sin título</string>
     <string name="editor_placeholder"># Empieza a programar…</string>
     <string name="editor_search_placeholder">Buscar…</string>
