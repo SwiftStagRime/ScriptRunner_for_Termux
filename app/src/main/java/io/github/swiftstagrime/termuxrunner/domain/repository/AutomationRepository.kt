@@ -18,4 +18,6 @@ interface AutomationRepository {
     )
 
     suspend fun getAutomationsForScript(scriptId: Int): List<Automation>
+
+    suspend fun updateLastResult(automationId: Int, exitCode: Int, timestamp: Long)
 }

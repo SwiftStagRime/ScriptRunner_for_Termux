@@ -45,11 +45,6 @@ class AutomationScheduler
                 }
             }
 
-            // If it's a one-time script and the time has already passed, don't schedule
-            if (automation.type == AutomationType.ONE_TIME && triggerTime < System.currentTimeMillis()) {
-                return
-            }
-
             val intent =
                 Intent(context, AutomationReceiver::class.java).apply {
                     putExtra("automation_id", automation.id)

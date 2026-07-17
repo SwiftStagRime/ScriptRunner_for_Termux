@@ -1,10 +1,10 @@
 package io.github.swiftstagrime.termuxrunner.domain.usecase
 
-import io.github.swiftstagrime.termuxrunner.data.automation.AutomationNotificationHelper
-import io.github.swiftstagrime.termuxrunner.data.local.dao.AutomationDao
 import io.github.swiftstagrime.termuxrunner.domain.model.AutomationLog
 import io.github.swiftstagrime.termuxrunner.domain.repository.AutomationLogRepository
-import io.github.swiftstagrime.termuxrunner.ui.utils.WidgetManager
+import io.github.swiftstagrime.termuxrunner.domain.repository.AutomationRepository
+import io.github.swiftstagrime.termuxrunner.domain.repository.ScriptResultNotificator
+import io.github.swiftstagrime.termuxrunner.domain.repository.WidgetUpdater
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -12,10 +12,10 @@ import javax.inject.Singleton
 class ProcessTermuxResultUseCase
     @Inject
     constructor(
-        private val automationDao: AutomationDao,
+        private val automationRepository: AutomationRepository,
         private val logRepository: AutomationLogRepository,
-        private val notificationHelper: AutomationNotificationHelper,
-        private val widgetManager: WidgetManager,
+        private val notificationHelper: ScriptResultNotificator,
+        private val widgetManager: WidgetUpdater,
     ) {
         suspend fun execute(
             automationId: Int,
@@ -27,7 +27,7 @@ class ProcessTermuxResultUseCase
             val timestamp = System.currentTimeMillis()
 
             if (automationId != -1) {
-                automationDao.updateLastResult(automationId, exitCode, timestamp)
+                automationRepository.updateLastResult(automationId, exitCode, timestamp)
 
                 logRepository.insertLog(
                     AutomationLog(

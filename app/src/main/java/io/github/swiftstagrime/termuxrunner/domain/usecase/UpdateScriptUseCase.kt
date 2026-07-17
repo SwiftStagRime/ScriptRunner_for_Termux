@@ -1,5 +1,6 @@
 package io.github.swiftstagrime.termuxrunner.domain.usecase
 
+import android.util.Log
 import io.github.swiftstagrime.termuxrunner.domain.model.Script
 import io.github.swiftstagrime.termuxrunner.domain.repository.ScriptRepository
 import java.io.File
@@ -21,7 +22,9 @@ class UpdateScriptUseCase
                     if (oldPath != null && oldPath != newPath) {
                         val oldFile = File(oldPath)
                         if (oldFile.exists()) {
-                            oldFile.delete()
+                            if (!oldFile.delete()) {
+                                Log.w("UpdateScript", "Failed to delete old icon: $oldPath")
+                            }
                         }
                     }
                 }

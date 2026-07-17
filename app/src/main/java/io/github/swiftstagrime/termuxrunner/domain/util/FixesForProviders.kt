@@ -2,7 +2,8 @@ package io.github.swiftstagrime.termuxrunner.domain.util
 
 import android.app.AppOpsManager
 import android.content.Context
-import android.os.Binder
+import android.os.Process
+import android.util.Log
 
 object MiuiUtils {
     fun hasShortcutPermission(context: Context): Boolean {
@@ -20,13 +21,15 @@ object MiuiUtils {
                 method.invoke(
                     appOps,
                     10017,
-                    Binder.getCallingUid(),
+                    Process.myUid(),
                     context.packageName,
                 ) as Int
 
             result == AppOpsManager.MODE_ALLOWED
-        } catch (_: Exception) {
-            // If the method doesn't exist (non-MIUI), assume true and let Android handle it
+        } catch (e: NoSuchMethodException) {
+            true
+        } catch (e: Exception) {
+            Log.d("MiuiUtils", "Unexpected error checking shortcut permission", e)
             true
         }
     }

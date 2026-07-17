@@ -21,6 +21,19 @@ class RunScriptUseCase
         private val scriptFileRepository: ScriptFileRepository,
         private val monitoringRepository: MonitoringRepository,
     ) {
+
+    companion object {
+        private val VALID_ENV_KEY_PATTERN = Regex("^[a-zA-Z_][a-zA-Z0-9_]*$")
+        private val SAFE_INTERPRETER_PATTERN = Regex("^[a-z0-9_/.-]+$", RegexOption.IGNORE_CASE)
+        private val SAFE_PREFIX_PATTERN = Regex("^[a-zA-Z0-9_./\\s:;@|&<>()\\[\\]{}'\"$`,!%^#=-+*?~]*$")
+
+        /** Escapes a string for safe placement inside bash -c "..." double-quoted context. */
+        private fun escapeForBashDoubleQuotes(input: String): String = input
+            .replace("\\", "\\\\")
+            .replace("\"", "\\\"")
+            .replace("$", "\\$")
+            .replace("`", "\\`")
+    }
         suspend operator fun invoke(
             script: Script,
             runtimeArgs: String? = null,
@@ -33,8 +46,8 @@ class RunScriptUseCase
 
             val envVarString = StringBuilder()
             combinedEnv.forEach { (key, value) ->
-                if (key.matches(Regex("^[a-zA-Z_][a-zA-Z0-9_]*$"))) {
-                    val safeValue = value.replace("'", "'\\''")
+                if (key.matches(VALID_ENV_KEY_PATTERN)) {
+                    val safeValue = value.replace("\\", "\\\\").replace("'", "'\\''").replace("$", "\\$").replace("`", "\\`")
                     envVarString.append("export $key='$safeValue'; ")
                 }
             }
@@ -164,15 +177,16 @@ except:
             val fullPath = "$tempDir/$fileName"
             val encodedCode = Base64.encodeToString(script.code.toByteArray(), Base64.NO_WRAP)
 
-            val coreExecution =
-                StringBuilder()
-                    .apply {
-                        append(envVars)
-                        if (actualPrefix.isNotBlank()) append("$actualPrefix ")
-                        append("${script.interpreter} ")
-                        append("$fullPath ")
-                        append(combinedArgs)
-                    }.toString()
+            if (!script.interpreter.matches(SAFE_INTERPRETER_PATTERN)) {
+                return "echo 'Error: Invalid interpreter specified.'"
+            }
+
+            val escapedInterpreter = escapeForBashDoubleQuotes(script.interpreter)
+            val escapedPrefix = if (actualPrefix.isNotBlank()) escapeForBashDoubleQuotes(actualPrefix) + " " else ""
+            val escapedArgs = escapeForBashDoubleQuotes(combinedArgs)
+            val escapedEnvVars = escapeForBashDoubleQuotes(envVars)
+
+            val coreExecution = "$escapedEnvVars$escapedPrefix$escapedInterpreter $fullPath $escapedArgs"
 
             return StringBuilder()
                 .append("mkdir -p $tempDir && ")
@@ -180,7 +194,7 @@ except:
                 .append("chmod +x $fullPath && ")
                 .append("bash -c \"")
                 .append("trap 'rm -f $fullPath' EXIT; ")
-                .append(coreExecution.replace("\"", "\\\""))
+                .append(coreExecution)
                 .append("\"")
                 .apply {
                     if (script.keepSessionOpen) {
@@ -204,15 +218,16 @@ except:
                 }
             val termuxDestPath = "~/scriptrunner_for_termux/$fileName"
 
-            val coreExecution =
-                StringBuilder()
-                    .apply {
-                        append(envVars)
-                        if (actualPrefix.isNotBlank()) append("$actualPrefix ")
-                        append("${script.interpreter} ")
-                        append("$termuxDestPath ")
-                        append(combinedArgs)
-                    }.toString()
+            if (!script.interpreter.matches(SAFE_INTERPRETER_PATTERN)) {
+                return "echo 'Error: Invalid interpreter specified.'"
+            }
+
+            val escapedInterpreter = escapeForBashDoubleQuotes(script.interpreter)
+            val escapedPrefix = if (actualPrefix.isNotBlank()) escapeForBashDoubleQuotes(actualPrefix) + " " else ""
+            val escapedArgs = escapeForBashDoubleQuotes(combinedArgs)
+            val escapedEnvVars = escapeForBashDoubleQuotes(envVars)
+
+            val coreExecution = "$escapedEnvVars$escapedPrefix$escapedInterpreter $termuxDestPath $escapedArgs"
 
             return StringBuilder()
                 .append("mkdir -p ~/scriptrunner_for_termux && ")
@@ -221,7 +236,7 @@ except:
                 .append("chmod +x $termuxDestPath && ")
                 .append("bash -c \"")
                 .append("trap 'rm -f $termuxDestPath' EXIT; ")
-                .append(coreExecution.replace("\"", "\\\""))
+                .append(coreExecution)
                 .append("\"")
                 .apply {
                     if (script.keepSessionOpen) {

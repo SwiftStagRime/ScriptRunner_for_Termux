@@ -36,11 +36,9 @@ class AutomationRepositoryImpl
                 }
             }
 
-            val id = dao.insertAutomation(entity)
-            val savedEntity = dao.getAutomationById(id.toInt())
-            if (savedEntity != null) {
-                scheduler.schedule(savedEntity)
-            }
+            val insertedId = dao.insertAutomation(entity)
+            val entityWithId = entity.copy(id = insertedId.toInt())
+            scheduler.schedule(entityWithId)
         }
 
         override suspend fun deleteAutomation(automation: Automation) {
@@ -68,4 +66,8 @@ class AutomationRepositoryImpl
             dao.getAutomationsForScript(scriptId).map {
                 it.toAutomationDomain()
             }
+
+        override suspend fun updateLastResult(automationId: Int, exitCode: Int, timestamp: Long) {
+            dao.updateLastResult(automationId, exitCode, timestamp)
+        }
     }

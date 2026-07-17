@@ -3,6 +3,7 @@ package io.github.swiftstagrime.termuxrunner.ui.utils
 import android.content.Context
 import androidx.glance.appwidget.updateAll
 import dagger.hilt.android.qualifiers.ApplicationContext
+import io.github.swiftstagrime.termuxrunner.domain.repository.WidgetUpdater
 import io.github.swiftstagrime.termuxrunner.ui.features.widget.automation.AutomationWidget
 import io.github.swiftstagrime.termuxrunner.ui.features.widget.automationlogs.AutomationLogsWidget
 import io.github.swiftstagrime.termuxrunner.ui.features.widget.script.ScriptWidget
@@ -14,7 +15,7 @@ class WidgetManager
     @Inject
     constructor(
         @ApplicationContext private val context: Context,
-    ) {
+    ) : WidgetUpdater {
         suspend fun updateAllWidgets() {
             AutomationWidget().updateAll(context)
             ScriptWidget().updateAll(context)

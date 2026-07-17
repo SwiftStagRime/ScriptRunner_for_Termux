@@ -38,10 +38,6 @@ class KeyManager
         private var cachedKey: ByteArray? = null
         private val mutex = Mutex()
 
-        init {
-            AeadConfig.register()
-        }
-
         suspend fun getRoomPassphrase(): ByteArray =
             mutex.withLock {
                 cachedKey?.let { return it }

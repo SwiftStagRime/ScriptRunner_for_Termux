@@ -68,6 +68,7 @@ class TcpMonitor(
 
     fun stop() {
         monitorJob?.cancel()
+        scope.cancel()
         try {
             serverSocket?.close()
         } catch (_: Exception) {

@@ -7,6 +7,7 @@ import android.os.Build
 import androidx.core.app.NotificationCompat
 import dagger.hilt.android.qualifiers.ApplicationContext
 import io.github.swiftstagrime.termuxrunner.R
+import io.github.swiftstagrime.termuxrunner.domain.repository.ScriptResultNotificator
 import io.github.swiftstagrime.termuxrunner.ui.extensions.UiText
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -16,7 +17,7 @@ class AutomationNotificationHelper
     @Inject
     constructor(
         @ApplicationContext private val context: Context,
-    ) {
+    ) : ScriptResultNotificator {
         fun showResultNotification(
             scriptId: Int,
             name: String,

@@ -8,7 +8,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class AutomationExportDto(
     val scriptId: Int,
-    val type: AutomationType,
+    type: AutomationType,
     val scheduledTimestamp: Long,
     val intervalMillis: Long,
     val daysOfWeek: List<Int>,
@@ -22,6 +22,7 @@ data class AutomationExportDto(
     val requireWifi: Boolean,
     val requireCharging: Boolean,
     val batteryThreshold: Int,
+    val lastRunTimestamp: Long? = null,
 )
 
 fun AutomationExportDto.toEntity(newScriptId: Int): AutomationEntity =
@@ -41,7 +42,7 @@ fun AutomationExportDto.toEntity(newScriptId: Int): AutomationEntity =
         requireWifi = this.requireWifi,
         requireCharging = this.requireCharging,
         batteryThreshold = this.batteryThreshold,
-        lastRunTimestamp = null,
+        lastRunTimestamp = this.lastRunTimestamp,
         nextRunTimestamp = null,
     )
 
@@ -62,4 +63,5 @@ fun Automation.toExportDto() =
         requireWifi = requireWifi,
         requireCharging = requireCharging,
         batteryThreshold = batteryThreshold,
+        lastRunTimestamp = lastRunTimestamp,
     )

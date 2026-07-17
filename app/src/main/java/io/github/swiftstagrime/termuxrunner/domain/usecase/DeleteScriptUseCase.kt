@@ -1,5 +1,6 @@
 package io.github.swiftstagrime.termuxrunner.domain.usecase
 
+import android.util.Log
 import io.github.swiftstagrime.termuxrunner.domain.model.Script
 import io.github.swiftstagrime.termuxrunner.domain.repository.ScriptRepository
 import java.io.File
@@ -14,7 +15,9 @@ class DeleteScriptUseCase
             script.iconPath?.let { path ->
                 val file = File(path)
                 if (file.exists()) {
-                    file.delete()
+                    if (!file.delete()) {
+                        Log.w("DeleteScript", "Failed to delete icon: $path")
+                    }
                 }
             }
 

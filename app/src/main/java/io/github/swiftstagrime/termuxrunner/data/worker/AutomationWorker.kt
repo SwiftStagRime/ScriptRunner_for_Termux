@@ -73,17 +73,20 @@ class AutomationWorker
                 if (capabilities == null || !capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)) return false
             }
 
+            if (!automation.requireCharging && automation.batteryThreshold <= 0) return true
+
             val bm = applicationContext.getSystemService(Context.BATTERY_SERVICE) as BatteryManager
+
+            val batteryIntent =
+                applicationContext.registerReceiver(
+                    null,
+                    IntentFilter(Intent.ACTION_BATTERY_CHANGED),
+                )
 
             if (automation.requireCharging) {
                 val isCharging = bm.isCharging
                 if (!isCharging) {
-                    val intent =
-                        applicationContext.registerReceiver(
-                            null,
-                            IntentFilter(Intent.ACTION_BATTERY_CHANGED),
-                        )
-                    val status = intent?.getIntExtra(BatteryManager.EXTRA_STATUS, -1) ?: -1
+                    val status = batteryIntent?.getIntExtra(BatteryManager.EXTRA_STATUS, -1) ?: -1
                     val charging =
                         status == BatteryManager.BATTERY_STATUS_CHARGING || status == BatteryManager.BATTERY_STATUS_FULL
                     if (!charging) return false
@@ -94,12 +97,7 @@ class AutomationWorker
                 val level = bm.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY)
                 val finalLevel =
                     if (level <= 0) {
-                        val intent =
-                            applicationContext.registerReceiver(
-                                null,
-                                IntentFilter(Intent.ACTION_BATTERY_CHANGED),
-                            )
-                        intent?.getIntExtra(BatteryManager.EXTRA_LEVEL, -1) ?: -1
+                        batteryIntent?.getIntExtra(BatteryManager.EXTRA_LEVEL, -1) ?: -1
                     } else {
                         level
                     }

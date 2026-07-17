@@ -12,5 +12,5 @@ interface AutomationLogRepository {
 
     suspend fun deleteOldLogs(threshold: Long)
 
-    fun getRecentLogs(i: Int): Flow<List<AutomationLog>>
+    fun getRecentLogs(limit: Int): Flow<List<AutomationLog>>
 }

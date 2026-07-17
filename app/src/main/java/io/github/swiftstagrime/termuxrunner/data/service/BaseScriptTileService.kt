@@ -46,6 +46,11 @@ abstract class BaseScriptTileService : TileService() {
         updateTileState()
     }
 
+    override fun onStopListening() {
+        super.onStopListening()
+        serviceScope.cancel()
+    }
+
     override fun onClick() {
         val scriptId = assignedScriptId
 

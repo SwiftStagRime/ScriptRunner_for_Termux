@@ -5,8 +5,8 @@ import kotlinx.parcelize.Parcelize
 
 @Parcelize
 data class Automation(
-    val id: Int,
-    val scriptId: Int,
+    val id: Int = 0,
+    val scriptId: Int = 0,
     val label: String,
     val type: AutomationType,
     val scheduledTimestamp: Long,

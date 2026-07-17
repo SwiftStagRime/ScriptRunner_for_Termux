@@ -15,6 +15,7 @@ import io.github.swiftstagrime.termuxrunner.R
 import io.github.swiftstagrime.termuxrunner.data.service.AdbScriptExecutionService.Companion.EXTRA_ADB_CODE
 import io.github.swiftstagrime.termuxrunner.domain.repository.ScriptRepository
 import io.github.swiftstagrime.termuxrunner.domain.usecase.RunScriptUseCase
+import io.github.swiftstagrime.termuxrunner.data.repository.ScriptNotFoundException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -160,7 +161,3 @@ class AdbScriptExecutionService : Service() {
         notificationManager.notify(NOTIFICATION_ID, notification)
     }
 }
-
-class ScriptNotFoundException(
-    adbCode: String,
-) : Exception("Script with code '$adbCode' not found.")

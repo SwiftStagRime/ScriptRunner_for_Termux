@@ -1,6 +1,7 @@
 package io.github.swiftstagrime.termuxrunner.data.repository
 
 import android.content.Context
+import android.os.Build
 import android.os.Environment
 import dagger.hilt.android.qualifiers.ApplicationContext
 import io.github.swiftstagrime.termuxrunner.R
@@ -21,11 +22,15 @@ class ScriptFileRepositoryImpl
             fileName: String,
             code: String,
         ): String {
-            val downloadDir =
-                Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
-
-            val folderName = context.getString(R.string.bridge_folder_name)
-            val bridgeDir = File(downloadDir, folderName)
+            val bridgeDir =
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    val folderName = context.getString(R.string.bridge_folder_name)
+                    File(context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS), folderName)
+                } else {
+                    val downloadDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+                    val folderName = context.getString(R.string.bridge_folder_name)
+                    File(downloadDir, folderName)
+                }
 
             if (!bridgeDir.exists()) {
                 if (!bridgeDir.mkdirs()) {

@@ -19,7 +19,7 @@ object LocaleManager {
             AppLanguage("de", "Deutsch", "🇩🇪"),
             AppLanguage("es", "Español", "🇪🇸"),
             AppLanguage("pt", "Português", "🇧🇷"),
-            AppLanguage("zh-CN", "简体中文", "🇨🇳"),
+            AppLanguage("zh", "简体中文", "🇨🇳"),
         )
 
     fun setLocale(languageCode: String) {
@@ -28,15 +28,15 @@ object LocaleManager {
     }
 
     fun getCurrentLanguage(): AppLanguage {
-        val currentTag =
-            AppCompatDelegate
-                .getApplicationLocales()
-                .toLanguageTags()
-                .split(",")
-                .firstOrNull()
-                ?: Locale.getDefault().toLanguageTag()
+        val locale = AppCompatDelegate.getApplicationLocales().get(0) ?: Locale.getDefault()
 
-        return supportedLanguages.find { currentTag.startsWith(it.code) }
-            ?: supportedLanguages.first()
+        return supportedLanguages.find {
+            if (it.code.contains("-")) {
+                val parts = it.code.split("-")
+                locale.language == parts[0] && (parts.getOrElse(1) { null } == null || locale.country == parts[1])
+            } else {
+                locale.language == it.code
+            }
+        } ?: supportedLanguages.first()
     }
 }

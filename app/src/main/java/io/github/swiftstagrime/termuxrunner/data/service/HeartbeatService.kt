@@ -226,7 +226,8 @@ class HeartbeatService : Service() {
 
         try {
             unregisterReceiver(heartbeatReceiver)
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            android.util.Log.d("HeartbeatService", "Failed to unregister receiver (may already be unregistered)", e)
         }
     }
 
@@ -242,7 +243,8 @@ class HeartbeatService : Service() {
         serviceScope.launch {
             while (isServiceRunning) {
                 delay(CHECK_INTERVAL_MS)
-                checkHealth()
+                val allTcp = monitoredScripts.keys.all { tcpMonitors.containsKey(it) }
+                if (!allTcp) checkHealth()
                 if (isServiceRunning) updateNotification()
             }
         }
@@ -280,6 +282,12 @@ class HeartbeatService : Service() {
                 MAX_RESTARTS,
             )
         state.lastHeartbeatTime = System.currentTimeMillis()
+
+        if (state.restartCount >= MAX_RESTARTS) {
+            monitoredScripts.remove(state.id)
+            updateNotification()
+            return
+        }
 
         // Relaunch
         serviceScope.launch {

@@ -37,14 +37,14 @@ class UserPreferencesRepositoryImpl
             context.dataStore.data
                 .map { prefs ->
                     val name = prefs[Keys.THEME_ACCENT] ?: AppTheme.GREEN.name
-                    AppTheme.valueOf(name)
+                    try { AppTheme.valueOf(name) } catch (_: Exception) { AppTheme.GREEN }
                 }
 
         override val selectedMode: Flow<ThemeMode> =
             context.dataStore.data
                 .map { prefs ->
                     val name = prefs[Keys.THEME_MODE] ?: ThemeMode.SYSTEM.name
-                    ThemeMode.valueOf(name)
+                    try { ThemeMode.valueOf(name) } catch (_: Exception) { ThemeMode.SYSTEM }
                 }
 
         override val selectedCustomThemeId: Flow<Int?> =

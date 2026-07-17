@@ -3,6 +3,7 @@ package io.github.swiftstagrime.termuxrunner.data.receiver
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 import dagger.hilt.android.AndroidEntryPoint
 import io.github.swiftstagrime.termuxrunner.data.automation.AutomationScheduler
 import io.github.swiftstagrime.termuxrunner.data.local.dao.AutomationDao
@@ -24,7 +25,6 @@ class DeviceBootReceiver : BroadcastReceiver() {
     @Inject lateinit var runScriptUseCase: RunScriptUseCase
 
     @Inject lateinit var scriptDao: ScriptDao
-    private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
     override fun onReceive(
         context: Context,
@@ -37,6 +37,7 @@ class DeviceBootReceiver : BroadcastReceiver() {
     }
 
     internal fun handleBoot(pendingResult: PendingResult? = null) {
+        val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
         scope.launch {
             try {
                 val allAutomations = automationDao.getEnabledAutomations()
@@ -60,10 +61,11 @@ class DeviceBootReceiver : BroadcastReceiver() {
                     }
                 }
             } catch (e: Exception) {
-                e.printStackTrace()
+                Log.e("DeviceBootReceiver", "Error handling boot automations", e)
             } finally {
+                scope.coroutineContext[kotlinx.coroutines.Job]?.cancel()
                 pendingResult?.finish()
             }
-        }
+        }.invokeOnCompletion { pendingResult?.finish() }
     }
 }

@@ -40,7 +40,7 @@ class TermuxResultReceiver : BroadcastReceiver() {
         }
 
         val pendingResult = goAsync()
-        CoroutineScope(Dispatchers.IO).launch {
+        val job = CoroutineScope(Dispatchers.IO).launch {
             try {
                 processUseCase.execute(
                     automationId = automationId,
@@ -50,8 +50,9 @@ class TermuxResultReceiver : BroadcastReceiver() {
                     internalError = internalError,
                 )
             } finally {
-                pendingResult?.finish()
+                pendingResult.finish()
             }
         }
+        pendingResult.setOnFinishListener { job.cancel() }
     }
 }
