@@ -66,6 +66,6 @@ class DeviceBootReceiver : BroadcastReceiver() {
                 scope.coroutineContext[kotlinx.coroutines.Job]?.cancel()
                 pendingResult?.finish()
             }
-        }.invokeOnCompletion { pendingResult?.finish() }
+        }
     }
 }

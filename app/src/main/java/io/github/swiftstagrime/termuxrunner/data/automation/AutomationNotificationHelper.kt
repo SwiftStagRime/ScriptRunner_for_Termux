@@ -18,7 +18,7 @@ class AutomationNotificationHelper
     constructor(
         @ApplicationContext private val context: Context,
     ) : ScriptResultNotificator {
-        fun showResultNotification(
+        override fun showResultNotification(
             scriptId: Int,
             name: String,
             exitCode: Int,

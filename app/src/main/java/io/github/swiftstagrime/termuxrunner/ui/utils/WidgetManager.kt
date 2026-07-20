@@ -26,7 +26,7 @@ class WidgetManager
             AutomationWidget().updateAll(context)
         }
 
-        suspend fun updateLogsWidget() {
+        override suspend fun updateLogsWidget() {
             AutomationLogsWidget().updateAll(context)
         }
 

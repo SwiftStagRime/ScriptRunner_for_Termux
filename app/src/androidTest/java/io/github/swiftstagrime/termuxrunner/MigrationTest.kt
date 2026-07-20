@@ -4,6 +4,7 @@ import androidx.room.testing.MigrationTestHelper
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import io.github.swiftstagrime.termuxrunner.data.local.AppDatabase
+import io.github.swiftstagrime.termuxrunner.data.local.MIGRATION_6_7
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertTrue
 import org.junit.Assert.assertNotEquals
@@ -215,7 +216,7 @@ class MigrationTest {
                 close()
             }
 
-        db = helper.runMigrationsAndValidate(TEST_DB, 7, true)
+        db = helper.runMigrationsAndValidate(TEST_DB, 7, true, MIGRATION_6_7)
 
         val codePagesCheck = db.query("SELECT codePages FROM scripts LIMIT 1")
         assertTrue("codePages column should exist", codePagesCheck.getColumnIndexOrThrow("codePages") >= 0)
@@ -227,7 +228,7 @@ class MigrationTest {
         val codePagesIndex = cursor.getColumnIndexOrThrow("codePages")
         val codePages = cursor.getString(codePagesIndex)
         assertTrue("codePages should be JSON array", codePages.startsWith("["))
-        assertTrue("codePages should contain original code", codePages.contains("echo \"hello world\""))
+        assertTrue("codePages should contain original code", codePages.contains("echo \\\"hello world\\\""))
 
         val cursor2 = db.query("SELECT * FROM scripts WHERE id = 2")
         assertTrue(cursor2.moveToFirst())
@@ -240,7 +241,7 @@ class MigrationTest {
 
         val pageNamesIndex = cursor.getColumnIndexOrThrow("page_names")
         val pageNames = cursor.getString(pageNamesIndex)
-        assertEquals("page_names should be empty for migrated scripts", "", pageNames)
+        assertEquals("page_names should be empty array for migrated scripts", "[]", pageNames)
 
         cursor.close()
         cursor2.close()

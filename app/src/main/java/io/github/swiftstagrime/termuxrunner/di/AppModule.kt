@@ -1,6 +1,7 @@
 package io.github.swiftstagrime.termuxrunner.di
 
 import android.content.Context
+import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -26,6 +27,7 @@ import io.github.swiftstagrime.termuxrunner.data.repository.ScriptRepositoryImpl
 import io.github.swiftstagrime.termuxrunner.data.repository.ShortcutRepositoryImpl
 import io.github.swiftstagrime.termuxrunner.data.repository.TermuxRepositoryImpl
 import io.github.swiftstagrime.termuxrunner.data.repository.UserPreferencesRepositoryImpl
+import io.github.swiftstagrime.termuxrunner.ui.utils.WidgetManager
 import io.github.swiftstagrime.termuxrunner.domain.repository.AutomationLogRepository
 import io.github.swiftstagrime.termuxrunner.domain.repository.AutomationRepository
 import io.github.swiftstagrime.termuxrunner.domain.repository.CategoryRepository
@@ -34,9 +36,11 @@ import io.github.swiftstagrime.termuxrunner.domain.repository.IconRepository
 import io.github.swiftstagrime.termuxrunner.domain.repository.MonitoringRepository
 import io.github.swiftstagrime.termuxrunner.domain.repository.ScriptFileRepository
 import io.github.swiftstagrime.termuxrunner.domain.repository.ScriptRepository
+import io.github.swiftstagrime.termuxrunner.domain.repository.ScriptResultNotificator
 import io.github.swiftstagrime.termuxrunner.domain.repository.ShortcutRepository
 import io.github.swiftstagrime.termuxrunner.domain.repository.TermuxRepository
 import io.github.swiftstagrime.termuxrunner.domain.repository.UserPreferencesRepository
+import io.github.swiftstagrime.termuxrunner.domain.repository.WidgetUpdater
 import javax.inject.Singleton
 
 @Module
@@ -125,9 +129,15 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideAutomationNotificationHelper(
+    fun provideScriptResultNotificator(
         @ApplicationContext context: Context,
-    ): AutomationNotificationHelper = AutomationNotificationHelper(context)
+    ): ScriptResultNotificator = AutomationNotificationHelper(context)
+
+    @Provides
+    @Singleton
+    fun provideWidgetUpdater(
+        @ApplicationContext context: Context,
+    ): WidgetUpdater = WidgetManager(context)
 
     @Provides
     @PackageName

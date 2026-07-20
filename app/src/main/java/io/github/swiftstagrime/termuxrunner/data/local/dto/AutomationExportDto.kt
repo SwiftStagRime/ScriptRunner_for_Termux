@@ -8,7 +8,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class AutomationExportDto(
     val scriptId: Int,
-    type: AutomationType,
+    val type: AutomationType,
     val scheduledTimestamp: Long,
     val intervalMillis: Long,
     val daysOfWeek: List<Int>,

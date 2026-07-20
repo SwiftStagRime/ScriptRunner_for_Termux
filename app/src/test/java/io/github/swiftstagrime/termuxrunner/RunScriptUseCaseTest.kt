@@ -103,7 +103,7 @@ class RunScriptUseCaseTest {
             verify { termuxRepo.runCommand(command = capture(commandSlot), any(), any(), any(), any(), any(), any()) }
 
             val command = commandSlot.captured
-            assertTrue(command.contains("export VALID_KEY='value'\\''with'\\''quote'"))
+            assertTrue("Should contain escaped export statement", command.contains("export VALID_KEY='value'\\''with'\\''quote'"))
             assertFalse(command.contains("123INVALID"))
         }
 
@@ -260,5 +260,219 @@ class RunScriptUseCaseTest {
             verify { termuxRepo.runCommand(command = capture(commandSlot), any(), any(), any(), any(), any(), any()) }
 
             assertEquals("echo 'Error: Could not save script to device storage.'", commandSlot.captured)
+        }
+
+    @Test
+    fun `malicious interpreter with semicolon is rejected`() =
+        runTest {
+            val script = Script(
+                id = 100,
+                name = "Inject",
+                codePages = listOf("echo hello"),
+                interpreter = "bash; rm -rf /",
+            )
+
+            useCase(script)
+
+            val commandSlot = slot<String>()
+            verify { termuxRepo.runCommand(command = capture(commandSlot), any(), any(), any(), any(), any(), any()) }
+
+            assertTrue("Should return error, not execute malicious command",
+                commandSlot.captured.contains("Invalid interpreter"))
+        }
+
+    @Test
+    fun `malicious interpreter with backtick is rejected`() =
+        runTest {
+            val script = Script(
+                id = 101,
+                name = "Inject2",
+                codePages = listOf("echo hello"),
+                interpreter = "`rm -rf /`",
+            )
+
+            useCase(script)
+
+            val commandSlot = slot<String>()
+            verify { termuxRepo.runCommand(command = capture(commandSlot), any(), any(), any(), any(), any(), any()) }
+
+            assertTrue("Should return error for backtick injection",
+                commandSlot.captured.contains("Invalid interpreter"))
+            assertFalse(commandSlot.captured.contains("`rm -rf /`"))
+        }
+
+    @Test
+    fun `malicious interpreter with dollar sign is rejected`() =
+        runTest {
+            val script = Script(
+                id = 102,
+                name = "Inject3",
+                codePages = listOf("echo hello"),
+                interpreter = "$(rm -rf /)",
+            )
+
+            useCase(script)
+
+            val commandSlot = slot<String>()
+            verify { termuxRepo.runCommand(command = capture(commandSlot), any(), any(), any(), any(), any(), any()) }
+
+            assertTrue("Should return error for dollar-sign injection",
+                commandSlot.captured.contains("Invalid interpreter"))
+        }
+
+    @Test
+    fun `malicious interpreter with pipe is rejected`() =
+        runTest {
+            val script = Script(
+                id = 103,
+                name = "Inject4",
+                codePages = listOf("echo hello"),
+                interpreter = "bash | rm -rf /",
+            )
+
+            useCase(script)
+
+            val commandSlot = slot<String>()
+            verify { termuxRepo.runCommand(command = capture(commandSlot), any(), any(), any(), any(), any(), any()) }
+
+            assertTrue("Should return error for pipe injection",
+                commandSlot.captured.contains("Invalid interpreter"))
+        }
+
+    @Test
+    fun `malicious interpreter with ampersand is rejected`() =
+        runTest {
+            val script = Script(
+                id = 104,
+                name = "Inject5",
+                codePages = listOf("echo hello"),
+                interpreter = "bash & rm -rf /",
+            )
+
+            useCase(script)
+
+            val commandSlot = slot<String>()
+            verify { termuxRepo.runCommand(command = capture(commandSlot), any(), any(), any(), any(), any(), any()) }
+
+            assertTrue("Should return error for ampersand injection",
+                commandSlot.captured.contains("Invalid interpreter"))
+        }
+
+    @Test
+    fun `valid path-based interpreter is accepted`() =
+        runTest {
+            val script = Script(
+                id = 105,
+                name = "ValidPath",
+                codePages = listOf("echo hello"),
+                interpreter = "/data/data/com.termux/files/usr/bin/bash",
+            )
+
+            useCase(script)
+
+            val commandSlot = slot<String>()
+            verify { termuxRepo.runCommand(command = capture(commandSlot), any(), any(), any(), any(), any(), any()) }
+
+            assertFalse("Should not be rejected as invalid",
+                commandSlot.captured.contains("Invalid interpreter"))
+            assertTrue("Should contain the valid interpreter path",
+                commandSlot.captured.contains("/data/data/com.termux/files/usr/bin/bash"))
+        }
+
+    @Test
+    fun `env var value with dollar sign is safe inside single quotes`() =
+        runTest {
+            val dollarValue = "prefix" + '$' + "HOMEsuffix"
+            val script = Script(
+                id = 106,
+                name = "EnvDollar",
+                codePages = listOf("echo test"),
+                envVars = mapOf("TEST_VAR" to dollarValue),
+            )
+
+            useCase(script)
+
+            val commandSlot = slot<String>()
+            verify { termuxRepo.runCommand(command = capture(commandSlot), any(), any(), any(), any(), any(), any()) }
+
+            assertTrue("Dollar sign should appear literally (safe inside single quotes)",
+                commandSlot.captured.contains("'prefix\$HOMEsuffix'"))
+        }
+
+    @Test
+    fun `env var value with backtick is safe inside single quotes`() =
+        runTest {
+            val script = Script(
+                id = 107,
+                name = "EnvBacktick",
+                codePages = listOf("echo test"),
+                envVars = mapOf("TEST_VAR" to """prefix`whoami`suffix"""),
+            )
+
+            useCase(script)
+
+            val commandSlot = slot<String>()
+            verify { termuxRepo.runCommand(command = capture(commandSlot), any(), any(), any(), any(), any(), any()) }
+
+            assertTrue("Backtick should appear literally (safe inside single quotes)",
+                commandSlot.captured.contains("`whoami`"))
+        }
+
+    @Test
+    fun `env var value with double quote is not specially handled in single-quote context`() =
+        runTest {
+            val script = Script(
+                id = 108,
+                name = "EnvQuote",
+                codePages = listOf("echo test"),
+                envVars = mapOf("TEST_VAR" to "value'with'quotes"),
+            )
+
+            useCase(script)
+
+            // Just verify it doesn't crash and produces valid output
+            val commandSlot = slot<String>()
+            verify { termuxRepo.runCommand(command = capture(commandSlot), any(), any(), any(), any(), any(), any()) }
+
+            assertTrue("Should contain the export statement",
+                commandSlot.captured.contains("export TEST_VAR="))
+        }
+
+    @Test
+    fun `interpreter allowlist rejects spaces`() =
+        runTest {
+            val script = Script(
+                id = 109,
+                name = "SpaceInject",
+                codePages = listOf("echo hello"),
+                interpreter = "bash -c 'rm -rf /'",
+            )
+
+            useCase(script)
+
+            val commandSlot = slot<String>()
+            verify { termuxRepo.runCommand(command = capture(commandSlot), any(), any(), any(), any(), any(), any()) }
+
+            assertTrue("Spaces in interpreter should be rejected",
+                commandSlot.captured.contains("Invalid interpreter"))
+        }
+
+    @Test
+    fun `interpreter allowlist rejects newlines`() =
+        runTest {
+            val script = Script(
+                id = 110,
+                name = "NewlineInject",
+                codePages = listOf("echo hello"),
+                interpreter = "bash\nrm -rf /",
+            )
+
+            useCase(script)
+
+            val commandSlot = slot<String>()
+            verify { termuxRepo.runCommand(command = capture(commandSlot), any(), any(), any(), any(), any(), any()) }
+
+            assertTrue("Newlines in interpreter should be rejected",
+                commandSlot.captured.contains("Invalid interpreter"))
         }
 }

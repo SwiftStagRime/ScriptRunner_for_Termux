@@ -19,12 +19,11 @@ object AutomationTimeCalculator {
             AutomationType.PERIODIC -> {
                 if (automation.intervalMillis <= 0) return null
                 var next = automation.nextRunTimestamp ?: baseTime
-                var iterations = 0
-                while (next <= fromTime && iterations < 100_000) {
-                    next += automation.intervalMillis
-                    iterations++
+                if (next <= fromTime) {
+                    val diff = fromTime - next + 1
+                    next += (diff / automation.intervalMillis + 1) * automation.intervalMillis
                 }
-                if (iterations >= 100_000) null else next
+                next
             }
 
             AutomationType.WEEKLY -> {

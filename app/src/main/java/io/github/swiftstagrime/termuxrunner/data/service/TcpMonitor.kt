@@ -23,7 +23,8 @@ class TcpMonitor(
 ) {
     private var serverSocket: ServerSocket? = null
     private var monitorJob: Job? = null
-    private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+    private val supervisorJob = SupervisorJob()
+    private val scope = CoroutineScope(Dispatchers.IO + supervisorJob)
 
     fun startListening(): Int {
         // Bind to 127.0.0.1 specifically for security - prevents external access
@@ -68,7 +69,7 @@ class TcpMonitor(
 
     fun stop() {
         monitorJob?.cancel()
-        scope.cancel()
+        supervisorJob.cancel()
         try {
             serverSocket?.close()
         } catch (_: Exception) {

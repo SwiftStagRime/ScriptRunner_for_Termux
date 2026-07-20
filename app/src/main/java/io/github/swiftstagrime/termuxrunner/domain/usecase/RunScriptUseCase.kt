@@ -25,7 +25,6 @@ class RunScriptUseCase
     companion object {
         private val VALID_ENV_KEY_PATTERN = Regex("^[a-zA-Z_][a-zA-Z0-9_]*$")
         private val SAFE_INTERPRETER_PATTERN = Regex("^[a-z0-9_/.-]+$", RegexOption.IGNORE_CASE)
-        private val SAFE_PREFIX_PATTERN = Regex("^[a-zA-Z0-9_./\\s:;@|&<>()\\[\\]{}'\"$`,!%^#=-+*?~]*$")
 
         /** Escapes a string for safe placement inside bash -c "..." double-quoted context. */
         private fun escapeForBashDoubleQuotes(input: String): String = input
@@ -33,6 +32,8 @@ class RunScriptUseCase
             .replace("\"", "\\\"")
             .replace("$", "\\$")
             .replace("`", "\\`")
+
+        private fun escapeForSingleQuotedBash(input: String): String = input.replace("\"", "\\\"")
     }
         suspend operator fun invoke(
             script: Script,
@@ -47,7 +48,7 @@ class RunScriptUseCase
             val envVarString = StringBuilder()
             combinedEnv.forEach { (key, value) ->
                 if (key.matches(VALID_ENV_KEY_PATTERN)) {
-                    val safeValue = value.replace("\\", "\\\\").replace("'", "'\\''").replace("$", "\\$").replace("`", "\\`")
+                    val safeValue = value.replace("'", "'\\''")
                     envVarString.append("export $key='$safeValue'; ")
                 }
             }
@@ -184,7 +185,7 @@ except:
             val escapedInterpreter = escapeForBashDoubleQuotes(script.interpreter)
             val escapedPrefix = if (actualPrefix.isNotBlank()) escapeForBashDoubleQuotes(actualPrefix) + " " else ""
             val escapedArgs = escapeForBashDoubleQuotes(combinedArgs)
-            val escapedEnvVars = escapeForBashDoubleQuotes(envVars)
+            val escapedEnvVars = escapeForSingleQuotedBash(envVars)
 
             val coreExecution = "$escapedEnvVars$escapedPrefix$escapedInterpreter $fullPath $escapedArgs"
 
@@ -225,7 +226,7 @@ except:
             val escapedInterpreter = escapeForBashDoubleQuotes(script.interpreter)
             val escapedPrefix = if (actualPrefix.isNotBlank()) escapeForBashDoubleQuotes(actualPrefix) + " " else ""
             val escapedArgs = escapeForBashDoubleQuotes(combinedArgs)
-            val escapedEnvVars = escapeForBashDoubleQuotes(envVars)
+            val escapedEnvVars = escapeForSingleQuotedBash(envVars)
 
             val coreExecution = "$escapedEnvVars$escapedPrefix$escapedInterpreter $termuxDestPath $escapedArgs"
 
