@@ -31,20 +31,29 @@ class UserPreferencesRepositoryImpl
             val ONBOARDING_COMPLETED = booleanPreferencesKey("onboarding_completed")
             val SELECTED_CUSTOM_THEME_ID = intPreferencesKey("selected_custom_theme_id")
             val EDITOR_LINE_WRAPPING_ENABLED = booleanPreferencesKey("editor_line_wrapping_enabled")
+            val WEBHOOK_ENABLED = booleanPreferencesKey("webhook_enabled")
         }
 
         override val selectedAccent: Flow<AppTheme> =
             context.dataStore.data
                 .map { prefs ->
                     val name = prefs[Keys.THEME_ACCENT] ?: AppTheme.GREEN.name
-                    try { AppTheme.valueOf(name) } catch (_: Exception) { AppTheme.GREEN }
+                    try {
+                        AppTheme.valueOf(name)
+                    } catch (_: Exception) {
+                        AppTheme.GREEN
+                    }
                 }
 
         override val selectedMode: Flow<ThemeMode> =
             context.dataStore.data
                 .map { prefs ->
                     val name = prefs[Keys.THEME_MODE] ?: ThemeMode.SYSTEM.name
-                    try { ThemeMode.valueOf(name) } catch (_: Exception) { ThemeMode.SYSTEM }
+                    try {
+                        ThemeMode.valueOf(name)
+                    } catch (_: Exception) {
+                        ThemeMode.SYSTEM
+                    }
                 }
 
         override val selectedCustomThemeId: Flow<Int?> =
@@ -96,6 +105,14 @@ class UserPreferencesRepositoryImpl
 
         override suspend fun setEditorLineWrappingEnabled(enabled: Boolean) {
             context.dataStore.edit { it[Keys.EDITOR_LINE_WRAPPING_ENABLED] = enabled }
+        }
+
+        override val isWebhookEnabled: Flow<Boolean> =
+            context.dataStore.data
+                .map { preferences -> preferences[Keys.WEBHOOK_ENABLED] ?: false }
+
+        override suspend fun setWebhookEnabled(enabled: Boolean) {
+            context.dataStore.edit { it[Keys.WEBHOOK_ENABLED] = enabled }
         }
     }
 

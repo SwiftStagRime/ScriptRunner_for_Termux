@@ -8,7 +8,11 @@ import io.github.swiftstagrime.termuxrunner.domain.model.Script
 object WidgetMockData {
     val scripts =
         listOf(
-            Script(id = 1, name = "Daily Backup", codePages = listOf("tar -czf backup.tar.gz /data")),
+            Script(
+                id = 1,
+                name = "Daily Backup",
+                codePages = listOf("tar -czf backup.tar.gz /data"),
+            ),
             Script(id = 2, name = "Server Check", codePages = listOf("curl -I https://google.com")),
             Script(id = 3, name = "Clean Temp", codePages = listOf("rm -rf /tmp/*")),
         )
@@ -51,7 +55,17 @@ object WidgetMockData {
                 timestamp = System.currentTimeMillis(),
                 exitCode = 0,
             ),
-            AutomationLog(id = 2, automationId = 2, timestamp = System.currentTimeMillis() - 86400000, exitCode = 1),
-            AutomationLog(id = 3, automationId = 1, timestamp = System.currentTimeMillis() - 172800000, exitCode = 0),
+            AutomationLog(
+                id = 2,
+                automationId = 2,
+                timestamp = System.currentTimeMillis() - 86400000,
+                exitCode = 1,
+            ),
+            AutomationLog(
+                id = 3,
+                automationId = 1,
+                timestamp = System.currentTimeMillis() - 172800000,
+                exitCode = 0,
+            ),
         )
 }

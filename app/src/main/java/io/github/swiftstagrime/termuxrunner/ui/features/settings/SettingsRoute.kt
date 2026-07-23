@@ -20,6 +20,8 @@ fun SettingsRoute(
     onBack: () -> Unit,
     onNavigateToEditor: (Int) -> Unit,
     onNavigateToCustomTheme: () -> Unit,
+    onNavigateToExecutionHistory: () -> Unit,
+    onNavigateToWebhookSettings: () -> Unit,
     viewModel: SettingsViewModel = hiltViewModel(),
 ) {
     val context = LocalContext.current
@@ -71,6 +73,8 @@ fun SettingsRoute(
             onDeveloperClick = { uriHandler.openUri(GITHUB_URL) },
             onBack = onBack,
             onNavigateToCustomTheme = onNavigateToCustomTheme,
+            onNavigateToExecutionHistory = onNavigateToExecutionHistory,
+            onNavigateToWebhookSettings = onNavigateToWebhookSettings,
         )
 
     SettingsScreen(

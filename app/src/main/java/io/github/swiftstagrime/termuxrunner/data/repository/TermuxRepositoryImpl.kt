@@ -47,7 +47,8 @@ class TermuxRepositoryImpl
         override fun runCommand(
             command: String,
             runInBackground: Boolean,
-            sessionAction: String,
+            sessionAction: String?,
+            shellName: String?,
             scriptId: Int,
             scriptName: String,
             notifyOnResult: Boolean,
@@ -68,7 +69,11 @@ class TermuxRepositoryImpl
                     putExtra(EXTRA_COMMAND_PATH, termuxBashPath)
                     putExtra(EXTRA_ARGUMENTS, arrayOf("-c", command))
                     putExtra(EXTRA_BACKGROUND, runInBackground)
-                    putExtra(EXTRA_SESSION_ACTION, sessionAction)
+                    sessionAction?.let { putExtra(EXTRA_SESSION_ACTION, it) }
+                    if (shellName != null) {
+                        putExtra(EXTRA_SHELL_NAME, shellName)
+                        putExtra(EXTRA_SHELL_CREATE_MODE, SHELL_CREATE_MODE_NO_SHELL_WITH_NAME)
+                    }
 
                     if (notifyOnResult) {
                         val resultIntent =
@@ -142,10 +147,12 @@ class TermuxRepositoryImpl
                         }
                     context.startActivity(intent)
 
-                    val msg = UiText.StringResource(R.string.error_find_overlay_manually).asString(context)
+                    val msg =
+                        UiText.StringResource(R.string.error_find_overlay_manually).asString(context)
                     Toast.makeText(context, msg, Toast.LENGTH_LONG).show()
                 } catch (_: Exception) {
-                    val msg = UiText.StringResource(R.string.error_open_settings_manually).asString(context)
+                    val msg =
+                        UiText.StringResource(R.string.error_open_settings_manually).asString(context)
                     Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
                 }
             }
@@ -161,6 +168,9 @@ class TermuxRepositoryImpl
             const val EXTRA_ARGUMENTS = "com.termux.RUN_COMMAND_ARGUMENTS"
             const val EXTRA_BACKGROUND = "com.termux.RUN_COMMAND_BACKGROUND"
             const val EXTRA_SESSION_ACTION = "com.termux.RUN_COMMAND_SESSION_ACTION"
+            const val EXTRA_SHELL_NAME = "com.termux.RUN_COMMAND_SHELL_NAME"
+            const val EXTRA_SHELL_CREATE_MODE = "com.termux.RUN_COMMAND_SHELL_CREATE_MODE"
+            const val SHELL_CREATE_MODE_NO_SHELL_WITH_NAME = "no-shell-with-name"
             const val EXTRA_PENDING_INTENT = "com.termux.RUN_COMMAND_PENDING_INTENT"
         }
     }

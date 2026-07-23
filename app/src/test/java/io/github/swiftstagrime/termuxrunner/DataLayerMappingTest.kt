@@ -9,11 +9,13 @@ import io.github.swiftstagrime.termuxrunner.data.local.entity.AutomationLogEntit
 import io.github.swiftstagrime.termuxrunner.data.local.entity.CategoryEntity
 import io.github.swiftstagrime.termuxrunner.data.local.entity.CustomThemeEntity
 import io.github.swiftstagrime.termuxrunner.data.local.entity.ScriptEntity
+import io.github.swiftstagrime.termuxrunner.data.local.entity.ScriptExecutionEntity
 import io.github.swiftstagrime.termuxrunner.domain.model.Automation
 import io.github.swiftstagrime.termuxrunner.domain.model.AutomationLog
 import io.github.swiftstagrime.termuxrunner.domain.model.Category
 import io.github.swiftstagrime.termuxrunner.domain.model.CustomTheme
 import io.github.swiftstagrime.termuxrunner.domain.model.Script
+import io.github.swiftstagrime.termuxrunner.domain.model.ScriptExecution
 import junit.framework.TestCase.fail
 import org.junit.Test
 import kotlin.reflect.KClass
@@ -122,6 +124,21 @@ class DataLayerMappingTest {
             source = CustomThemeExportDto::class,
             destination = CustomThemeEntity::class,
             ignoreProperties = setOf("id"),
+        )
+    }
+
+    @Test
+    fun `ScriptExecution - All entity fields are mapped to domain`() {
+        assertAllPropertiesMapped(
+            source = ScriptExecutionEntity::class,
+            destination = ScriptExecution::class,
+            ignoreProperties = setOf("toDomain", "source"),
+        )
+
+        assertAllPropertiesMapped(
+            source = ScriptExecution::class,
+            destination = ScriptExecutionEntity::class,
+            ignoreProperties = setOf("isSuccess", "statusText", "source"),
         )
     }
 

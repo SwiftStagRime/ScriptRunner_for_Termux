@@ -66,6 +66,10 @@ class ScriptRepositoryImpl
 
         override suspend fun insertScript(script: Script): Int = dao.insertScript(script.toScriptEntity()).toInt()
 
+        override suspend fun updateScript(script: Script) {
+            dao.updateScript(script.toScriptEntity())
+        }
+
         override suspend fun deleteScript(script: Script) {
             dao.deleteScript(script.toScriptEntity())
         }
@@ -128,28 +132,41 @@ class ScriptRepositoryImpl
                             val jsonString = stream.bufferedReader().readText()
                             val jsonElement = json.parseToJsonElement(jsonString)
                             if (jsonElement is JsonArray) {
-                                FullBackupDto(scripts = json.decodeFromJsonElement<List<ScriptExportDto>>(jsonElement))
+                                FullBackupDto(
+                                    scripts =
+                                        json.decodeFromJsonElement<List<ScriptExportDto>>(
+                                            jsonElement,
+                                        ),
+                                )
                             } else {
                                 json.decodeFromJsonElement<FullBackupDto>(jsonElement)
                             }
                         } ?: throw ImportStreamException()
 
                     appDatabase.withTransaction {
-                        val existingThemes = customThemeDao.getAllThemesOneShot().map { it.name }.toSet()
+                        val existingThemes =
+                            customThemeDao.getAllThemesOneShot().map { it.name }.toSet()
                         backup.themes.forEach { themeDto ->
                             if (!existingThemes.contains(themeDto.name)) {
                                 customThemeDao.insertTheme(themeDto.toEntity())
                             }
                         }
 
-                        val existingCategoryMap = categoryDao.getAllCategoriesOneShot().associate { it.name to it.id }
+                        val existingCategoryMap =
+                            categoryDao.getAllCategoriesOneShot().associate { it.name to it.id }
                         val categoryIdMap = mutableMapOf<Int, Int?>()
                         backup.categories.forEach { dto ->
                             val existingId = existingCategoryMap[dto.name]
                             if (existingId != null) {
                                 categoryIdMap[dto.id] = existingId
                             } else {
-                                val newId = categoryDao.insertCategory(CategoryEntity(name = dto.name, orderIndex = dto.orderIndex))
+                                val newId =
+                                    categoryDao.insertCategory(
+                                        CategoryEntity(
+                                            name = dto.name,
+                                            orderIndex = dto.orderIndex,
+                                        ),
+                                    )
                                 categoryIdMap[dto.id] = newId.toInt()
                             }
                         }

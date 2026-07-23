@@ -11,10 +11,13 @@ class AdbTriggerActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val adbCode = intent.getStringExtra(AdbScriptExecutionService.EXTRA_ADB_CODE)
+        val code = intent.getStringExtra(AdbScriptExecutionService.EXTRA_ADB_CODE)
+        val targetType =
+            intent.getStringExtra(AdbScriptExecutionService.EXTRA_TARGET_TYPE)
+                ?: AdbScriptExecutionService.TARGET_SCRIPT
 
-        if (!adbCode.isNullOrBlank()) {
-            val serviceIntent = AdbScriptExecutionService.newIntent(this, adbCode)
+        if (!code.isNullOrBlank()) {
+            val serviceIntent = AdbScriptExecutionService.newIntent(this, code, targetType)
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 startForegroundService(serviceIntent)

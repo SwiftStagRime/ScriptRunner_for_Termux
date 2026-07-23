@@ -4,39 +4,57 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.util.Log
+import androidx.core.content.ContextCompat
 import dagger.hilt.android.AndroidEntryPoint
 import io.github.swiftstagrime.termuxrunner.data.automation.AutomationScheduler
 import io.github.swiftstagrime.termuxrunner.data.local.dao.AutomationDao
 import io.github.swiftstagrime.termuxrunner.data.local.dao.ScriptDao
+import io.github.swiftstagrime.termuxrunner.data.service.WebhookService
 import io.github.swiftstagrime.termuxrunner.domain.model.AutomationType
+import io.github.swiftstagrime.termuxrunner.domain.repository.UserPreferencesRepository
 import io.github.swiftstagrime.termuxrunner.domain.usecase.RunScriptUseCase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
 class DeviceBootReceiver : BroadcastReceiver() {
-    @Inject lateinit var automationDao: AutomationDao
+    @Inject
+    lateinit var automationDao: AutomationDao
 
-    @Inject lateinit var scheduler: AutomationScheduler
+    @Inject
+    lateinit var scheduler: AutomationScheduler
 
-    @Inject lateinit var runScriptUseCase: RunScriptUseCase
+    @Inject
+    lateinit var runScriptUseCase: RunScriptUseCase
 
-    @Inject lateinit var scriptDao: ScriptDao
+    @Inject
+    lateinit var scriptDao: ScriptDao
+
+    @Inject
+    lateinit var userPreferencesRepository: UserPreferencesRepository
+
+    private var receiverContext: Context? = null
 
     override fun onReceive(
         context: Context,
         intent: Intent,
     ) {
         if (intent.action == Intent.ACTION_BOOT_COMPLETED) {
+            receiverContext = context.applicationContext
             val pendingResult = goAsync()
             handleBoot(pendingResult)
         }
     }
 
-    internal fun handleBoot(pendingResult: PendingResult? = null) {
+    internal fun handleBoot(
+        pendingResult: PendingResult? = null,
+        context: Context? = receiverContext,
+    ) {
+        if (context == null) return
         val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
         scope.launch {
             try {
@@ -59,6 +77,14 @@ class DeviceBootReceiver : BroadcastReceiver() {
                     } else {
                         scheduler.schedule(automation)
                     }
+                }
+
+                if (userPreferencesRepository.isWebhookEnabled.first()) {
+                    Log.d("DeviceBootReceiver", "Auto-starting WebhookService")
+                    ContextCompat.startForegroundService(
+                        context.applicationContext,
+                        Intent(context.applicationContext, WebhookService::class.java),
+                    )
                 }
             } catch (e: Exception) {
                 Log.e("DeviceBootReceiver", "Error handling boot automations", e)

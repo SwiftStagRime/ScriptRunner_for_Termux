@@ -23,4 +23,12 @@ data class Automation(
     val requireWifi: Boolean = false,
     val requireCharging: Boolean = false,
     val batteryThreshold: Int = 0,
+    val scheduledDayOfMonth: Int? = null,
+    val windowStartHour: Int = 0,
+    val windowStartMinute: Int = 0,
+    val windowEndHour: Int = 23,
+    val windowEndMinute: Int = 59,
+    val randomDelayMinMillis: Long? = null,
+    val randomDelayMaxMillis: Long? = null,
+    val automationCode: String? = null,
 ) : Parcelable

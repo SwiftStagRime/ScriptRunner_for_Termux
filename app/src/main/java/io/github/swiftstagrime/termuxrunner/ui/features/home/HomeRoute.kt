@@ -42,6 +42,7 @@ fun HomeRoute(
     onNavigateToSettings: () -> Unit,
     onNavigateToTileSettings: () -> Unit,
     onNavigateToAutomation: () -> Unit,
+    onNavigateToScriptHistory: (scriptId: Int) -> Unit,
     viewModel: HomeViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.homeUiState.collectAsStateWithLifecycle()
@@ -49,6 +50,7 @@ fun HomeRoute(
 
     val selectedCategoryId by viewModel.selectedCategoryId.collectAsStateWithLifecycle()
     val sortOption by viewModel.sortOption.collectAsStateWithLifecycle()
+    val automations by viewModel.automations.collectAsStateWithLifecycle()
 
     var scriptForShortcutStyle by remember { mutableStateOf<Script?>(null) }
 
@@ -222,7 +224,11 @@ fun HomeRoute(
                 },
                 onUpdateScript = viewModel::updateScript,
                 onHeartbeatToggle = { if (it) requestNotifications() },
-                onRequestBatteryUnrestricted = { BatteryUtils.requestIgnoreBatteryOptimizations(context) },
+                onRequestBatteryUnrestricted = {
+                    BatteryUtils.requestIgnoreBatteryOptimizations(
+                        context,
+                    )
+                },
                 onRequestNotificationPermission = { requestNotifications() },
                 onProcessImage = viewModel::processImage,
                 onCategorySelect = viewModel::selectCategory,
@@ -232,6 +238,7 @@ fun HomeRoute(
                 onMove = viewModel::moveScript,
                 onTileSettingsClick = onNavigateToTileSettings,
                 onNavigateToAutomation = onNavigateToAutomation,
+                onNavigateToScriptHistory = { script -> onNavigateToScriptHistory(script.id) },
             )
         }
 
@@ -240,6 +247,7 @@ fun HomeRoute(
         searchQuery = searchQuery,
         configState = viewModel.configState,
         originalScript = viewModel.originalScriptForConfig,
+        allAutomations = automations,
         isBatteryUnrestricted = isBatteryUnrestricted,
         selectedCategoryId = selectedCategoryId,
         sortOption = sortOption,

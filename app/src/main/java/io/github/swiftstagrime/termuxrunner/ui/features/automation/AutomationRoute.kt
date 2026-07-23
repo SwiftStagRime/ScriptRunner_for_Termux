@@ -18,6 +18,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.toArgb
@@ -28,6 +29,7 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.swiftstagrime.termuxrunner.domain.model.Automation
+import io.github.swiftstagrime.termuxrunner.domain.model.AutomationChain
 import io.github.swiftstagrime.termuxrunner.domain.model.AutomationType
 import io.github.swiftstagrime.termuxrunner.domain.model.Category
 import io.github.swiftstagrime.termuxrunner.domain.model.InteractionMode
@@ -36,9 +38,11 @@ import io.github.swiftstagrime.termuxrunner.domain.model.ScriptRuntimeParams
 import io.github.swiftstagrime.termuxrunner.domain.util.AutomationFormatter
 import io.github.swiftstagrime.termuxrunner.ui.components.ScriptPickerDialog
 import io.github.swiftstagrime.termuxrunner.ui.components.ScriptRuntimePromptDialog
+import io.github.swiftstagrime.termuxrunner.ui.features.automation.components.AutomationChainEditorDialog
 import io.github.swiftstagrime.termuxrunner.ui.features.automation.components.AutomationConfigDialog
 import io.github.swiftstagrime.termuxrunner.ui.features.automation.components.AutomationHistorySheet
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
 
 private const val MINUTE_IN_MILLIS = 60_000L
@@ -55,7 +59,12 @@ fun AutomationRoute(
     val allCategories by viewModel.allCategories.collectAsStateWithLifecycle()
 
     var hasExactAlarmPermission by rememberSaveable { mutableStateOf(true) }
-    var selectedAutomationForHistory by rememberSaveable { mutableStateOf<Automation?>(null) }
+    var selectedHistoryId by rememberSaveable { mutableStateOf<Int?>(null) }
+    var editingChainId by rememberSaveable { mutableStateOf<Int?>(null) }
+
+    val selectedAutomationForHistory = automations.find { it.id == selectedHistoryId }
+    val editingChainAutomation = automations.find { it.id == editingChainId }
+    val coroutineScope = rememberCoroutineScope()
 
     var flowState by rememberSaveable { mutableStateOf<AutomationFlowState>(AutomationFlowState.Idle) }
 
@@ -72,8 +81,9 @@ fun AutomationRoute(
         onDeleteAutomation = viewModel::deleteAutomation,
         onAddAutomationClick = { flowState = AutomationFlowState.PickingScript },
         onRunNow = viewModel::runAutomationNow,
-        onShowHistory = { selectedAutomationForHistory = it },
+        onShowHistory = { selectedHistoryId = it.id },
         onRequestPermission = { launchExactAlarmSettings(context) },
+        onEditChain = { editingChainId = it.id },
     )
 
     AutomationCreationFlow(
@@ -90,9 +100,48 @@ fun AutomationRoute(
 
     AutomationHistoryView(
         selectedAutomation = selectedAutomationForHistory,
-        onDismiss = { selectedAutomationForHistory = null },
+        onDismiss = { selectedHistoryId = null },
         viewModel = viewModel,
     )
+
+    editingChainAutomation?.let { chainAutomation ->
+        val triggerLabel = chainAutomation.label
+        val availableTargets = automations.filter { it.id != chainAutomation.id }
+
+        val existingChain by produceState(
+            initialValue = null as AutomationChain?,
+            key1 = chainAutomation.id,
+        ) {
+            try {
+                value = viewModel.getChainsByTriggerId(chainAutomation.id).firstOrNull()
+            } catch (e: Exception) {
+                android.util.Log.e("AutomationRoute", "Failed to load chains", e)
+                value = null
+            }
+        }
+
+        AutomationChainEditorDialog(
+            chain = existingChain,
+            triggerAutomationLabel = triggerLabel,
+            availableAutomations = availableTargets,
+            onDismiss = { editingChainId = null },
+            onSave = { chain ->
+                coroutineScope.launch {
+                    try {
+                        if (chain.id == 0) {
+                            val updated = chain.copy(triggerAutomationId = chainAutomation.id)
+                            viewModel.saveChain(updated)
+                        } else {
+                            viewModel.updateChain(chain)
+                        }
+                        editingChainId = null
+                    } catch (e: Exception) {
+                        android.util.Log.e("AutomationRoute", "Failed to save chain", e)
+                    }
+                }
+            },
+        )
+    }
 }
 
 @Composable
@@ -126,8 +175,17 @@ private fun rememberAutomationUiItems(
                 automation = automation,
                 scriptName = script?.name ?: "Unknown",
                 scriptIconPath = script?.iconPath,
-                nextRunText = AutomationFormatter.formatNextRun(context, automation.nextRunTimestamp),
-                lastRunText = AutomationFormatter.formatLastRun(context, automation.lastRunTimestamp, automation.lastExitCode),
+                nextRunText =
+                    AutomationFormatter.formatNextRun(
+                        context,
+                        automation.nextRunTimestamp,
+                    ),
+                lastRunText =
+                    AutomationFormatter.formatLastRun(
+                        context,
+                        automation.lastRunTimestamp,
+                        automation.lastExitCode,
+                    ),
                 statusColor = statusColor,
             )
         }
@@ -154,21 +212,33 @@ private fun AutomationCreationFlow(
                     if (script.interactionMode != InteractionMode.NONE) {
                         onStateChange(AutomationFlowState.PromptingRuntime(script))
                     } else {
-                        val params = ScriptRuntimeParams(script.executionParams, script.commandPrefix, script.envVars)
+                        val params =
+                            ScriptRuntimeParams(
+                                script.executionParams,
+                                script.commandPrefix,
+                                script.envVars,
+                            )
                         onStateChange(AutomationFlowState.Configuring(script, params))
                     }
                 },
             )
         }
+
         is AutomationFlowState.PromptingRuntime -> {
             ScriptRuntimePromptDialog(
                 script = flowState.script,
                 onDismiss = onDismiss,
                 onConfirm = { args, prefix, env ->
-                    onStateChange(AutomationFlowState.Configuring(flowState.script, ScriptRuntimeParams(args, prefix, env)))
+                    onStateChange(
+                        AutomationFlowState.Configuring(
+                            flowState.script,
+                            ScriptRuntimeParams(args, prefix, env),
+                        ),
+                    )
                 },
             )
         }
+
         is AutomationFlowState.Configuring -> {
             AutomationConfigDialog(
                 script = flowState.script,
@@ -178,6 +248,7 @@ private fun AutomationCreationFlow(
                 },
             )
         }
+
         else -> Unit
     }
 }
@@ -247,13 +318,16 @@ sealed class AutomationFlowState : Parcelable {
     @Parcelize
     object Idle : AutomationFlowState()
 
-    @Parcelize object PickingScript : AutomationFlowState()
+    @Parcelize
+    object PickingScript : AutomationFlowState()
 
-    @Parcelize data class PromptingRuntime(
+    @Parcelize
+    data class PromptingRuntime(
         val script: Script,
     ) : AutomationFlowState()
 
-    @Parcelize data class Configuring(
+    @Parcelize
+    data class Configuring(
         val script: Script,
         val runtime: ScriptRuntimeParams,
     ) : AutomationFlowState()
@@ -271,4 +345,12 @@ data class AutomationSaveParams(
     val requireCharging: Boolean = false,
     val batteryThreshold: Int = 0,
     val runtime: ScriptRuntimeParams = ScriptRuntimeParams(),
+    val scheduledDayOfMonth: Int? = null,
+    val windowStartHour: Int = 0,
+    val windowStartMinute: Int = 0,
+    val windowEndHour: Int = 23,
+    val windowEndMinute: Int = 59,
+    val randomDelayMinMillis: Long? = null,
+    val randomDelayMaxMillis: Long? = null,
+    val automationCode: String = "",
 )

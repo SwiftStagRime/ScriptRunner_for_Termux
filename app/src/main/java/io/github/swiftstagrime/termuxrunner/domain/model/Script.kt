@@ -2,13 +2,48 @@ package io.github.swiftstagrime.termuxrunner.domain.model
 
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
+import kotlinx.serialization.Serializable
 
+@Serializable
 @Parcelize
 enum class InteractionMode : Parcelable {
     NONE,
     TEXT_INPUT,
     MULTI_CHOICE,
 }
+
+/**
+ * Controls what Termux does with the newly created session for foreground executions.
+ * Maps to the `com.termux.RUN_COMMAND_SESSION_ACTION` extra.
+ */
+@Serializable
+@Parcelize
+enum class ForegroundSessionBehavior : Parcelable {
+    SWITCH_OPEN,
+    KEEP_OPEN,
+    SWITCH_SILENT,
+    KEEP_SILENT,
+    TERMUX_DEFAULT,
+    ;
+
+    /** The value for Termux's `RUN_COMMAND_SESSION_ACTION` extra, or null to use Termux's default. */
+    val termuxAction: String?
+        get() =
+            when (this) {
+                SWITCH_OPEN -> "0"
+                KEEP_OPEN -> "1"
+                SWITCH_SILENT -> "2"
+                KEEP_SILENT -> "3"
+                TERMUX_DEFAULT -> null
+            }
+}
+
+@Serializable
+@Parcelize
+data class NotificationAction(
+    val label: String,
+    val targetAutomationId: Int,
+) : Parcelable
 
 @Parcelize
 data class Script(
@@ -24,6 +59,8 @@ data class Script(
     val iconPath: String? = null,
     val runInBackground: Boolean = false, // If true, shows notification only
     val openNewSession: Boolean = true, // If true, opens Termux window
+    val foregroundSessionBehavior: ForegroundSessionBehavior = ForegroundSessionBehavior.KEEP_OPEN,
+    val reuseSession: Boolean = false, // If true, joins an existing Termux session named after the script when one exists
     val keepSessionOpen: Boolean = true, // If true, adds a hack to keep the screen open, don't really rely on it
     val useHeartbeat: Boolean = false, // Experimental hack to monitor script execution
     val heartbeatTimeout: Long = 30000,
@@ -36,6 +73,7 @@ data class Script(
     val prefixPresets: List<String> = emptyList(),
     val envVarPresets: List<String> = emptyList(),
     val adbCode: String? = null,
+    val notificationActions: List<NotificationAction> = emptyList(),
 ) : Parcelable {
     /**
      * Computed property that concatenates all code pages into a single string,
@@ -57,6 +95,8 @@ data class Script(
             iconPath: String? = null,
             runInBackground: Boolean = false,
             openNewSession: Boolean = true,
+            foregroundSessionBehavior: ForegroundSessionBehavior = ForegroundSessionBehavior.KEEP_OPEN,
+            reuseSession: Boolean = false,
             keepSessionOpen: Boolean = true,
             useHeartbeat: Boolean = false,
             heartbeatTimeout: Long = 30000,
@@ -69,6 +109,7 @@ data class Script(
             prefixPresets: List<String> = emptyList(),
             envVarPresets: List<String> = emptyList(),
             adbCode: String? = null,
+            notificationActions: List<NotificationAction> = emptyList(),
         ): Script =
             Script(
                 id = id,
@@ -82,6 +123,8 @@ data class Script(
                 iconPath = iconPath,
                 runInBackground = runInBackground,
                 openNewSession = openNewSession,
+                foregroundSessionBehavior = foregroundSessionBehavior,
+                reuseSession = reuseSession,
                 keepSessionOpen = keepSessionOpen,
                 useHeartbeat = useHeartbeat,
                 heartbeatTimeout = heartbeatTimeout,
@@ -94,6 +137,7 @@ data class Script(
                 prefixPresets = prefixPresets,
                 envVarPresets = envVarPresets,
                 adbCode = adbCode,
+                notificationActions = notificationActions,
             )
     }
 }

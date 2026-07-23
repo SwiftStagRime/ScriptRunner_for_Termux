@@ -159,6 +159,16 @@
     <string name="desc_bg_execution">Nur Benachrichtigung anzeigen</string>
     <string name="label_interactive_session">Interaktive Sitzung</string>
     <string name="desc_interactive_session">Terminal nach Ende offen lassen</string>
+    <string name="label_foreground_session_behavior">Vordergrund-Verhalten der Sitzung</string>
+    <string name="desc_foreground_session_behavior">Was Termux mit der neuen Sitzung macht</string>
+    <string name="fg_session_switch_open">Zu neuer Sitzung wechseln, Termux öffnen</string>
+    <string name="fg_session_keep_open">Aktuelle Sitzung behalten, Termux öffnen</string>
+    <string name="fg_session_switch_silent">Zu neuer Sitzung wechseln, Termux nicht öffnen</string>
+    <string name="fg_session_keep_silent">Aktuelle Sitzung behalten, Termux nicht öffnen</string>
+    <string name="fg_session_default">Termux-Standard</string>
+    <string name="label_reuse_session">Vorhandene Sitzung wiederverwenden</string>
+    <string name="desc_reuse_session">Führt das Skript in einer bestehenden Termux-Sitzung mit seinem Namen aus, anstatt eine neue zu erstellen</string>
+    <string name="warning_reuse_session_version">Erfordert Termux 0.119 oder neuer. Ältere Versionen ignorieren diese Option und erstellen eine neue Sitzung</string>
     <string name="empty_env_vars">Keine Umgebungsvariablen.</string>
     <string name="label_key">Schlüssel</string>
     <string name="label_value">Wert</string>
@@ -272,7 +282,7 @@
     <!-- Script Picker Dialog -->
     <string name="title_select_script">Skript auswählen</string>
     <string name="no_scripts_available">Keine Skripte verfügbar</string>
-    <string name="assign_scripts_to_these_slots_you_can_then_trigger_them_directly_from_your_phone_s_quick_settings_panel">Weisen Sie diesen Steckplätzen Skripte zu. Sie können diese dann direkt über das Schnelleinstellungsmenü Ihres Telefons auslösen.</string>
+    <string name="tile_assignment_hint">Weisen Sie diesen Steckplätzen Skripte zu. Sie können diese dann direkt über das Schnelleinstellungsmenü Ihres Telefons auslösen.</string>
     <string name="configure_tiles">Kacheln konfigurieren</string>
     <string name="empty">Leer</string>
 
@@ -337,6 +347,12 @@
     <string name="automation_condition_wifi">Nur WLAN</string>
     <string name="automation_condition_charging">Nur beim Laden</string>
     <string name="automation_section_upcoming">Kommende Termine</string>
+    <string name="automation_section_trigger">Auslösemodus</string>
+    <string name="automation_section_schedule_type">Zeitplan-Typ</string>
+    <string name="automation_section_event_source">Ereignisquelle</string>
+    <string name="trigger_mode_schedule">Zeitplan</string>
+    <string name="trigger_mode_event">Ereignis</string>
+    <string name="trigger_mode_boot">Beim Start</string>
     <string name="automation_save_button">Aufgabe planen</string>
     <string name="ok">OK</string>
     <string name="history_title">Ausführungshistorie</string>
@@ -355,8 +371,22 @@
     <string name="label_battery_threshold">Akku-Schwellenwert</string>
     <string name="battery_threshold_desc">Nur ausführen, wenn der Akku über %1$d%% liegt</string>
     <string name="automation_type_boot">Beim Start</string>
+    <string name="automation_type_monthly">Monatlich</string>
+    <string name="automation_type_time_window">Zeitfenster</string>
+    <string name="automation_type_random_delay">Zufällige Verzögerung</string>
+    <string name="automation_type_screen_on">Bildschirm an</string>
+    <string name="automation_type_screen_off">Bildschirm aus</string>
+    <string name="automation_type_network_connected">Netzwerk verbunden</string>
+    <string name="automation_type_network_disconnected">Netzwerk getrennt</string>
+    <string name="automation_type_usb_connected">USB verbunden</string>
+    <string name="automation_type_usb_disconnected">USB getrennt</string>
     <string name="automation_boot_hint">Das Skript wird jedes Mal ausgeführt, wenn das Gerät startet.</string>
     <string name="automation_boot_next_run">Wird bei jedem Start ausgeführt</string>
+    <string name="automation_monthly_day_of_month">Tag des Monats</string>
+    <string name="automation_window_from">Von %1$s</string>
+    <string name="automation_window_to">Bis %1$s</string>
+    <string name="automation_random_delay_min">Min. (s)</string>
+    <string name="automation_random_delay_max">Max. (s)</string>
 
     <!-- Automation Widget -->
     <string name="automation_widget_title">Automatisierungen</string>
@@ -419,5 +449,39 @@
     <string name="surfaces_background"><![CDATA[Oberflächen & Hintergrund]]></string>
     <string name="utility">Dienstprogramme</string>
     <string name="surface_container_lowest">Oberflächencontainer am niedrigsten</string>
+
+    <!-- Notification Actions -->
+    <string name="section_notification_actions">Benachrichtigungsaktionen</string>
+    <string name="desc_notification_actions">Aktionsbuttons in Skriptergebnis-Benachrichtigungen. Jeder Button löst eine andere Automatisierung aus.</string>
+    <string name="label_action_label">Beschriftung</string>
+    <string name="label_target_automation">Zielautomatisierung</string>
+    <string name="btn_add_action">Aktion hinzufügen</string>
+
+    <!-- Webhook -->
+    <string name="webhook_settings_title">Webhook-Einstellungen</string>
+    <string name="webhook_config_label">Konfiguration</string>
+    <string name="webhook_port_label">Port</string>
+    <string name="webhook_bind_label">LAN-Zugriff</string>
+    <string name="webhook_bind_all">0.0.0.0</string>
+    <string name="webhook_bind_local">127.0.0.1</string>
+    <string name="webhook_lan_access_hint">Wenn aktiviert, lauscht der Server auf allen Schnittstellen und ist von anderen Geräten in Ihrem Netzwerk erreichbar.</string>
+    <string name="webhook_auth_label">Authentifizierung</string>
+    <string name="webhook_token_label">Auth-Token</string>
+    <string name="webhook_copy_token">Kopieren</string>
+    <string name="webhook_regenerate_token">Neu generieren</string>
+    <string name="webhook_generate_token">Token generieren</string>
+    <string name="webhook_auth_hint">Fügen Sie den Token als Bearer-Header oder Query-Parameter hinzu, wenn Sie Anfragen senden.</string>
+    <string name="webhook_examples_label">Beispielanfragen</string>
+    <string name="webhook_example_script">Skript per ID auslösen</string>
+    <string name="webhook_example_automation">Automatisierung per ID auslösen</string>
+    <string name="webhook_query_param_hint">Der Token kann auch als ?token=IHR_TOKEN in der URL übergeben werden.</string>
+    <string name="webhook_enable_label">Webhook-Server aktivieren</string>
+    <string name="webhook_running_indicator">Läuft auf Port %1$d</string>
+    <string name="webhook_stopped_indicator">Gestoppt</string>
+    <string name="webhook_restarting">Server wird neu gestartet…</string>
+    <string name="webhook_server_restarted">Server neu gestartet</string>
+    <string name="webhook_stop_server">Server stoppen</string>
+    <string name="copied_label">Kopiert!</string>
+    <string name="execution_history_label">Verlauf der Ausführung</string>
 
 </resources>

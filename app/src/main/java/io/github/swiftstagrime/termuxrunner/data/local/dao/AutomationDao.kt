@@ -29,6 +29,9 @@ interface AutomationDao {
     @Delete
     suspend fun deleteAutomation(automation: AutomationEntity)
 
+    @Query("SELECT * FROM automations WHERE automationCode = :code LIMIT 1")
+    suspend fun getAutomationByAdbCode(code: String): AutomationEntity?
+
     @Query("SELECT * FROM automations WHERE scriptId = :scriptId")
     suspend fun getAutomationsForScript(scriptId: Int): List<AutomationEntity>
 

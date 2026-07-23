@@ -1,5 +1,6 @@
 package io.github.swiftstagrime.termuxrunner.data.local.entity
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
@@ -38,6 +39,14 @@ data class AutomationEntity(
     val requireWifi: Boolean = false,
     val requireCharging: Boolean = false,
     val batteryThreshold: Int = 0,
+    @ColumnInfo(defaultValue = "NULL") val scheduledDayOfMonth: Int? = null,
+    @ColumnInfo(defaultValue = "0") val windowStartHour: Int = 0,
+    @ColumnInfo(defaultValue = "0") val windowStartMinute: Int = 0,
+    @ColumnInfo(defaultValue = "23") val windowEndHour: Int = 23,
+    @ColumnInfo(defaultValue = "59") val windowEndMinute: Int = 59,
+    @ColumnInfo(defaultValue = "NULL") val randomDelayMinMillis: Long? = null,
+    @ColumnInfo(defaultValue = "NULL") val randomDelayMaxMillis: Long? = null,
+    @ColumnInfo(defaultValue = "NULL") val automationCode: String? = null,
 )
 
 fun AutomationEntity.toAutomationDomain() =
@@ -60,6 +69,14 @@ fun AutomationEntity.toAutomationDomain() =
         requireWifi = requireWifi,
         requireCharging = requireCharging,
         batteryThreshold = batteryThreshold,
+        scheduledDayOfMonth = scheduledDayOfMonth,
+        windowStartHour = windowStartHour,
+        windowStartMinute = windowStartMinute,
+        windowEndHour = windowEndHour,
+        windowEndMinute = windowEndMinute,
+        randomDelayMinMillis = randomDelayMinMillis,
+        randomDelayMaxMillis = randomDelayMaxMillis,
+        automationCode = automationCode,
     )
 
 fun Automation.toEntity() =
@@ -82,4 +99,12 @@ fun Automation.toEntity() =
         requireWifi = requireWifi,
         requireCharging = requireCharging,
         batteryThreshold = batteryThreshold,
+        scheduledDayOfMonth = scheduledDayOfMonth,
+        windowStartHour = windowStartHour,
+        windowStartMinute = windowStartMinute,
+        windowEndHour = windowEndHour,
+        windowEndMinute = windowEndMinute,
+        randomDelayMinMillis = randomDelayMinMillis,
+        randomDelayMaxMillis = randomDelayMaxMillis,
+        automationCode = automationCode,
     )

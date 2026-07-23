@@ -227,7 +227,11 @@ class HeartbeatService : Service() {
         try {
             unregisterReceiver(heartbeatReceiver)
         } catch (e: Exception) {
-            android.util.Log.d("HeartbeatService", "Failed to unregister receiver (may already be unregistered)", e)
+            android.util.Log.d(
+                "HeartbeatService",
+                "Failed to unregister receiver (may already be unregistered)",
+                e,
+            )
         }
     }
 
@@ -354,7 +358,9 @@ class HeartbeatService : Service() {
 
         val restartText =
             if (state.restartCount > 0) {
-                UiText.StringResource(R.string.notif_restart_count, state.restartCount).asString(this)
+                UiText
+                    .StringResource(R.string.notif_restart_count, state.restartCount)
+                    .asString(this)
             } else {
                 ""
             }
@@ -370,7 +376,10 @@ class HeartbeatService : Service() {
                 ).asString(this)
 
         buildAndNotify(
-            title = UiText.StringResource(R.string.notif_monitoring_title, state.name).asString(this),
+            title =
+                UiText
+                    .StringResource(R.string.notif_monitoring_title, state.name)
+                    .asString(this),
             text = contentText,
         )
     }
@@ -498,7 +507,8 @@ class HeartbeatService : Service() {
     companion object {
         // Intent actions
         const val ACTION_START = "ACTION_START_MONITORING"
-        const val ACTION_STOP = "ACTION_STOP_MONITORING" // Stops specific script if ID provided, or all
+        const val ACTION_STOP =
+            "ACTION_STOP_MONITORING" // Stops specific script if ID provided, or all
         const val ACTION_STOP_ALL = "ACTION_STOP_ALL_MONITORING" // Explicit stop all
 
         // Intent extras

@@ -3,7 +3,9 @@ package io.github.swiftstagrime.termuxrunner.data.local.entity
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import io.github.swiftstagrime.termuxrunner.domain.model.ForegroundSessionBehavior
 import io.github.swiftstagrime.termuxrunner.domain.model.InteractionMode
+import io.github.swiftstagrime.termuxrunner.domain.model.NotificationAction
 import io.github.swiftstagrime.termuxrunner.domain.model.Script
 
 @Entity(tableName = "scripts")
@@ -45,6 +47,12 @@ data class ScriptEntity(
     val envVarPresets: List<String> = emptyList(),
     @ColumnInfo(defaultValue = "NULL")
     val adbCode: String? = null,
+    @ColumnInfo(name = "notificationActions", defaultValue = "")
+    val notificationActions: List<NotificationAction> = emptyList(),
+    @ColumnInfo(defaultValue = "'KEEP_OPEN'")
+    val foregroundSessionBehavior: ForegroundSessionBehavior = ForegroundSessionBehavior.KEEP_OPEN,
+    @ColumnInfo(defaultValue = "0")
+    val reuseSession: Boolean = false,
 ) {
     fun toScriptDomain(): Script =
         Script(
@@ -72,6 +80,9 @@ data class ScriptEntity(
             prefixPresets = prefixPresets,
             envVarPresets = envVarPresets,
             adbCode = adbCode,
+            notificationActions = notificationActions,
+            foregroundSessionBehavior = foregroundSessionBehavior,
+            reuseSession = reuseSession,
         )
 }
 
@@ -101,4 +112,7 @@ fun Script.toScriptEntity(): ScriptEntity =
         prefixPresets = prefixPresets,
         envVarPresets = envVarPresets,
         adbCode = adbCode,
+        notificationActions = notificationActions,
+        foregroundSessionBehavior = foregroundSessionBehavior,
+        reuseSession = reuseSession,
     )

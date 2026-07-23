@@ -39,6 +39,7 @@
         android:theme="@style/Theme.App.Starting"
         tools:ignore="UnusedAttribute">
         <profileable android:shell="true" />
+
         <activity
             android:name=".ui.MainActivity"
             android:exported="true"
@@ -47,6 +48,9 @@
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE_PREFERENCES" />
             </intent-filter>
         </activity>
         <activity
@@ -57,11 +61,11 @@
             android:theme="@android:style/Theme.Translucent.NoTitleBar" />
         <activity
             android:name=".ui.features.adbtrigger.AdbTriggerActivity"
-            android:theme="@android:style/Theme.NoDisplay"
-            android:showForAllUsers="true"
             android:excludeFromRecents="true"
-            android:exported="true">
-        </activity>
+            android:exported="true"
+            android:showForAllUsers="true"
+            android:theme="@android:style/Theme.NoDisplay"></activity>
+
         <receiver
             android:name=".data.receiver.TermuxResultReceiver"
             android:exported="true">
@@ -72,9 +76,13 @@
 
         <service
             android:name=".data.service.AdbScriptExecutionService"
-            android:foregroundServiceType="dataSync"
-            android:exported="false" />
+            android:exported="false"
+            android:foregroundServiceType="dataSync" />
 
+        <service
+            android:name=".data.service.WebhookService"
+            android:exported="false"
+            android:foregroundServiceType="dataSync" />
 
         <service
             android:name=".data.service.HeartbeatService"
@@ -85,6 +93,19 @@
         <receiver
             android:name=".data.receiver.AutomationReceiver"
             android:exported="false" />
+
+        <receiver
+            android:name=".data.receiver.EventReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.SCREEN_ON" />
+                <action android:name="android.intent.action.USER_PRESENT" />
+                <action android:name="android.intent.action.SCREEN_OFF" />
+                <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
+                <action android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED" />
+                <action android:name="android.hardware.usb.action.USB_DEVICE_DETACHED" />
+            </intent-filter>
+        </receiver>
 
         <receiver
             android:name=".data.receiver.DeviceBootReceiver"
@@ -184,23 +205,35 @@
 
         <activity
             android:name=".ui.features.widget.WidgetConfigurationActivity"
+            android:excludeFromRecents="true"
             android:exported="true"
             android:taskAffinity=""
-            android:excludeFromRecents="true"
             android:theme="@style/Theme.ScriptRunnerForTermux">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
             </intent-filter>
         </activity>
 
-        <receiver android:name=".data.receiver.AutomationWidgetReceiver" android:exported="true">
-            <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>
-            <meta-data android:name="android.appwidget.provider" android:resource="@xml/automation_widget_info" />
+        <receiver
+            android:name=".data.receiver.AutomationWidgetReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/automation_widget_info" />
         </receiver>
 
-        <receiver android:name=".data.receiver.AutomationLogWidgetReceiver" android:exported="true">
-            <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>
-            <meta-data android:name="android.appwidget.provider" android:resource="@xml/automation_logs_widget_info" />
+        <receiver
+            android:name=".data.receiver.AutomationLogWidgetReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/automation_logs_widget_info" />
         </receiver>
 
     </application>

@@ -6,6 +6,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
+import androidx.room.Update
 import io.github.swiftstagrime.termuxrunner.data.local.entity.ScriptEntity
 import kotlinx.coroutines.flow.Flow
 
@@ -17,8 +18,11 @@ interface ScriptDao {
     @Query("SELECT * FROM scripts WHERE id = :id")
     suspend fun getScriptById(id: Int): ScriptEntity?
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Insert(onConflict = OnConflictStrategy.ABORT)
     suspend fun insertScript(script: ScriptEntity): Long
+
+    @Update(onConflict = OnConflictStrategy.ABORT)
+    suspend fun updateScript(script: ScriptEntity): Int
 
     @Query("SELECT * FROM scripts WHERE adbCode = :adbCode LIMIT 1")
     suspend fun getScriptByAdbCode(adbCode: String): ScriptEntity?

@@ -1,6 +1,5 @@
 package io.github.swiftstagrime.termuxrunner.ui.features.automation.components
 
-import android.content.res.Configuration
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -19,6 +18,8 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccessTime
+import androidx.compose.material.icons.filled.BrightnessHigh
+import androidx.compose.material.icons.filled.BrightnessLow
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.Check
@@ -26,6 +27,9 @@ import androidx.compose.material.icons.filled.Power
 import androidx.compose.material.icons.filled.Repeat
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.Timer
+import androidx.compose.material.icons.filled.Usb
+import androidx.compose.material.icons.filled.Wifi
+import androidx.compose.material.icons.filled.WifiOff
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -62,10 +66,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalLocale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -73,20 +77,25 @@ import io.github.swiftstagrime.termuxrunner.R
 import io.github.swiftstagrime.termuxrunner.data.local.entity.AutomationEntity
 import io.github.swiftstagrime.termuxrunner.domain.model.AutomationType
 import io.github.swiftstagrime.termuxrunner.domain.model.Script
+import io.github.swiftstagrime.termuxrunner.domain.model.TriggerMode
+import io.github.swiftstagrime.termuxrunner.domain.model.availableTypes
+import io.github.swiftstagrime.termuxrunner.domain.model.triggerMode
 import io.github.swiftstagrime.termuxrunner.domain.util.AutomationTimeCalculator
 import io.github.swiftstagrime.termuxrunner.ui.components.DayOfWeekPicker
 import io.github.swiftstagrime.termuxrunner.ui.features.automation.AutomationConfigState
 import io.github.swiftstagrime.termuxrunner.ui.features.automation.AutomationSaveParams
+import io.github.swiftstagrime.termuxrunner.ui.preview.DevicePreviews
 import io.github.swiftstagrime.termuxrunner.ui.preview.sampleScripts
 import io.github.swiftstagrime.termuxrunner.ui.theme.ScriptRunnerForTermuxTheme
 import java.text.SimpleDateFormat
 import java.util.Date
-import java.util.Locale
 
 private const val MILLIS_IN_MINUTE = 60_000L
 private const val DEFAULT_INTERVAL_MINUTES = 60L
 private const val MAX_BATTERY_LEVEL = 100f
 private const val SLIDER_STEPS = 19
+
+private enum class TimePickerMode { Main, WindowStart, WindowEnd }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -98,40 +107,29 @@ fun AutomationConfigDialog(
     val state = rememberAutomationConfigState(script)
     var showDatePicker by rememberSaveable { mutableStateOf(false) }
     var showTimePicker by rememberSaveable { mutableStateOf(false) }
+    var timePickerMode by remember { mutableStateOf(TimePickerMode.Main) }
 
     Dialog(onDismissRequest = onDismiss) {
         Card(
-            modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp).imePadding(),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 16.dp)
+                    .imePadding(),
             shape = RoundedCornerShape(28.dp),
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
         ) {
-            Column(
-                modifier = Modifier.padding(24.dp).verticalScroll(rememberScrollState()),
-                verticalArrangement = Arrangement.spacedBy(24.dp),
-            ) {
-                Text(
-                    text = stringResource(R.string.automation_title),
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.primary,
-                )
-
-                GeneralSection(state)
-                FrequencySection(state)
-                ScheduleSection(state, onShowDate = { showDatePicker = true }, onShowTime = { showTimePicker = true })
-                ConditionsSection(state)
-
-                if (state.type != AutomationType.ONE_TIME) {
-                    UpcomingRunsSection(script, state)
-                }
-
-                DialogActionButtons(
-                    onDismiss = onDismiss,
-                    onConfirm = {
-                        onSave(state.toSaveParams(script.id))
-                    },
-                )
-            }
+            AutomationConfigDialogContent(
+                script = script,
+                state = state,
+                onShowDate = { showDatePicker = true },
+                onShowTime = { mode ->
+                    timePickerMode = mode
+                    showTimePicker = true
+                },
+                onDismiss = onDismiss,
+                onConfirm = { onSave(state.toSaveParams(script.id)) },
+            )
         }
     }
 
@@ -140,7 +138,63 @@ fun AutomationConfigDialog(
     }
 
     if (showTimePicker) {
-        AutomationTimePicker(state) { showTimePicker = false }
+        AutomationTimePicker(state, timePickerMode) {
+            showTimePicker = false
+            timePickerMode = TimePickerMode.Main
+        }
+    }
+}
+
+@Composable
+private fun AutomationConfigDialogContent(
+    script: Script,
+    state: AutomationConfigState,
+    onShowDate: () -> Unit,
+    onShowTime: (TimePickerMode) -> Unit,
+    onDismiss: () -> Unit,
+    onConfirm: () -> Unit,
+) {
+    Column(modifier = Modifier.padding(horizontal = 24.dp, vertical = 24.dp)) {
+        Text(
+            text = stringResource(R.string.automation_title),
+            style = MaterialTheme.typography.headlineSmall,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.primary,
+        )
+
+        Column(
+            modifier =
+                Modifier
+                    .weight(1f)
+                    .verticalScroll(rememberScrollState())
+                    .padding(vertical = 24.dp),
+            verticalArrangement = Arrangement.spacedBy(24.dp),
+        ) {
+            GeneralSection(state)
+            TriggerModeSection(state)
+            ScheduleTypeSection(state)
+            EventSourceSection(state)
+
+            when (state.type.triggerMode) {
+                TriggerMode.SCHEDULE ->
+                    ScheduleSection(
+                        state,
+                        onShowDate = onShowDate,
+                        onShowTime = onShowTime,
+                    )
+
+                TriggerMode.EVENT -> EventTriggerLabel(state.type)
+                TriggerMode.BOOT -> BootTriggerHint()
+            }
+
+            ConditionsSection(state)
+
+            if (state.type.triggerMode == TriggerMode.SCHEDULE && state.type != AutomationType.ONE_TIME) {
+                UpcomingRunsSection(script, state)
+            }
+        }
+
+        DialogActionButtons(onDismiss = onDismiss, onConfirm = onConfirm)
     }
 }
 
@@ -155,26 +209,33 @@ private fun GeneralSection(state: AutomationConfigState) {
             shape = RoundedCornerShape(12.dp),
             colors = transparentTextFieldColors(),
         )
+        Spacer(modifier = Modifier.height(8.dp))
+        TextField(
+            value = state.automationCode,
+            onValueChange = { state.automationCode = it },
+            label = { Text(stringResource(R.string.adb_code)) },
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(12.dp),
+            colors = transparentTextFieldColors(),
+        )
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun FrequencySection(state: AutomationConfigState) {
+private fun TriggerModeSection(state: AutomationConfigState) {
     var expanded by remember { mutableStateOf(false) }
 
-    ConfigSection(title = stringResource(R.string.automation_section_frequency)) {
+    ConfigSection(title = stringResource(R.string.automation_section_trigger)) {
         ExposedDropdownMenuBox(
             expanded = expanded,
             onExpandedChange = { expanded = !expanded },
         ) {
             OutlinedTextField(
-                value = getAutomationTypeLabel(state.type),
+                value = getTriggerModeLabel(state.type.triggerMode),
                 onValueChange = {},
                 readOnly = true,
-                trailingIcon = {
-                    ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
-                },
+                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
                 modifier =
                     Modifier
                         .fillMaxWidth()
@@ -186,48 +247,25 @@ private fun FrequencySection(state: AutomationConfigState) {
                 shape = RoundedCornerShape(12.dp),
             )
 
-            ExposedDropdownMenu(
-                expanded = expanded,
-                onDismissRequest = { expanded = false },
-            ) {
-                AutomationType.entries.forEach { automationType ->
-                    val isSelected = state.type == automationType
-
+            ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+                TriggerMode.entries.forEach { mode ->
+                    val isSelected = state.type.triggerMode == mode
                     DropdownMenuItem(
                         text = {
                             Text(
-                                text = getAutomationTypeLabel(automationType),
+                                getTriggerModeLabel(mode),
                                 fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
                             )
                         },
                         onClick = {
-                            state.type = automationType
+                            state.type = mode.availableTypes.first()
                             expanded = false
-                        },
-                        leadingIcon = {
-                            val icon =
-                                when (automationType) {
-                                    AutomationType.ONE_TIME -> Icons.Default.Schedule
-                                    AutomationType.PERIODIC -> Icons.Default.Repeat
-                                    AutomationType.WEEKLY -> Icons.Default.CalendarMonth
-                                    AutomationType.BOOT -> Icons.Default.Power
-                                }
-                            Icon(
-                                imageVector = icon,
-                                contentDescription = null,
-                                tint =
-                                    if (isSelected) {
-                                        MaterialTheme.colorScheme.primary
-                                    } else {
-                                        MaterialTheme.colorScheme.onSurfaceVariant
-                                    },
-                            )
                         },
                         trailingIcon = {
                             if (isSelected) {
                                 Icon(
-                                    imageVector = Icons.Default.Check,
-                                    contentDescription = null,
+                                    Icons.Default.Check,
+                                    null,
                                     tint = MaterialTheme.colorScheme.primary,
                                 )
                             }
@@ -239,11 +277,160 @@ private fun FrequencySection(state: AutomationConfigState) {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun ScheduleTypeSection(state: AutomationConfigState) {
+    if (state.type.triggerMode != TriggerMode.SCHEDULE) return
+
+    var expanded by remember { mutableStateOf(false) }
+
+    ConfigSection(title = stringResource(R.string.automation_section_schedule_type)) {
+        ExposedDropdownMenuBox(
+            expanded = expanded,
+            onExpandedChange = { expanded = !expanded },
+        ) {
+            OutlinedTextField(
+                value = getAutomationTypeLabel(state.type),
+                onValueChange = {},
+                readOnly = true,
+                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .menuAnchor(
+                            type = ExposedDropdownMenuAnchorType.PrimaryNotEditable,
+                            enabled = true,
+                        ),
+                colors = transparentTextFieldColors(),
+                shape = RoundedCornerShape(12.dp),
+            )
+
+            ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+                TriggerMode.SCHEDULE.availableTypes.forEach { automationType ->
+                    val isSelected = state.type == automationType
+                    DropdownMenuItem(
+                        text = {
+                            Text(
+                                getAutomationTypeLabel(automationType),
+                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                            )
+                        },
+                        onClick = {
+                            state.type = automationType
+                            expanded = false
+                        },
+                        leadingIcon = {
+                            Icon(
+                                getScheduleTypeIcon(automationType),
+                                null,
+                                tint = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        },
+                        trailingIcon = {
+                            if (isSelected) {
+                                Icon(
+                                    Icons.Default.Check,
+                                    null,
+                                    tint = MaterialTheme.colorScheme.primary,
+                                )
+                            }
+                        },
+                    )
+                }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun EventSourceSection(state: AutomationConfigState) {
+    if (state.type.triggerMode != TriggerMode.EVENT) return
+
+    var expanded by remember { mutableStateOf(false) }
+
+    ConfigSection(title = stringResource(R.string.automation_section_event_source)) {
+        ExposedDropdownMenuBox(
+            expanded = expanded,
+            onExpandedChange = { expanded = !expanded },
+        ) {
+            OutlinedTextField(
+                value = getAutomationTypeLabel(state.type),
+                onValueChange = {},
+                readOnly = true,
+                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .menuAnchor(
+                            type = ExposedDropdownMenuAnchorType.PrimaryNotEditable,
+                            enabled = true,
+                        ),
+                colors = transparentTextFieldColors(),
+                shape = RoundedCornerShape(12.dp),
+            )
+
+            ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+                TriggerMode.EVENT.availableTypes.forEach { automationType ->
+                    val isSelected = state.type == automationType
+                    DropdownMenuItem(
+                        text = {
+                            Text(
+                                getAutomationTypeLabel(automationType),
+                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                            )
+                        },
+                        onClick = {
+                            state.type = automationType
+                            expanded = false
+                        },
+                        leadingIcon = {
+                            Icon(
+                                getEventTypeIcon(automationType),
+                                null,
+                                tint = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        },
+                        trailingIcon = {
+                            if (isSelected) {
+                                Icon(
+                                    Icons.Default.Check,
+                                    null,
+                                    tint = MaterialTheme.colorScheme.primary,
+                                )
+                            }
+                        },
+                    )
+                }
+            }
+        }
+    }
+}
+
+private fun getScheduleTypeIcon(type: AutomationType): ImageVector =
+    when (type) {
+        AutomationType.ONE_TIME -> Icons.Default.Schedule
+        AutomationType.PERIODIC -> Icons.Default.Repeat
+        AutomationType.WEEKLY -> Icons.Default.CalendarMonth
+        AutomationType.MONTHLY -> Icons.Default.CalendarToday
+        AutomationType.TIME_WINDOW -> Icons.Default.AccessTime
+        AutomationType.RANDOM_DELAY -> Icons.Default.Timer
+        else -> Icons.Default.Schedule
+    }
+
+@Composable
+private fun getTriggerModeLabel(mode: TriggerMode): String =
+    when (mode) {
+        TriggerMode.SCHEDULE -> stringResource(R.string.trigger_mode_schedule)
+        TriggerMode.EVENT -> stringResource(R.string.trigger_mode_event)
+        TriggerMode.BOOT -> stringResource(R.string.trigger_mode_boot)
+    }
+
 @Composable
 private fun ScheduleSection(
     state: AutomationConfigState,
     onShowDate: () -> Unit,
-    onShowTime: () -> Unit,
+    onShowTime: (TimePickerMode) -> Unit,
 ) {
     ConfigSection(title = stringResource(R.string.automation_section_schedule)) {
         Row(
@@ -253,16 +440,25 @@ private fun ScheduleSection(
             if (state.type == AutomationType.ONE_TIME) {
                 DateTimeButton(
                     icon = Icons.Default.CalendarToday,
-                    text = SimpleDateFormat("MMM dd", Locale.getDefault()).format(Date(state.selectedDate)),
+                    text =
+                        SimpleDateFormat("MMM dd", LocalLocale.current.platformLocale).format(
+                            Date(state.selectedDate),
+                        ),
                     modifier = Modifier.weight(1f),
                     onClick = onShowDate,
                 )
             }
             DateTimeButton(
                 icon = Icons.Default.AccessTime,
-                text = String.format(Locale.getDefault(), "%02d:%02d", state.selectedHour, state.selectedMinute),
+                text =
+                    String.format(
+                        LocalLocale.current.platformLocale,
+                        "%02d:%02d",
+                        state.selectedHour,
+                        state.selectedMinute,
+                    ),
                 modifier = Modifier.weight(1f),
-                onClick = onShowTime,
+                onClick = { onShowTime(TimePickerMode.Main) },
             )
         }
 
@@ -277,6 +473,101 @@ private fun ScheduleSection(
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 colors = transparentTextFieldColors(),
             )
+        }
+
+        if (state.type == AutomationType.MONTHLY) {
+            Spacer(modifier = Modifier.height(12.dp))
+            TextField(
+                value = state.scheduledDayOfMonth,
+                onValueChange = {
+                    if (it.all { c -> c.isDigit() }) {
+                        val num = it.toIntOrNull()
+                        if (num == null || num in 1..31) state.scheduledDayOfMonth = it
+                    }
+                },
+                label = { Text(stringResource(R.string.automation_monthly_day_of_month)) },
+                modifier = Modifier.fillMaxWidth(),
+                leadingIcon = {
+                    Icon(
+                        Icons.Default.CalendarToday,
+                        null,
+                        modifier = Modifier.size(20.dp),
+                    )
+                },
+                shape = RoundedCornerShape(12.dp),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                colors = transparentTextFieldColors(),
+            )
+        }
+
+        if (state.type == AutomationType.TIME_WINDOW) {
+            Spacer(modifier = Modifier.height(12.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                DateTimeButton(
+                    icon = Icons.Default.AccessTime,
+                    text =
+                        stringResource(
+                            R.string.automation_window_from,
+                            String.format(
+                                LocalLocale.current.platformLocale,
+                                "%02d:%02d",
+                                state.windowStartHour,
+                                state.windowStartMinute,
+                            ),
+                        ),
+                    modifier = Modifier.weight(1f),
+                    onClick = { onShowTime(TimePickerMode.WindowStart) },
+                )
+                DateTimeButton(
+                    icon = Icons.Default.AccessTime,
+                    text =
+                        stringResource(
+                            R.string.automation_window_to,
+                            String.format(
+                                LocalLocale.current.platformLocale,
+                                "%02d:%02d",
+                                state.windowEndHour,
+                                state.windowEndMinute,
+                            ),
+                        ),
+                    modifier = Modifier.weight(1f),
+                    onClick = { onShowTime(TimePickerMode.WindowEnd) },
+                )
+            }
+        }
+
+        if (state.type == AutomationType.RANDOM_DELAY) {
+            Spacer(modifier = Modifier.height(12.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                TextField(
+                    value = state.randomDelayMinValue,
+                    onValueChange = {
+                        if (it.all { c -> c.isDigit() }) state.randomDelayMinValue = it
+                    },
+                    label = { Text(stringResource(R.string.automation_random_delay_min)) },
+                    modifier = Modifier.weight(1f),
+                    shape = RoundedCornerShape(12.dp),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    colors = transparentTextFieldColors(),
+                )
+                TextField(
+                    value = state.randomDelayMaxValue,
+                    onValueChange = {
+                        if (it.all { c -> c.isDigit() }) state.randomDelayMaxValue = it
+                    },
+                    label = { Text(stringResource(R.string.automation_random_delay_max)) },
+                    modifier = Modifier.weight(1f),
+                    shape = RoundedCornerShape(12.dp),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    colors = transparentTextFieldColors(),
+                )
+            }
         }
 
         if (state.type == AutomationType.WEEKLY) {
@@ -297,6 +588,7 @@ private fun ScheduleSection(
 
 @Composable
 private fun ConditionsSection(state: AutomationConfigState) {
+    val showRunIfMissed = state.type.triggerMode == TriggerMode.SCHEDULE
     ConfigSection(title = stringResource(R.string.automation_section_conditions)) {
         Column(
             modifier =
@@ -304,18 +596,26 @@ private fun ConditionsSection(state: AutomationConfigState) {
                     .clip(RoundedCornerShape(16.dp))
                     .background(MaterialTheme.colorScheme.surfaceContainerLowest),
         ) {
-            AutomationOptionTile(
-                title = stringResource(R.string.automation_run_if_missed),
-                checked = state.runIfMissed,
-                onCheckedChange = { state.runIfMissed = it },
-            )
-            HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), color = dividerColor())
+            if (showRunIfMissed) {
+                AutomationOptionTile(
+                    title = stringResource(R.string.automation_run_if_missed),
+                    checked = state.runIfMissed,
+                    onCheckedChange = { state.runIfMissed = it },
+                )
+                HorizontalDivider(
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    color = dividerColor(),
+                )
+            }
             AutomationOptionTile(
                 title = stringResource(R.string.automation_condition_wifi),
                 checked = state.requireWifi,
                 onCheckedChange = { state.requireWifi = it },
             )
-            HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), color = dividerColor())
+            HorizontalDivider(
+                modifier = Modifier.padding(horizontal = 16.dp),
+                color = dividerColor(),
+            )
             AutomationOptionTile(
                 title = stringResource(R.string.automation_condition_charging),
                 checked = state.requireCharging,
@@ -344,15 +644,36 @@ private fun UpcomingRunsSection(
     }
 
     val upcomingRuns =
-        remember(state.type, state.selectedDate, state.selectedHour, state.selectedMinute, state.intervalValue, state.selectedDays) {
+        remember(
+            state.type,
+            state.selectedDate,
+            state.selectedHour,
+            state.selectedMinute,
+            state.intervalValue,
+            state.selectedDays,
+            state.scheduledDayOfMonth,
+            state.windowStartHour,
+            state.windowStartMinute,
+            state.windowEndHour,
+            state.windowEndMinute,
+        ) {
             val temp =
                 AutomationEntity(
                     scriptId = script.id,
                     label = "",
                     type = state.type,
                     scheduledTimestamp = state.selectedDate,
-                    intervalMillis = (state.intervalValue.toLongOrNull() ?: DEFAULT_INTERVAL_MINUTES) * MILLIS_IN_MINUTE,
+                    intervalMillis =
+                        (
+                            state.intervalValue.toLongOrNull()
+                                ?: DEFAULT_INTERVAL_MINUTES
+                        ) * MILLIS_IN_MINUTE,
                     daysOfWeek = state.selectedDays,
+                    scheduledDayOfMonth = state.scheduledDayOfMonth.toIntOrNull(),
+                    windowStartHour = state.windowStartHour,
+                    windowStartMinute = state.windowStartMinute,
+                    windowEndHour = state.windowEndHour,
+                    windowEndMinute = state.windowEndMinute,
                 )
             AutomationTimeCalculator.getNextRuns(temp, 3)
         }
@@ -363,7 +684,12 @@ private fun UpcomingRunsSection(
             shape = RoundedCornerShape(12.dp),
             border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)),
         ) {
-            Column(modifier = Modifier.padding(12.dp).fillMaxWidth()) {
+            Column(
+                modifier =
+                    Modifier
+                        .padding(12.dp)
+                        .fillMaxWidth(),
+            ) {
                 upcomingRuns.forEach { time ->
                     UpcomingRunRow(time)
                 }
@@ -396,19 +722,40 @@ private fun AutomationDatePicker(
 @Composable
 private fun AutomationTimePicker(
     state: AutomationConfigState,
+    mode: TimePickerMode,
     onDismiss: () -> Unit,
 ) {
+    val (initialHour, initialMinute) =
+        when (mode) {
+            TimePickerMode.Main -> state.selectedHour to state.selectedMinute
+            TimePickerMode.WindowStart -> state.windowStartHour to state.windowStartMinute
+            TimePickerMode.WindowEnd -> state.windowEndHour to state.windowEndMinute
+        }
     val timePickerState =
         rememberTimePickerState(
-            initialHour = state.selectedHour,
-            initialMinute = state.selectedMinute,
+            initialHour = initialHour,
+            initialMinute = initialMinute,
         )
     AlertDialog(
         onDismissRequest = onDismiss,
         confirmButton = {
             TextButton(onClick = {
-                state.selectedHour = timePickerState.hour
-                state.selectedMinute = timePickerState.minute
+                when (mode) {
+                    TimePickerMode.Main -> {
+                        state.selectedHour = timePickerState.hour
+                        state.selectedMinute = timePickerState.minute
+                    }
+
+                    TimePickerMode.WindowStart -> {
+                        state.windowStartHour = timePickerState.hour
+                        state.windowStartMinute = timePickerState.minute
+                    }
+
+                    TimePickerMode.WindowEnd -> {
+                        state.windowEndHour = timePickerState.hour
+                        state.windowEndMinute = timePickerState.minute
+                    }
+                }
                 onDismiss()
             }) { Text(stringResource(R.string.ok)) }
         },
@@ -430,7 +777,11 @@ private fun UpcomingRunRow(time: Long) {
         )
         Spacer(modifier = Modifier.width(8.dp))
         Text(
-            text = SimpleDateFormat("MMM dd, HH:mm", Locale.getDefault()).format(Date(time)),
+            text =
+                SimpleDateFormat(
+                    "MMM dd, HH:mm",
+                    LocalLocale.current.platformLocale,
+                ).format(Date(time)),
             style = MaterialTheme.typography.labelMedium,
         )
     }
@@ -503,7 +854,94 @@ private fun getAutomationTypeLabel(type: AutomationType) =
         AutomationType.PERIODIC -> stringResource(R.string.automation_type_periodic)
         AutomationType.WEEKLY -> stringResource(R.string.automation_type_weekly)
         AutomationType.BOOT -> stringResource(R.string.automation_type_boot)
+        AutomationType.MONTHLY -> stringResource(R.string.automation_type_monthly)
+        AutomationType.TIME_WINDOW -> stringResource(R.string.automation_type_time_window)
+        AutomationType.RANDOM_DELAY -> stringResource(R.string.automation_type_random_delay)
+        AutomationType.SCREEN_ON -> stringResource(R.string.automation_type_screen_on)
+        AutomationType.SCREEN_OFF -> stringResource(R.string.automation_type_screen_off)
+        AutomationType.NETWORK_CONNECTED -> stringResource(R.string.automation_type_network_connected)
+        AutomationType.NETWORK_DISCONNECTED -> stringResource(R.string.automation_type_network_disconnected)
+        AutomationType.USB_CONNECTED -> stringResource(R.string.automation_type_usb_connected)
+        AutomationType.USB_DISCONNECTED -> stringResource(R.string.automation_type_usb_disconnected)
     }
+
+private fun getEventTypeIcon(type: AutomationType): ImageVector =
+    when (type) {
+        AutomationType.SCREEN_ON -> Icons.Default.BrightnessHigh
+        AutomationType.SCREEN_OFF -> Icons.Default.BrightnessLow
+        AutomationType.NETWORK_CONNECTED -> Icons.Default.Wifi
+        AutomationType.NETWORK_DISCONNECTED -> Icons.Default.WifiOff
+        AutomationType.USB_CONNECTED -> Icons.Default.Usb
+        AutomationType.USB_DISCONNECTED -> Icons.Default.Usb
+        else -> Icons.Default.Power
+    }
+
+@Composable
+private fun EventTriggerLabel(type: AutomationType) {
+    val icon = getEventTypeIcon(type)
+    ConfigSection(title = stringResource(R.string.automation_section_schedule)) {
+        Surface(
+            color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.15f),
+            shape = RoundedCornerShape(12.dp),
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)),
+        ) {
+            Row(
+                modifier =
+                    Modifier
+                        .padding(horizontal = 16.dp, vertical = 12.dp)
+                        .fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                Icon(
+                    icon,
+                    null,
+                    modifier = Modifier.size(20.dp),
+                    tint = MaterialTheme.colorScheme.primary,
+                )
+                Text(
+                    text = getAutomationTypeLabel(type),
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    fontWeight = FontWeight.Medium,
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun BootTriggerHint() {
+    ConfigSection(title = stringResource(R.string.automation_section_schedule)) {
+        Surface(
+            color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.15f),
+            shape = RoundedCornerShape(12.dp),
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)),
+        ) {
+            Row(
+                modifier =
+                    Modifier
+                        .padding(horizontal = 16.dp, vertical = 12.dp)
+                        .fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                Icon(
+                    Icons.Default.Power,
+                    null,
+                    modifier = Modifier.size(20.dp),
+                    tint = MaterialTheme.colorScheme.primary,
+                )
+                Text(
+                    text = stringResource(R.string.automation_boot_hint),
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    fontWeight = FontWeight.Medium,
+                )
+            }
+        }
+    }
+}
 
 @Composable
 private fun ConfigSection(
@@ -585,19 +1023,22 @@ private fun AutomationOptionTile(
     }
 }
 
-@Preview(
-    name = "One-Time Automation - Night",
-    showBackground = true,
-    uiMode = Configuration.UI_MODE_NIGHT_YES,
-)
+@DevicePreviews
 @Composable
 private fun PreviewAutomationConfigOneTime() {
     ScriptRunnerForTermuxTheme {
-        Surface {
-            AutomationConfigDialog(
-                script = sampleScripts[0],
+        val script = sampleScripts[0]
+        Surface(
+            color = MaterialTheme.colorScheme.surfaceContainerHigh,
+            shape = RoundedCornerShape(28.dp),
+        ) {
+            AutomationConfigDialogContent(
+                script = script,
+                state = AutomationConfigState(script),
+                onShowDate = {},
+                onShowTime = {},
                 onDismiss = {},
-                onSave = {},
+                onConfirm = {},
             )
         }
     }

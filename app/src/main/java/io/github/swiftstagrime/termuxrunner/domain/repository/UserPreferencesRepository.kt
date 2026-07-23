@@ -19,6 +19,10 @@ interface UserPreferencesRepository {
 
     suspend fun setEditorLineWrappingEnabled(enabled: Boolean)
 
+    val isWebhookEnabled: Flow<Boolean>
+
+    suspend fun setWebhookEnabled(enabled: Boolean)
+
     fun getScriptIdForTile(tileIndex: Int): Flow<Int?>
 
     suspend fun setScriptIdForTile(

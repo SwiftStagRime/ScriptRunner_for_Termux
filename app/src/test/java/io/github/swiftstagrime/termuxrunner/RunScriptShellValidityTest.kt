@@ -4,6 +4,7 @@ import io.github.swiftstagrime.termuxrunner.domain.model.Script
 import io.github.swiftstagrime.termuxrunner.domain.repository.MonitoringRepository
 import io.github.swiftstagrime.termuxrunner.domain.repository.ScriptFileRepository
 import io.github.swiftstagrime.termuxrunner.domain.repository.TermuxRepository
+import io.github.swiftstagrime.termuxrunner.domain.usecase.ProcessTermuxResultUseCase
 import io.github.swiftstagrime.termuxrunner.domain.usecase.RunScriptUseCase
 import io.mockk.coEvery
 import io.mockk.every
@@ -28,26 +29,52 @@ class RunScriptShellValidityTest {
     private val termuxRepo = mockk<TermuxRepository>(relaxed = true)
     private val fileRepo = mockk<ScriptFileRepository>(relaxed = true)
     private val monitorRepo = mockk<MonitoringRepository>(relaxed = true)
+    private val processResultTracker = mockk<ProcessTermuxResultUseCase>(relaxed = true)
 
     private lateinit var useCase: RunScriptUseCase
     private val testPackageName = "io.github.swiftstagrime.test"
 
     @Before
     fun setup() {
-        useCase = RunScriptUseCase(testPackageName, termuxRepo, fileRepo, monitorRepo)
+        useCase =
+            RunScriptUseCase(
+                testPackageName,
+                termuxRepo,
+                fileRepo,
+                monitorRepo,
+                processResultTracker,
+            )
         every { monitorRepo.hasNotificationPermission() } returns false
     }
 
     private fun captureCommand(): String {
         val slot = slot<String>()
-        verify { termuxRepo.runCommand(command = capture(slot), any(), any(), any(), any(), any(), any()) }
+        verify {
+            termuxRepo.runCommand(
+                command = capture(slot),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+            )
+        }
         return slot.captured
     }
 
     @Test
     fun `bash script with simple echo`() =
         runTest {
-            useCase(Script(id = 1, name = "t", codePages = listOf("echo hello"), interpreter = "bash"))
+            useCase(
+                Script(
+                    id = 1,
+                    name = "t",
+                    codePages = listOf("echo hello"),
+                    interpreter = "bash",
+                ),
+            )
             val cmd = captureCommand()
             assertTrue(cmd.contains("bash "))
             assertFalse(cmd.contains("Invalid interpreter"))
@@ -56,7 +83,14 @@ class RunScriptShellValidityTest {
     @Test
     fun `python3 script with print`() =
         runTest {
-            useCase(Script(id = 2, name = "t", codePages = listOf("print('hi')"), interpreter = "python3"))
+            useCase(
+                Script(
+                    id = 2,
+                    name = "t",
+                    codePages = listOf("print('hi')"),
+                    interpreter = "python3",
+                ),
+            )
             val cmd = captureCommand()
             assertTrue(cmd.contains("python3 "))
         }
@@ -64,7 +98,14 @@ class RunScriptShellValidityTest {
     @Test
     fun `node script`() =
         runTest {
-            useCase(Script(id = 3, name = "t", codePages = listOf("console.log(1)"), interpreter = "node"))
+            useCase(
+                Script(
+                    id = 3,
+                    name = "t",
+                    codePages = listOf("console.log(1)"),
+                    interpreter = "node",
+                ),
+            )
             val cmd = captureCommand()
             assertTrue(cmd.contains("node "))
         }
@@ -72,7 +113,14 @@ class RunScriptShellValidityTest {
     @Test
     fun `full path interpreter`() =
         runTest {
-            useCase(Script(id = 4, name = "t", codePages = listOf("echo ok"), interpreter = "/data/data/com.termux/files/usr/bin/python3"))
+            useCase(
+                Script(
+                    id = 4,
+                    name = "t",
+                    codePages = listOf("echo ok"),
+                    interpreter = "/data/data/com.termux/files/usr/bin/python3",
+                ),
+            )
             val cmd = captureCommand()
             assertTrue(cmd.contains("/data/data/com.termux/files/usr/bin/python3"))
         }
@@ -82,7 +130,9 @@ class RunScriptShellValidityTest {
         runTest {
             useCase(
                 Script(
-                    id = 10, name = "t", codePages = listOf($$"echo $TEST"),
+                    id = 10,
+                    name = "t",
+                    codePages = listOf($$"echo $TEST"),
                     envVars = mapOf("TEST" to $$"$HOME/$USER"),
                 ),
             )
@@ -94,8 +144,12 @@ class RunScriptShellValidityTest {
     fun `env var with backticks`() =
         runTest {
             useCase(
-                Script(id = 11, name = "t", codePages = listOf("echo ok"),
-                    envVars = mapOf("CMD" to """`whoami`;`id`""")),
+                Script(
+                    id = 11,
+                    name = "t",
+                    codePages = listOf("echo ok"),
+                    envVars = mapOf("CMD" to """`whoami`;`id`"""),
+                ),
             )
             val cmd = captureCommand()
             assertTrue(cmd.contains("export CMD='"))
@@ -105,8 +159,12 @@ class RunScriptShellValidityTest {
     fun `env var with single quotes`() =
         runTest {
             useCase(
-                Script(id = 12, name = "t", codePages = listOf("echo ok"),
-                    envVars = mapOf("MSG" to "it's a test")),
+                Script(
+                    id = 12,
+                    name = "t",
+                    codePages = listOf("echo ok"),
+                    envVars = mapOf("MSG" to "it's a test"),
+                ),
             )
             val cmd = captureCommand()
             assertTrue(cmd.contains("'\\''"))
@@ -116,8 +174,12 @@ class RunScriptShellValidityTest {
     fun `env var with double quotes`() =
         runTest {
             useCase(
-                Script(id = 13, name = "t", codePages = listOf("echo ok"),
-                    envVars = mapOf("MSG" to """he said "hello"""")),
+                Script(
+                    id = 13,
+                    name = "t",
+                    codePages = listOf("echo ok"),
+                    envVars = mapOf("MSG" to """he said "hello""""),
+                ),
             )
             val cmd = captureCommand()
             assertTrue(cmd.contains("export MSG='"))
@@ -127,8 +189,12 @@ class RunScriptShellValidityTest {
     fun `env var with backslashes`() =
         runTest {
             useCase(
-                Script(id = 14, name = "t", codePages = listOf("echo ok"),
-                    envVars = mapOf("PATH" to "C:\\Users\\test")),
+                Script(
+                    id = 14,
+                    name = "t",
+                    codePages = listOf("echo ok"),
+                    envVars = mapOf("PATH" to "C:\\Users\\test"),
+                ),
             )
             val cmd = captureCommand()
             assertTrue(cmd.contains("export PATH='"))
@@ -138,8 +204,12 @@ class RunScriptShellValidityTest {
     fun `env var with newlines`() =
         runTest {
             useCase(
-                Script(id = 15, name = "t", codePages = listOf("echo ok"),
-                    envVars = mapOf("MULTI" to "line1\nline2\r\nline3")),
+                Script(
+                    id = 15,
+                    name = "t",
+                    codePages = listOf("echo ok"),
+                    envVars = mapOf("MULTI" to "line1\nline2\r\nline3"),
+                ),
             )
             val cmd = captureCommand()
             assertTrue(cmd.contains("export MULTI='"))
@@ -149,8 +219,12 @@ class RunScriptShellValidityTest {
     fun `env var with semicolons and pipes`() =
         runTest {
             useCase(
-                Script(id = 16, name = "t", codePages = listOf("echo ok"),
-                    envVars = mapOf("SHELL" to "; rm -rf / | cat")),
+                Script(
+                    id = 16,
+                    name = "t",
+                    codePages = listOf("echo ok"),
+                    envVars = mapOf("SHELL" to "; rm -rf / | cat"),
+                ),
             )
             val cmd = captureCommand()
             assertTrue(cmd.contains("export SHELL='"))
@@ -160,8 +234,12 @@ class RunScriptShellValidityTest {
     fun `env var with all special chars combined`() =
         runTest {
             useCase(
-                Script(id = 17, name = "t", codePages = listOf("echo ok"),
-                    envVars = mapOf("ALL" to """prefix${'$'}HOME `whoami` it's "quoted" \n;|&""")),
+                Script(
+                    id = 17,
+                    name = "t",
+                    codePages = listOf("echo ok"),
+                    envVars = mapOf("ALL" to """prefix${'$'}HOME `whoami` it's "quoted" \n;|&"""),
+                ),
             )
             val cmd = captureCommand()
             assertTrue(cmd.contains("export ALL='"))
@@ -205,7 +283,12 @@ class RunScriptShellValidityTest {
     fun `prefix sudo`() =
         runTest {
             useCase(
-                Script(id = 30, name = "t", codePages = listOf("echo root"), commandPrefix = "sudo"),
+                Script(
+                    id = 30,
+                    name = "t",
+                    codePages = listOf("echo root"),
+                    commandPrefix = "sudo",
+                ),
             )
             val cmd = captureCommand()
             assertTrue(cmd.contains("sudo"))
@@ -215,7 +298,12 @@ class RunScriptShellValidityTest {
     fun `prefix with flags`() =
         runTest {
             useCase(
-                Script(id = 31, name = "t", codePages = listOf("sleep 10"), commandPrefix = "nice -n 19 ionice -c 3"),
+                Script(
+                    id = 31,
+                    name = "t",
+                    codePages = listOf("sleep 10"),
+                    commandPrefix = "nice -n 19 ionice -c 3",
+                ),
             )
             val cmd = captureCommand()
             assertTrue(cmd.contains("nice"))
@@ -226,7 +314,12 @@ class RunScriptShellValidityTest {
     fun `prefix with dollar and quotes`() =
         runTest {
             useCase(
-                Script(id = 32, name = "t", codePages = listOf("echo ok"), commandPrefix = """env FOO="bar${'$'}baz\""""),
+                Script(
+                    id = 32,
+                    name = "t",
+                    codePages = listOf("echo ok"),
+                    commandPrefix = """env FOO="bar${'$'}baz\"""",
+                ),
             )
             val cmd = captureCommand()
             assertTrue(cmd.contains("FOO"))
@@ -236,8 +329,12 @@ class RunScriptShellValidityTest {
     fun `injection via env var value - semicolon command`() =
         runTest {
             useCase(
-                Script(id = 40, name = "t", codePages = listOf("echo safe"),
-                    envVars = mapOf("X" to "'; rm -rf /; #")),
+                Script(
+                    id = 40,
+                    name = "t",
+                    codePages = listOf("echo safe"),
+                    envVars = mapOf("X" to "'; rm -rf /; #"),
+                ),
             )
             val cmd = captureCommand()
             assertTrue(cmd.contains("export X='"))
@@ -247,8 +344,12 @@ class RunScriptShellValidityTest {
     fun `injection via env var value - backtick command`() =
         runTest {
             useCase(
-                Script(id = 41, name = "t", codePages = listOf("echo safe"),
-                    envVars = mapOf("X" to "`rm -rf /`")),
+                Script(
+                    id = 41,
+                    name = "t",
+                    codePages = listOf("echo safe"),
+                    envVars = mapOf("X" to "`rm -rf /`"),
+                ),
             )
             val cmd = captureCommand()
             assertTrue(cmd.contains("export X='"))
@@ -280,7 +381,12 @@ class RunScriptShellValidityTest {
     fun `injection via prefix - command chaining`() =
         runTest {
             useCase(
-                Script(id = 44, name = "t", codePages = listOf("echo safe"), commandPrefix = "bash; rm -rf /"),
+                Script(
+                    id = 44,
+                    name = "t",
+                    codePages = listOf("echo safe"),
+                    commandPrefix = "bash; rm -rf /",
+                ),
             )
             val cmd = captureCommand()
             assertTrue(cmd.contains("bash"))
@@ -290,7 +396,12 @@ class RunScriptShellValidityTest {
     fun `injection via interpreter - already rejected`() =
         runTest {
             useCase(
-                Script(id = 45, name = "t", codePages = listOf("echo safe"), interpreter = "python3; rm -rf /"),
+                Script(
+                    id = 45,
+                    name = "t",
+                    codePages = listOf("echo safe"),
+                    interpreter = "python3; rm -rf /",
+                ),
             )
             val cmd = captureCommand()
             assertTrue(cmd.contains("Invalid interpreter"))
@@ -300,7 +411,12 @@ class RunScriptShellValidityTest {
     fun `large script bridge path with special chars in filename`() =
         runTest {
             val largeCode = "a".repeat(4001)
-            coEvery { fileRepo.saveToBridge(any(), any()) } returns "/sdcard/Download/scriptrunner/script_99_test.sh"
+            coEvery {
+                fileRepo.saveToBridge(
+                    any(),
+                    any(),
+                )
+            } returns "/sdcard/Download/scriptrunner/script_99_test.sh"
 
             useCase(Script(id = 50, name = "t", codePages = listOf(largeCode)))
             val cmd = captureCommand()
@@ -312,7 +428,9 @@ class RunScriptShellValidityTest {
         runTest {
             useCase(
                 Script(
-                    id = 60, name = "t", codePages = listOf("echo test"),
+                    id = 60,
+                    name = "t",
+                    codePages = listOf("echo test"),
                     envVars = mapOf("A" to """' " \ $ ${'$'} `"""),
                     interpreter = "bash",
                 ),
@@ -324,8 +442,10 @@ class RunScriptShellValidityTest {
             val openIdx = cmd.indexOf("bash -c \"")
             assertTrue(openIdx > 0)
             val afterBashC = cmd.substring(openIdx + 9) // skip "bash -c \""
-            assertTrue("Should have closing double-quote for bash -c",
-                afterBashC.trimEnd().endsWith("\"") || afterBashC.contains("\";"))
+            assertTrue(
+                "Should have closing double-quote for bash -c",
+                afterBashC.trimEnd().endsWith("\"") || afterBashC.contains("\";"),
+            )
         }
 
     @Test
@@ -349,8 +469,12 @@ class RunScriptShellValidityTest {
     fun `invalid env key names are rejected`() =
         runTest {
             useCase(
-                Script(id = 63, name = "t", codePages = listOf("echo ok"),
-                    envVars = mapOf("123BAD" to "x", "ALSO-BAD" to "y", "GOOD_KEY" to "z")),
+                Script(
+                    id = 63,
+                    name = "t",
+                    codePages = listOf("echo ok"),
+                    envVars = mapOf("123BAD" to "x", "ALSO-BAD" to "y", "GOOD_KEY" to "z"),
+                ),
             )
             val cmd = captureCommand()
             assertFalse(cmd.contains("export 123BAD"))
@@ -381,7 +505,14 @@ class RunScriptShellValidityTest {
     @Test
     fun `keep session open appends read prompt`() =
         runTest {
-            useCase(Script(id = 66, name = "t", codePages = listOf("echo ok"), keepSessionOpen = true))
+            useCase(
+                Script(
+                    id = 66,
+                    name = "t",
+                    codePages = listOf("echo ok"),
+                    keepSessionOpen = true,
+                ),
+            )
             val cmd = captureCommand()
             assertTrue(cmd.contains("read"))
             assertTrue(cmd.contains("exec "))

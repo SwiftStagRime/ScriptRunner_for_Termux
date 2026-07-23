@@ -27,4 +27,17 @@ sealed interface Route : NavKey {
 
     @Serializable
     data object Automation : Route
+
+    @Serializable
+    data class ExecutionHistory(
+        val scriptId: Int? = null,
+    ) : Route
+
+    @Serializable
+    data class ScriptVersions(
+        val scriptId: Int,
+    ) : Route
+
+    @Serializable
+    data object WebhookSettings : Route
 }

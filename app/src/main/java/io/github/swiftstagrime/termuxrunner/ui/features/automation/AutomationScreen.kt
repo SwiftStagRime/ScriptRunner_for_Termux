@@ -28,6 +28,7 @@ import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.DeleteSweep
 import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.Event
+import androidx.compose.material.icons.filled.Link
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material.icons.filled.Wifi
@@ -79,6 +80,7 @@ fun AutomationScreen(
     onRunNow: (Automation) -> Unit,
     onShowHistory: (Automation) -> Unit,
     onRequestPermission: () -> Unit,
+    onEditChain: (Automation) -> Unit,
 ) {
     val outerBackgroundColor = MaterialTheme.colorScheme.surface
     val sheetContainerColor = MaterialTheme.colorScheme.surfaceContainerLowest
@@ -126,7 +128,13 @@ fun AutomationScreen(
                     .padding(bottom = 8.dp)
                     .fillMaxSize(),
             color = sheetContainerColor,
-            shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp, bottomEnd = 32.dp, bottomStart = 32.dp),
+            shape =
+                RoundedCornerShape(
+                    topStart = 32.dp,
+                    topEnd = 32.dp,
+                    bottomEnd = 32.dp,
+                    bottomStart = 32.dp,
+                ),
             shadowElevation = 1.dp,
         ) {
             Column {
@@ -154,6 +162,7 @@ fun AutomationScreen(
                             onDelete = { onDeleteAutomation(item.automation) },
                             onRunNow = { onRunNow(item.automation) },
                             onShowHistory = { onShowHistory(item.automation) },
+                            onEditChain = { onEditChain(item.automation) },
                         )
                     }
                 }
@@ -169,6 +178,7 @@ private fun AutomationItem(
     onRunNow: () -> Unit,
     onDelete: () -> Unit,
     onShowHistory: () -> Unit,
+    onEditChain: () -> Unit,
 ) {
     Card(
         modifier =
@@ -290,6 +300,22 @@ private fun AutomationItem(
                         }
 
                         Surface(
+                            onClick = onEditChain,
+                            color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.15f),
+                            contentColor = MaterialTheme.colorScheme.primary,
+                            shape = RoundedCornerShape(12.dp),
+                            modifier = Modifier.size(40.dp),
+                        ) {
+                            Box(contentAlignment = Alignment.Center) {
+                                Icon(
+                                    Icons.Default.Link,
+                                    null,
+                                    modifier = Modifier.size(20.dp),
+                                )
+                            }
+                        }
+
+                        Surface(
                             onClick = onDelete,
                             color = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.15f),
                             contentColor = MaterialTheme.colorScheme.error,
@@ -319,6 +345,15 @@ private fun FrequencyBadge(type: AutomationType) {
             AutomationType.PERIODIC -> stringResource(R.string.automation_type_periodic)
             AutomationType.WEEKLY -> stringResource(R.string.automation_type_weekly)
             AutomationType.BOOT -> stringResource(R.string.automation_type_boot)
+            AutomationType.MONTHLY -> stringResource(R.string.automation_type_monthly)
+            AutomationType.TIME_WINDOW -> stringResource(R.string.automation_type_time_window)
+            AutomationType.RANDOM_DELAY -> stringResource(R.string.automation_type_random_delay)
+            AutomationType.SCREEN_ON -> stringResource(R.string.automation_type_screen_on)
+            AutomationType.SCREEN_OFF -> stringResource(R.string.automation_type_screen_off)
+            AutomationType.NETWORK_CONNECTED -> stringResource(R.string.automation_type_network_connected)
+            AutomationType.NETWORK_DISCONNECTED -> stringResource(R.string.automation_type_network_disconnected)
+            AutomationType.USB_CONNECTED -> stringResource(R.string.automation_type_usb_connected)
+            AutomationType.USB_DISCONNECTED -> stringResource(R.string.automation_type_usb_disconnected)
         }
 
     Surface(
@@ -331,6 +366,8 @@ private fun FrequencyBadge(type: AutomationType) {
             modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
             style = MaterialTheme.typography.labelSmall,
             fontWeight = FontWeight.Black,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
         )
     }
 }
@@ -397,6 +434,7 @@ fun AutomationScreenPreview() {
             onRequestPermission = {},
             onRunNow = {},
             onShowHistory = {},
+            onEditChain = {},
         )
     }
 }
@@ -418,6 +456,7 @@ fun AutomationScreenPermissionPreview() {
             onRequestPermission = {},
             onRunNow = {},
             onShowHistory = {},
+            onEditChain = {},
         )
     }
 }

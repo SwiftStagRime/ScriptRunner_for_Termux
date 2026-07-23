@@ -1,5 +1,6 @@
 package io.github.swiftstagrime.termuxrunner.data.service
 
+import android.content.ComponentName
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -26,3 +27,13 @@ class ScriptTileService4 : BaseScriptTileService() {
 class ScriptTileService5 : BaseScriptTileService() {
     override val tileIndex = 5
 }
+
+fun tileIndexForComponent(component: ComponentName?): Int? =
+    when (component?.className) {
+        ScriptTileService1::class.java.name -> 1
+        ScriptTileService2::class.java.name -> 2
+        ScriptTileService3::class.java.name -> 3
+        ScriptTileService4::class.java.name -> 4
+        ScriptTileService5::class.java.name -> 5
+        else -> null
+    }

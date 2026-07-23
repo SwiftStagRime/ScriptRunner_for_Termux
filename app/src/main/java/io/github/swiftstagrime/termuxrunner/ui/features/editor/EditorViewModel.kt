@@ -12,8 +12,10 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.swiftstagrime.termuxrunner.R
 import io.github.swiftstagrime.termuxrunner.di.IoDispatcher
+import io.github.swiftstagrime.termuxrunner.domain.model.Automation
 import io.github.swiftstagrime.termuxrunner.domain.model.Category
 import io.github.swiftstagrime.termuxrunner.domain.model.Script
+import io.github.swiftstagrime.termuxrunner.domain.repository.AutomationRepository
 import io.github.swiftstagrime.termuxrunner.domain.repository.CategoryRepository
 import io.github.swiftstagrime.termuxrunner.domain.repository.IconRepository
 import io.github.swiftstagrime.termuxrunner.domain.repository.ScriptRepository
@@ -26,6 +28,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
@@ -46,6 +49,7 @@ class EditorViewModel
     @Inject
     constructor(
         private val scriptRepository: ScriptRepository,
+        private val automationRepository: AutomationRepository,
         private val categoryRepository: CategoryRepository,
         private val userPreferencesRepository: UserPreferencesRepository,
         private val updateScriptUseCase: UpdateScriptUseCase,
@@ -69,6 +73,13 @@ class EditorViewModel
                     started = SharingStarted.WhileSubscribed(5000),
                     initialValue = false,
                 )
+
+        val automations: StateFlow<List<Automation>> =
+            automationRepository.getAllAutomations().stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = emptyList(),
+            )
 
         private val _currentScript = MutableStateFlow<Script?>(null)
         val currentScript = _currentScript.asStateFlow()
@@ -141,7 +152,7 @@ class EditorViewModel
                 try {
                     val scriptToSave =
                         _currentScript.value?.let { current ->
-                            script.copy(codePages = current.codePages)
+                            script.copy(codePages = current.codePages, pageNames = current.pageNames)
                         } ?: script
                     updateScriptUseCase(scriptToSave)
 
@@ -225,9 +236,11 @@ class EditorViewModel
                 fromIndex -> {
                     currentPageIndex = toIndex
                 }
+
                 in (fromIndex + 1)..toIndex -> {
                     currentPageIndex -= 1
                 }
+
                 in toIndex..<fromIndex -> {
                     currentPageIndex += 1
                 }
@@ -280,4 +293,12 @@ class EditorViewModel
                     null
                 }
             }
+
+        fun reloadScript() {
+            val id = _currentScript.value?.id ?: return
+            if (id == 0) return
+            viewModelScope.launch(ioDispatcher) {
+                _currentScript.value = scriptRepository.getScriptById(id)
+            }
+        }
     }

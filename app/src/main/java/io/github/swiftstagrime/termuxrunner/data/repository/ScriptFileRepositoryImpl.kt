@@ -27,7 +27,8 @@ class ScriptFileRepositoryImpl
                     val folderName = context.getString(R.string.bridge_folder_name)
                     File(context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS), folderName)
                 } else {
-                    val downloadDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+                    val downloadDir =
+                        Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
                     val folderName = context.getString(R.string.bridge_folder_name)
                     File(downloadDir, folderName)
                 }

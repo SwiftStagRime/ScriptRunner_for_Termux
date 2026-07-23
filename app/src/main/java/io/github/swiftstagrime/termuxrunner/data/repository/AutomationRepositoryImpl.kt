@@ -27,7 +27,7 @@ class AutomationRepositoryImpl
 
         override suspend fun saveAutomation(automation: Automation) {
             var entity = automation.toEntity()
-            if (entity.type != AutomationType.BOOT) {
+            if (entity.type != AutomationType.BOOT && !entity.type.isEventBased) {
                 val now = System.currentTimeMillis()
                 val triggerTime = entity.nextRunTimestamp ?: entity.scheduledTimestamp
                 if (triggerTime < now && !entity.runIfMissed) {
@@ -67,7 +67,23 @@ class AutomationRepositoryImpl
                 it.toAutomationDomain()
             }
 
-        override suspend fun updateLastResult(automationId: Int, exitCode: Int, timestamp: Long) {
+        override suspend fun updateLastResult(
+            automationId: Int,
+            exitCode: Int,
+            timestamp: Long,
+        ) {
             dao.updateLastResult(automationId, exitCode, timestamp)
         }
+
+        override suspend fun getAutomationByAdbCode(code: String): Result<Automation> =
+            runCatching {
+                val entity =
+                    dao.getAutomationByAdbCode(code)
+                        ?: throw AutomationNotFoundException(code)
+                entity.toAutomationDomain()
+            }
     }
+
+class AutomationNotFoundException(
+    val code: String,
+) : Exception("Automation with code '$code' was not found in the database.")

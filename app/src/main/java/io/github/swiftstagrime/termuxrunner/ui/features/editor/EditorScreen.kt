@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -35,6 +36,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import io.github.swiftstagrime.termuxrunner.R
+import io.github.swiftstagrime.termuxrunner.domain.model.Automation
 import io.github.swiftstagrime.termuxrunner.domain.model.Category
 import io.github.swiftstagrime.termuxrunner.domain.model.Script
 import io.github.swiftstagrime.termuxrunner.ui.features.scriptconfigdialog.ScriptConfigDialog
@@ -50,6 +52,7 @@ fun EditorScreen(
     onCodeChange: (TextFieldValue) -> Unit,
     onMetadataChange: (Script) -> Unit,
     snackbarHostState: SnackbarHostState,
+    allAutomations: List<Automation>,
     onBack: () -> Unit,
     onSave: (Script) -> Unit,
     categories: List<Category>,
@@ -73,6 +76,7 @@ fun EditorScreen(
     onConfirmDeletePage: () -> Unit = {},
     onDismissDeletePage: () -> Unit = {},
     defaultWrapEnabled: Boolean = false,
+    onNavigateToVersions: () -> Unit = {},
 ) {
     var showConfigDialog by rememberSaveable { mutableStateOf(false) }
 
@@ -107,15 +111,29 @@ fun EditorScreen(
                 },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.back_description))
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack,
+                            stringResource(R.string.back_description),
+                        )
                     }
                 },
                 actions = {
+                    IconButton(onClick = onNavigateToVersions, enabled = scriptDraft.id != 0) {
+                        Icon(
+                            Icons.Default.History,
+                            "Code versions",
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
                     IconButton(onClick = {
                         onOpenConfig()
                         showConfigDialog = true
                     }, modifier = Modifier.testTag("editor_save_btn")) {
-                        Icon(Icons.Default.Save, stringResource(R.string.cd_save), tint = MaterialTheme.colorScheme.primary)
+                        Icon(
+                            Icons.Default.Save,
+                            stringResource(R.string.cd_save),
+                            tint = MaterialTheme.colorScheme.primary,
+                        )
                     }
                 },
             )
@@ -161,6 +179,7 @@ fun EditorScreen(
         if (showConfigDialog) {
             ScriptConfigDialog(
                 state = configState!!,
+                allAutomations = allAutomations,
                 categories = categories,
                 onDismiss = {
                     showConfigDialog = false
@@ -189,7 +208,10 @@ fun EditorScreen(
                 text = { Text(stringResource(R.string.cd_confirm_delete_page)) },
                 confirmButton = {
                     TextButton(onClick = onConfirmDeletePage) {
-                        Text(stringResource(R.string.delete), color = MaterialTheme.colorScheme.error)
+                        Text(
+                            stringResource(R.string.delete),
+                            color = MaterialTheme.colorScheme.error,
+                        )
                     }
                 },
                 dismissButton = {
@@ -225,6 +247,7 @@ fun PreviewEditorNewRaw() {
                     codePages = listOf(sampleCode, "# Page 2\necho second"),
                     pageNames = listOf("Main", "Helper"),
                 ),
+            allAutomations = emptyList(),
             codeState = TextFieldValue(sampleCode),
             onCodeChange = {},
             onMetadataChange = {},

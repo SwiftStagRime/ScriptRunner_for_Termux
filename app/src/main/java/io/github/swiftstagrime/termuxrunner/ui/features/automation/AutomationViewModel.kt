@@ -6,8 +6,10 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.swiftstagrime.termuxrunner.data.local.entity.AutomationEntity
 import io.github.swiftstagrime.termuxrunner.di.IoDispatcher
 import io.github.swiftstagrime.termuxrunner.domain.model.Automation
+import io.github.swiftstagrime.termuxrunner.domain.model.AutomationChain
 import io.github.swiftstagrime.termuxrunner.domain.model.Category
 import io.github.swiftstagrime.termuxrunner.domain.model.Script
+import io.github.swiftstagrime.termuxrunner.domain.repository.AutomationChainRepository
 import io.github.swiftstagrime.termuxrunner.domain.repository.AutomationLogRepository
 import io.github.swiftstagrime.termuxrunner.domain.repository.AutomationRepository
 import io.github.swiftstagrime.termuxrunner.domain.repository.CategoryRepository
@@ -36,6 +38,7 @@ class AutomationViewModel
         private val scriptRepository: ScriptRepository,
         categoryRepository: CategoryRepository,
         private val automationLogRepository: AutomationLogRepository,
+        private val chainRepository: AutomationChainRepository,
         private val runScriptUseCase: RunScriptUseCase,
         private val widgetManager: WidgetManager,
         @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
@@ -105,6 +108,14 @@ class AutomationViewModel
                         requireWifi = params.requireWifi,
                         requireCharging = params.requireCharging,
                         batteryThreshold = params.batteryThreshold,
+                        scheduledDayOfMonth = params.scheduledDayOfMonth,
+                        windowStartHour = params.windowStartHour,
+                        windowStartMinute = params.windowStartMinute,
+                        windowEndHour = params.windowEndHour,
+                        windowEndMinute = params.windowEndMinute,
+                        randomDelayMinMillis = params.randomDelayMinMillis,
+                        randomDelayMaxMillis = params.randomDelayMaxMillis,
+                        automationCode = params.automationCode.ifBlank { null },
                     )
 
                 val nextRun =
@@ -133,6 +144,14 @@ class AutomationViewModel
                         batteryThreshold = params.batteryThreshold,
                         lastRunTimestamp = null,
                         lastExitCode = null,
+                        scheduledDayOfMonth = params.scheduledDayOfMonth,
+                        windowStartHour = params.windowStartHour,
+                        windowStartMinute = params.windowStartMinute,
+                        windowEndHour = params.windowEndHour,
+                        windowEndMinute = params.windowEndMinute,
+                        randomDelayMinMillis = params.randomDelayMinMillis,
+                        randomDelayMaxMillis = params.randomDelayMaxMillis,
+                        automationCode = params.automationCode.ifBlank { null },
                     )
 
                 automationRepository.saveAutomation(automation)
@@ -141,4 +160,18 @@ class AutomationViewModel
         }
 
         fun getAutomationLogs(automationId: Int) = automationLogRepository.getLogsForAutomation(automationId)
+
+        suspend fun saveChain(chain: AutomationChain) {
+            require(chain.name.isNotBlank()) { "Chain name cannot be blank" }
+            require(chain.steps.isNotEmpty()) { "Chain must have at least one step" }
+            chainRepository.saveChain(chain)
+        }
+
+        suspend fun updateChain(chain: AutomationChain) {
+            require(chain.name.isNotBlank()) { "Chain name cannot be blank" }
+            require(chain.steps.isNotEmpty()) { "Chain must have at least one step" }
+            chainRepository.updateChain(chain)
+        }
+
+        suspend fun getChainsByTriggerId(automationId: Int): List<AutomationChain> = chainRepository.getChainsByTriggerId(automationId)
     }

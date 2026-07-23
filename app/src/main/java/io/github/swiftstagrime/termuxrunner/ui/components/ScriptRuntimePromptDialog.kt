@@ -131,6 +131,7 @@ fun ScriptRuntimePromptDialog(
                             envList = textModeEnvList,
                         )
                     }
+
                     InteractionMode.MULTI_CHOICE -> {
                         MultiChoiceSection(
                             script = script,
@@ -255,7 +256,10 @@ private fun MultiChoiceSection(
     selectedEnvPresets: SnapshotStateList<String>,
 ) {
     if (script.prefixPresets.isNotEmpty()) {
-        Text(stringResource(R.string.label_choose_prefix), style = MaterialTheme.typography.labelLarge)
+        Text(
+            stringResource(R.string.label_choose_prefix),
+            style = MaterialTheme.typography.labelLarge,
+        )
         FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             script.prefixPresets.forEach { prefix ->
                 FilterChip(

@@ -164,6 +164,16 @@
     <string name="desc_bg_execution">Only show notification</string>
     <string name="label_interactive_session">Interactive Session</string>
     <string name="desc_interactive_session">Keep terminal open after finish</string>
+    <string name="label_foreground_session_behavior">Foreground Session Behavior</string>
+    <string name="desc_foreground_session_behavior">What Termux does with the new session</string>
+    <string name="fg_session_switch_open">Switch to new session, open Termux</string>
+    <string name="fg_session_keep_open">Keep current session, open Termux</string>
+    <string name="fg_session_switch_silent">Switch to new session, keep Termux closed</string>
+    <string name="fg_session_keep_silent">Keep current session, keep Termux closed</string>
+    <string name="fg_session_default">Termux default</string>
+    <string name="label_reuse_session">Reuse Existing Session</string>
+    <string name="desc_reuse_session">If a Termux session with this script\'s name exists, run the script there instead of creating a new session</string>
+    <string name="warning_reuse_session_version">Requires Termux 0.119 or newer. On older versions this option is ignored and a new session is created</string>
     <string name="empty_env_vars">No environment variables set.</string>
     <string name="label_key">Key</string>
     <string name="placeholder_key" translatable="false">API_KEY</string>
@@ -188,6 +198,11 @@
     <string name="error_empty_name">Script name cannot be empty</string>
     <string name="execution_feedback">Execution Feedback</string>
     <string name="show_a_notification_with_the_result_success_fail_when_finished">Show a notification with the result (Success/Fail) when finished</string>
+    <string name="section_notification_actions">Notification Actions</string>
+    <string name="desc_notification_actions">Action buttons shown in script result notifications. Each button triggers another automation.</string>
+    <string name="label_action_label">Label</string>
+    <string name="label_target_automation">Target Automation</string>
+    <string name="btn_add_action">Add Action</string>
     <string name="section_interactivity">Interactivity &amp; Presets</string>
     <string name="label_interaction_mode">Interaction Mode</string>
     <string name="interaction_none">None (Instant)</string>
@@ -200,7 +215,7 @@
     <string name="label_prefix_value">Prefix Value</string>
     <string name="btn_add_preset">Add Preset</string>
     <string name="placeholder_prefix_example">e.g. sudo</string>
-    <string name="adb_code">ADB code name(empty by default)</string>
+    <string name="adb_code">Trigger code (empty = cannot trigger externally)</string>
 
 
     <!-- Repo errors -->
@@ -278,7 +293,7 @@
     <!-- Script Picker Dialog -->
     <string name="title_select_script">Select Script</string>
     <string name="no_scripts_available">No scripts available</string>
-    <string name="assign_scripts_to_these_slots_you_can_then_trigger_them_directly_from_your_phone_s_quick_settings_panel">Assign scripts to these slots. You can then trigger them directly from your phone\'s Quick Settings panel.</string>
+    <string name="tile_assignment_hint">Assign scripts to these slots. You can then trigger them directly from your phone\'s Quick Settings panel.</string>
     <string name="configure_tiles">Configure Tiles</string>
     <string name="empty">Empty</string>
 
@@ -305,7 +320,8 @@
     <string name="notif_finished_success">Finished successfully</string>
     <string name="notif_finished_error">Finished with error (Code: %1$d)</string>
     <string name="notif_restart_count"> • Restarts: %1$d</string>
-    <string name="notif_details_format">Status: %1$s %2$s\nUptime: %3$d m • Last Pulse: %4$d s ago</string>    <string name="notif_monitoring_title">Monitoring: %1$s</string>
+    <string name="notif_details_format">Status: %1$s %2$s\nUptime: %3$d m • Last Pulse: %4$d s ago</string>
+    <string name="notif_monitoring_title">Monitoring: %1$s</string>
     <string name="notif_stop_monitoring">Stop Monitoring</string>
     <string name="channel_monitor_name">Script Monitor</string>
     <string name="channel_monitor_desc">Shows status of scripts running with crash protection</string>
@@ -341,6 +357,12 @@
     <string name="automation_condition_wifi">WiFi Only</string>
     <string name="automation_condition_charging">Charging Only</string>
     <string name="automation_section_upcoming">Upcoming Schedule</string>
+    <string name="automation_section_trigger">Trigger Mode</string>
+    <string name="automation_section_schedule_type">Schedule Type</string>
+    <string name="automation_section_event_source">Event Source</string>
+    <string name="trigger_mode_schedule">Schedule</string>
+    <string name="trigger_mode_event">Event</string>
+    <string name="trigger_mode_boot">On Boot</string>
     <string name="automation_save_button">Schedule Task</string>
     <string name="ok">OK</string>
     <string name="history_title">Execution History</string>
@@ -359,8 +381,22 @@
     <string name="label_battery_threshold">Battery Threshold</string>
     <string name="battery_threshold_desc">Run only if battery is above %1$d%%</string>
     <string name="automation_type_boot">On Boot</string>
+    <string name="automation_type_monthly">Monthly</string>
+    <string name="automation_type_time_window">Time Window</string>
+    <string name="automation_type_random_delay">Random Delay</string>
+    <string name="automation_type_screen_on">Screen On</string>
+    <string name="automation_type_screen_off">Screen Off</string>
+    <string name="automation_type_network_connected">Network Connected</string>
+    <string name="automation_type_network_disconnected">Network Disconnected</string>
+    <string name="automation_type_usb_connected">USB Connected</string>
+    <string name="automation_type_usb_disconnected">USB Disconnected</string>
     <string name="automation_boot_hint">Script will run every time the device boots up.</string>
     <string name="automation_boot_next_run">Runs on every boot</string>
+    <string name="automation_monthly_day_of_month">Day of month</string>
+    <string name="automation_window_from">From %1$s</string>
+    <string name="automation_window_to">To %1$s</string>
+    <string name="automation_random_delay_min">Min (s)</string>
+    <string name="automation_random_delay_max">Max (s)</string>
 
     <!-- Automation Widget -->
     <string name="automation_widget_title">Automations</string>
@@ -423,4 +459,32 @@
     <string name="surfaces_background"><![CDATA[Surfaces & Background]]></string>
     <string name="utility">Utility</string>
     <string name="surface_container_lowest">Surface Container Lowest</string>
+
+    <!-- Webhook Server -->
+    <string name="webhook_settings_title">Webhook Settings</string>
+    <string name="webhook_config_label">Configuration</string>
+    <string name="webhook_port_label">Port</string>
+    <string name="webhook_bind_label">LAN Access</string>
+    <string name="webhook_bind_all">0.0.0.0</string>
+    <string name="webhook_bind_local">127.0.0.1</string>
+    <string name="webhook_lan_access_hint">When enabled, the server listens on all interfaces and can be reached from other devices on your network.</string>
+    <string name="webhook_auth_label">Authentication</string>
+    <string name="webhook_token_label">Auth Token</string>
+    <string name="webhook_copy_token">Copy token</string>
+    <string name="webhook_regenerate_token">Regenerate token</string>
+    <string name="webhook_generate_token">Generate Token</string>
+    <string name="webhook_auth_hint">Include the token as a Bearer header or query parameter when making requests.</string>
+    <string name="webhook_examples_label">Example Requests</string>
+    <string name="webhook_example_script">Trigger script by ID</string>
+    <string name="webhook_example_automation">Trigger automation by ID</string>
+    <string name="webhook_query_param_hint">Token can also be passed as ?token=YOUR_TOKEN in the URL.</string>
+    <string name="webhook_enable_label">Enable webhook server</string>
+    <string name="webhook_running_indicator">Running on port %1$d</string>
+    <string name="webhook_stopped_indicator">Stopped</string>
+    <string name="webhook_restarting">Restarting server…</string>
+    <string name="webhook_server_restarted">Server restarted</string>
+    <string name="webhook_stop_server">Stop server</string>
+    <!-- General -->
+    <string name="copied_label">Copied!</string>
+    <string name="execution_history_label">Execution History</string>
 </resources>

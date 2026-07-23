@@ -186,9 +186,20 @@ fun CodeEditor(
     val passiveMatchColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f)
 
     val searchTransformation =
-        remember(searchMatches, currentMatchIndex, isSearchVisible, activeMatchColor, passiveMatchColor) {
+        remember(
+            searchMatches,
+            currentMatchIndex,
+            isSearchVisible,
+            activeMatchColor,
+            passiveMatchColor,
+        ) {
             if (isSearchVisible && searchMatches.isNotEmpty()) {
-                SearchVisualTransformation(searchMatches, currentMatchIndex, activeMatchColor, passiveMatchColor)
+                SearchVisualTransformation(
+                    searchMatches,
+                    currentMatchIndex,
+                    activeMatchColor,
+                    passiveMatchColor,
+                )
             } else {
                 VisualTransformation.None
             }
@@ -199,15 +210,24 @@ fun CodeEditor(
             EditorActions(onCodeChange, interpreter, undoStack, redoStack)
         }
 
-    Box(modifier = modifier.fillMaxSize().imePadding()) {
+    Box(
+        modifier =
+            modifier
+                .fillMaxSize()
+                .imePadding(),
+    ) {
         Column(modifier = Modifier.fillMaxSize()) {
             EditorSearchBar(
                 visible = isSearchVisible,
                 query = searchQuery,
                 onQueryChange = { searchQuery = it },
                 matchInfo = if (searchMatches.isNotEmpty()) "${currentMatchIndex + 1}/${searchMatches.size}" else null,
-                onPrev = { currentMatchIndex = navigateSearch(searchMatches, currentMatchIndex, -1) },
-                onNext = { currentMatchIndex = navigateSearch(searchMatches, currentMatchIndex, 1) },
+                onPrev = {
+                    currentMatchIndex = navigateSearch(searchMatches, currentMatchIndex, -1)
+                },
+                onNext = {
+                    currentMatchIndex = navigateSearch(searchMatches, currentMatchIndex, 1)
+                },
                 onClose = {
                     isSearchVisible = false
                     searchQuery = ""
@@ -238,7 +258,15 @@ fun CodeEditor(
                 onUndo = { actions.undo(onCodeChange) },
                 onRedo = { actions.redo(onCodeChange) },
                 onToggleSearch = { isSearchVisible = !isSearchVisible },
-                onToggleComment = { onCodeChange(code.toggleComment(LanguageUtils.getCommentSymbol(interpreter))) },
+                onToggleComment = {
+                    onCodeChange(
+                        code.toggleComment(
+                            LanguageUtils.getCommentSymbol(
+                                interpreter,
+                            ),
+                        ),
+                    )
+                },
                 onHide = { isAccessoryVisible = false },
                 onInsertSymbol = { actions.handleInsertSymbol(code, it) },
                 interpreter = interpreter,
@@ -256,7 +284,13 @@ fun CodeEditor(
                 onToggleWrap = { isWrappingEnabled = !isWrappingEnabled },
                 isWrappingEnabled = isWrappingEnabled,
                 onScrollTop = { coroutineScope.launch { verticalScrollState.animateScrollTo(0) } },
-                onScrollBottom = { coroutineScope.launch { verticalScrollState.animateScrollTo(verticalScrollState.maxValue) } },
+                onScrollBottom = {
+                    coroutineScope.launch {
+                        verticalScrollState.animateScrollTo(
+                            verticalScrollState.maxValue,
+                        )
+                    }
+                },
             )
         }
     }
@@ -363,14 +397,21 @@ private class EditorActions(
             val indent = getIndentation(newText, cursor - 1)
             if (indent.isNotEmpty()) {
                 val result = newText.take(cursor) + indent + newText.substring(cursor)
-                onCodeChange(newValue.copy(text = result, selection = TextRange(cursor + indent.length)))
+                onCodeChange(
+                    newValue.copy(
+                        text = result,
+                        selection = TextRange(cursor + indent.length),
+                    ),
+                )
                 return
             }
         }
 
         val pairs = mapOf('(' to ')', '{' to '}', '[' to ']', '"' to '"', '\'' to '\'')
         if (pairs.containsKey(char)) {
-            onCodeChange(newValue.insert(pairs[char].toString()).copy(selection = TextRange(cursor)))
+            onCodeChange(
+                newValue.insert(pairs[char].toString()).copy(selection = TextRange(cursor)),
+            )
             return
         }
 
@@ -386,14 +427,17 @@ private class EditorActions(
                 val start = current.text.lastIndexOf('\n', current.selection.start - 1) + 1
                 onCodeChange(current.copy(selection = TextRange(start)))
             }
+
             "END_KEY" -> {
                 val index = current.text.indexOf('\n', current.selection.start)
                 val end = if (index == -1) current.text.length else index
                 onCodeChange(current.copy(selection = TextRange(end)))
             }
+
             "BACKTAB" -> {
                 val cursor = current.selection.start
-                val lineStart = current.text.lastIndexOf('\n', cursor - 1).let { if (it == -1) 0 else it + 1 }
+                val lineStart =
+                    current.text.lastIndexOf('\n', cursor - 1).let { if (it == -1) 0 else it + 1 }
                 val spaces = "    "
                 if (current.text.startsWith(spaces, lineStart)) {
                     onCodeChange(
@@ -411,6 +455,7 @@ private class EditorActions(
                     )
                 }
             }
+
             else -> onCodeChange(current.insert(symbol))
         }
     }
@@ -448,8 +493,19 @@ private fun MainEditorArea(
             (TOOLBAR_HEIGHT_DP.dp + (EXTRA_LINES_COUNT * LINE_HEIGHT_SP).sp.toDp() + 120.dp)
         }
 
-    Row(modifier = Modifier.fillMaxWidth().background(Color.Transparent)) {
-        LineNumberGutter(code.text, textLayoutResult, scrollState, EXTRA_LINES_COUNT, TOOLBAR_HEIGHT_DP.dp)
+    Row(
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .background(Color.Transparent),
+    ) {
+        LineNumberGutter(
+            code.text,
+            textLayoutResult,
+            scrollState,
+            EXTRA_LINES_COUNT,
+            TOOLBAR_HEIGHT_DP.dp,
+        )
 
         Box(
             modifier =
@@ -457,7 +513,15 @@ private fun MainEditorArea(
                     .weight(1f)
                     .fillMaxHeight()
                     .verticalScroll(scrollState)
-                    .then(if (isWrappingEnabled) Modifier else Modifier.horizontalScroll(rememberScrollState())),
+                    .then(
+                        if (isWrappingEnabled) {
+                            Modifier
+                        } else {
+                            Modifier.horizontalScroll(
+                                rememberScrollState(),
+                            )
+                        },
+                    ),
         ) {
             Column {
                 BasicTextField(
@@ -490,7 +554,10 @@ private fun MainEditorArea(
                                     Text(
                                         stringResource(R.string.editor_placeholder),
                                         modifier = Modifier.padding(top = 2.dp),
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                                        color =
+                                            MaterialTheme.colorScheme.onSurfaceVariant.copy(
+                                                alpha = 0.5f,
+                                            ),
                                     )
                                 }
                                 inner()
@@ -500,14 +567,17 @@ private fun MainEditorArea(
                 )
                 Spacer(
                     modifier =
-                        Modifier.fillMaxWidth().height(bottomBuffer).clickable(
-                            interactionSource =
-                                remember {
-                                    MutableInteractionSource()
-                                },
-                            indication = null,
-                            onClick = onBottomClick,
-                        ),
+                        Modifier
+                            .fillMaxWidth()
+                            .height(bottomBuffer)
+                            .clickable(
+                                interactionSource =
+                                    remember {
+                                        MutableInteractionSource()
+                                    },
+                                indication = null,
+                                onClick = onBottomClick,
+                            ),
                 )
             }
         }

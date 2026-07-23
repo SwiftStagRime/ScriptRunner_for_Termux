@@ -95,6 +95,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import io.github.swiftstagrime.termuxrunner.R
+import io.github.swiftstagrime.termuxrunner.domain.model.Automation
 import io.github.swiftstagrime.termuxrunner.domain.model.Category
 import io.github.swiftstagrime.termuxrunner.domain.model.Script
 import io.github.swiftstagrime.termuxrunner.ui.components.ScriptIcon
@@ -128,6 +129,7 @@ data class HomeActions(
     val onMove: (Int, Int) -> Unit,
     val onTileSettingsClick: () -> Unit,
     val onNavigateToAutomation: () -> Unit,
+    val onNavigateToScriptHistory: (Script) -> Unit,
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -137,6 +139,7 @@ fun HomeScreen(
     searchQuery: String,
     configState: ScriptConfigState?,
     originalScript: Script?,
+    allAutomations: List<Automation>,
     isBatteryUnrestricted: Boolean,
     selectedCategoryId: Int?,
     sortOption: SortOption,
@@ -215,6 +218,7 @@ fun HomeScreen(
                 state = configState,
                 script = originalScript,
                 categories = uiState.categories,
+                allAutomations = allAutomations,
                 onDismiss = actions.onDismissConfig,
                 onSave = { updatedScript ->
                     actions.onUpdateScript(updatedScript)
@@ -252,7 +256,10 @@ private fun CollapsingHomeTopBar(
                         onToggleSearch(false)
                         actions.onSearchQueryChange("")
                     }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.cd_close_search))
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack,
+                            stringResource(R.string.cd_close_search),
+                        )
                     }
                 },
                 actions = {
@@ -398,58 +405,65 @@ private fun ScriptList(
         contentPadding = PaddingValues(top = 0.dp, start = 12.dp, end = 12.dp, bottom = 88.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
         modifier =
-            modifier.fillMaxSize().then(
-                if (isManualSort) {
-                    Modifier.pointerInput(Unit) {
-                        detectDragGesturesAfterLongPress(
-                            onDragStart = { offset ->
-                                lazyListState.layoutInfo.visibleItemsInfo
-                                    .find {
-                                        it.offset <= offset.y.toInt() && (it.offset + it.size) >= offset.y.toInt()
-                                    }?.let { item ->
-                                        if (item.index >= listOffset) {
-                                            draggedItemIndex = item.index
+            modifier
+                .fillMaxSize()
+                .then(
+                    if (isManualSort) {
+                        Modifier.pointerInput(Unit) {
+                            detectDragGesturesAfterLongPress(
+                                onDragStart = { offset ->
+                                    lazyListState.layoutInfo.visibleItemsInfo
+                                        .find {
+                                            it.offset <= offset.y.toInt() && (it.offset + it.size) >= offset.y.toInt()
+                                        }?.let { item ->
+                                            if (item.index >= listOffset) {
+                                                draggedItemIndex = item.index
+                                            }
+                                        }
+                                },
+                                onDrag = { change, dragAmount ->
+                                    change.consume()
+                                    dragOffset += dragAmount.y
+                                    val currentIdx =
+                                        draggedItemIndex ?: return@detectDragGesturesAfterLongPress
+                                    val layoutInfo = lazyListState.layoutInfo
+                                    val currentItem =
+                                        layoutInfo.visibleItemsInfo.find { it.index == currentIdx }
+
+                                    currentItem?.let {
+                                        val targetCenter = it.offset + (it.size / 2) + dragOffset
+                                        val targetItem =
+                                            layoutInfo.visibleItemsInfo.find { info ->
+                                                targetCenter.toInt() in info.offset..(info.offset + info.size)
+                                            }
+
+                                        if (targetItem != null &&
+                                            targetItem.index != currentIdx &&
+                                            targetItem.index >= listOffset
+                                        ) {
+                                            actions.onMove(
+                                                currentIdx - listOffset,
+                                                targetItem.index - listOffset,
+                                            )
+                                            draggedItemIndex = targetItem.index
+                                            dragOffset = 0f
                                         }
                                     }
-                            },
-                            onDrag = { change, dragAmount ->
-                                change.consume()
-                                dragOffset += dragAmount.y
-                                val currentIdx = draggedItemIndex ?: return@detectDragGesturesAfterLongPress
-                                val layoutInfo = lazyListState.layoutInfo
-                                val currentItem = layoutInfo.visibleItemsInfo.find { it.index == currentIdx }
-
-                                currentItem?.let {
-                                    val targetCenter = it.offset + (it.size / 2) + dragOffset
-                                    val targetItem =
-                                        layoutInfo.visibleItemsInfo.find { info ->
-                                            targetCenter.toInt() in info.offset..(info.offset + info.size)
-                                        }
-
-                                    if (targetItem != null &&
-                                        targetItem.index != currentIdx &&
-                                        targetItem.index >= listOffset
-                                    ) {
-                                        actions.onMove(currentIdx - listOffset, targetItem.index - listOffset)
-                                        draggedItemIndex = targetItem.index
-                                        dragOffset = 0f
-                                    }
-                                }
-                            },
-                            onDragEnd = {
-                                draggedItemIndex = null
-                                dragOffset = 0f
-                            },
-                            onDragCancel = {
-                                draggedItemIndex = null
-                                dragOffset = 0f
-                            },
-                        )
-                    }
-                } else {
-                    Modifier
-                },
-            ),
+                                },
+                                onDragEnd = {
+                                    draggedItemIndex = null
+                                    dragOffset = 0f
+                                },
+                                onDragCancel = {
+                                    draggedItemIndex = null
+                                    dragOffset = 0f
+                                },
+                            )
+                        }
+                    } else {
+                        Modifier
+                    },
+                ),
     ) {
         if (showBanner) {
             item(key = "banner_header") {
@@ -516,11 +530,15 @@ private fun ScriptList(
                         onRunClick = actions.onRunClick,
                         onDeleteClick = actions.onDeleteScript,
                         onCreateShortcutClick = actions.onCreateShortcutClick,
+                        onHistoryClick = actions.onNavigateToScriptHistory,
                     )
                 }
             }
         } else {
-            itemsIndexed(items = uiState.scripts, key = { _, script -> script.id }) { index, script ->
+            itemsIndexed(
+                items = uiState.scripts,
+                key = { _, script -> script.id },
+            ) { index, script ->
                 val absoluteIndex = index + listOffset
                 val isDragging = absoluteIndex == draggedItemIndex
 
@@ -539,7 +557,12 @@ private fun ScriptList(
                         Modifier
                     }
 
-                Box(modifier = Modifier.fillMaxWidth().then(itemModifier)) {
+                Box(
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .then(itemModifier),
+                ) {
                     ScriptItem(
                         script = script,
                         onCodeClick = actions.onScriptCodeClick,
@@ -547,6 +570,7 @@ private fun ScriptList(
                         onRunClick = actions.onRunClick,
                         onDeleteClick = actions.onDeleteScript,
                         onCreateShortcutClick = actions.onCreateShortcutClick,
+                        onHistoryClick = actions.onNavigateToScriptHistory,
                     )
                 }
             }
@@ -562,6 +586,7 @@ private fun ScriptItem(
     onRunClick: (Script) -> Unit,
     onDeleteClick: (Script) -> Unit,
     onCreateShortcutClick: (Script) -> Unit,
+    onHistoryClick: (Script) -> Unit,
 ) {
     Card(
         modifier =
@@ -635,6 +660,7 @@ private fun ScriptItem(
                     onConfigClick = onConfigClick,
                     onCreateShortcutClick = onCreateShortcutClick,
                     onDeleteClick = onDeleteClick,
+                    onHistoryClick = onHistoryClick,
                 )
             }
         }
@@ -647,6 +673,7 @@ private fun ScriptContextMenu(
     onConfigClick: (Script) -> Unit,
     onCreateShortcutClick: (Script) -> Unit,
     onDeleteClick: (Script) -> Unit,
+    onHistoryClick: (Script) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     var showMenu by remember { mutableStateOf(false) }
@@ -706,6 +733,26 @@ private fun ScriptContextMenu(
                 onClick = {
                     showMenu = false
                     onCreateShortcutClick(script)
+                },
+            )
+            DropdownMenuItem(
+                text = {
+                    Text(
+                        stringResource(R.string.history_title),
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
+                },
+                leadingIcon = {
+                    Icon(
+                        Icons.Default.History,
+                        null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(20.dp),
+                    )
+                },
+                onClick = {
+                    showMenu = false
+                    onHistoryClick(script)
                 },
             )
             HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
@@ -954,6 +1001,7 @@ fun PreviewHomeScreen() {
             searchQuery = "",
             configState = null,
             originalScript = null,
+            allAutomations = emptyList(),
             isBatteryUnrestricted = false,
             selectedCategoryId = null,
             sortOption = SortOption.NAME_ASC,
@@ -972,6 +1020,7 @@ private fun PreviewEmptyHome() {
             searchQuery = "",
             configState = null,
             originalScript = null,
+            allAutomations = emptyList(),
             isBatteryUnrestricted = false,
             selectedCategoryId = null,
             sortOption = SortOption.NAME_ASC,

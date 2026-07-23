@@ -144,7 +144,8 @@ class CustomThemeViewModel
             isDark: Boolean,
         ): CustomTheme {
             val seedColor = Color(seed.toInt())
-            val scheme = if (isDark) darkColorScheme(primary = seedColor) else lightColorScheme(primary = seedColor)
+            val scheme =
+                if (isDark) darkColorScheme(primary = seedColor) else lightColorScheme(primary = seedColor)
 
             return CustomTheme(
                 id = _uiState.value.editingTheme?.id ?: 0,

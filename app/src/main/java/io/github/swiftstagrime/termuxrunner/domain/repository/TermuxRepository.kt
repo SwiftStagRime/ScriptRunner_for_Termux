@@ -10,7 +10,8 @@ interface TermuxRepository {
     fun runCommand(
         command: String,
         runInBackground: Boolean,
-        sessionAction: String,
+        sessionAction: String?,
+        shellName: String?,
         scriptId: Int,
         scriptName: String,
         notifyOnResult: Boolean,

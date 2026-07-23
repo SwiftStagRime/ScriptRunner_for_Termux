@@ -38,6 +38,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun EditorRoute(
     onBack: () -> Unit,
+    onNavigateToVersions: (Int) -> Unit = {},
     viewModel: EditorViewModel = hiltViewModel(),
 ) {
     val context = LocalContext.current
@@ -48,6 +49,7 @@ fun EditorRoute(
     val script by viewModel.currentScript.collectAsStateWithLifecycle()
     val categories by viewModel.categories.collectAsStateWithLifecycle()
     val lineWrappingEnabled by viewModel.lineWrappingEnabled.collectAsStateWithLifecycle()
+    val automations by viewModel.automations.collectAsStateWithLifecycle()
 
     var scriptDraft by rememberSaveable(script?.id) {
         mutableStateOf(script)
@@ -139,6 +141,7 @@ fun EditorRoute(
             LifecycleEventObserver { _, event ->
                 if (event == Lifecycle.Event.ON_RESUME) {
                     isBatteryUnrestricted = BatteryUtils.isIgnoringBatteryOptimizations(context)
+                    viewModel.reloadScript()
                 }
             }
         lifecycleOwner.lifecycle.addObserver(observer)
@@ -180,6 +183,7 @@ fun EditorRoute(
                 viewModel.updateCurrentPageCode(it.text)
             },
             onMetadataChange = { scriptDraft = it },
+            allAutomations = automations,
             categories = categories,
             onBack = onBack,
             onSave = viewModel::saveScript,
@@ -201,6 +205,7 @@ fun EditorRoute(
             onConfirmDeletePage = viewModel::confirmDeletePage,
             onDismissDeletePage = viewModel::dismissDeletePageDialog,
             defaultWrapEnabled = lineWrappingEnabled,
+            onNavigateToVersions = { scriptDraft?.id?.let(onNavigateToVersions) },
         )
     }
 }

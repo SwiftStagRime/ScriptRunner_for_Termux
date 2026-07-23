@@ -4,6 +4,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.toMutableStateList
+import io.github.swiftstagrime.termuxrunner.domain.model.NotificationAction
 import io.github.swiftstagrime.termuxrunner.domain.model.Script
 
 private const val MS_TO_S = 1000L
@@ -25,6 +26,8 @@ class ScriptConfigState(
     var heartbeatInterval by mutableStateOf((script.heartbeatInterval / MS_TO_S).toString())
     var heartbeatTimeout by mutableStateOf((script.heartbeatTimeout / MS_TO_S).toString())
     var runInBackground by mutableStateOf(script.runInBackground)
+    var foregroundSessionBehavior by mutableStateOf(script.foregroundSessionBehavior)
+    var reuseSession by mutableStateOf(script.reuseSession)
     var keepOpen by mutableStateOf(script.keepSessionOpen)
     var interactionMode by mutableStateOf(script.interactionMode)
     var showAddCategoryDialog by mutableStateOf(false)
@@ -37,6 +40,10 @@ class ScriptConfigState(
     val prefixPresets = script.prefixPresets.toMutableStateList()
     val envVarPresets = script.envVarPresets.toMutableStateList()
     var adbCode by mutableStateOf(script.adbCode)
+    val notificationActions =
+        script.notificationActions
+            .map { Pair(it.label, it.targetAutomationId) }
+            .toMutableStateList()
 
     fun validate(): Boolean {
         if (name.isBlank()) {
@@ -58,9 +65,15 @@ class ScriptConfigState(
             codePages = codePages,
             pageNames = pageNames,
             executionParams = executionParams,
-            heartbeatInterval = heartbeatInterval.toLongOrNull()?.times(MS_TO_S) ?: original.heartbeatInterval,
-            heartbeatTimeout = heartbeatTimeout.toLongOrNull()?.times(MS_TO_S) ?: original.heartbeatTimeout,
+            heartbeatInterval =
+                heartbeatInterval.toLongOrNull()?.times(MS_TO_S)
+                    ?: original.heartbeatInterval,
+            heartbeatTimeout =
+                heartbeatTimeout.toLongOrNull()?.times(MS_TO_S)
+                    ?: original.heartbeatTimeout,
             runInBackground = runInBackground,
+            foregroundSessionBehavior = foregroundSessionBehavior,
+            reuseSession = reuseSession,
             keepSessionOpen = keepOpen,
             interactionMode = interactionMode,
             notifyOnResult = notifyOnResult,
@@ -69,5 +82,9 @@ class ScriptConfigState(
             prefixPresets = prefixPresets.toList(),
             envVarPresets = envVarPresets.toList(),
             adbCode = adbCode,
+            notificationActions =
+                notificationActions
+                    .filter { it.first.isNotBlank() && it.second > 0 }
+                    .map { (label, targetId) -> NotificationAction(label, targetId) },
         )
 }

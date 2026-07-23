@@ -26,6 +26,14 @@ class AutomationConfigState(
     initialWifi: Boolean = false,
     initialCharging: Boolean = false,
     initialBattery: Int = 0,
+    initialScheduledDayOfMonth: Int? = null,
+    initialWindowStartHour: Int = 0,
+    initialWindowStartMinute: Int = 0,
+    initialWindowEndHour: Int = 23,
+    initialWindowEndMinute: Int = 59,
+    initialRandomDelayMinMillis: Long? = null,
+    initialRandomDelayMaxMillis: Long? = null,
+    initialAutomationCode: String = "",
 ) {
     var label by mutableStateOf(initialLabel)
     var type by mutableStateOf(initialType)
@@ -38,6 +46,14 @@ class AutomationConfigState(
     var requireWifi by mutableStateOf(initialWifi)
     var requireCharging by mutableStateOf(initialCharging)
     var batteryThreshold by mutableIntStateOf(initialBattery)
+    var scheduledDayOfMonth by mutableStateOf(initialScheduledDayOfMonth?.toString() ?: "")
+    var windowStartHour by mutableIntStateOf(initialWindowStartHour)
+    var windowStartMinute by mutableIntStateOf(initialWindowStartMinute)
+    var windowEndHour by mutableIntStateOf(initialWindowEndHour)
+    var windowEndMinute by mutableIntStateOf(initialWindowEndMinute)
+    var randomDelayMinValue by mutableStateOf(initialRandomDelayMinMillis?.toString() ?: "")
+    var randomDelayMaxValue by mutableStateOf(initialRandomDelayMaxMillis?.toString() ?: "")
+    var automationCode by mutableStateOf(initialAutomationCode)
 
     fun toSaveParams(scriptId: Int): AutomationSaveParams {
         val calendar =
@@ -52,12 +68,24 @@ class AutomationConfigState(
             label = label.ifBlank { "Untitled" },
             type = type,
             timestamp = calendar.timeInMillis,
-            interval = (intervalValue.toLongOrNull() ?: DEFAULT_INTERVAL_MINUTES) * MILLIS_IN_MINUTE,
+            interval =
+                (
+                    intervalValue.toLongOrNull()
+                        ?: DEFAULT_INTERVAL_MINUTES
+                ) * MILLIS_IN_MINUTE,
             days = selectedDays,
             runIfMissed = runIfMissed,
             requireWifi = requireWifi,
             requireCharging = requireCharging,
             batteryThreshold = batteryThreshold,
+            scheduledDayOfMonth = scheduledDayOfMonth.toIntOrNull(),
+            windowStartHour = windowStartHour,
+            windowStartMinute = windowStartMinute,
+            windowEndHour = windowEndHour,
+            windowEndMinute = windowEndMinute,
+            randomDelayMinMillis = (randomDelayMinValue.toLongOrNull() ?: 0L) * 1000,
+            randomDelayMaxMillis = (randomDelayMaxValue.toLongOrNull() ?: 0L) * 1000,
+            automationCode = automationCode.trim(),
         )
     }
 
@@ -77,6 +105,13 @@ class AutomationConfigState(
                         state.requireWifi,
                         state.requireCharging,
                         state.batteryThreshold,
+                        state.scheduledDayOfMonth,
+                        state.windowStartHour,
+                        state.windowStartMinute,
+                        state.windowEndHour,
+                        state.windowEndMinute,
+                        state.randomDelayMinValue,
+                        state.randomDelayMaxValue,
                     )
                 },
                 restore = { saved ->
@@ -94,6 +129,13 @@ class AutomationConfigState(
                         initialWifi = list[8] as Boolean,
                         initialCharging = list[9] as Boolean,
                         initialBattery = list[10] as Int,
+                        initialScheduledDayOfMonth = (list[11] as String).toIntOrNull(),
+                        initialWindowStartHour = list[12] as Int,
+                        initialWindowStartMinute = list[13] as Int,
+                        initialWindowEndHour = list[14] as Int,
+                        initialWindowEndMinute = list[15] as Int,
+                        initialRandomDelayMinMillis = (list[16] as String).toLongOrNull(),
+                        initialRandomDelayMaxMillis = (list[17] as String).toLongOrNull(),
                     )
                 },
             )

@@ -49,10 +49,21 @@ class AutomationWorker
 
             val scriptEntity = scriptDao.getScriptById(automation.scriptId)?.copy(notifyOnResult = true)
             if (scriptEntity != null) {
+                val chainEnvVars =
+                    inputData.keyValueMap
+                        .filterKeys { it.startsWith("chain_step_env_") }
+                        .mapKeys { it.key.removePrefix("chain_step_env_") }
+                        .mapValues { it.value.toString() }
+
+                val mergedEnv =
+                    automation.runtimeEnv.toMutableMap().apply {
+                        putAll(chainEnvVars)
+                    }
+
                 runScriptUseCase(
                     script = scriptEntity.toScriptDomain(),
                     runtimeArgs = automation.runtimeArgs,
-                    runtimeEnv = automation.runtimeEnv,
+                    runtimeEnv = mergedEnv,
                     runtimePrefix = automation.runtimePrefix,
                     automationId = automation.id,
                 )

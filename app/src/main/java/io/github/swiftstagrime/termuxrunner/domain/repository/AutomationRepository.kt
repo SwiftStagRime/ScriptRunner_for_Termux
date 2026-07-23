@@ -8,6 +8,8 @@ interface AutomationRepository {
 
     suspend fun getAutomationById(id: Int): Automation?
 
+    suspend fun getAutomationByAdbCode(code: String): Result<Automation>
+
     suspend fun saveAutomation(automation: Automation)
 
     suspend fun deleteAutomation(automation: Automation)
@@ -19,5 +21,9 @@ interface AutomationRepository {
 
     suspend fun getAutomationsForScript(scriptId: Int): List<Automation>
 
-    suspend fun updateLastResult(automationId: Int, exitCode: Int, timestamp: Long)
+    suspend fun updateLastResult(
+        automationId: Int,
+        exitCode: Int,
+        timestamp: Long,
+    )
 }

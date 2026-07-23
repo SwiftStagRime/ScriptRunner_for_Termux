@@ -21,14 +21,14 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.OpenInNew
 import androidx.compose.material.icons.filled.AutoAwesome
@@ -64,8 +64,8 @@ import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.ClipEntry
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.testTag
@@ -180,7 +180,10 @@ fun OnboardingScreen(
                         val isLastPage = pagerState.currentPage == pagerState.pageCount - 1
                         Button(
                             onClick = onNextClick,
-                            modifier = Modifier.weight(2f).testTag("onboarding_next_button"),
+                            modifier =
+                                Modifier
+                                    .weight(2f)
+                                    .testTag("onboarding_next_button"),
                             shape = RoundedCornerShape(16.dp),
                             contentPadding = PaddingValues(16.dp),
                         ) {
@@ -220,24 +223,28 @@ private fun OnboardingPageContent(
                 description = stringResource(R.string.body_manage_your_scripts),
                 preview = { PreviewHomeScreen() },
             )
+
         6 ->
             FeatureShowcaseStep(
                 title = stringResource(R.string.title_powerful_editor),
                 description = stringResource(R.string.body_powerful_editor),
                 preview = { PreviewEditorNewRaw() },
             )
+
         7 ->
             FeatureShowcaseStep(
                 title = stringResource(R.string.title_automation),
                 description = stringResource(R.string.body_automation),
                 preview = { AutomationScreenPreview() },
             )
+
         8 ->
             FeatureShowcaseStep(
                 title = stringResource(R.string.title_quick_access_tiles),
                 description = stringResource(R.string.body_quick_access_tiles),
                 preview = { TileSettingsScreenPreview() },
             )
+
         9 ->
             FeatureShowcaseStep(
                 title = stringResource(R.string.title_rice),
@@ -255,8 +262,16 @@ private fun TermuxInstallStep(isInstalled: Boolean) {
         modifier = Modifier.fillMaxSize(),
     ) {
         StepIcon(Icons.Default.InstallMobile, isDone = isInstalled)
-        Text(stringResource(R.string.setup_step_1_title), style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
-        Text(stringResource(R.string.setup_step_1_desc), textAlign = TextAlign.Center, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text(
+            stringResource(R.string.setup_step_1_title),
+            style = MaterialTheme.typography.headlineSmall,
+            fontWeight = FontWeight.Bold,
+        )
+        Text(
+            stringResource(R.string.setup_step_1_desc),
+            textAlign = TextAlign.Center,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
 
         if (!isInstalled) {
             RequirementWarning(message = stringResource(R.string.termux_install_warning))
@@ -269,11 +284,22 @@ private fun TermuxConfigStep() {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(16.dp),
-        modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()),
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState()),
     ) {
         StepIcon(Icons.Default.SettingsSuggest, isDone = false)
-        Text(stringResource(R.string.setup_step_2_title), style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
-        Text(stringResource(R.string.setup_step_2_desc), textAlign = TextAlign.Center, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text(
+            stringResource(R.string.setup_step_2_title),
+            style = MaterialTheme.typography.headlineSmall,
+            fontWeight = FontWeight.Bold,
+        )
+        Text(
+            stringResource(R.string.setup_step_2_desc),
+            textAlign = TextAlign.Center,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
 
         CodeBlock(code = stringResource(R.string.setup_step_2_code))
         CodeBlock(code = stringResource(R.string.setup_step_2_code_2))
@@ -285,14 +311,30 @@ private fun PermissionStep(
     isPermissionGranted: Boolean,
     onGrantPermission: () -> Unit,
 ) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(16.dp)) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+        modifier = Modifier.fillMaxSize(),
+    ) {
         StepIcon(Icons.Default.Security, isDone = isPermissionGranted)
-        Text(stringResource(R.string.setup_step_3_title), style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
-        Text(stringResource(R.string.setup_step_3_desc), textAlign = TextAlign.Center, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text(
+            stringResource(R.string.setup_step_3_title),
+            style = MaterialTheme.typography.headlineSmall,
+            fontWeight = FontWeight.Bold,
+        )
+        Text(
+            stringResource(R.string.setup_step_3_desc),
+            textAlign = TextAlign.Center,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
 
         if (!isPermissionGranted) {
             RequirementWarning(message = stringResource(R.string.termux_permission_warning))
-            Button(onClick = onGrantPermission, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp)) {
+            Button(
+                onClick = onGrantPermission,
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+            ) {
                 Text(stringResource(R.string.grant_permission_label))
             }
         }
@@ -304,10 +346,22 @@ private fun OptimizationStep(
     isBatteryUnrestricted: Boolean,
     onOpenSettings: () -> Unit,
 ) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(16.dp)) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+        modifier = Modifier.fillMaxSize(),
+    ) {
         StepIcon(Icons.Default.BatteryChargingFull, isDone = isBatteryUnrestricted)
-        Text(stringResource(R.string.setup_step_5_title), style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
-        Text(stringResource(R.string.setup_step_5_desc), textAlign = TextAlign.Center, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text(
+            stringResource(R.string.setup_step_5_title),
+            style = MaterialTheme.typography.headlineSmall,
+            fontWeight = FontWeight.Bold,
+        )
+        Text(
+            stringResource(R.string.setup_step_5_desc),
+            textAlign = TextAlign.Center,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
 
         if (!isBatteryUnrestricted) {
             RequirementWarning(message = stringResource(R.string.battery_warning_text))
@@ -339,7 +393,7 @@ private fun PagerIndicator(
     currentPage: Int,
 ) {
     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        repeat(count) { it ->
+        repeat(count) {
             val isSelected = it == currentPage
             Box(
                 modifier =

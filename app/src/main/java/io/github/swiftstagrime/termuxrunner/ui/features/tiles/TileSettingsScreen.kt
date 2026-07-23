@@ -111,7 +111,10 @@ fun TileSettingsScreen(
                     Card(
                         colors =
                             CardDefaults.cardColors(
-                                containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.7f),
+                                containerColor =
+                                    MaterialTheme.colorScheme.primaryContainer.copy(
+                                        alpha = 0.7f,
+                                    ),
                                 contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
                             ),
                         shape = RoundedCornerShape(20.dp),
@@ -128,10 +131,7 @@ fun TileSettingsScreen(
                             )
                             Spacer(modifier = Modifier.width(12.dp))
                             Text(
-                                text =
-                                    stringResource(
-                                        R.string.assign_scripts_to_these_slots_you_can_then_trigger_them_directly_from_your_phone_s_quick_settings_panel,
-                                    ),
+                                text = stringResource(R.string.tile_assignment_hint),
                                 style = MaterialTheme.typography.labelMedium,
                                 lineHeight = TextUnit(16f, TextUnitType.Sp),
                             )
@@ -172,7 +172,9 @@ fun TileSettingsScreen(
                                         .clip(CircleShape)
                                         .background(
                                             if (isAssigned) {
-                                                MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f)
+                                                MaterialTheme.colorScheme.primaryContainer.copy(
+                                                    alpha = 0.4f,
+                                                )
                                             } else {
                                                 MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
                                             },
@@ -216,7 +218,9 @@ fun TileSettingsScreen(
                                     fontWeight = FontWeight.Bold,
                                 )
                                 Text(
-                                    text = assignedScript?.name ?: stringResource(R.string.tile_unassigned),
+                                    text =
+                                        assignedScript?.name
+                                            ?: stringResource(R.string.tile_unassigned),
                                     style = MaterialTheme.typography.titleMedium,
                                     fontWeight = if (isAssigned) FontWeight.Bold else FontWeight.Medium,
                                     color =

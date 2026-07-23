@@ -95,6 +95,7 @@ class ScriptRunnerActivity : ComponentActivity() {
             is ScriptRunnerEvent.RequestPermission -> {
                 requestPermissionLauncher.launch("com.termux.permission.RUN_COMMAND")
             }
+
             is ScriptRunnerEvent.ShowError -> {
                 Toast.makeText(this, event.message, Toast.LENGTH_LONG).show()
             }

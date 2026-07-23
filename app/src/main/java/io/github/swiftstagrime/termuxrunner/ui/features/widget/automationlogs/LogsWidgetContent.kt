@@ -75,7 +75,8 @@ fun LogsWidgetContent(
                 items(logs.sortedByDescending { it.timestamp }) { log ->
                     val automation = automationMap[log.automationId]
                     val isSuccess = log.exitCode == 0
-                    val statusColor = if (isSuccess) GlanceTheme.colors.primary else GlanceTheme.colors.error
+                    val statusColor =
+                        if (isSuccess) GlanceTheme.colors.primary else GlanceTheme.colors.error
 
                     Box(
                         modifier =
@@ -106,7 +107,9 @@ fun LogsWidgetContent(
 
                             Column(modifier = GlanceModifier.defaultWeight()) {
                                 Text(
-                                    text = automation?.label ?: context.getString(R.string.logs_unknown_automation),
+                                    text =
+                                        automation?.label
+                                            ?: context.getString(R.string.logs_unknown_automation),
                                     style =
                                         TextStyle(
                                             color = GlanceTheme.colors.onSurface,
@@ -117,7 +120,10 @@ fun LogsWidgetContent(
 
                                 val dateStr =
                                     try {
-                                        SimpleDateFormat("HH:mm, dd/MM", Locale.getDefault()).format(Date(log.timestamp))
+                                        SimpleDateFormat(
+                                            "HH:mm, dd/MM",
+                                            Locale.getDefault(),
+                                        ).format(Date(log.timestamp))
                                     } catch (e: Exception) {
                                         ""
                                     }

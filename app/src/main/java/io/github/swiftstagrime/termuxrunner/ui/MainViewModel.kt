@@ -4,15 +4,19 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation3.runtime.NavKey
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.github.swiftstagrime.termuxrunner.di.IoDispatcher
 import io.github.swiftstagrime.termuxrunner.domain.repository.CustomThemeRepository
 import io.github.swiftstagrime.termuxrunner.domain.repository.UserPreferencesRepository
 import io.github.swiftstagrime.termuxrunner.ui.navigation.Route
 import io.github.swiftstagrime.termuxrunner.ui.theme.AppTheme
 import io.github.swiftstagrime.termuxrunner.ui.theme.ThemeMode
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
@@ -26,6 +30,7 @@ class MainViewModel
     constructor(
         private val userPreferencesRepository: UserPreferencesRepository,
         private val customThemeRepository: CustomThemeRepository,
+        @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
     ) : ViewModel() {
         private val _isReady = MutableStateFlow(false)
         val isReady = _isReady.asStateFlow()
@@ -90,5 +95,17 @@ class MainViewModel
             _backStack.clear()
             _backStack.addAll(newStack)
             backStack.value = newStack.toList()
+        }
+
+        fun openTileScriptEditor(tileIndex: Int) {
+            viewModelScope.launch(ioDispatcher) {
+                _isReady.first { it }
+                val scriptId = userPreferencesRepository.getScriptIdForTile(tileIndex).firstOrNull()
+                    ?: return@launch
+                val target = listOf(Route.Home, Route.Editor(scriptId))
+                if (_backStack != target) {
+                    updateStack(target)
+                }
+            }
         }
     }

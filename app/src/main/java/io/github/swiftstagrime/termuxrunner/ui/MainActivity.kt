@@ -1,7 +1,10 @@
 package io.github.swiftstagrime.termuxrunner.ui
 
 import android.animation.ObjectAnimator
+import android.content.ComponentName
+import android.content.Intent
 import android.os.Bundle
+import android.service.quicksettings.TileService
 import android.view.View
 import android.view.animation.OvershootInterpolator
 import androidx.activity.compose.setContent
@@ -27,6 +30,7 @@ import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDe
 import androidx.navigation3.runtime.SaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import dagger.hilt.android.AndroidEntryPoint
+import io.github.swiftstagrime.termuxrunner.data.service.tileIndexForComponent
 import io.github.swiftstagrime.termuxrunner.ui.navigation.rememberEntryProvider
 import io.github.swiftstagrime.termuxrunner.ui.theme.ScriptRunnerForTermuxTheme
 
@@ -34,9 +38,14 @@ import io.github.swiftstagrime.termuxrunner.ui.theme.ScriptRunnerForTermuxTheme
 class MainActivity : AppCompatActivity() {
     private val mainViewModel: MainViewModel by viewModels()
 
+    companion object {
+        private const val EXTRA_COMPONENT_NAME = "android.intent.extra.COMPONENT_NAME"
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         val splashScreen = installSplashScreen()
         super.onCreate(savedInstanceState)
+        handleTilePreferencesIntent(intent)
 
         splashScreen.setKeepOnScreenCondition {
             !mainViewModel.isReady.value
@@ -54,7 +63,11 @@ class MainActivity : AppCompatActivity() {
             CompositionLocalProvider(
                 LocalInspectionMode provides false,
             ) {
-                ScriptRunnerForTermuxTheme(accent = accent, mode = mode, customTheme = customTheme) {
+                ScriptRunnerForTermuxTheme(
+                    accent = accent,
+                    mode = mode,
+                    customTheme = customTheme,
+                ) {
                     Surface(
                         modifier =
                             Modifier
@@ -82,6 +95,25 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        handleTilePreferencesIntent(intent)
+    }
+
+    private fun handleTilePreferencesIntent(intent: Intent) {
+        if (intent.action != TileService.ACTION_QS_TILE_PREFERENCES) {
+            return
+        }
+
+        @Suppress("DEPRECATION")
+        val tileComponent =
+            intent.getParcelableExtra<ComponentName>(EXTRA_COMPONENT_NAME)
+
+        val tileIndex = tileComponent?.let { tileIndexForComponent(it) } ?: return
+        mainViewModel.openTileScriptEditor(tileIndex)
     }
 
     private fun applyTerminalSlide(splashProvider: SplashScreenViewProvider) {

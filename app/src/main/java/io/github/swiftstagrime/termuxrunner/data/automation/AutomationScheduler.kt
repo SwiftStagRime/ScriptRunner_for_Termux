@@ -31,8 +31,8 @@ class AutomationScheduler
             val now = System.currentTimeMillis()
             val triggerTime = automation.nextRunTimestamp ?: automation.scheduledTimestamp
 
-            // Don't schedule AlarmManager for BOOT type
-            if (automation.type == AutomationType.BOOT) {
+            // Don't schedule AlarmManager for BOOT or event-based types
+            if (automation.type == AutomationType.BOOT || automation.type.isEventBased) {
                 return
             }
 

@@ -24,19 +24,20 @@ class ScriptFileRepositoryInstrumentedTest {
         val context = ApplicationProvider.getApplicationContext<Context>()
         repository = ScriptFileRepositoryImpl(context)
 
-        bridgeDir = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
-            File(
-                context.getExternalFilesDir(android.os.Environment.DIRECTORY_DOWNLOADS),
-                bridgeFolderName,
-            )
-        } else {
-            File(
-                android.os.Environment.getExternalStoragePublicDirectory(
-                    android.os.Environment.DIRECTORY_DOWNLOADS,
-                ),
-                bridgeFolderName,
-            )
-        }
+        bridgeDir =
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+                File(
+                    context.getExternalFilesDir(android.os.Environment.DIRECTORY_DOWNLOADS),
+                    bridgeFolderName,
+                )
+            } else {
+                File(
+                    android.os.Environment.getExternalStoragePublicDirectory(
+                        android.os.Environment.DIRECTORY_DOWNLOADS,
+                    ),
+                    bridgeFolderName,
+                )
+            }
 
         if (bridgeDir.exists()) {
             deleteBridgeContents()

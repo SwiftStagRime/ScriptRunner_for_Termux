@@ -1,0 +1,170 @@
+{
+  "version": 6,
+  "categories": [
+    {
+      "id": 1,
+      "name": "Test",
+      "orderIndex": 0
+    }
+  ],
+  "scripts": [
+    {
+      "id": 1,
+      "name": "hello_world",
+      "codePages": [
+        "echo \"Hello from ScriptRunner!\"\necho \"Backup import test: OK\"\ndate\n"
+      ],
+      "pageNames": ["Main"],
+      "categoryId": 1,
+      "interpreter": "bash",
+      "fileExtension": "sh",
+      "commandPrefix": "",
+      "runInBackground": false,
+      "openNewSession": false,
+      "executionParams": "",
+      "envVars": {},
+      "keepSessionOpen": false,
+      "useHeartbeat": false,
+      "heartbeatTimeout": 30000,
+      "heartbeatInterval": 10000,
+      "iconBase64": null,
+      "orderIndex": 0,
+      "notifyOnResult": false,
+      "interactionMode": "NONE",
+      "argumentPresets": [],
+      "prefixPresets": [],
+      "envVarPresets": [],
+      "adbCode": null,
+      "notificationActions": []
+    },
+    {
+      "id": 2,
+      "name": "system_report",
+      "codePages": [
+        "echo \"== System report ==\"\nuname -a\necho\necho \"== Disk usage ==\"\ndf -h /data | head -n 5\n",
+        "echo\necho \"== Memory ==\"\nfree -m\necho\necho \"== Uptime ==\"\nuptime\n"
+      ],
+      "pageNames": ["Overview", "Memory"],
+      "categoryId": 1,
+      "interpreter": "bash",
+      "fileExtension": "sh",
+      "commandPrefix": "",
+      "runInBackground": false,
+      "openNewSession": false,
+      "executionParams": "",
+      "envVars": {},
+      "keepSessionOpen": false,
+      "useHeartbeat": false,
+      "heartbeatTimeout": 30000,
+      "heartbeatInterval": 10000,
+      "iconBase64": null,
+      "orderIndex": 1,
+      "notifyOnResult": false,
+      "interactionMode": "NONE",
+      "argumentPresets": [],
+      "prefixPresets": [],
+      "envVarPresets": [],
+      "adbCode": null,
+      "notificationActions": []
+    },
+    {
+      "id": 3,
+      "name": "env_and_args_demo",
+      "codePages": [
+        "echo \"== Args & env demo ==\"\necho \"All args: $*\"\necho \"Arg count: $#\"\necho \"First arg: $1\"\necho \"DEMO_ENV_USER=${DEMO_ENV_USER:-<unset>}\"\necho \"DEMO_ENV_MODE=${DEMO_ENV_MODE:-<unset>}\"\n"
+      ],
+      "pageNames": ["Main"],
+      "categoryId": 1,
+      "interpreter": "bash",
+      "fileExtension": "sh",
+      "commandPrefix": "",
+      "runInBackground": false,
+      "openNewSession": false,
+      "executionParams": "alpha beta",
+      "envVars": {
+        "DEMO_ENV_USER": "termux",
+        "DEMO_ENV_MODE": "manual-test"
+      },
+      "keepSessionOpen": false,
+      "useHeartbeat": false,
+      "heartbeatTimeout": 30000,
+      "heartbeatInterval": 10000,
+      "iconBase64": null,
+      "orderIndex": 2,
+      "notifyOnResult": false,
+      "interactionMode": "NONE",
+      "argumentPresets": [
+        "one",
+        "two three"
+      ],
+      "prefixPresets": [],
+      "envVarPresets": [],
+      "adbCode": null,
+      "notificationActions": []
+    },
+    {
+      "id": 4,
+      "name": "name_prompt",
+      "codePages": [
+        "if [ $# -eq 0 ]; then\n    echo \"No input was provided.\"\nelse\n    echo \"Hello, $*!\"\n    echo \"Your input had $# word(s).\"\nfi\n"
+      ],
+      "pageNames": ["Main"],
+      "categoryId": null,
+      "interpreter": "bash",
+      "fileExtension": "sh",
+      "commandPrefix": "",
+      "runInBackground": false,
+      "openNewSession": false,
+      "executionParams": "",
+      "envVars": {},
+      "keepSessionOpen": false,
+      "useHeartbeat": false,
+      "heartbeatTimeout": 30000,
+      "heartbeatInterval": 10000,
+      "iconBase64": null,
+      "orderIndex": 3,
+      "notifyOnResult": false,
+      "interactionMode": "TEXT_INPUT",
+      "argumentPresets": [
+        "Termux",
+        "backup test"
+      ],
+      "prefixPresets": [],
+      "envVarPresets": [],
+      "adbCode": null,
+      "notificationActions": []
+    },
+    {
+      "id": 5,
+      "name": "python_countdown",
+      "codePages": [
+        "import time\n\nfor i in range(5, 0, -1):\n    print(f\"{i}...\", flush=True)\n    time.sleep(1)\nprint(\"Countdown complete!\", flush=True)\n"
+      ],
+      "pageNames": ["Main"],
+      "categoryId": null,
+      "interpreter": "python",
+      "fileExtension": "py",
+      "commandPrefix": "",
+      "runInBackground": false,
+      "openNewSession": false,
+      "executionParams": "",
+      "envVars": {},
+      "keepSessionOpen": true,
+      "useHeartbeat": false,
+      "heartbeatTimeout": 30000,
+      "heartbeatInterval": 10000,
+      "iconBase64": null,
+      "orderIndex": 4,
+      "notifyOnResult": false,
+      "interactionMode": "NONE",
+      "argumentPresets": [],
+      "prefixPresets": [],
+      "envVarPresets": [],
+      "adbCode": null,
+      "notificationActions": []
+    }
+  ],
+  "automations": [],
+  "themes": [],
+  "chains": []
+}

@@ -43,7 +43,10 @@ class ScriptWidget : GlanceAppWidget() {
             val prefs = currentState<Preferences>()
             val ids =
                 remember(prefs[ScriptsListKey]) {
-                    prefs[ScriptsListKey]?.split(",")?.filter { it.isNotEmpty() }?.mapNotNull { it.toIntOrNull() } ?: emptyList()
+                    prefs[ScriptsListKey]
+                        ?.split(",")
+                        ?.filter { it.isNotEmpty() }
+                        ?.mapNotNull { it.toIntOrNull() } ?: emptyList()
                 }
 
             val scriptsState =

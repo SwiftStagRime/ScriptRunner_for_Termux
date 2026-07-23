@@ -74,7 +74,9 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import coil3.compose.AsyncImage
 import io.github.swiftstagrime.termuxrunner.R
+import io.github.swiftstagrime.termuxrunner.domain.model.Automation
 import io.github.swiftstagrime.termuxrunner.domain.model.Category
+import io.github.swiftstagrime.termuxrunner.domain.model.ForegroundSessionBehavior
 import io.github.swiftstagrime.termuxrunner.domain.model.InteractionMode
 import io.github.swiftstagrime.termuxrunner.domain.model.Script
 import io.github.swiftstagrime.termuxrunner.ui.components.CategorySpinner
@@ -96,6 +98,7 @@ fun ScriptConfigDialog(
     state: ScriptConfigState,
     script: Script,
     categories: List<Category>,
+    allAutomations: List<Automation>,
     isBatteryUnrestricted: Boolean,
     onDismiss: () -> Unit,
     onSave: (Script) -> Unit,
@@ -165,6 +168,7 @@ fun ScriptConfigDialog(
                             onRequestNotificationPermission = onRequestNotificationPermission,
                         )
                     }
+                    item { NotificationActionsSection(state, allAutomations) }
                     item { EnvironmentSection(state) }
                 }
             }
@@ -248,8 +252,120 @@ private fun BehaviorSection(state: ScriptConfigState) {
                 onCheckedChange = { isChecked ->
                     state.keepOpen = isChecked
                     if (isChecked) state.notifyOnResult = false
+                    if (isChecked) state.foregroundSessionBehavior = ForegroundSessionBehavior.SWITCH_OPEN
                 },
             )
+
+            HorizontalDivider(
+                modifier = Modifier.padding(vertical = 8.dp),
+                color = MaterialTheme.colorScheme.outlineVariant,
+            )
+
+            SwitchRow(
+                title = stringResource(R.string.label_reuse_session),
+                description = stringResource(R.string.desc_reuse_session),
+                checked = state.reuseSession,
+                onCheckedChange = { state.reuseSession = it },
+            )
+
+            if (state.reuseSession) {
+                Row(
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(start = 4.dp, bottom = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Icon(
+                        Icons.Default.Warning,
+                        null,
+                        tint = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.size(14.dp),
+                    )
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text(
+                        text = stringResource(R.string.warning_reuse_session_version),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.error,
+                    )
+                }
+            }
+
+            HorizontalDivider(
+                modifier = Modifier.padding(vertical = 8.dp),
+                color = MaterialTheme.colorScheme.outlineVariant,
+            )
+
+            ForegroundSessionBehaviorSpinner(
+                selectedBehavior = state.foregroundSessionBehavior,
+                onBehaviorSelected = { state.foregroundSessionBehavior = it },
+            )
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun ForegroundSessionBehaviorSpinner(
+    selectedBehavior: ForegroundSessionBehavior,
+    onBehaviorSelected: (ForegroundSessionBehavior) -> Unit,
+) {
+    var expanded by remember { mutableStateOf(false) }
+
+    val behaviorLabel =
+        stringResource(
+            when (selectedBehavior) {
+                ForegroundSessionBehavior.SWITCH_OPEN -> R.string.fg_session_switch_open
+                ForegroundSessionBehavior.KEEP_OPEN -> R.string.fg_session_keep_open
+                ForegroundSessionBehavior.SWITCH_SILENT -> R.string.fg_session_switch_silent
+                ForegroundSessionBehavior.KEEP_SILENT -> R.string.fg_session_keep_silent
+                ForegroundSessionBehavior.TERMUX_DEFAULT -> R.string.fg_session_default
+            },
+        )
+
+    ExposedDropdownMenuBox(
+        expanded = expanded,
+        onExpandedChange = { expanded = !expanded },
+    ) {
+        StyledTextField(
+            value = behaviorLabel,
+            onValueChange = {},
+            readOnly = true,
+            label = stringResource(R.string.label_foreground_session_behavior),
+            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+            modifier =
+                Modifier
+                    .menuAnchor(
+                        type = ExposedDropdownMenuAnchorType.PrimaryNotEditable,
+                        enabled = true,
+                    ).fillMaxWidth(),
+        )
+
+        ExposedDropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false },
+        ) {
+            ForegroundSessionBehavior.entries.forEach { behavior ->
+                DropdownMenuItem(
+                    text = {
+                        Text(
+                            stringResource(
+                                when (behavior) {
+                                    ForegroundSessionBehavior.SWITCH_OPEN -> R.string.fg_session_switch_open
+                                    ForegroundSessionBehavior.KEEP_OPEN -> R.string.fg_session_keep_open
+                                    ForegroundSessionBehavior.SWITCH_SILENT -> R.string.fg_session_switch_silent
+                                    ForegroundSessionBehavior.KEEP_SILENT -> R.string.fg_session_keep_silent
+                                    ForegroundSessionBehavior.TERMUX_DEFAULT -> R.string.fg_session_default
+                                },
+                            ),
+                        )
+                    },
+                    onClick = {
+                        onBehaviorSelected(behavior)
+                        expanded = false
+                    },
+                )
+            }
         }
     }
 }
@@ -584,7 +700,10 @@ private fun IdentitySection(
                 },
                 label = stringResource(R.string.label_script_name),
                 isError = state.nameError,
-                modifier = Modifier.weight(1f).testTag("config_name_input"),
+                modifier =
+                    Modifier
+                        .weight(1f)
+                        .testTag("config_name_input"),
             )
         }
     }
@@ -661,7 +780,12 @@ private fun ReliabilitySection(
                     ).padding(12.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Icon(Icons.Default.Warning, null, tint = MaterialTheme.colorScheme.error, modifier = Modifier.size(20.dp))
+            Icon(
+                Icons.Default.Warning,
+                null,
+                tint = MaterialTheme.colorScheme.error,
+                modifier = Modifier.size(20.dp),
+            )
             Spacer(modifier = Modifier.width(12.dp))
             Text(
                 text = stringResource(R.string.experimental_warning),
@@ -716,7 +840,10 @@ private fun ReliabilitySection(
             },
         )
 
-        HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp), color = MaterialTheme.colorScheme.outlineVariant)
+        HorizontalDivider(
+            modifier = Modifier.padding(vertical = 8.dp),
+            color = MaterialTheme.colorScheme.outlineVariant,
+        )
         SwitchRow(
             title = stringResource(R.string.execution_feedback),
             description =
@@ -747,14 +874,18 @@ private fun ReliabilitySection(
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     StyledTextField(
                         value = state.heartbeatInterval,
-                        onValueChange = { if (it.all { c -> c.isDigit() }) state.heartbeatInterval = it },
+                        onValueChange = {
+                            if (it.all { c -> c.isDigit() }) state.heartbeatInterval = it
+                        },
                         label = stringResource(R.string.pulse_interval_s),
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         modifier = Modifier.weight(1f),
                     )
                     StyledTextField(
                         value = state.heartbeatTimeout,
-                        onValueChange = { if (it.all { c -> c.isDigit() }) state.heartbeatTimeout = it },
+                        onValueChange = {
+                            if (it.all { c -> c.isDigit() }) state.heartbeatTimeout = it
+                        },
                         label = stringResource(R.string.timeout_limit_s),
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         modifier = Modifier.weight(1f),
@@ -770,6 +901,98 @@ private fun ReliabilitySection(
                     modifier = Modifier.padding(top = 8.dp),
                 )
             }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun NotificationActionsSection(
+    state: ScriptConfigState,
+    allAutomations: List<Automation>,
+) {
+    ConfigSection(title = stringResource(R.string.section_notification_actions)) {
+        Text(
+            text = stringResource(R.string.desc_notification_actions),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+            modifier = Modifier.padding(bottom = PADDING_STANDARD.dp),
+        )
+
+        state.notificationActions.forEachIndexed { index, (label, targetId) ->
+            var expanded by remember { mutableStateOf(false) }
+            val selectedAutomation = allAutomations.find { it.id == targetId }
+
+            Row(
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                StyledTextField(
+                    value = label,
+                    onValueChange = { newLabel ->
+                        state.notificationActions[index] = Pair(newLabel, targetId)
+                    },
+                    label = stringResource(R.string.label_action_label),
+                    modifier = Modifier.weight(0.5f),
+                )
+
+                Spacer(modifier = Modifier.width(8.dp))
+
+                ExposedDropdownMenuBox(
+                    expanded = expanded,
+                    onExpandedChange = { expanded = !expanded },
+                    modifier = Modifier.weight(0.5f),
+                ) {
+                    StyledTextField(
+                        value = selectedAutomation?.label ?: "",
+                        onValueChange = {},
+                        readOnly = true,
+                        label = stringResource(R.string.label_target_automation),
+                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+                        modifier =
+                            Modifier
+                                .menuAnchor(
+                                    type = ExposedDropdownMenuAnchorType.PrimaryNotEditable,
+                                    enabled = true,
+                                ).fillMaxWidth(),
+                    )
+
+                    ExposedDropdownMenu(
+                        expanded = expanded,
+                        onDismissRequest = { expanded = false },
+                    ) {
+                        allAutomations.forEach { automation ->
+                            DropdownMenuItem(
+                                text = { Text(automation.label) },
+                                onClick = {
+                                    state.notificationActions[index] = Pair(label, automation.id)
+                                    expanded = false
+                                },
+                            )
+                        }
+                    }
+                }
+
+                IconButton(onClick = { state.notificationActions.removeAt(index) }) {
+                    Icon(
+                        Icons.Default.Close,
+                        contentDescription = stringResource(R.string.cd_remove),
+                        tint = MaterialTheme.colorScheme.error,
+                    )
+                }
+            }
+        }
+
+        TextButton(
+            onClick = { state.notificationActions.add(Pair("", 0)) },
+            modifier = Modifier.align(Alignment.Start),
+        ) {
+            Icon(Icons.Default.Add, null, modifier = Modifier.size(18.dp))
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(stringResource(R.string.btn_add_action))
         }
     }
 }
@@ -826,6 +1049,7 @@ private fun PreviewConfigDialogLight() {
                     Category(id = 1, name = "Automation"),
                     Category(id = 2, name = "Utility"),
                 ),
+            allAutomations = emptyList(),
             onDismiss = {},
             onSave = {},
             onProcessImage = { null },

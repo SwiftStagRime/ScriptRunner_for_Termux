@@ -10,12 +10,19 @@ import android.content.pm.ServiceInfo
 import android.os.Build
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
+import androidx.work.workDataOf
 import dagger.hilt.android.AndroidEntryPoint
 import io.github.swiftstagrime.termuxrunner.R
+import io.github.swiftstagrime.termuxrunner.data.repository.AutomationNotFoundException
+import io.github.swiftstagrime.termuxrunner.data.repository.ScriptNotFoundException
 import io.github.swiftstagrime.termuxrunner.data.service.AdbScriptExecutionService.Companion.EXTRA_ADB_CODE
+import io.github.swiftstagrime.termuxrunner.data.service.AdbScriptExecutionService.Companion.EXTRA_TARGET_TYPE
+import io.github.swiftstagrime.termuxrunner.data.worker.AutomationWorker
+import io.github.swiftstagrime.termuxrunner.domain.repository.AutomationRepository
 import io.github.swiftstagrime.termuxrunner.domain.repository.ScriptRepository
 import io.github.swiftstagrime.termuxrunner.domain.usecase.RunScriptUseCase
-import io.github.swiftstagrime.termuxrunner.data.repository.ScriptNotFoundException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -25,11 +32,11 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 /**
- * A foreground service responsible for executing a script identified by its `adbCode`.
+ * A foreground service responsible for executing a script or automation identified by its trigger code.
  *
  * This service is designed to be started via an [Intent] that contains the
  * `adbCode` as an extra under the key [EXTRA_ADB_CODE].
- * It's called by special activity, as receivers work like shit for this specific purpose in modern android
+ * Use [EXTRA_TARGET_TYPE] to specify "script" (default) or "automation".
  */
 @AndroidEntryPoint
 class AdbScriptExecutionService : Service() {
@@ -37,13 +44,18 @@ class AdbScriptExecutionService : Service() {
         private const val CHANNEL_ID = "adb_script_execution_channel"
         private const val NOTIFICATION_ID = 1001
         const val EXTRA_ADB_CODE = "io.github.swiftstagrime.termuxrunner.adb_code"
+        const val EXTRA_TARGET_TYPE = "io.github.swiftstagrime.termuxrunner.target_type"
+        const val TARGET_SCRIPT = "script"
+        const val TARGET_AUTOMATION = "automation"
 
         fun newIntent(
             context: Context,
-            adbCode: String,
+            code: String,
+            targetType: String = TARGET_SCRIPT,
         ): Intent =
             Intent(context, AdbScriptExecutionService::class.java).apply {
-                putExtra(EXTRA_ADB_CODE, adbCode)
+                putExtra(EXTRA_ADB_CODE, code)
+                putExtra(EXTRA_TARGET_TYPE, targetType)
             }
     }
 
@@ -51,6 +63,9 @@ class AdbScriptExecutionService : Service() {
 
     @Inject
     lateinit var scriptRepository: ScriptRepository
+
+    @Inject
+    lateinit var automationRepository: AutomationRepository
 
     @Inject
     lateinit var runScriptUseCase: RunScriptUseCase
@@ -78,36 +93,88 @@ class AdbScriptExecutionService : Service() {
         flags: Int,
         startId: Int,
     ): Int {
-        val adbCode = intent?.getStringExtra(EXTRA_ADB_CODE)
+        val code = intent?.getStringExtra(EXTRA_ADB_CODE)
+        val targetType = intent?.getStringExtra(EXTRA_TARGET_TYPE) ?: TARGET_SCRIPT
 
-        if (adbCode == null) {
+        if (code == null) {
             cleanupAndStop(startId)
             return START_NOT_STICKY
         }
 
         serviceScope.launch {
             try {
-                updateNotification("Searching for script: $adbCode")
-                val script = scriptRepository.getScriptByAdbCode(adbCode).getOrThrow()
-
-                updateNotification("Executing: ${script.name}")
-                runScriptUseCase(script)
-
-                updateNotification("Execution finished successfully.")
+                when (targetType) {
+                    TARGET_AUTOMATION -> executeAutomation(code, startId)
+                    else -> executeScript(code, startId)
+                }
             } catch (e: Exception) {
-                val errorMessage =
-                    when (e) {
-                        is ScriptNotFoundException -> e.message ?: "Script not found."
-                        else -> "Error: ${e.localizedMessage ?: "Unknown execution error"}"
-                    }
-                updateNotification(errorMessage, isError = true)
-            } finally {
+                val errorMessage = e.message ?: "Unknown execution error"
+                updateNotification("Error: $errorMessage", isError = true)
                 delay(3000)
                 cleanupAndStop(startId)
             }
         }
 
         return START_NOT_STICKY
+    }
+
+    private suspend fun executeScript(
+        code: String,
+        startId: Int,
+    ) {
+        try {
+            updateNotification("Searching for script: $code")
+            val script = scriptRepository.getScriptByAdbCode(code).getOrThrow()
+
+            updateNotification("Executing: ${script.name}")
+            runScriptUseCase(script)
+
+            updateNotification("Execution finished successfully.")
+        } catch (e: Exception) {
+            val errorMessage =
+                when (e) {
+                    is ScriptNotFoundException -> e.message ?: "Script not found."
+                    else -> "Error: ${e.localizedMessage ?: "Unknown execution error"}"
+                }
+            updateNotification(errorMessage, isError = true)
+        } finally {
+            delay(3000)
+            cleanupAndStop(startId)
+        }
+    }
+
+    private suspend fun executeAutomation(
+        code: String,
+        startId: Int,
+    ) {
+        try {
+            updateNotification("Searching for automation: $code")
+            val automation = automationRepository.getAutomationByAdbCode(code).getOrThrow()
+
+            updateNotification("Triggering: ${automation.label}")
+            triggerAutomationViaWorkManager(automation.id)
+            updateNotification("Automation triggered successfully.")
+        } catch (e: Exception) {
+            val errorMessage =
+                when (e) {
+                    is AutomationNotFoundException -> e.message ?: "Automation not found."
+                    else -> "Error: ${e.localizedMessage ?: "Unknown execution error"}"
+                }
+            updateNotification(errorMessage, isError = true)
+        } finally {
+            delay(3000)
+            cleanupAndStop(startId)
+        }
+    }
+
+    private fun triggerAutomationViaWorkManager(automationId: Int) {
+        val workRequest =
+            OneTimeWorkRequestBuilder<AutomationWorker>()
+                .setInputData(workDataOf("automation_id" to automationId))
+                .build()
+        WorkManager
+            .getInstance(this)
+            .enqueue(workRequest)
     }
 
     private fun cleanupAndStop(startId: Int) {
@@ -127,10 +194,10 @@ class AdbScriptExecutionService : Service() {
             val channel =
                 NotificationChannel(
                     CHANNEL_ID,
-                    "ADB Script Execution",
+                    "ADB Execution",
                     NotificationManager.IMPORTANCE_LOW,
                 ).apply {
-                    description = "Shows progress of scripts executed via ADB"
+                    description = "Shows progress of scripts and automations executed via ADB"
                 }
             notificationManager.createNotificationChannel(channel)
         }

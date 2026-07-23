@@ -56,7 +56,11 @@ class WidgetConfigurationActivity : ComponentActivity() {
         if (intent.action == AppWidgetManager.ACTION_APPWIDGET_CONFIGURE ||
             intent.hasExtra(AppWidgetManager.EXTRA_APPWIDGET_ID)
         ) {
-            appWidgetId = intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID)
+            appWidgetId =
+                intent.getIntExtra(
+                    AppWidgetManager.EXTRA_APPWIDGET_ID,
+                    AppWidgetManager.INVALID_APPWIDGET_ID,
+                )
         }
 
         if (appWidgetId == AppWidgetManager.INVALID_APPWIDGET_ID) {
@@ -65,7 +69,8 @@ class WidgetConfigurationActivity : ComponentActivity() {
         }
 
         lifecycleScope.launch {
-            val glanceId = GlanceAppWidgetManager(this@WidgetConfigurationActivity).getGlanceIdBy(appWidgetId)
+            val glanceId =
+                GlanceAppWidgetManager(this@WidgetConfigurationActivity).getGlanceIdBy(appWidgetId)
             val prefs =
                 getAppWidgetState(
                     context = this@WidgetConfigurationActivity,
@@ -73,7 +78,10 @@ class WidgetConfigurationActivity : ComponentActivity() {
                     glanceId = glanceId,
                 )
             val existing =
-                prefs[ScriptWidget.ScriptsListKey]?.split(",")?.filter { it.isNotEmpty() }?.mapNotNull { it.toIntOrNull() } ?: emptyList()
+                prefs[ScriptWidget.ScriptsListKey]
+                    ?.split(",")
+                    ?.filter { it.isNotEmpty() }
+                    ?.mapNotNull { it.toIntOrNull() } ?: emptyList()
             selectedScriptIds.addAll(existing)
         }
         enableEdgeToEdge()
@@ -89,7 +97,11 @@ class WidgetConfigurationActivity : ComponentActivity() {
             ScriptRunnerForTermuxTheme(accent = accent, mode = mode, customTheme = customTheme) {
                 Scaffold(
                     topBar = {
-                        Text("Widget Configuration", modifier = Modifier.padding(16.dp), style = MaterialTheme.typography.headlineSmall)
+                        Text(
+                            "Widget Configuration",
+                            modifier = Modifier.padding(16.dp),
+                            style = MaterialTheme.typography.headlineSmall,
+                        )
                     },
                     floatingActionButton = {
                         FloatingActionButton(onClick = { saveAndExit() }) {
@@ -97,8 +109,16 @@ class WidgetConfigurationActivity : ComponentActivity() {
                         }
                     },
                 ) { padding ->
-                    Column(modifier = Modifier.padding(padding).fillMaxSize()) {
-                        Text("Selected Scripts (${selectedScriptIds.size}/5)", modifier = Modifier.padding(16.dp))
+                    Column(
+                        modifier =
+                            Modifier
+                                .padding(padding)
+                                .fillMaxSize(),
+                    ) {
+                        Text(
+                            "Selected Scripts (${selectedScriptIds.size}/5)",
+                            modifier = Modifier.padding(16.dp),
+                        )
 
                         LazyColumn(modifier = Modifier.weight(1f)) {
                             items(selectedScriptIds) { id ->
@@ -107,7 +127,10 @@ class WidgetConfigurationActivity : ComponentActivity() {
                                     headlineContent = { Text(script?.name ?: "Unknown Script") },
                                     trailingContent = {
                                         IconButton(onClick = { selectedScriptIds.remove(id) }) {
-                                            Icon(Icons.Default.Delete, contentDescription = "Remove")
+                                            Icon(
+                                                Icons.Default.Delete,
+                                                contentDescription = "Remove",
+                                            )
                                         }
                                     },
                                 )
@@ -116,7 +139,10 @@ class WidgetConfigurationActivity : ComponentActivity() {
                                 item {
                                     OutlinedButton(
                                         onClick = { showPicker = true },
-                                        modifier = Modifier.fillMaxWidth().padding(16.dp),
+                                        modifier =
+                                            Modifier
+                                                .fillMaxWidth()
+                                                .padding(16.dp),
                                     ) {
                                         Text("Add Script")
                                     }
@@ -145,13 +171,15 @@ class WidgetConfigurationActivity : ComponentActivity() {
 
     private fun saveAndExit() {
         lifecycleScope.launch {
-            val glanceId = GlanceAppWidgetManager(this@WidgetConfigurationActivity).getGlanceIdBy(appWidgetId)
+            val glanceId =
+                GlanceAppWidgetManager(this@WidgetConfigurationActivity).getGlanceIdBy(appWidgetId)
             updateAppWidgetState(this@WidgetConfigurationActivity, glanceId) { prefs ->
                 prefs[ScriptWidget.ScriptsListKey] = selectedScriptIds.joinToString(",")
             }
             ScriptWidget().update(this@WidgetConfigurationActivity, glanceId)
 
-            val resultValue = Intent().apply { putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId) }
+            val resultValue =
+                Intent().apply { putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId) }
             setResult(RESULT_OK, resultValue)
             finish()
         }

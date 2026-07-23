@@ -13,8 +13,10 @@ import io.github.swiftstagrime.termuxrunner.data.repository.TermuxException
 import io.github.swiftstagrime.termuxrunner.data.repository.TermuxPermissionException
 import io.github.swiftstagrime.termuxrunner.di.DefaultDispatcher
 import io.github.swiftstagrime.termuxrunner.di.IoDispatcher
+import io.github.swiftstagrime.termuxrunner.domain.model.Automation
 import io.github.swiftstagrime.termuxrunner.domain.model.Category
 import io.github.swiftstagrime.termuxrunner.domain.model.Script
+import io.github.swiftstagrime.termuxrunner.domain.repository.AutomationRepository
 import io.github.swiftstagrime.termuxrunner.domain.repository.CategoryRepository
 import io.github.swiftstagrime.termuxrunner.domain.repository.IconRepository
 import io.github.swiftstagrime.termuxrunner.domain.repository.ScriptRepository
@@ -86,6 +88,7 @@ class HomeViewModel
         private val shortcutRepository: ShortcutRepository,
         private val iconRepository: IconRepository,
         private val categoryRepository: CategoryRepository,
+        private val automationRepository: AutomationRepository,
         private val scriptRepository: ScriptRepository,
         private val userPreferencesRepository: UserPreferencesRepository,
         private val widgetManager: WidgetManager,
@@ -100,6 +103,13 @@ class HomeViewModel
 
         private val _sortOption = MutableStateFlow(SortOption.NAME_ASC)
         val sortOption = _sortOption.asStateFlow()
+
+        val automations: StateFlow<List<Automation>> =
+            automationRepository.getAllAutomations().stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = emptyList(),
+            )
 
         private val _uiEvent = Channel<HomeUiEvent>()
         val uiEvent = _uiEvent.receiveAsFlow()
@@ -206,8 +216,20 @@ class HomeViewModel
         ) {
             viewModelScope.launch(ioDispatcher) {
                 try {
-                    runScriptUseCase(script = script, runtimeArgs = runtimeArgs, runtimePrefix = runtimePrefix, runtimeEnv = runtimeEnv)
-                    sendEvent(HomeUiEvent.ShowSnackbar(UiText.StringResource(R.string.msg_running_script, script.name)))
+                    runScriptUseCase(
+                        script = script,
+                        runtimeArgs = runtimeArgs,
+                        runtimePrefix = runtimePrefix,
+                        runtimeEnv = runtimeEnv,
+                    )
+                    sendEvent(
+                        HomeUiEvent.ShowSnackbar(
+                            UiText.StringResource(
+                                R.string.msg_running_script,
+                                script.name,
+                            ),
+                        ),
+                    )
                     clearPendingRun()
                 } catch (_: TermuxPermissionException) {
                     pendingScript = script

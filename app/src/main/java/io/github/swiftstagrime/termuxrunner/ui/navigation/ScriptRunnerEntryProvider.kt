@@ -11,10 +11,13 @@ import io.github.swiftstagrime.termuxrunner.ui.features.automation.AutomationRou
 import io.github.swiftstagrime.termuxrunner.ui.features.customtheme.CustomThemeRoute
 import io.github.swiftstagrime.termuxrunner.ui.features.editor.EditorRoute
 import io.github.swiftstagrime.termuxrunner.ui.features.editor.EditorViewModel
+import io.github.swiftstagrime.termuxrunner.ui.features.executionhistory.ExecutionHistoryRoute
 import io.github.swiftstagrime.termuxrunner.ui.features.home.HomeRoute
 import io.github.swiftstagrime.termuxrunner.ui.features.onboarding.OnboardingRoute
+import io.github.swiftstagrime.termuxrunner.ui.features.scriptversions.ScriptVersionsRoute
 import io.github.swiftstagrime.termuxrunner.ui.features.settings.SettingsRoute
 import io.github.swiftstagrime.termuxrunner.ui.features.tiles.TileSettingsRoute
+import io.github.swiftstagrime.termuxrunner.ui.features.webhooksettings.WebhookSettingsRoute
 
 @Composable
 fun rememberEntryProvider(mainViewModel: MainViewModel): (NavKey) -> NavEntry<NavKey> =
@@ -42,6 +45,9 @@ fun rememberEntryProvider(mainViewModel: MainViewModel): (NavKey) -> NavEntry<Na
                             onNavigateToAutomation = {
                                 mainViewModel.navigateTo(Route.Automation)
                             },
+                            onNavigateToScriptHistory = { scriptId ->
+                                mainViewModel.navigateTo(Route.ExecutionHistory(scriptId))
+                            },
                         )
                     }
 
@@ -54,6 +60,9 @@ fun rememberEntryProvider(mainViewModel: MainViewModel): (NavKey) -> NavEntry<Na
 
                         EditorRoute(
                             onBack = { mainViewModel.goBack() },
+                            onNavigateToVersions = { scriptId ->
+                                mainViewModel.navigateTo(Route.ScriptVersions(scriptId))
+                            },
                             viewModel = viewModel,
                         )
                     }
@@ -66,6 +75,12 @@ fun rememberEntryProvider(mainViewModel: MainViewModel): (NavKey) -> NavEntry<Na
                             },
                             onNavigateToCustomTheme = {
                                 mainViewModel.navigateTo(Route.CustomTheme)
+                            },
+                            onNavigateToExecutionHistory = {
+                                mainViewModel.navigateTo(Route.ExecutionHistory(null))
+                            },
+                            onNavigateToWebhookSettings = {
+                                mainViewModel.navigateTo(Route.WebhookSettings)
                             },
                         )
                     }
@@ -84,6 +99,26 @@ fun rememberEntryProvider(mainViewModel: MainViewModel): (NavKey) -> NavEntry<Na
 
                     is Route.CustomTheme -> {
                         CustomThemeRoute(
+                            onBack = { mainViewModel.goBack() },
+                        )
+                    }
+
+                    is Route.ExecutionHistory -> {
+                        ExecutionHistoryRoute(
+                            onBack = { mainViewModel.goBack() },
+                            scriptId = key.scriptId,
+                        )
+                    }
+
+                    is Route.ScriptVersions -> {
+                        ScriptVersionsRoute(
+                            onBack = { _ -> mainViewModel.goBack() },
+                            scriptId = key.scriptId,
+                        )
+                    }
+
+                    is Route.WebhookSettings -> {
+                        WebhookSettingsRoute(
                             onBack = { mainViewModel.goBack() },
                         )
                     }

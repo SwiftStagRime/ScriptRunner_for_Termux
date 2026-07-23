@@ -380,13 +380,15 @@ fun pickColorScheme(
                 if (isDark) DarkGreenColorScheme else LightGreenColorScheme
             }
         }
+
         AppTheme.GREEN -> if (isDark) DarkGreenColorScheme else LightGreenColorScheme
         AppTheme.BLUE -> if (isDark) DarkBlueColorScheme else LightBlueColorScheme
         AppTheme.RED -> if (isDark) DarkRedColorScheme else LightRedColorScheme
         AppTheme.AMOLED -> if (isDark) DarkAmoledColorScheme else LightAmoledColorScheme
         AppTheme.CYBER -> if (isDark) DarkColorfulAmoledColorScheme else LightColorfulAmoledColorScheme
         AppTheme.CUSTOM -> {
-            customTheme?.toColorScheme(isDark) ?: if (isDark) DarkGreenColorScheme else LightGreenColorScheme
+            customTheme?.toColorScheme(isDark)
+                ?: if (isDark) DarkGreenColorScheme else LightGreenColorScheme
         }
     }
 

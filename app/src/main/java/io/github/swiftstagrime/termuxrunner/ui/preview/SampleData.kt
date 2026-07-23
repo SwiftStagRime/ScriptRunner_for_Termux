@@ -123,6 +123,7 @@ val stubHomeActions =
         onMove = { _, _ -> },
         onTileSettingsClick = {},
         onNavigateToAutomation = {},
+        onNavigateToScriptHistory = {},
     )
 
 val sampleCategories =

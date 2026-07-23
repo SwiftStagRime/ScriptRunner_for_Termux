@@ -59,10 +59,18 @@ fun ScriptWidgetContent(
                 .cornerRadius(20.dp)
                 .padding(12.dp),
     ) {
-        Row(modifier = GlanceModifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+        Row(
+            modifier = GlanceModifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
             Text(
                 text = context.getString(R.string.script_widget_title),
-                style = TextStyle(color = GlanceTheme.colors.onSurface, fontWeight = FontWeight.Bold, fontSize = 16.sp),
+                style =
+                    TextStyle(
+                        color = GlanceTheme.colors.onSurface,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 16.sp,
+                    ),
                 modifier = GlanceModifier.defaultWeight(),
             )
 

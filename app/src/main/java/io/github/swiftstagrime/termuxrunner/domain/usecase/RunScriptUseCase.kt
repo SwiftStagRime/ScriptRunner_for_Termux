@@ -20,21 +20,23 @@ class RunScriptUseCase
         private val termuxRepository: TermuxRepository,
         private val scriptFileRepository: ScriptFileRepository,
         private val monitoringRepository: MonitoringRepository,
+        private val processResultTracker: ProcessTermuxResultUseCase,
     ) {
+        companion object {
+            private val VALID_ENV_KEY_PATTERN = Regex("^[a-zA-Z_][a-zA-Z0-9_]*$")
+            private val SAFE_INTERPRETER_PATTERN = Regex("^[a-z0-9_/.-]+$", RegexOption.IGNORE_CASE)
 
-    companion object {
-        private val VALID_ENV_KEY_PATTERN = Regex("^[a-zA-Z_][a-zA-Z0-9_]*$")
-        private val SAFE_INTERPRETER_PATTERN = Regex("^[a-z0-9_/.-]+$", RegexOption.IGNORE_CASE)
+            /** Escapes a string for safe placement inside bash -c "..." double-quoted context. */
+            private fun escapeForBashDoubleQuotes(input: String): String =
+                input
+                    .replace("\\", "\\\\")
+                    .replace("\"", "\\\"")
+                    .replace("$", "\\$")
+                    .replace("`", "\\`")
 
-        /** Escapes a string for safe placement inside bash -c "..." double-quoted context. */
-        private fun escapeForBashDoubleQuotes(input: String): String = input
-            .replace("\\", "\\\\")
-            .replace("\"", "\\\"")
-            .replace("$", "\\$")
-            .replace("`", "\\`")
+            private fun escapeForSingleQuotedBash(input: String): String = input.replace("\"", "\\\"")
+        }
 
-        private fun escapeForSingleQuotedBash(input: String): String = input.replace("\"", "\\\"")
-    }
         suspend operator fun invoke(
             script: Script,
             runtimeArgs: String? = null,
@@ -116,11 +118,19 @@ class RunScriptUseCase
                     finalCommand
                 }
 
+            processResultTracker.recordStartTime(script.id)
+
             // Execute in Termux with wrapped command
             termuxRepository.runCommand(
                 command = wrappedCommand,
                 runInBackground = script.runInBackground,
-                sessionAction = "1",
+                sessionAction = script.foregroundSessionBehavior.termuxAction,
+                shellName =
+                    if (script.reuseSession && !script.runInBackground) {
+                        script.name.takeIf { it.isNotBlank() }
+                    } else {
+                        null
+                    },
                 scriptId = script.id,
                 scriptName = script.name,
                 notifyOnResult = script.notifyOnResult,
@@ -183,11 +193,13 @@ except:
             }
 
             val escapedInterpreter = escapeForBashDoubleQuotes(script.interpreter)
-            val escapedPrefix = if (actualPrefix.isNotBlank()) escapeForBashDoubleQuotes(actualPrefix) + " " else ""
+            val escapedPrefix =
+                if (actualPrefix.isNotBlank()) escapeForBashDoubleQuotes(actualPrefix) + " " else ""
             val escapedArgs = escapeForBashDoubleQuotes(combinedArgs)
             val escapedEnvVars = escapeForSingleQuotedBash(envVars)
 
-            val coreExecution = "$escapedEnvVars$escapedPrefix$escapedInterpreter $fullPath $escapedArgs"
+            val coreExecution =
+                "$escapedEnvVars$escapedPrefix$escapedInterpreter $fullPath $escapedArgs"
 
             return StringBuilder()
                 .append("mkdir -p $tempDir && ")
@@ -224,11 +236,13 @@ except:
             }
 
             val escapedInterpreter = escapeForBashDoubleQuotes(script.interpreter)
-            val escapedPrefix = if (actualPrefix.isNotBlank()) escapeForBashDoubleQuotes(actualPrefix) + " " else ""
+            val escapedPrefix =
+                if (actualPrefix.isNotBlank()) escapeForBashDoubleQuotes(actualPrefix) + " " else ""
             val escapedArgs = escapeForBashDoubleQuotes(combinedArgs)
             val escapedEnvVars = escapeForSingleQuotedBash(envVars)
 
-            val coreExecution = "$escapedEnvVars$escapedPrefix$escapedInterpreter $termuxDestPath $escapedArgs"
+            val coreExecution =
+                "$escapedEnvVars$escapedPrefix$escapedInterpreter $termuxDestPath $escapedArgs"
 
             return StringBuilder()
                 .append("mkdir -p ~/scriptrunner_for_termux && ")

@@ -15,15 +15,15 @@ A secure Android bridge for managing and executing scripts via Termux. This app 
 * **Customization:** Personalize your script shortcuts with custom icons.
 * **Data Portability:** Full support for importing and exporting your script library(now with sripts themself and not just my json DTOs parsing)
 
-### ADB Remote Execution
+### ADB and Remote Execution
 
-You can now trigger scripts remotely via ADB. To use this feature, ensure you have set an "ADB Code" in the script settings (this is empty by default).
+You can now trigger scripts remotely via ADB or Webhook service. To use this feature, ensure you have set an "ADB Code" in the script settings (this is empty by default).
 **Run command:**
 adb shell am start \
   -n io.github.swiftstagrime.termuxrunner/io.github.swiftstagrime.termuxrunner.ui.features.adbtrigger.AdbTriggerActivity \
   --es io.github.swiftstagrime.termuxrunner.adb_code "YOUR_CODE_HERE"
 
-YOUR_CODE_HERE is supposed to be the code name of the script, like "test2" for example.
+YOUR_CODE_HERE is supposed to be the code name of the script, like "test2" for example. Webhook example in settings.
 
 ### Security First
 

@@ -1,0 +1,5 @@
+Automation chain editor, notification actions config, webhook.
+Sharing + code versions.
+More behaviour settings for termux session management.
+Long press opens editor, short launches script.
+Klint+cleanup.

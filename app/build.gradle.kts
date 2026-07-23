@@ -29,8 +29,8 @@ android {
         applicationId = "io.github.swiftstagrime.termuxrunner"
         minSdk = 24
         targetSdk = 37
-        versionCode = 173
-        versionName = "1.7.3"
+        versionCode = 180
+        versionName = "1.8.0"
 
         testInstrumentationRunner = "io.github.swiftstagrime.termuxrunner.di.HiltTestRunner"
     }
@@ -204,6 +204,7 @@ dependencies {
     testImplementation(libs.robolectric)
     implementation(libs.androidx.glance.material3)
     implementation(libs.androidx.glance.appwidget)
+    implementation(libs.nanohttpd)
 }
 
 baselineProfile {

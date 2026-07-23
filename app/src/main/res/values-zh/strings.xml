@@ -157,6 +157,16 @@
     <string name="desc_bg_execution">仅显示通知</string>
     <string name="label_interactive_session">交互式会话</string>
     <string name="desc_interactive_session">运行结束后保持终端开启</string>
+    <string name="label_foreground_session_behavior">前台会话行为</string>
+    <string name="desc_foreground_session_behavior">Termux 对新会话的处理方式</string>
+    <string name="fg_session_switch_open">切换到新会话并打开 Termux</string>
+    <string name="fg_session_keep_open">保持当前会话并打开 Termux</string>
+    <string name="fg_session_switch_silent">切换到新会话，不打开 Termux</string>
+    <string name="fg_session_keep_silent">保持当前会话，不打开 Termux</string>
+    <string name="fg_session_default">Termux 默认</string>
+    <string name="label_reuse_session">复用现有会话</string>
+    <string name="desc_reuse_session">如果已存在与此脚本同名的 Termux 会话，则在其中运行而不是创建新会话</string>
+    <string name="warning_reuse_session_version">需要 Termux 0.119 或更高版本。在旧版本中，此选项将被忽略，并会创建新会话</string>
     <string name="empty_env_vars">未设置环境变量。</string>
     <string name="label_key">键 (Key)</string>
     <string name="label_value">值 (Value)</string>
@@ -269,7 +279,7 @@
     <!-- Script Picker Dialog -->
     <string name="title_select_script">选择脚本</string>
     <string name="no_scripts_available">无可用脚本</string>
-    <string name="assign_scripts_to_these_slots_you_can_then_trigger_them_directly_from_your_phone_s_quick_settings_panel">将脚本分配到这些槽位。之后您可以直接从手机的快捷设置面板触发它们。</string>
+    <string name="tile_assignment_hint">将脚本分配到这些槽位。之后您可以直接从手机的快捷设置面板触发它们。</string>
     <string name="configure_tiles">配置磁贴</string>
     <string name="empty">空白</string>
 
@@ -333,6 +343,12 @@
     <string name="automation_condition_wifi">仅 WiFi</string>
     <string name="automation_condition_charging">仅充电时</string>
     <string name="automation_section_upcoming">即将运行</string>
+    <string name="automation_section_trigger">触发模式</string>
+    <string name="automation_section_schedule_type">调度类型</string>
+    <string name="automation_section_event_source">事件来源</string>
+    <string name="trigger_mode_schedule">定时</string>
+    <string name="trigger_mode_event">事件</string>
+    <string name="trigger_mode_boot">启动时</string>
     <string name="automation_save_button">安排任务</string>
     <string name="history_title">执行历史</string>
     <string name="no_logs_recorded">尚无日志记录</string>
@@ -351,8 +367,22 @@
     <string name="label_battery_threshold">电池电量阈值</string>
     <string name="battery_threshold_desc">仅在电池电量高于 %1$d%% 时运行</string>
     <string name="automation_type_boot">启动时</string>
+    <string name="automation_type_monthly">每月</string>
+    <string name="automation_type_time_window">时间窗口</string>
+    <string name="automation_type_random_delay">随机延迟</string>
+    <string name="automation_type_screen_on">屏幕开启</string>
+    <string name="automation_type_screen_off">屏幕关闭</string>
+    <string name="automation_type_network_connected">网络已连接</string>
+    <string name="automation_type_network_disconnected">网络已断开</string>
+    <string name="automation_type_usb_connected">USB 已连接</string>
+    <string name="automation_type_usb_disconnected">USB 已断开</string>
     <string name="automation_boot_hint">设备每次启动时都将运行脚本。</string>
     <string name="automation_boot_next_run">每次启动时运行</string>
+    <string name="automation_monthly_day_of_month">几号</string>
+    <string name="automation_window_from">从 %1$s 开始</string>
+    <string name="automation_window_to">到 %1$s 结束</string>
+    <string name="automation_random_delay_min">最小（秒）</string>
+    <string name="automation_random_delay_max">最大（秒）</string>
 
     <!-- Automation Widget -->
     <string name="automation_widget_title">自动化</string>
@@ -415,5 +445,39 @@
     <string name="surfaces_background"><![CDATA[表面和背景]]></string>
     <string name="utility">公用</string>
     <string name="surface_container_lowest">表面容器最低层 (Surface Container Lowest)</string>
+
+    <!-- Notification Actions -->
+    <string name="section_notification_actions">通知操作</string>
+    <string name="desc_notification_actions">在脚本结果通知中显示的操作按钮。每个按钮触发另一个自动化任务。</string>
+    <string name="label_action_label">标签</string>
+    <string name="label_target_automation">目标自动化</string>
+    <string name="btn_add_action">添加操作</string>
+
+    <!-- Webhook -->
+    <string name="webhook_settings_title">Webhook 设置</string>
+    <string name="webhook_config_label">配置</string>
+    <string name="webhook_port_label">端口</string>
+    <string name="webhook_bind_label">局域网访问</string>
+    <string name="webhook_bind_all">0.0.0.0</string>
+    <string name="webhook_bind_local">127.0.0.1</string>
+    <string name="webhook_lan_access_hint">启用后，服务器将监听所有接口，并可通过您网络中的其他设备访问。</string>
+    <string name="webhook_auth_label">身份验证</string>
+    <string name="webhook_token_label">认证令牌</string>
+    <string name="webhook_copy_token">复制</string>
+    <string name="webhook_regenerate_token">重新生成</string>
+    <string name="webhook_generate_token">生成令牌</string>
+    <string name="webhook_auth_hint">发送请求时，请将令牌作为 Bearer 标头或查询参数包含。</string>
+    <string name="webhook_examples_label">请求示例</string>
+    <string name="webhook_example_script">按 ID 触发脚本</string>
+    <string name="webhook_example_automation">按 ID 触发自动化</string>
+    <string name="webhook_query_param_hint">令牌也可以通过 URL 中的 ?token=您的令牌 传递。</string>
+    <string name="webhook_enable_label">启用 Webhook 服务器</string>
+    <string name="webhook_running_indicator">正在端口 %1$d 运行</string>
+    <string name="webhook_stopped_indicator">已停止</string>
+    <string name="webhook_restarting">正在重启服务器…</string>
+    <string name="webhook_server_restarted">服务器已重启</string>
+    <string name="webhook_stop_server">停止服务器</string>
+    <string name="copied_label">已复制！</string>
+    <string name="execution_history_label">执行历史</string>
 
 </resources>

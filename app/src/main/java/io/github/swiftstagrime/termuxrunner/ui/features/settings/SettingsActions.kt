@@ -13,4 +13,6 @@ data class SettingsActions(
     val onDeveloperClick: () -> Unit,
     val onBack: () -> Unit,
     val onNavigateToCustomTheme: () -> Unit,
+    val onNavigateToExecutionHistory: () -> Unit,
+    val onNavigateToWebhookSettings: () -> Unit,
 )

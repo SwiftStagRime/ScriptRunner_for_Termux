@@ -158,6 +158,16 @@
     <string name="desc_bg_execution">Mostrar apenas notificação</string>
     <string name="label_interactive_session">Sessão Interativa</string>
     <string name="desc_interactive_session">Manter terminal aberto ao finalizar</string>
+    <string name="label_foreground_session_behavior">Comportamento da Sessão em Primeiro Plano</string>
+    <string name="desc_foreground_session_behavior">O que o Termux faz com a nova sessão</string>
+    <string name="fg_session_switch_open">Alternar para a nova sessão, abrir Termux</string>
+    <string name="fg_session_keep_open">Manter a sessão atual, abrir Termux</string>
+    <string name="fg_session_switch_silent">Alternar para a nova sessão, sem abrir Termux</string>
+    <string name="fg_session_keep_silent">Manter a sessão atual, sem abrir Termux</string>
+    <string name="fg_session_default">Padrão do Termux</string>
+    <string name="label_reuse_session">Reutilizar sessão existente</string>
+    <string name="desc_reuse_session">Se uma sessão do Termux com o nome deste script existir, execute nela em vez de criar uma nova</string>
+    <string name="warning_reuse_session_version">Requer o Termux 0.119 ou mais recente. Em versões anteriores, esta opção é ignorada e uma nova sessão é criada</string>
     <string name="empty_env_vars">Nenhuma variável definida.</string>
     <string name="label_key">Chave</string>
     <string name="label_value">Valor</string>
@@ -270,7 +280,7 @@
     <!-- Script Picker Dialog -->
     <string name="title_select_script">Selecionar script</string>
     <string name="no_scripts_available">Nenhum script disponível</string>
-    <string name="assign_scripts_to_these_slots_you_can_then_trigger_them_directly_from_your_phone_s_quick_settings_panel">Atribua scripts a esses slots. Você poderá então acioná-los diretamente do painel de configurações rápidas do seu telefone.</string>
+    <string name="tile_assignment_hint">Atribua scripts a esses slots. Você poderá então acioná-los diretamente do painel de configurações rápidas do seu telefone.</string>
     <string name="configure_tiles">Configurar blocos</string>
     <string name="empty">Vazio</string>
 
@@ -334,6 +344,12 @@
     <string name="automation_condition_wifi">Apenas WiFi</string>
     <string name="automation_condition_charging">Apenas carregando</string>
     <string name="automation_section_upcoming">Próximas agendadas</string>
+    <string name="automation_section_trigger">Modo de Disparo</string>
+    <string name="automation_section_schedule_type">Tipo de Agendamento</string>
+    <string name="automation_section_event_source">Fonte do Evento</string>
+    <string name="trigger_mode_schedule">Agendado</string>
+    <string name="trigger_mode_event">Evento</string>
+    <string name="trigger_mode_boot">Inicialização</string>
     <string name="automation_save_button">Agendar tarefa</string>
     <string name="ok">OK</string>
     <string name="history_title">Histórico de execução</string>
@@ -352,8 +368,22 @@
     <string name="label_battery_threshold">Limite de bateria</string>
     <string name="battery_threshold_desc">Executar apenas se a bateria estiver acima de %1$d%%</string>
     <string name="automation_type_boot">Na Inicialização</string>
+    <string name="automation_type_monthly">Mensal</string>
+    <string name="automation_type_time_window">Janela de Tempo</string>
+    <string name="automation_type_random_delay">Atraso Aleatório</string>
+    <string name="automation_type_screen_on">Tela Ligada</string>
+    <string name="automation_type_screen_off">Tela Desligada</string>
+    <string name="automation_type_network_connected">Rede Conectada</string>
+    <string name="automation_type_network_disconnected">Rede Desconectada</string>
+    <string name="automation_type_usb_connected">USB Conectado</string>
+    <string name="automation_type_usb_disconnected">USB Desconectado</string>
     <string name="automation_boot_hint">O script será executado sempre que o dispositivo for iniciado.</string>
     <string name="automation_boot_next_run">Executa em cada inicialização</string>
+    <string name="automation_monthly_day_of_month">Dia do mês</string>
+    <string name="automation_window_from">De %1$s</string>
+    <string name="automation_window_to">Até %1$s</string>
+    <string name="automation_random_delay_min">Mín. (s)</string>
+    <string name="automation_random_delay_max">Máx. (s)</string>
 
     <!-- Automation Widget -->
     <string name="automation_widget_title">Automações</string>
@@ -416,5 +446,39 @@
     <string name="surfaces_background"><![CDATA[Superfícies e plano de fundo]]></string>
     <string name="utility">Utilidade</string>
     <string name="surface_container_lowest">Container de superfície mais baixo</string>
+
+    <!-- Notification Actions -->
+    <string name="section_notification_actions">Ações de notificação</string>
+    <string name="desc_notification_actions">Botões de ação mostrados nas notificações de resultado do script. Cada botão aciona outra automação.</string>
+    <string name="label_action_label">Rótulo</string>
+    <string name="label_target_automation">Automação alvo</string>
+    <string name="btn_add_action">Adicionar ação</string>
+
+    <!-- Webhook -->
+    <string name="webhook_settings_title">Configurações do Webhook</string>
+    <string name="webhook_config_label">Configuração</string>
+    <string name="webhook_port_label">Porta</string>
+    <string name="webhook_bind_label">Acesso LAN</string>
+    <string name="webhook_bind_all">0.0.0.0</string>
+    <string name="webhook_bind_local">127.0.0.1</string>
+    <string name="webhook_lan_access_hint">Quando ativado, o servidor escuta em todas as interfaces e pode ser acessado de outros dispositivos na sua rede.</string>
+    <string name="webhook_auth_label">Autenticação</string>
+    <string name="webhook_token_label">Token de autenticação</string>
+    <string name="webhook_copy_token">Copiar</string>
+    <string name="webhook_regenerate_token">Regenerar</string>
+    <string name="webhook_generate_token">Gerar token</string>
+    <string name="webhook_auth_hint">Inclua o token como cabeçalho Bearer ou parâmetro de consulta ao fazer solicitações.</string>
+    <string name="webhook_examples_label">Solicitações de exemplo</string>
+    <string name="webhook_example_script">Disparar script por ID</string>
+    <string name="webhook_example_automation">Disparar automação por ID</string>
+    <string name="webhook_query_param_hint">O token também pode ser passado como ?token=SEU_TOKEN na URL.</string>
+    <string name="webhook_enable_label">Ativar servidor Webhook</string>
+    <string name="webhook_running_indicator">Ativo na porta %1$d</string>
+    <string name="webhook_stopped_indicator">Parado</string>
+    <string name="webhook_restarting">Reiniciando servidor…</string>
+    <string name="webhook_server_restarted">Servidor reiniciado</string>
+    <string name="webhook_stop_server">Parar servidor</string>
+    <string name="copied_label">Copiado!</string>
+    <string name="execution_history_label">Histórico de execuções</string>
 
 </resources>

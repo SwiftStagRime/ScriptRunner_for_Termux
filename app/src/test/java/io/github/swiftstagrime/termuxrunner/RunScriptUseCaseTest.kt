@@ -1,9 +1,11 @@
 package io.github.swiftstagrime.termuxrunner
 
+import io.github.swiftstagrime.termuxrunner.domain.model.ForegroundSessionBehavior
 import io.github.swiftstagrime.termuxrunner.domain.model.Script
 import io.github.swiftstagrime.termuxrunner.domain.repository.MonitoringRepository
 import io.github.swiftstagrime.termuxrunner.domain.repository.ScriptFileRepository
 import io.github.swiftstagrime.termuxrunner.domain.repository.TermuxRepository
+import io.github.swiftstagrime.termuxrunner.domain.usecase.ProcessTermuxResultUseCase
 import io.github.swiftstagrime.termuxrunner.domain.usecase.RunScriptUseCase
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -15,6 +17,7 @@ import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertFalse
 import junit.framework.TestCase.assertTrue
 import kotlinx.coroutines.test.runTest
+import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -27,13 +30,21 @@ class RunScriptUseCaseTest {
     private val termuxRepo = mockk<TermuxRepository>(relaxed = true)
     private val fileRepo = mockk<ScriptFileRepository>(relaxed = true)
     private val monitorRepo = mockk<MonitoringRepository>(relaxed = true)
+    private val processResultTracker = mockk<ProcessTermuxResultUseCase>(relaxed = true)
 
     private lateinit var useCase: RunScriptUseCase
     private val testPackageName = "io.github.swiftstagrime.test"
 
     @Before
     fun setup() {
-        useCase = RunScriptUseCase(testPackageName, termuxRepo, fileRepo, monitorRepo)
+        useCase =
+            RunScriptUseCase(
+                testPackageName,
+                termuxRepo,
+                fileRepo,
+                monitorRepo,
+                processResultTracker,
+            )
     }
 
     @Test
@@ -53,6 +64,7 @@ class RunScriptUseCaseTest {
             verify {
                 termuxRepo.runCommand(
                     command = capture(commandSlot),
+                    any(),
                     any(),
                     any(),
                     any(),
@@ -81,7 +93,18 @@ class RunScriptUseCaseTest {
             coVerify { fileRepo.saveToBridge(match { it.startsWith("script_2") }, largeCode) }
 
             val commandSlot = slot<String>()
-            verify { termuxRepo.runCommand(command = capture(commandSlot), any(), any(), any(), any(), any(), any()) }
+            verify {
+                termuxRepo.runCommand(
+                    command = capture(commandSlot),
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                )
+            }
 
             assertTrue(commandSlot.captured.contains("cp -f /sdcard/bridge/script_2.sh"))
         }
@@ -100,10 +123,24 @@ class RunScriptUseCaseTest {
             useCase(script)
 
             val commandSlot = slot<String>()
-            verify { termuxRepo.runCommand(command = capture(commandSlot), any(), any(), any(), any(), any(), any()) }
+            verify {
+                termuxRepo.runCommand(
+                    command = capture(commandSlot),
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                )
+            }
 
             val command = commandSlot.captured
-            assertTrue("Should contain escaped export statement", command.contains("export VALID_KEY='value'\\''with'\\''quote'"))
+            assertTrue(
+                "Should contain escaped export statement",
+                command.contains("export VALID_KEY='value'\\''with'\\''quote'"),
+            )
             assertFalse(command.contains("123INVALID"))
         }
 
@@ -122,10 +159,24 @@ class RunScriptUseCaseTest {
             useCase(script)
 
             val commandSlot = slot<String>()
-            verify { termuxRepo.runCommand(command = capture(commandSlot), any(), any(), any(), any(), any(), any()) }
+            verify {
+                termuxRepo.runCommand(
+                    command = capture(commandSlot),
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                )
+            }
 
             assertTrue("Should contain .py extension", commandSlot.captured.contains(".py"))
-            assertFalse("Should not contain default .sh extension", commandSlot.captured.contains(".sh"))
+            assertFalse(
+                "Should not contain default .sh extension",
+                commandSlot.captured.contains(".sh"),
+            )
         }
 
     @Test
@@ -150,6 +201,7 @@ class RunScriptUseCaseTest {
                     command = capture(commandSlot),
                     runInBackground = any(),
                     sessionAction = any(),
+                    shellName = any(),
                     scriptId = any(),
                     scriptName = any(),
                     notifyOnResult = any(),
@@ -190,6 +242,7 @@ class RunScriptUseCaseTest {
                     command = capture(commandSlot),
                     runInBackground = any(),
                     sessionAction = any(),
+                    shellName = any(),
                     scriptId = any(),
                     scriptName = any(),
                     notifyOnResult = any(),
@@ -210,12 +263,24 @@ class RunScriptUseCaseTest {
     @Test
     fun `keepSessionOpen appends shell hack`() =
         runTest {
-            val script = Script(id = 6, name = "KeepOpen", codePages = listOf("ls"), keepSessionOpen = true)
+            val script =
+                Script(id = 6, name = "KeepOpen", codePages = listOf("ls"), keepSessionOpen = true)
 
             useCase(script)
 
             val commandSlot = slot<String>()
-            verify { termuxRepo.runCommand(command = capture(commandSlot), any(), any(), any(), any(), any(), any()) }
+            verify {
+                termuxRepo.runCommand(
+                    command = capture(commandSlot),
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                )
+            }
 
             assertTrue(commandSlot.captured.contains("--- Finished (Press Enter) ---"))
             assertTrue(commandSlot.captured.contains($$"read; exec $SHELL"))
@@ -224,12 +289,24 @@ class RunScriptUseCaseTest {
     @Test
     fun `runtimeArgs are correctly appended to script executionParams`() =
         runTest {
-            val script = Script(id = 7, name = "ArgTest", codePages = listOf("ls"), executionParams = "-l")
+            val script =
+                Script(id = 7, name = "ArgTest", codePages = listOf("ls"), executionParams = "-l")
 
             useCase(script, runtimeArgs = "-a")
 
             val commandSlot = slot<String>()
-            verify { termuxRepo.runCommand(command = capture(commandSlot), any(), any(), any(), any(), any(), any()) }
+            verify {
+                termuxRepo.runCommand(
+                    command = capture(commandSlot),
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                )
+            }
 
             assertTrue(commandSlot.captured.contains("-l -a"))
         }
@@ -241,7 +318,18 @@ class RunScriptUseCaseTest {
             useCase(script, runtimeArgs = "--name=\"My Script\"")
 
             val commandSlot = slot<String>()
-            verify { termuxRepo.runCommand(command = capture(commandSlot), any(), any(), any(), any(), any(), any()) }
+            verify {
+                termuxRepo.runCommand(
+                    command = capture(commandSlot),
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                )
+            }
 
             val command = commandSlot.captured
             assertTrue(command.contains("--name=\\\"My Script\\\""))
@@ -257,222 +345,570 @@ class RunScriptUseCaseTest {
             useCase(script)
 
             val commandSlot = slot<String>()
-            verify { termuxRepo.runCommand(command = capture(commandSlot), any(), any(), any(), any(), any(), any()) }
+            verify {
+                termuxRepo.runCommand(
+                    command = capture(commandSlot),
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                )
+            }
 
-            assertEquals("echo 'Error: Could not save script to device storage.'", commandSlot.captured)
+            assertEquals(
+                "echo 'Error: Could not save script to device storage.'",
+                commandSlot.captured,
+            )
         }
 
     @Test
     fun `malicious interpreter with semicolon is rejected`() =
         runTest {
-            val script = Script(
-                id = 100,
-                name = "Inject",
-                codePages = listOf("echo hello"),
-                interpreter = "bash; rm -rf /",
-            )
+            val script =
+                Script(
+                    id = 100,
+                    name = "Inject",
+                    codePages = listOf("echo hello"),
+                    interpreter = "bash; rm -rf /",
+                )
 
             useCase(script)
 
             val commandSlot = slot<String>()
-            verify { termuxRepo.runCommand(command = capture(commandSlot), any(), any(), any(), any(), any(), any()) }
+            verify {
+                termuxRepo.runCommand(
+                    command = capture(commandSlot),
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                )
+            }
 
-            assertTrue("Should return error, not execute malicious command",
-                commandSlot.captured.contains("Invalid interpreter"))
+            assertTrue(
+                "Should return error, not execute malicious command",
+                commandSlot.captured.contains("Invalid interpreter"),
+            )
         }
 
     @Test
     fun `malicious interpreter with backtick is rejected`() =
         runTest {
-            val script = Script(
-                id = 101,
-                name = "Inject2",
-                codePages = listOf("echo hello"),
-                interpreter = "`rm -rf /`",
-            )
+            val script =
+                Script(
+                    id = 101,
+                    name = "Inject2",
+                    codePages = listOf("echo hello"),
+                    interpreter = "`rm -rf /`",
+                )
 
             useCase(script)
 
             val commandSlot = slot<String>()
-            verify { termuxRepo.runCommand(command = capture(commandSlot), any(), any(), any(), any(), any(), any()) }
+            verify {
+                termuxRepo.runCommand(
+                    command = capture(commandSlot),
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                )
+            }
 
-            assertTrue("Should return error for backtick injection",
-                commandSlot.captured.contains("Invalid interpreter"))
+            assertTrue(
+                "Should return error for backtick injection",
+                commandSlot.captured.contains("Invalid interpreter"),
+            )
             assertFalse(commandSlot.captured.contains("`rm -rf /`"))
         }
 
     @Test
     fun `malicious interpreter with dollar sign is rejected`() =
         runTest {
-            val script = Script(
-                id = 102,
-                name = "Inject3",
-                codePages = listOf("echo hello"),
-                interpreter = "$(rm -rf /)",
-            )
+            val script =
+                Script(
+                    id = 102,
+                    name = "Inject3",
+                    codePages = listOf("echo hello"),
+                    interpreter = "$(rm -rf /)",
+                )
 
             useCase(script)
 
             val commandSlot = slot<String>()
-            verify { termuxRepo.runCommand(command = capture(commandSlot), any(), any(), any(), any(), any(), any()) }
+            verify {
+                termuxRepo.runCommand(
+                    command = capture(commandSlot),
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                )
+            }
 
-            assertTrue("Should return error for dollar-sign injection",
-                commandSlot.captured.contains("Invalid interpreter"))
+            assertTrue(
+                "Should return error for dollar-sign injection",
+                commandSlot.captured.contains("Invalid interpreter"),
+            )
         }
 
     @Test
     fun `malicious interpreter with pipe is rejected`() =
         runTest {
-            val script = Script(
-                id = 103,
-                name = "Inject4",
-                codePages = listOf("echo hello"),
-                interpreter = "bash | rm -rf /",
-            )
+            val script =
+                Script(
+                    id = 103,
+                    name = "Inject4",
+                    codePages = listOf("echo hello"),
+                    interpreter = "bash | rm -rf /",
+                )
 
             useCase(script)
 
             val commandSlot = slot<String>()
-            verify { termuxRepo.runCommand(command = capture(commandSlot), any(), any(), any(), any(), any(), any()) }
+            verify {
+                termuxRepo.runCommand(
+                    command = capture(commandSlot),
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                )
+            }
 
-            assertTrue("Should return error for pipe injection",
-                commandSlot.captured.contains("Invalid interpreter"))
+            assertTrue(
+                "Should return error for pipe injection",
+                commandSlot.captured.contains("Invalid interpreter"),
+            )
         }
 
     @Test
     fun `malicious interpreter with ampersand is rejected`() =
         runTest {
-            val script = Script(
-                id = 104,
-                name = "Inject5",
-                codePages = listOf("echo hello"),
-                interpreter = "bash & rm -rf /",
-            )
+            val script =
+                Script(
+                    id = 104,
+                    name = "Inject5",
+                    codePages = listOf("echo hello"),
+                    interpreter = "bash & rm -rf /",
+                )
 
             useCase(script)
 
             val commandSlot = slot<String>()
-            verify { termuxRepo.runCommand(command = capture(commandSlot), any(), any(), any(), any(), any(), any()) }
+            verify {
+                termuxRepo.runCommand(
+                    command = capture(commandSlot),
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                )
+            }
 
-            assertTrue("Should return error for ampersand injection",
-                commandSlot.captured.contains("Invalid interpreter"))
+            assertTrue(
+                "Should return error for ampersand injection",
+                commandSlot.captured.contains("Invalid interpreter"),
+            )
         }
 
     @Test
     fun `valid path-based interpreter is accepted`() =
         runTest {
-            val script = Script(
-                id = 105,
-                name = "ValidPath",
-                codePages = listOf("echo hello"),
-                interpreter = "/data/data/com.termux/files/usr/bin/bash",
-            )
+            val script =
+                Script(
+                    id = 105,
+                    name = "ValidPath",
+                    codePages = listOf("echo hello"),
+                    interpreter = "/data/data/com.termux/files/usr/bin/bash",
+                )
 
             useCase(script)
 
             val commandSlot = slot<String>()
-            verify { termuxRepo.runCommand(command = capture(commandSlot), any(), any(), any(), any(), any(), any()) }
+            verify {
+                termuxRepo.runCommand(
+                    command = capture(commandSlot),
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                )
+            }
 
-            assertFalse("Should not be rejected as invalid",
-                commandSlot.captured.contains("Invalid interpreter"))
-            assertTrue("Should contain the valid interpreter path",
-                commandSlot.captured.contains("/data/data/com.termux/files/usr/bin/bash"))
+            assertFalse(
+                "Should not be rejected as invalid",
+                commandSlot.captured.contains("Invalid interpreter"),
+            )
+            assertTrue(
+                "Should contain the valid interpreter path",
+                commandSlot.captured.contains("/data/data/com.termux/files/usr/bin/bash"),
+            )
         }
 
     @Test
     fun `env var value with dollar sign is safe inside single quotes`() =
         runTest {
             val dollarValue = "prefix" + '$' + "HOMEsuffix"
-            val script = Script(
-                id = 106,
-                name = "EnvDollar",
-                codePages = listOf("echo test"),
-                envVars = mapOf("TEST_VAR" to dollarValue),
-            )
+            val script =
+                Script(
+                    id = 106,
+                    name = "EnvDollar",
+                    codePages = listOf("echo test"),
+                    envVars = mapOf("TEST_VAR" to dollarValue),
+                )
 
             useCase(script)
 
             val commandSlot = slot<String>()
-            verify { termuxRepo.runCommand(command = capture(commandSlot), any(), any(), any(), any(), any(), any()) }
+            verify {
+                termuxRepo.runCommand(
+                    command = capture(commandSlot),
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                )
+            }
 
-            assertTrue("Dollar sign should appear literally (safe inside single quotes)",
-                commandSlot.captured.contains("'prefix\$HOMEsuffix'"))
+            assertTrue(
+                "Dollar sign should appear literally (safe inside single quotes)",
+                commandSlot.captured.contains("'prefix\$HOMEsuffix'"),
+            )
         }
 
     @Test
     fun `env var value with backtick is safe inside single quotes`() =
         runTest {
-            val script = Script(
-                id = 107,
-                name = "EnvBacktick",
-                codePages = listOf("echo test"),
-                envVars = mapOf("TEST_VAR" to """prefix`whoami`suffix"""),
-            )
+            val script =
+                Script(
+                    id = 107,
+                    name = "EnvBacktick",
+                    codePages = listOf("echo test"),
+                    envVars = mapOf("TEST_VAR" to """prefix`whoami`suffix"""),
+                )
 
             useCase(script)
 
             val commandSlot = slot<String>()
-            verify { termuxRepo.runCommand(command = capture(commandSlot), any(), any(), any(), any(), any(), any()) }
+            verify {
+                termuxRepo.runCommand(
+                    command = capture(commandSlot),
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                )
+            }
 
-            assertTrue("Backtick should appear literally (safe inside single quotes)",
-                commandSlot.captured.contains("`whoami`"))
+            assertTrue(
+                "Backtick should appear literally (safe inside single quotes)",
+                commandSlot.captured.contains("`whoami`"),
+            )
         }
 
     @Test
     fun `env var value with double quote is not specially handled in single-quote context`() =
         runTest {
-            val script = Script(
-                id = 108,
-                name = "EnvQuote",
-                codePages = listOf("echo test"),
-                envVars = mapOf("TEST_VAR" to "value'with'quotes"),
-            )
+            val script =
+                Script(
+                    id = 108,
+                    name = "EnvQuote",
+                    codePages = listOf("echo test"),
+                    envVars = mapOf("TEST_VAR" to "value'with'quotes"),
+                )
 
             useCase(script)
 
             // Just verify it doesn't crash and produces valid output
             val commandSlot = slot<String>()
-            verify { termuxRepo.runCommand(command = capture(commandSlot), any(), any(), any(), any(), any(), any()) }
+            verify {
+                termuxRepo.runCommand(
+                    command = capture(commandSlot),
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                )
+            }
 
-            assertTrue("Should contain the export statement",
-                commandSlot.captured.contains("export TEST_VAR="))
+            assertTrue(
+                "Should contain the export statement",
+                commandSlot.captured.contains("export TEST_VAR="),
+            )
         }
 
     @Test
     fun `interpreter allowlist rejects spaces`() =
         runTest {
-            val script = Script(
-                id = 109,
-                name = "SpaceInject",
-                codePages = listOf("echo hello"),
-                interpreter = "bash -c 'rm -rf /'",
-            )
+            val script =
+                Script(
+                    id = 109,
+                    name = "SpaceInject",
+                    codePages = listOf("echo hello"),
+                    interpreter = "bash -c 'rm -rf /'",
+                )
 
             useCase(script)
 
             val commandSlot = slot<String>()
-            verify { termuxRepo.runCommand(command = capture(commandSlot), any(), any(), any(), any(), any(), any()) }
+            verify {
+                termuxRepo.runCommand(
+                    command = capture(commandSlot),
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                )
+            }
 
-            assertTrue("Spaces in interpreter should be rejected",
-                commandSlot.captured.contains("Invalid interpreter"))
+            assertTrue(
+                "Spaces in interpreter should be rejected",
+                commandSlot.captured.contains("Invalid interpreter"),
+            )
         }
 
     @Test
     fun `interpreter allowlist rejects newlines`() =
         runTest {
-            val script = Script(
-                id = 110,
-                name = "NewlineInject",
-                codePages = listOf("echo hello"),
-                interpreter = "bash\nrm -rf /",
-            )
+            val script =
+                Script(
+                    id = 110,
+                    name = "NewlineInject",
+                    codePages = listOf("echo hello"),
+                    interpreter = "bash\nrm -rf /",
+                )
 
             useCase(script)
 
             val commandSlot = slot<String>()
-            verify { termuxRepo.runCommand(command = capture(commandSlot), any(), any(), any(), any(), any(), any()) }
+            verify {
+                termuxRepo.runCommand(
+                    command = capture(commandSlot),
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                )
+            }
 
-            assertTrue("Newlines in interpreter should be rejected",
-                commandSlot.captured.contains("Invalid interpreter"))
+            assertTrue(
+                "Newlines in interpreter should be rejected",
+                commandSlot.captured.contains("Invalid interpreter"),
+            )
         }
+
+    @Test
+    fun `session action defaults to keep current session and open Termux`() =
+        runTest {
+            val script = Script(id = 111, name = "DefaultAction", codePages = listOf("echo hi"))
+
+            useCase(script)
+
+            val actionSlot = slot<String?>()
+            verify {
+                termuxRepo.runCommand(
+                    command = any(),
+                    runInBackground = any(),
+                    sessionAction = captureNullable(actionSlot),
+                    shellName = any(),
+                    scriptId = any(),
+                    scriptName = any(),
+                    notifyOnResult = any(),
+                    automationId = any(),
+                )
+            }
+
+            assertEquals("1", actionSlot.captured)
+        }
+
+    @Test
+    fun `session action follows script foregroundSessionBehavior`() =
+        runTest {
+            val script =
+                Script(
+                    id = 112,
+                    name = "SwitchOpen",
+                    codePages = listOf("echo hi"),
+                    foregroundSessionBehavior = ForegroundSessionBehavior.SWITCH_OPEN,
+                )
+
+            useCase(script)
+
+            val actionSlot = slot<String?>()
+            verify {
+                termuxRepo.runCommand(
+                    command = any(),
+                    runInBackground = any(),
+                    sessionAction = captureNullable(actionSlot),
+                    shellName = any(),
+                    scriptId = any(),
+                    scriptName = any(),
+                    notifyOnResult = any(),
+                    automationId = any(),
+                )
+            }
+
+            assertEquals("0", actionSlot.captured)
+        }
+
+    @Test
+    fun `session action is null for Termux default behavior`() =
+        runTest {
+            val script =
+                Script(
+                    id = 113,
+                    name = "TermuxDefault",
+                    codePages = listOf("echo hi"),
+                    foregroundSessionBehavior = ForegroundSessionBehavior.TERMUX_DEFAULT,
+                )
+
+            useCase(script)
+
+            val actionSlot = slot<String?>()
+            verify {
+                termuxRepo.runCommand(
+                    command = any(),
+                    runInBackground = any(),
+                    sessionAction = captureNullable(actionSlot),
+                    shellName = any(),
+                    scriptId = any(),
+                    scriptName = any(),
+                    notifyOnResult = any(),
+                    automationId = any(),
+                )
+            }
+
+            assertNull(actionSlot.captured)
+        }
+
+    @Test
+    fun `shell name is null by default so a new session is always created`() =
+        runTest {
+            val script = Script(id = 114, name = "DefaultReuse", codePages = listOf("echo hi"))
+
+            useCase(script)
+
+            val shellNameSlot = slot<String?>()
+            verify {
+                termuxRepo.runCommand(
+                    command = any(),
+                    runInBackground = any(),
+                    sessionAction = any(),
+                    shellName = captureNullable(shellNameSlot),
+                    scriptId = any(),
+                    scriptName = any(),
+                    notifyOnResult = any(),
+                    automationId = any(),
+                )
+            }
+
+            assertNull(shellNameSlot.captured)
+        }
+
+    @Test
+    fun `shell name is the script name when reuseSession is enabled`() =
+        runTest {
+            val script =
+                Script(
+                    id = 115,
+                    name = "My SSH Session",
+                    codePages = listOf("echo hi"),
+                    reuseSession = true,
+                )
+
+            useCase(script)
+
+            val shellNameSlot = slot<String?>()
+            verify {
+                termuxRepo.runCommand(
+                    command = any(),
+                    runInBackground = any(),
+                    sessionAction = any(),
+                    shellName = captureNullable(shellNameSlot),
+                    scriptId = any(),
+                    scriptName = any(),
+                    notifyOnResult = any(),
+                    automationId = any(),
+                )
+            }
+
+            assertEquals("My SSH Session", shellNameSlot.captured)
+        }
+
+    @Test
+    fun `shell name is null for background scripts even when reuseSession is enabled`() =
+        runTest {
+            val script =
+                Script(
+                    id = 116,
+                    name = "BackgroundReuse",
+                    codePages = listOf("echo hi"),
+                    runInBackground = true,
+                    reuseSession = true,
+                )
+
+            useCase(script)
+
+            val shellNameSlot = slot<String?>()
+            verify {
+                termuxRepo.runCommand(
+                    command = any(),
+                    runInBackground = any(),
+                    sessionAction = any(),
+                    shellName = captureNullable(shellNameSlot),
+                    scriptId = any(),
+                    scriptName = any(),
+                    notifyOnResult = any(),
+                    automationId = any(),
+                )
+            }
+
+            assertNull(shellNameSlot.captured)
+        }
+
+    @Test
+    fun `every foregroundSessionBehavior maps to the correct Termux action`() {
+        assertEquals("0", ForegroundSessionBehavior.SWITCH_OPEN.termuxAction)
+        assertEquals("1", ForegroundSessionBehavior.KEEP_OPEN.termuxAction)
+        assertEquals("2", ForegroundSessionBehavior.SWITCH_SILENT.termuxAction)
+        assertEquals("3", ForegroundSessionBehavior.KEEP_SILENT.termuxAction)
+        assertNull(ForegroundSessionBehavior.TERMUX_DEFAULT.termuxAction)
+    }
 }

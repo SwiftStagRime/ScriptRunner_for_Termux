@@ -77,9 +77,20 @@ class ScriptRepositoryImplTest {
             val block = it.invocation.args[1] as suspend () -> Any
             block()
         }
-        repository = ScriptRepositoryImpl(scriptDao, categoryDao, automationDao, customThemeDao, appDatabase, context)
+        repository =
+            ScriptRepositoryImpl(
+                scriptDao,
+                categoryDao,
+                automationDao,
+                customThemeDao,
+                appDatabase,
+                context,
+            )
         java.io.File(context.filesDir, "script_icons").deleteRecursively()
-        Robolectric.setupContentProvider(TestFileProvider::class.java, "io.github.swiftstagrime.provider")
+        Robolectric.setupContentProvider(
+            TestFileProvider::class.java,
+            "io.github.swiftstagrime.provider",
+        )
     }
 
     private fun setupMockFile(
@@ -162,7 +173,13 @@ class ScriptRepositoryImplTest {
             "automations": []
         }"""
 
-            coEvery { categoryDao.getAllCategoriesOneShot() } returns listOf(CategoryEntity(id = 77, name = "Existing"))
+            coEvery { categoryDao.getAllCategoriesOneShot() } returns
+                listOf(
+                    CategoryEntity(
+                        id = 77,
+                        name = "Existing",
+                    ),
+                )
             coEvery { scriptDao.insertScript(capture(capturedScript)) } returns 1L
 
             val uri = setupMockFile("cat.json", json)
@@ -468,7 +485,9 @@ class ScriptRepositoryImplTest {
             val categoryIdCounter =
                 java.util.concurrent.atomic
                     .AtomicInteger(10)
-            coEvery { categoryDao.insertCategory(any()) } answers { categoryIdCounter.getAndIncrement().toLong() }
+            coEvery { categoryDao.insertCategory(any()) } answers {
+                categoryIdCounter.getAndIncrement().toLong()
+            }
 
             val scriptCategories = mutableListOf<Int?>()
             coEvery { scriptDao.insertScript(capture(capturedScript)) } answers {
@@ -764,7 +783,12 @@ class ScriptRepositoryImplTest {
                     keepSessionOpen = false,
                     iconPath = null,
                 )
-            coEvery { scriptDao.getAllScripts() } returns kotlinx.coroutines.flow.flowOf(listOf(entity))
+            coEvery { scriptDao.getAllScripts() } returns
+                kotlinx.coroutines.flow.flowOf(
+                    listOf(
+                        entity,
+                    ),
+                )
 
             val collectedLists = repository.getAllScripts().toList()
 

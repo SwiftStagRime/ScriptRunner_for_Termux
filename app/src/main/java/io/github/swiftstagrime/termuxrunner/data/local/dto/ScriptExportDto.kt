@@ -1,7 +1,9 @@
 package io.github.swiftstagrime.termuxrunner.data.local.dto
 
 import io.github.swiftstagrime.termuxrunner.data.local.entity.ScriptEntity
+import io.github.swiftstagrime.termuxrunner.domain.model.ForegroundSessionBehavior
 import io.github.swiftstagrime.termuxrunner.domain.model.InteractionMode
+import io.github.swiftstagrime.termuxrunner.domain.model.NotificationAction
 import io.github.swiftstagrime.termuxrunner.domain.model.Script
 import kotlinx.serialization.Serializable
 
@@ -32,6 +34,9 @@ data class ScriptExportDto(
     val prefixPresets: List<String> = emptyList(),
     val envVarPresets: List<String> = emptyList(),
     val adbCode: String? = null,
+    val notificationActions: List<NotificationAction> = emptyList(),
+    val foregroundSessionBehavior: ForegroundSessionBehavior = ForegroundSessionBehavior.KEEP_OPEN,
+    val reuseSession: Boolean = false,
 )
 
 fun Script.toExportDto(base64Icon: String?): ScriptExportDto =
@@ -60,6 +65,9 @@ fun Script.toExportDto(base64Icon: String?): ScriptExportDto =
         prefixPresets = prefixPresets,
         envVarPresets = envVarPresets,
         adbCode = adbCode,
+        notificationActions = notificationActions,
+        foregroundSessionBehavior = foregroundSessionBehavior,
+        reuseSession = reuseSession,
     )
 
 fun ScriptExportDto.toEntity(
@@ -104,5 +112,8 @@ fun ScriptExportDto.toEntity(
         notifyOnResult = notifyOnResult,
         categoryId = mappedCategoryId,
         adbCode = adbCode,
+        notificationActions = notificationActions,
+        foregroundSessionBehavior = foregroundSessionBehavior,
+        reuseSession = reuseSession,
     )
 }

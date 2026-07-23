@@ -195,7 +195,10 @@ private fun ThemeSelectionRow(
                     Icon(Icons.Default.Add, contentDescription = null)
                 }
                 Spacer(modifier = Modifier.height(8.dp))
-                Text(stringResource(R.string.new_theme_label), style = MaterialTheme.typography.labelMedium)
+                Text(
+                    stringResource(R.string.new_theme_label),
+                    style = MaterialTheme.typography.labelMedium,
+                )
             }
         }
 
@@ -276,7 +279,10 @@ private fun ThemeEditorForm(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
-                Text(stringResource(R.string.dark_mode_label), style = MaterialTheme.typography.titleMedium)
+                Text(
+                    stringResource(R.string.dark_mode_label),
+                    style = MaterialTheme.typography.titleMedium,
+                )
                 Switch(checked = theme.isDark, onCheckedChange = onToggleDarkMode)
             }
         }
@@ -290,7 +296,12 @@ private fun ThemeEditorForm(
                 "onPrimaryContainer" to R.string.color_on_primary_container,
             )
         items(primaryGroup) { (key, label) ->
-            ColorRow(stringResource(label), getThemeColorByKey(theme, key)) { onColorChange(key, it) }
+            ColorRow(stringResource(label), getThemeColorByKey(theme, key)) {
+                onColorChange(
+                    key,
+                    it,
+                )
+            }
         }
 
         item { ColorGroupHeader(stringResource(R.string.color_secondary)) }
@@ -302,7 +313,12 @@ private fun ThemeEditorForm(
                 "onSecondaryContainer" to R.string.color_on_secondary_container,
             )
         items(secondaryGroup) { (key, label) ->
-            ColorRow(stringResource(label), getThemeColorByKey(theme, key)) { onColorChange(key, it) }
+            ColorRow(stringResource(label), getThemeColorByKey(theme, key)) {
+                onColorChange(
+                    key,
+                    it,
+                )
+            }
         }
 
         item { ColorGroupHeader(stringResource(R.string.color_tertiary)) }
@@ -314,7 +330,12 @@ private fun ThemeEditorForm(
                 "onTertiaryContainer" to R.string.color_on_tertiary_container,
             )
         items(tertiaryGroup) { (key, label) ->
-            ColorRow(stringResource(label), getThemeColorByKey(theme, key)) { onColorChange(key, it) }
+            ColorRow(stringResource(label), getThemeColorByKey(theme, key)) {
+                onColorChange(
+                    key,
+                    it,
+                )
+            }
         }
 
         item { ColorGroupHeader(stringResource(R.string.surfaces_background)) }
@@ -330,7 +351,12 @@ private fun ThemeEditorForm(
                 "surfaceContainerLowest" to R.string.surface_container_lowest,
             )
         items(surfaceGroup) { (key, label) ->
-            ColorRow(stringResource(label), getThemeColorByKey(theme, key)) { onColorChange(key, it) }
+            ColorRow(stringResource(label), getThemeColorByKey(theme, key)) {
+                onColorChange(
+                    key,
+                    it,
+                )
+            }
         }
 
         item { ColorGroupHeader(stringResource(R.string.utility)) }
@@ -344,7 +370,12 @@ private fun ThemeEditorForm(
                 "onErrorContainer" to R.string.color_on_error_container,
             )
         items(utilGroup) { (key, label) ->
-            ColorRow(stringResource(label), getThemeColorByKey(theme, key)) { onColorChange(key, it) }
+            ColorRow(stringResource(label), getThemeColorByKey(theme, key)) {
+                onColorChange(
+                    key,
+                    it,
+                )
+            }
         }
     }
 }
@@ -446,7 +477,11 @@ fun SimpleColorPicker(
                             .height(80.dp)
                             .clip(RoundedCornerShape(8.dp))
                             .background(currentColor)
-                            .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(8.dp)),
+                            .border(
+                                1.dp,
+                                MaterialTheme.colorScheme.outline,
+                                RoundedCornerShape(8.dp),
+                            ),
                 )
 
                 StyledTextField(
@@ -454,7 +489,8 @@ fun SimpleColorPicker(
                     label = stringResource(R.string.hex_code),
                     placeholder = { Text("RRGGBB") },
                     onValueChange = { newHex ->
-                        val filtered = newHex.filter { it.isDigit() || it.uppercaseChar() in 'A'..'F' }.take(6)
+                        val filtered =
+                            newHex.filter { it.isDigit() || it.uppercaseChar() in 'A'..'F' }.take(6)
                         hexText = filtered
 
                         if (filtered.length == 6) {
@@ -488,7 +524,10 @@ fun SimpleColorPicker(
                         modifier = Modifier.fillMaxWidth(),
                     )
 
-                    Text(stringResource(R.string.saturation), style = MaterialTheme.typography.labelMedium)
+                    Text(
+                        stringResource(R.string.saturation),
+                        style = MaterialTheme.typography.labelMedium,
+                    )
                     Slider(
                         value = hsv.second,
                         onValueChange = {
@@ -499,7 +538,10 @@ fun SimpleColorPicker(
                         modifier = Modifier.fillMaxWidth(),
                     )
 
-                    Text(stringResource(R.string.brightness), style = MaterialTheme.typography.labelMedium)
+                    Text(
+                        stringResource(R.string.brightness),
+                        style = MaterialTheme.typography.labelMedium,
+                    )
                     Slider(
                         value = hsv.third,
                         onValueChange = {

@@ -2,7 +2,9 @@ package io.github.swiftstagrime.termuxrunner.data.local
 
 import androidx.room.TypeConverter
 import io.github.swiftstagrime.termuxrunner.domain.model.AutomationType
+import io.github.swiftstagrime.termuxrunner.domain.model.ForegroundSessionBehavior
 import io.github.swiftstagrime.termuxrunner.domain.model.InteractionMode
+import io.github.swiftstagrime.termuxrunner.domain.model.NotificationAction
 import kotlinx.serialization.json.Json
 
 class Converters {
@@ -37,6 +39,17 @@ class Converters {
         }
 
     @TypeConverter
+    fun fromForegroundSessionBehavior(value: ForegroundSessionBehavior): String = value.name
+
+    @TypeConverter
+    fun toForegroundSessionBehavior(data: String): ForegroundSessionBehavior =
+        try {
+            ForegroundSessionBehavior.valueOf(data)
+        } catch (_: Exception) {
+            ForegroundSessionBehavior.KEEP_OPEN
+        }
+
+    @TypeConverter
     fun fromStringList(list: List<String>): String = json.encodeToString(list)
 
     @TypeConverter
@@ -60,6 +73,19 @@ class Converters {
 
     @TypeConverter
     fun toIntList(data: String): List<Int> {
+        if (data.isBlank()) return emptyList()
+        return try {
+            json.decodeFromString(data)
+        } catch (_: Exception) {
+            emptyList()
+        }
+    }
+
+    @TypeConverter
+    fun fromNotificationActionList(list: List<NotificationAction>): String = json.encodeToString(list)
+
+    @TypeConverter
+    fun toNotificationActionList(data: String): List<NotificationAction> {
         if (data.isBlank()) return emptyList()
         return try {
             json.decodeFromString(data)

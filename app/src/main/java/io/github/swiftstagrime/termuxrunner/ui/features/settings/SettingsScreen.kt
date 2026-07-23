@@ -18,8 +18,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.OpenInNew
@@ -28,8 +30,10 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Code
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Download
+import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Upload
+import androidx.compose.material.icons.filled.Wifi
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -43,8 +47,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -97,36 +101,48 @@ fun SettingsScreen(
                 modifier =
                     Modifier
                         .fillMaxSize()
+                        .verticalScroll(rememberScrollState())
                         .padding(20.dp),
-                verticalArrangement = Arrangement.SpaceBetween,
             ) {
-                Column {
-                    AppearanceSection(selectedAccent, selectedMode, actions)
+                AppearanceSection(selectedAccent, selectedMode, actions)
 
-                    Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(24.dp))
 
-                    HorizontalDivider(
-                        modifier = Modifier.padding(horizontal = 4.dp),
-                        thickness = 1.dp,
-                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f),
-                    )
+                HorizontalDivider(
+                    modifier = Modifier.padding(horizontal = 4.dp),
+                    thickness = 1.dp,
+                    color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f),
+                )
 
-                    Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(24.dp))
 
-                    EditorSection(lineWrappingEnabled, actions)
+                EditorSection(lineWrappingEnabled, actions)
 
-                    Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(24.dp))
 
-                    HorizontalDivider(
-                        modifier = Modifier.padding(horizontal = 4.dp),
-                        thickness = 1.dp,
-                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f),
-                    )
+                HorizontalDivider(
+                    modifier = Modifier.padding(horizontal = 4.dp),
+                    thickness = 1.dp,
+                    color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f),
+                )
 
-                    Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(24.dp))
 
-                    DataManagementSection(actions)
-                }
+                WebhookNavTile(actions)
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                HorizontalDivider(
+                    modifier = Modifier.padding(horizontal = 4.dp),
+                    thickness = 1.dp,
+                    color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f),
+                )
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                DataManagementSection(actions)
+
+                Spacer(modifier = Modifier.height(24.dp))
 
                 DeveloperCard(actions.onDeveloperClick)
             }
@@ -307,6 +323,78 @@ private fun EditorSection(
 }
 
 @Composable
+private fun WebhookNavTile(actions: SettingsActions) {
+    Card(
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .clickable { actions.onNavigateToWebhookSettings() },
+        colors =
+            CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.secondaryContainer,
+            ),
+    ) {
+        Row(
+            modifier = Modifier.padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Icon(
+                imageVector = Icons.Default.Wifi,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSecondaryContainer,
+            )
+            Spacer(modifier = Modifier.width(16.dp))
+            Text(
+                text = stringResource(R.string.webhook_settings_title),
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSecondaryContainer,
+                modifier = Modifier.weight(1f),
+            )
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.OpenInNew,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSecondaryContainer,
+            )
+        }
+    }
+}
+
+@Composable
+private fun SwitchRow(
+    title: String,
+    description: String,
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit,
+) {
+    Row(
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(12.dp))
+                .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
+                .padding(16.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleMedium,
+            )
+            Text(
+                text = description,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        Switch(
+            checked = checked,
+            onCheckedChange = onCheckedChange,
+        )
+    }
+}
+
+@Composable
 private fun DataManagementSection(actions: SettingsActions) {
     Text(
         text = stringResource(R.string.data_management_label),
@@ -338,6 +426,13 @@ private fun DataManagementSection(actions: SettingsActions) {
         onClick = actions.onTriggerScriptImport,
         icon = Icons.Default.Description,
         label = stringResource(R.string.import_script_from_file),
+        modifier = Modifier.fillMaxWidth(),
+    )
+    Spacer(modifier = Modifier.height(8.dp))
+    ActionButton(
+        onClick = actions.onNavigateToExecutionHistory,
+        icon = Icons.Default.History,
+        label = stringResource(R.string.execution_history_label),
         modifier = Modifier.fillMaxWidth(),
     )
 }
@@ -423,7 +518,8 @@ fun ThemeSelectorItem(
     isSelected: Boolean,
     onClick: () -> Unit,
 ) {
-    val circleColor = if (theme == AppTheme.DYNAMIC) MaterialTheme.colorScheme.primary else theme.primaryColor
+    val circleColor =
+        if (theme == AppTheme.DYNAMIC) MaterialTheme.colorScheme.primary else theme.primaryColor
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -516,6 +612,8 @@ fun PreviewSettingsScreen() {
                     onDeveloperClick = {},
                     onBack = {},
                     onNavigateToCustomTheme = {},
+                    onNavigateToExecutionHistory = {},
+                    onNavigateToWebhookSettings = {},
                 ),
         )
     }

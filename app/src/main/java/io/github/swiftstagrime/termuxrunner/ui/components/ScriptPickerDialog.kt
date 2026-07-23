@@ -102,7 +102,11 @@ fun ScriptPickerDialog(
                     containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
                     contentColor = MaterialTheme.colorScheme.onSurface,
                 ),
-            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.2f)),
+            border =
+                BorderStroke(
+                    1.dp,
+                    MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.2f),
+                ),
         ) {
             Column(modifier = Modifier.fillMaxWidth()) {
                 Column(

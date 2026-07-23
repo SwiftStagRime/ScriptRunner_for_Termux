@@ -28,8 +28,14 @@ class AutomationLogsWidget : GlanceAppWidget() {
         val glanceColors = ColorProviders(light = lightScheme, dark = darkScheme)
 
         provideContent {
-            val logs by entryPoint.automationLogRepository().getRecentLogs(5).collectAsState(emptyList())
-            val automations by entryPoint.automationRepository().getAllAutomations().collectAsState(emptyList())
+            val logs by entryPoint
+                .automationLogRepository()
+                .getRecentLogs(5)
+                .collectAsState(emptyList())
+            val automations by entryPoint
+                .automationRepository()
+                .getAllAutomations()
+                .collectAsState(emptyList())
             val automationMap = remember(automations) { automations.associateBy { it.id } }
 
             GlanceTheme(glanceColors) {

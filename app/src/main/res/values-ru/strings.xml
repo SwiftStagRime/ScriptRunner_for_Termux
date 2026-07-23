@@ -156,6 +156,16 @@
     <string name="desc_bg_execution">Показывать только уведомление</string>
     <string name="label_interactive_session">Интерактивная сессия</string>
     <string name="desc_interactive_session">Оставить терминал открытым после завершения</string>
+    <string name="label_foreground_session_behavior">Поведение сессии на переднем плане</string>
+    <string name="desc_foreground_session_behavior">Что делает Termux с новой сессией</string>
+    <string name="fg_session_switch_open">Перейти в новую сессию и открыть Termux</string>
+    <string name="fg_session_keep_open">Оставить текущую сессию и открыть Termux</string>
+    <string name="fg_session_switch_silent">Перейти в новую сессию, не открывая Termux</string>
+    <string name="fg_session_keep_silent">Оставить текущую сессию, не открывая Termux</string>
+    <string name="fg_session_default">По умолчанию Termux</string>
+    <string name="label_reuse_session">Повторно использовать сессию</string>
+    <string name="desc_reuse_session">Если сессия Termux с именем этого скрипта уже существует, выполнять в ней, а не создавать новую</string>
+    <string name="warning_reuse_session_version">Требуется Termux версии 0.119 или новее. В старых версиях эта опция игнорируется, и создаётся новая сессия</string>
     <string name="empty_env_vars">Переменные не заданы.</string>
     <string name="label_key">Ключ</string>
     <string name="label_value">Значение</string>
@@ -268,7 +278,7 @@
     <!-- Script Picker Dialog -->
     <string name="title_select_script">Выбрать скрипт</string>
     <string name="no_scripts_available">Нет доступных скриптов</string>
-    <string name="assign_scripts_to_these_slots_you_can_then_trigger_them_directly_from_your_phone_s_quick_settings_panel">Назначьте скрипты в эти слоты. Затем вы сможете запускать их прямо из панели быстрых настроек вашего телефона.</string>
+    <string name="tile_assignment_hint">Назначьте скрипты в эти слоты. Затем вы сможете запускать их прямо из панели быстрых настроек вашего телефона.</string>
     <string name="configure_tiles">Настроить плитки</string>
     <string name="empty">Пусто</string>
 
@@ -332,6 +342,12 @@
     <string name="automation_condition_wifi">Только WiFi</string>
     <string name="automation_condition_charging">Только при зарядке</string>
     <string name="automation_section_upcoming">Предстоящие запуски</string>
+    <string name="automation_section_trigger">Режим запуска</string>
+    <string name="automation_section_schedule_type">Тип расписания</string>
+    <string name="automation_section_event_source">Источник события</string>
+    <string name="trigger_mode_schedule">Расписание</string>
+    <string name="trigger_mode_event">Событие</string>
+    <string name="trigger_mode_boot">При загрузке</string>
     <string name="automation_save_button">Запланировать</string>
     <string name="ok">ОК</string>
     <string name="history_title">История выполнения</string>
@@ -350,8 +366,22 @@
     <string name="label_battery_threshold">Порог заряда батареи</string>
     <string name="battery_threshold_desc">Запускать, только если заряд батареи выше %1$d%%</string>
     <string name="automation_type_boot">При запуске</string>
+    <string name="automation_type_monthly">Ежемесячно</string>
+    <string name="automation_type_time_window">Временное окно</string>
+    <string name="automation_type_random_delay">Случайная задержка</string>
+    <string name="automation_type_screen_on">Экран включён</string>
+    <string name="automation_type_screen_off">Экран выключен</string>
+    <string name="automation_type_network_connected">Сеть подключена</string>
+    <string name="automation_type_network_disconnected">Сеть отключена</string>
+    <string name="automation_type_usb_connected">USB подключён</string>
+    <string name="automation_type_usb_disconnected">USB отключён</string>
     <string name="automation_boot_hint">Скрипт будет запускаться каждый раз при включении устройства.</string>
     <string name="automation_boot_next_run">Запускается при каждом включении</string>
+    <string name="automation_monthly_day_of_month">День месяца</string>
+    <string name="automation_window_from">С %1$s</string>
+    <string name="automation_window_to">До %1$s</string>
+    <string name="automation_random_delay_min">Мин (с)</string>
+    <string name="automation_random_delay_max">Макс (с)</string>
 
     <!-- Automation Widget -->
     <string name="automation_widget_title">Автоматизации</string>
@@ -414,5 +444,39 @@
     <string name="surfaces_background"><![CDATA[Поверхности и фон]]></string>
     <string name="utility">Служебные</string>
     <string name="surface_container_lowest">Минимальный уровень контейнера поверхности</string>
+
+    <!-- Notification Actions -->
+    <string name="section_notification_actions">Действия уведомления</string>
+    <string name="desc_notification_actions">Кнопки действий в уведомлениях о результатах скриптов. Каждая кнопка запускает другую автоматизацию.</string>
+    <string name="label_action_label">Название</string>
+    <string name="label_target_automation">Целевая автоматизация</string>
+    <string name="btn_add_action">Добавить действие</string>
+
+    <!-- Webhook -->
+    <string name="webhook_settings_title">Настройки Webhook</string>
+    <string name="webhook_config_label">Конфигурация</string>
+    <string name="webhook_port_label">Порт</string>
+    <string name="webhook_bind_label">Доступ по LAN</string>
+    <string name="webhook_bind_all">0.0.0.0</string>
+    <string name="webhook_bind_local">127.0.0.1</string>
+    <string name="webhook_lan_access_hint">При включении сервер слушает все интерфейсы и доступен с других устройств в вашей сети.</string>
+    <string name="webhook_auth_label">Авторизация</string>
+    <string name="webhook_token_label">Токен авторизации</string>
+    <string name="webhook_copy_token">Копировать</string>
+    <string name="webhook_regenerate_token">Пересоздать</string>
+    <string name="webhook_generate_token">Сгенерировать токен</string>
+    <string name="webhook_auth_hint">Передавайте токен в заголовке Bearer или как параметр запроса при отправке запросов.</string>
+    <string name="webhook_examples_label">Примеры запросов</string>
+    <string name="webhook_example_script">Запуск скрипта по ID</string>
+    <string name="webhook_example_automation">Запуск автоматизации по ID</string>
+    <string name="webhook_query_param_hint">Токен также можно передать как ?token=ВАШ_ТОКЕН в URL.</string>
+    <string name="webhook_enable_label">Включить webhook-сервер</string>
+    <string name="webhook_running_indicator">Работает на порту %1$d</string>
+    <string name="webhook_stopped_indicator">Остановлен</string>
+    <string name="webhook_restarting">Перезапуск сервера…</string>
+    <string name="webhook_server_restarted">Сервер перезапущен</string>
+    <string name="webhook_stop_server">Остановить сервер</string>
+    <string name="copied_label">Скопировано!</string>
+    <string name="execution_history_label">История выполнения</string>
 
 </resources>

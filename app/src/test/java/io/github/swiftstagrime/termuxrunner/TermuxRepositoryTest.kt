@@ -60,7 +60,7 @@ class TermuxRepositoryTest {
     @Test
     fun `runCommand throws NotInstalledException when Termux missing`() {
         assertThrows(TermuxNotInstalledException::class.java) {
-            repository.runCommand("ls", true, "0", 1, "Test", false, null)
+            repository.runCommand("ls", true, "0", null, 1, "Test", false, null)
         }
     }
 
@@ -74,6 +74,7 @@ class TermuxRepositoryTest {
             command = "echo 'hello'",
             runInBackground = true,
             sessionAction = "0",
+            shellName = null,
             scriptId = 123,
             scriptName = "MyScript",
             notifyOnResult = true,
@@ -91,7 +92,8 @@ class TermuxRepositoryTest {
         val args = nextServiceIntent.getStringArrayExtra(TermuxRepositoryImpl.EXTRA_ARGUMENTS)
         assertArrayEquals(arrayOf("-c", "echo 'hello'"), args)
 
-        val pendingIntent = nextServiceIntent.getParcelableExtra<PendingIntent>(TermuxRepositoryImpl.EXTRA_PENDING_INTENT)
+        val pendingIntent =
+            nextServiceIntent.getParcelableExtra<PendingIntent>(TermuxRepositoryImpl.EXTRA_PENDING_INTENT)
         assertNotNull(pendingIntent)
 
         val shadowPendingIntent = shadowOf(pendingIntent)
@@ -100,6 +102,102 @@ class TermuxRepositoryTest {
         assertEquals(expectedAction, resultIntent.action)
         assertEquals(123, resultIntent.getIntExtra("script_id", -1))
         assertEquals(456, resultIntent.getIntExtra("automation_id", -1))
+    }
+
+    @Test
+    fun `runCommand includes session action extra when provided`() {
+        val packageInfo = PackageInfo().apply { packageName = TermuxRepositoryImpl.TERMUX_PACKAGE }
+        shadowPackageManager.installPackage(packageInfo)
+        shadowOf(context as Application).grantPermissions(TermuxRepositoryImpl.PERMISSION_RUN_COMMAND)
+
+        repository.runCommand(
+            command = "echo 'hello'",
+            runInBackground = false,
+            sessionAction = "0",
+            shellName = null,
+            scriptId = 1,
+            scriptName = "MyScript",
+            notifyOnResult = false,
+            automationId = null,
+        )
+
+        val intent = shadowOf(context).nextStartedService
+        assertNotNull(intent)
+        assertTrue(intent.hasExtra(TermuxRepositoryImpl.EXTRA_SESSION_ACTION))
+        assertEquals("0", intent.getStringExtra(TermuxRepositoryImpl.EXTRA_SESSION_ACTION))
+    }
+
+    @Test
+    fun `runCommand omits session action extra when null so Termux default applies`() {
+        val packageInfo = PackageInfo().apply { packageName = TermuxRepositoryImpl.TERMUX_PACKAGE }
+        shadowPackageManager.installPackage(packageInfo)
+        shadowOf(context as Application).grantPermissions(TermuxRepositoryImpl.PERMISSION_RUN_COMMAND)
+
+        repository.runCommand(
+            command = "echo 'hello'",
+            runInBackground = false,
+            sessionAction = null,
+            shellName = null,
+            scriptId = 1,
+            scriptName = "MyScript",
+            notifyOnResult = false,
+            automationId = null,
+        )
+
+        val intent = shadowOf(context).nextStartedService
+        assertNotNull(intent)
+        assertFalse(intent.hasExtra(TermuxRepositoryImpl.EXTRA_SESSION_ACTION))
+    }
+
+    @Test
+    fun `runCommand includes shell name and create mode extras when provided`() {
+        val packageInfo = PackageInfo().apply { packageName = TermuxRepositoryImpl.TERMUX_PACKAGE }
+        shadowPackageManager.installPackage(packageInfo)
+        shadowOf(context as Application).grantPermissions(TermuxRepositoryImpl.PERMISSION_RUN_COMMAND)
+
+        repository.runCommand(
+            command = "echo 'hello'",
+            runInBackground = false,
+            sessionAction = "0",
+            shellName = "My SSH Session",
+            scriptId = 1,
+            scriptName = "MyScript",
+            notifyOnResult = false,
+            automationId = null,
+        )
+
+        val intent = shadowOf(context).nextStartedService
+        assertNotNull(intent)
+        assertTrue(intent.hasExtra(TermuxRepositoryImpl.EXTRA_SHELL_NAME))
+        assertEquals("My SSH Session", intent.getStringExtra(TermuxRepositoryImpl.EXTRA_SHELL_NAME))
+        assertTrue(intent.hasExtra(TermuxRepositoryImpl.EXTRA_SHELL_CREATE_MODE))
+        assertEquals(
+            "no-shell-with-name",
+            intent.getStringExtra(TermuxRepositoryImpl.EXTRA_SHELL_CREATE_MODE),
+        )
+    }
+
+    @Test
+    fun `runCommand omits shell extras when null so Termux always creates a new session`() {
+        val packageInfo = PackageInfo().apply { packageName = TermuxRepositoryImpl.TERMUX_PACKAGE }
+        shadowPackageManager.installPackage(packageInfo)
+        shadowOf(context as Application).grantPermissions(TermuxRepositoryImpl.PERMISSION_RUN_COMMAND)
+
+        repository.runCommand(
+            command = "echo 'hello'",
+            runInBackground = false,
+            sessionAction = null,
+            shellName = null,
+            scriptId = 1,
+            scriptName = "MyScript",
+            notifyOnResult = false,
+            automationId = null,
+        )
+
+        val intent = shadowOf(context).nextStartedService
+        assertNotNull(intent)
+        assertFalse(intent.hasExtra(TermuxRepositoryImpl.EXTRA_SHELL_NAME))
+        assertFalse(intent.hasExtra(TermuxRepositoryImpl.EXTRA_SHELL_CREATE_MODE))
     }
 
     @Test
@@ -116,7 +214,7 @@ class TermuxRepositoryTest {
         } throws RuntimeException("ForegroundServiceStartNotAllowedException")
 
         assertThrows(TermuxBackgroundRestrictionException::class.java) {
-            repoWithSpy.runCommand("ls", true, "0", 1, "Test", false, null)
+            repoWithSpy.runCommand("ls", true, "0", null, 1, "Test", false, null)
         }
     }
 

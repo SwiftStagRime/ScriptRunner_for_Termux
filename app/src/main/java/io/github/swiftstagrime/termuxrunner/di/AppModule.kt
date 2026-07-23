@@ -1,7 +1,6 @@
 package io.github.swiftstagrime.termuxrunner.di
 
 import android.content.Context
-import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -11,36 +10,45 @@ import io.github.swiftstagrime.termuxrunner.data.automation.AutomationNotificati
 import io.github.swiftstagrime.termuxrunner.data.automation.AutomationScheduler
 import io.github.swiftstagrime.termuxrunner.data.local.AppDatabase
 import io.github.swiftstagrime.termuxrunner.data.local.ImageStorageManager
+import io.github.swiftstagrime.termuxrunner.data.local.dao.AutomationChainDao
 import io.github.swiftstagrime.termuxrunner.data.local.dao.AutomationDao
 import io.github.swiftstagrime.termuxrunner.data.local.dao.AutomationLogDao
 import io.github.swiftstagrime.termuxrunner.data.local.dao.CategoryDao
 import io.github.swiftstagrime.termuxrunner.data.local.dao.CustomThemeDao
 import io.github.swiftstagrime.termuxrunner.data.local.dao.ScriptDao
+import io.github.swiftstagrime.termuxrunner.data.local.dao.ScriptExecutionDao
+import io.github.swiftstagrime.termuxrunner.data.local.dao.ScriptVersionDao
+import io.github.swiftstagrime.termuxrunner.data.repository.AutomationChainRepositoryImpl
 import io.github.swiftstagrime.termuxrunner.data.repository.AutomationLogRepositoryImpl
 import io.github.swiftstagrime.termuxrunner.data.repository.AutomationRepositoryImpl
 import io.github.swiftstagrime.termuxrunner.data.repository.CategoryRepositoryImpl
 import io.github.swiftstagrime.termuxrunner.data.repository.CustomThemeRepositoryImpl
 import io.github.swiftstagrime.termuxrunner.data.repository.IconRepositoryImpl
 import io.github.swiftstagrime.termuxrunner.data.repository.MonitoringRepositoryImpl
+import io.github.swiftstagrime.termuxrunner.data.repository.ScriptExecutionRepositoryImpl
 import io.github.swiftstagrime.termuxrunner.data.repository.ScriptFileRepositoryImpl
 import io.github.swiftstagrime.termuxrunner.data.repository.ScriptRepositoryImpl
+import io.github.swiftstagrime.termuxrunner.data.repository.ScriptVersionRepositoryImpl
 import io.github.swiftstagrime.termuxrunner.data.repository.ShortcutRepositoryImpl
 import io.github.swiftstagrime.termuxrunner.data.repository.TermuxRepositoryImpl
 import io.github.swiftstagrime.termuxrunner.data.repository.UserPreferencesRepositoryImpl
-import io.github.swiftstagrime.termuxrunner.ui.utils.WidgetManager
+import io.github.swiftstagrime.termuxrunner.domain.repository.AutomationChainRepository
 import io.github.swiftstagrime.termuxrunner.domain.repository.AutomationLogRepository
 import io.github.swiftstagrime.termuxrunner.domain.repository.AutomationRepository
 import io.github.swiftstagrime.termuxrunner.domain.repository.CategoryRepository
 import io.github.swiftstagrime.termuxrunner.domain.repository.CustomThemeRepository
 import io.github.swiftstagrime.termuxrunner.domain.repository.IconRepository
 import io.github.swiftstagrime.termuxrunner.domain.repository.MonitoringRepository
+import io.github.swiftstagrime.termuxrunner.domain.repository.ScriptExecutionRepository
 import io.github.swiftstagrime.termuxrunner.domain.repository.ScriptFileRepository
 import io.github.swiftstagrime.termuxrunner.domain.repository.ScriptRepository
 import io.github.swiftstagrime.termuxrunner.domain.repository.ScriptResultNotificator
+import io.github.swiftstagrime.termuxrunner.domain.repository.ScriptVersionRepository
 import io.github.swiftstagrime.termuxrunner.domain.repository.ShortcutRepository
 import io.github.swiftstagrime.termuxrunner.domain.repository.TermuxRepository
 import io.github.swiftstagrime.termuxrunner.domain.repository.UserPreferencesRepository
 import io.github.swiftstagrime.termuxrunner.domain.repository.WidgetUpdater
+import io.github.swiftstagrime.termuxrunner.ui.utils.WidgetManager
 import javax.inject.Singleton
 
 @Module
@@ -125,7 +133,22 @@ object AppModule {
 
     @Provides
     @Singleton
+    fun provideAutomationChainRepository(automationChainDao: AutomationChainDao): AutomationChainRepository =
+        AutomationChainRepositoryImpl(automationChainDao)
+
+    @Provides
+    @Singleton
     fun provideCustomThemeRepository(customThemeDao: CustomThemeDao): CustomThemeRepository = CustomThemeRepositoryImpl(customThemeDao)
+
+    @Provides
+    @Singleton
+    fun provideScriptExecutionRepository(scriptExecutionDao: ScriptExecutionDao): ScriptExecutionRepository =
+        ScriptExecutionRepositoryImpl(scriptExecutionDao)
+
+    @Provides
+    @Singleton
+    fun provideScriptVersionRepository(scriptVersionDao: ScriptVersionDao): ScriptVersionRepository =
+        ScriptVersionRepositoryImpl(scriptVersionDao)
 
     @Provides
     @Singleton

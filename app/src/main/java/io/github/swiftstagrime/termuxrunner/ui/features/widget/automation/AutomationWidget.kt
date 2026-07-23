@@ -36,7 +36,10 @@ class AutomationWidget : GlanceAppWidget() {
         val glanceColors = ColorProviders(light = lightScheme, dark = darkScheme)
 
         provideContent {
-            val automations by entryPoint.automationRepository().getAllAutomations().collectAsState(emptyList())
+            val automations by entryPoint
+                .automationRepository()
+                .getAllAutomations()
+                .collectAsState(emptyList())
             val scripts by entryPoint.scriptRepository().getAllScripts().collectAsState(emptyList())
             val scriptMap = remember(scripts) { scripts.associateBy { it.id } }
 

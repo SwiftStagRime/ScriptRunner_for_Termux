@@ -11,6 +11,8 @@ interface ScriptRepository {
 
     suspend fun insertScript(script: Script): Int
 
+    suspend fun updateScript(script: Script)
+
     suspend fun deleteScript(script: Script)
 
     suspend fun exportScripts(uri: Uri): Result<Unit>
