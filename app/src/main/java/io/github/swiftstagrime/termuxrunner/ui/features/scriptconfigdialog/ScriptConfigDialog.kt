@@ -343,6 +343,7 @@ private fun ForegroundSessionBehaviorSpinner(
 
         ExposedDropdownMenu(
             expanded = expanded,
+            shape = RoundedCornerShape(12),
             onDismissRequest = { expanded = false },
         ) {
             ForegroundSessionBehavior.entries.forEach { behavior ->
@@ -614,6 +615,7 @@ fun InteractionModeSpinner(
 
         ExposedDropdownMenu(
             expanded = expanded,
+            shape = RoundedCornerShape(12),
             onDismissRequest = { expanded = false },
         ) {
             modes.forEach { mode ->
@@ -962,6 +964,7 @@ private fun NotificationActionsSection(
 
                     ExposedDropdownMenu(
                         expanded = expanded,
+                        shape = RoundedCornerShape(12),
                         onDismissRequest = { expanded = false },
                     ) {
                         allAutomations.forEach { automation ->
