@@ -29,6 +29,7 @@ fun SettingsRoute(
     val selectedAccent by viewModel.selectedAccent.collectAsStateWithLifecycle()
     val selectedMode by viewModel.selectedMode.collectAsStateWithLifecycle()
     val lineWrappingEnabled by viewModel.lineWrappingEnabled.collectAsStateWithLifecycle()
+    val bannerEnabled by viewModel.bannerEnabled.collectAsStateWithLifecycle()
     val ioMessage by viewModel.ioState.collectAsStateWithLifecycle()
     val exportFilename = stringResource(R.string.export_filename)
 
@@ -67,6 +68,7 @@ fun SettingsRoute(
             onAccentChange = viewModel::setAccent,
             onModeChange = viewModel::setMode,
             onLineWrappingToggle = viewModel::setLineWrappingEnabled,
+            onBannerToggle = viewModel::setBannerEnabled,
             onTriggerExport = { exportLauncher.launch(exportFilename) },
             onTriggerImport = { importBackupLauncher.launch(arrayOf("application/json")) },
             onTriggerScriptImport = { importFileLauncher.launch(arrayOf("*/*")) },
@@ -81,6 +83,7 @@ fun SettingsRoute(
         selectedAccent = selectedAccent,
         selectedMode = selectedMode,
         lineWrappingEnabled = lineWrappingEnabled,
+        bannerEnabled = bannerEnabled,
         actions = actions,
     )
 }

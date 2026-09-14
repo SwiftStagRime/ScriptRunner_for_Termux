@@ -40,12 +40,15 @@ class MainActivity : AppCompatActivity() {
 
     companion object {
         private const val EXTRA_COMPONENT_NAME = "android.intent.extra.COMPONENT_NAME"
+        private const val MAX_TILE_INDEX = 5
+        const val EXTRA_OPEN_TILE_SETTINGS = "open_tile_settings"
+        const val EXTRA_TILE_INDEX = "tile_index"
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         val splashScreen = installSplashScreen()
         super.onCreate(savedInstanceState)
-        handleTilePreferencesIntent(intent)
+        handleTileIntent(intent)
 
         splashScreen.setKeepOnScreenCondition {
             !mainViewModel.isReady.value
@@ -100,20 +103,24 @@ class MainActivity : AppCompatActivity() {
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         setIntent(intent)
-        handleTilePreferencesIntent(intent)
+        handleTileIntent(intent)
     }
 
-    private fun handleTilePreferencesIntent(intent: Intent) {
-        if (intent.action != TileService.ACTION_QS_TILE_PREFERENCES) {
+    private fun handleTileIntent(intent: Intent) {
+        if (intent.action == TileService.ACTION_QS_TILE_PREFERENCES) {
+            @Suppress("DEPRECATION")
+            val tileComponent =
+                intent.getParcelableExtra<ComponentName>(EXTRA_COMPONENT_NAME)
+
+            val tileIndex = tileComponent?.let { tileIndexForComponent(it) } ?: return
+            mainViewModel.openTileScriptEditor(tileIndex)
             return
         }
 
-        @Suppress("DEPRECATION")
-        val tileComponent =
-            intent.getParcelableExtra<ComponentName>(EXTRA_COMPONENT_NAME)
-
-        val tileIndex = tileComponent?.let { tileIndexForComponent(it) } ?: return
-        mainViewModel.openTileScriptEditor(tileIndex)
+        if (intent.getBooleanExtra(EXTRA_OPEN_TILE_SETTINGS, false)) {
+            val tileIndex = intent.getIntExtra(EXTRA_TILE_INDEX, -1)
+            mainViewModel.openTileSettings(if (tileIndex in 1..MAX_TILE_INDEX) tileIndex else null)
+        }
     }
 
     private fun applyTerminalSlide(splashProvider: SplashScreenViewProvider) {

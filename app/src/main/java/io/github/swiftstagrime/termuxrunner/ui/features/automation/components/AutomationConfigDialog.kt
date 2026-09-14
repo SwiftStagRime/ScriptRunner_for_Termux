@@ -75,6 +75,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import io.github.swiftstagrime.termuxrunner.R
 import io.github.swiftstagrime.termuxrunner.data.local.entity.AutomationEntity
+import io.github.swiftstagrime.termuxrunner.domain.model.Automation
 import io.github.swiftstagrime.termuxrunner.domain.model.AutomationType
 import io.github.swiftstagrime.termuxrunner.domain.model.Script
 import io.github.swiftstagrime.termuxrunner.domain.model.TriggerMode
@@ -103,8 +104,10 @@ fun AutomationConfigDialog(
     script: Script,
     onDismiss: () -> Unit,
     onSave: (AutomationSaveParams) -> Unit,
+    initialAutomation: Automation? = null,
 ) {
-    val state = rememberAutomationConfigState(script)
+    val isEditing = initialAutomation != null
+    val state = rememberAutomationConfigState(script, initialAutomation)
     var showDatePicker by rememberSaveable { mutableStateOf(false) }
     var showTimePicker by rememberSaveable { mutableStateOf(false) }
     var timePickerMode by remember { mutableStateOf(TimePickerMode.Main) }
@@ -122,6 +125,7 @@ fun AutomationConfigDialog(
             AutomationConfigDialogContent(
                 script = script,
                 state = state,
+                isEditing = isEditing,
                 onShowDate = { showDatePicker = true },
                 onShowTime = { mode ->
                     timePickerMode = mode
@@ -149,6 +153,7 @@ fun AutomationConfigDialog(
 private fun AutomationConfigDialogContent(
     script: Script,
     state: AutomationConfigState,
+    isEditing: Boolean,
     onShowDate: () -> Unit,
     onShowTime: (TimePickerMode) -> Unit,
     onDismiss: () -> Unit,
@@ -156,7 +161,10 @@ private fun AutomationConfigDialogContent(
 ) {
     Column(modifier = Modifier.padding(horizontal = 24.dp, vertical = 24.dp)) {
         Text(
-            text = stringResource(R.string.automation_title),
+            text =
+                stringResource(
+                    if (isEditing) R.string.automation_edit_title else R.string.automation_title,
+                ),
             style = MaterialTheme.typography.headlineSmall,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.primary,
@@ -194,7 +202,11 @@ private fun AutomationConfigDialogContent(
             }
         }
 
-        DialogActionButtons(onDismiss = onDismiss, onConfirm = onConfirm)
+        DialogActionButtons(
+            onDismiss = onDismiss,
+            onConfirm = onConfirm,
+            isEditing = isEditing,
+        )
     }
 }
 
@@ -816,6 +828,7 @@ private fun BatteryThresholdSlider(state: AutomationConfigState) {
 private fun DialogActionButtons(
     onDismiss: () -> Unit,
     onConfirm: () -> Unit,
+    isEditing: Boolean = false,
 ) {
     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
         TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) }
@@ -824,15 +837,26 @@ private fun DialogActionButtons(
             shape = RoundedCornerShape(12.dp),
             onClick = onConfirm,
         ) {
-            Text(stringResource(R.string.automation_save_button))
+            Text(
+                stringResource(
+                    if (isEditing) {
+                        R.string.automation_update_button
+                    } else {
+                        R.string.automation_save_button
+                    },
+                ),
+            )
         }
     }
 }
 
 @Composable
-fun rememberAutomationConfigState(script: Script): AutomationConfigState =
-    rememberSaveable(script, saver = AutomationConfigState.Saver(script)) {
-        AutomationConfigState(script)
+fun rememberAutomationConfigState(
+    script: Script,
+    automation: Automation? = null,
+): AutomationConfigState =
+    rememberSaveable(script, automation, saver = AutomationConfigState.Saver(script)) {
+        AutomationConfigState(script, automation)
     }
 
 @Composable
@@ -1035,6 +1059,7 @@ private fun PreviewAutomationConfigOneTime() {
             AutomationConfigDialogContent(
                 script = script,
                 state = AutomationConfigState(script),
+                isEditing = false,
                 onShowDate = {},
                 onShowTime = {},
                 onDismiss = {},

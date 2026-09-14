@@ -94,29 +94,7 @@ class AutomationViewModel
             viewModelScope.launch(ioDispatcher) {
                 val now = System.currentTimeMillis()
 
-                val tempEntity =
-                    AutomationEntity(
-                        id = 0,
-                        scriptId = params.scriptId,
-                        label = params.label,
-                        type = params.type,
-                        scheduledTimestamp = params.timestamp,
-                        intervalMillis = params.interval,
-                        daysOfWeek = params.days,
-                        isEnabled = true,
-                        runIfMissed = params.runIfMissed,
-                        requireWifi = params.requireWifi,
-                        requireCharging = params.requireCharging,
-                        batteryThreshold = params.batteryThreshold,
-                        scheduledDayOfMonth = params.scheduledDayOfMonth,
-                        windowStartHour = params.windowStartHour,
-                        windowStartMinute = params.windowStartMinute,
-                        windowEndHour = params.windowEndHour,
-                        windowEndMinute = params.windowEndMinute,
-                        randomDelayMinMillis = params.randomDelayMinMillis,
-                        randomDelayMaxMillis = params.randomDelayMaxMillis,
-                        automationCode = params.automationCode.ifBlank { null },
-                    )
+                val tempEntity = buildTempEntity(params)
 
                 val nextRun =
                     AutomationTimeCalculator.calculateNextRun(
@@ -158,6 +136,69 @@ class AutomationViewModel
                 widgetManager.updateAutomationWidget()
             }
         }
+
+        fun updateAutomation(
+            automationId: Int,
+            params: AutomationSaveParams,
+        ) {
+            viewModelScope.launch(ioDispatcher) {
+                val existing = automationRepository.getAutomationById(automationId) ?: return@launch
+                val nextRun =
+                    AutomationTimeCalculator.calculateNextRun(
+                        automation = buildTempEntity(params),
+                    )
+                val updated =
+                    existing.copy(
+                        label = params.label,
+                        type = params.type,
+                        scheduledTimestamp = params.timestamp,
+                        intervalMillis = params.interval,
+                        daysOfWeek = params.days,
+                        runIfMissed = params.runIfMissed,
+                        requireWifi = params.requireWifi,
+                        requireCharging = params.requireCharging,
+                        batteryThreshold = params.batteryThreshold,
+                        scheduledDayOfMonth = params.scheduledDayOfMonth,
+                        windowStartHour = params.windowStartHour,
+                        windowStartMinute = params.windowStartMinute,
+                        windowEndHour = params.windowEndHour,
+                        windowEndMinute = params.windowEndMinute,
+                        randomDelayMinMillis = params.randomDelayMinMillis,
+                        randomDelayMaxMillis = params.randomDelayMaxMillis,
+                        automationCode = params.automationCode.ifBlank { null },
+                        runtimeArgs = params.runtime.arguments,
+                        runtimePrefix = params.runtime.prefix,
+                        runtimeEnv = params.runtime.envVars,
+                        nextRunTimestamp = nextRun,
+                    )
+                automationRepository.updateAutomation(updated)
+                widgetManager.updateAutomationWidget()
+            }
+        }
+
+        private fun buildTempEntity(params: AutomationSaveParams): AutomationEntity =
+            AutomationEntity(
+                id = 0,
+                scriptId = params.scriptId,
+                label = params.label,
+                type = params.type,
+                scheduledTimestamp = params.timestamp,
+                intervalMillis = params.interval,
+                daysOfWeek = params.days,
+                isEnabled = true,
+                runIfMissed = params.runIfMissed,
+                requireWifi = params.requireWifi,
+                requireCharging = params.requireCharging,
+                batteryThreshold = params.batteryThreshold,
+                scheduledDayOfMonth = params.scheduledDayOfMonth,
+                windowStartHour = params.windowStartHour,
+                windowStartMinute = params.windowStartMinute,
+                windowEndHour = params.windowEndHour,
+                windowEndMinute = params.windowEndMinute,
+                randomDelayMinMillis = params.randomDelayMinMillis,
+                randomDelayMaxMillis = params.randomDelayMaxMillis,
+                automationCode = params.automationCode.ifBlank { null },
+            )
 
         fun getAutomationLogs(automationId: Int) = automationLogRepository.getLogsForAutomation(automationId)
 

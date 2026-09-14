@@ -20,11 +20,13 @@ import io.github.swiftstagrime.termuxrunner.data.local.entity.CategoryEntity
 import io.github.swiftstagrime.termuxrunner.data.local.entity.toAutomationDomain
 import io.github.swiftstagrime.termuxrunner.data.local.entity.toScriptEntity
 import io.github.swiftstagrime.termuxrunner.domain.model.Script
+import io.github.swiftstagrime.termuxrunner.domain.model.ScriptExportField
 import io.github.swiftstagrime.termuxrunner.domain.repository.ScriptRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.decodeFromJsonElement
@@ -198,26 +200,120 @@ class ScriptRepositoryImpl
                             BufferedReader(InputStreamReader(it)).readText()
                         } ?: throw ImportStreamException()
 
-                    val fileName = getFileName(uri) ?: "Imported Script"
-                    val extension = fileName.substringAfterLast('.', "sh")
-
-                    // Logic for the shebang
-                    val (finalCode, detectedInterpreter) = processScriptContent(content, extension)
-
-                    val scriptName = fileName.substringBeforeLast('.')
-
-                    Script(
-                        name = scriptName,
-                        codePages = listOf(finalCode),
-                        pageNames = listOf("Main"),
-                        interpreter = detectedInterpreter,
-                        fileExtension = extension,
-                        runInBackground = false,
-                        openNewSession = false,
-                        keepSessionOpen = false,
-                    )
+                    if (content.trimStart().startsWith("{")) {
+                        importScriptJson(content)
+                    } else {
+                        importScriptRaw(content, getFileName(uri) ?: "Imported Script")
+                    }
                 }
             }
+
+        override suspend fun exportScriptRaw(
+            uri: Uri,
+            script: Script,
+        ): Result<Unit> =
+            runCatching {
+                withContext(Dispatchers.IO) {
+                    context.contentResolver.openOutputStream(uri)?.use { outputStream ->
+                        outputStream.write(script.code.toByteArray())
+                    } ?: throw ExportStreamException()
+                }
+            }
+
+        override suspend fun exportScriptJson(
+            uri: Uri,
+            script: Script,
+            fields: Set<ScriptExportField>,
+        ): Result<Unit> =
+            runCatching {
+                withContext(Dispatchers.IO) {
+                    var base64Icon: String? = null
+                    if (ScriptExportField.ICON in fields) {
+                        script.iconPath?.let { path ->
+                            val file = File(path)
+                            if (file.exists()) {
+                                base64Icon = Base64.encodeToString(file.readBytes(), Base64.NO_WRAP)
+                            }
+                        }
+                    }
+
+                    val includePresets = ScriptExportField.PRESETS in fields
+                    val dto =
+                        script.toExportDto(base64Icon).copy(
+                            id = 0,
+                            categoryId = null,
+                            orderIndex = 0,
+                            envVars =
+                                if (ScriptExportField.ENV_VARS in fields) {
+                                    script.envVars
+                                } else {
+                                    emptyMap()
+                                },
+                            adbCode =
+                                if (ScriptExportField.ADB_CODE in fields) {
+                                    script.adbCode
+                                } else {
+                                    null
+                                },
+                            argumentPresets =
+                                if (includePresets) {
+                                    script.argumentPresets
+                                } else {
+                                    emptyList()
+                                },
+                            prefixPresets =
+                                if (includePresets) {
+                                    script.prefixPresets
+                                } else {
+                                    emptyList()
+                                },
+                            envVarPresets =
+                                if (includePresets) {
+                                    script.envVarPresets
+                                } else {
+                                    emptyList()
+                                },
+                        )
+
+                    context.contentResolver.openOutputStream(uri)?.use { outputStream ->
+                        outputStream.write(json.encodeToString(dto).toByteArray())
+                    } ?: throw ExportStreamException()
+                }
+            }
+
+        private fun importScriptJson(content: String): Script {
+            val dto =
+                try {
+                    json.decodeFromString<ScriptExportDto>(content)
+                } catch (e: SerializationException) {
+                    throw ImportStreamException("File is not a valid Script Runner export.", e)
+                }
+            val entity = dto.toEntity(saveBase64Icon(dto.iconBase64), null)
+            return entity.toScriptDomain()
+        }
+
+        private fun importScriptRaw(
+            content: String,
+            fileName: String,
+        ): Script {
+            val extension = fileName.substringAfterLast('.', "sh")
+
+            // Logic for the shebang
+            val (finalCode, detectedInterpreter) = processScriptContent(content, extension)
+
+            val scriptName = fileName.substringBeforeLast('.')
+
+            return Script(
+                name = scriptName,
+                codePages = listOf(finalCode),
+                pageNames = listOf("Main"),
+                interpreter = detectedInterpreter,
+                fileExtension = extension,
+                runInBackground = false,
+                openNewSession = false,
+                keepSessionOpen = false,
+            )
+        }
 
         override suspend fun getScriptByAdbCode(code: String): Result<Script> =
             runCatching {
@@ -318,11 +414,17 @@ class ScriptRepositoryImpl
         }
     }
 
-sealed class ScriptException : Exception()
+sealed class ScriptException(
+    message: String? = null,
+    cause: Throwable? = null,
+) : Exception(message, cause)
 
 class ExportStreamException : ScriptException()
 
-class ImportStreamException : ScriptException()
+class ImportStreamException(
+    message: String? = null,
+    cause: Throwable? = null,
+) : ScriptException(message, cause)
 
 class ScriptNotFoundException(
     val adbCode: String,

@@ -40,7 +40,7 @@ fun rememberEntryProvider(mainViewModel: MainViewModel): (NavKey) -> NavEntry<Na
                                 mainViewModel.navigateTo(Route.Settings)
                             },
                             onNavigateToTileSettings = {
-                                mainViewModel.navigateTo(Route.TileSettings)
+                                mainViewModel.navigateTo(Route.TileSettings())
                             },
                             onNavigateToAutomation = {
                                 mainViewModel.navigateTo(Route.Automation)
@@ -88,6 +88,7 @@ fun rememberEntryProvider(mainViewModel: MainViewModel): (NavKey) -> NavEntry<Na
                     is Route.TileSettings -> {
                         TileSettingsRoute(
                             onBack = { mainViewModel.goBack() },
+                            tileIndex = key.tileIndex,
                         )
                     }
 

@@ -55,6 +55,14 @@ class SettingsViewModel
                     initialValue = false,
                 )
 
+        val bannerEnabled =
+            userPreferencesRepository.showQuickSettingsBanner
+                .stateIn(
+                    scope = viewModelScope,
+                    started = SharingStarted.WhileSubscribed(5000),
+                    initialValue = true,
+                )
+
         private val _ioState = MutableStateFlow<UiText?>(null)
         val ioState = _ioState.asStateFlow()
 
@@ -78,6 +86,12 @@ class SettingsViewModel
         fun setLineWrappingEnabled(enabled: Boolean) {
             viewModelScope.launch(ioDispatcher) {
                 userPreferencesRepository.setEditorLineWrappingEnabled(enabled)
+            }
+        }
+
+        fun setBannerEnabled(enabled: Boolean) {
+            viewModelScope.launch(ioDispatcher) {
+                userPreferencesRepository.setShowQuickSettingsBanner(enabled)
             }
         }
 

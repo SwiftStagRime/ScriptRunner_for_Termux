@@ -32,6 +32,7 @@ class UserPreferencesRepositoryImpl
             val SELECTED_CUSTOM_THEME_ID = intPreferencesKey("selected_custom_theme_id")
             val EDITOR_LINE_WRAPPING_ENABLED = booleanPreferencesKey("editor_line_wrapping_enabled")
             val WEBHOOK_ENABLED = booleanPreferencesKey("webhook_enabled")
+            val SHOW_QS_BANNER = booleanPreferencesKey("show_qs_banner")
         }
 
         override val selectedAccent: Flow<AppTheme> =
@@ -113,6 +114,14 @@ class UserPreferencesRepositoryImpl
 
         override suspend fun setWebhookEnabled(enabled: Boolean) {
             context.dataStore.edit { it[Keys.WEBHOOK_ENABLED] = enabled }
+        }
+
+        override val showQuickSettingsBanner: Flow<Boolean> =
+            context.dataStore.data
+                .map { preferences -> preferences[Keys.SHOW_QS_BANNER] ?: true }
+
+        override suspend fun setShowQuickSettingsBanner(enabled: Boolean) {
+            context.dataStore.edit { it[Keys.SHOW_QS_BANNER] = enabled }
         }
     }
 

@@ -6,54 +6,60 @@ import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.setValue
+import io.github.swiftstagrime.termuxrunner.domain.model.Automation
 import io.github.swiftstagrime.termuxrunner.domain.model.AutomationType
 import io.github.swiftstagrime.termuxrunner.domain.model.Script
+import io.github.swiftstagrime.termuxrunner.domain.model.TriggerMode
+import io.github.swiftstagrime.termuxrunner.domain.model.triggerMode
 import java.util.Calendar
 
 private const val MILLIS_IN_MINUTE = 60_000L
 private const val DEFAULT_INTERVAL_MINUTES = 60L
+private const val MILLIS_IN_SECOND = 1000L
+private const val DEFAULT_END_HOUR = 23
+private const val DEFAULT_END_MINUTE = 59
 
 class AutomationConfigState(
     script: Script,
-    initialLabel: String = script.name,
-    initialType: AutomationType = AutomationType.ONE_TIME,
-    initialRunIfMissed: Boolean = true,
-    initialDate: Long = System.currentTimeMillis(),
-    initialHour: Int = Calendar.getInstance().get(Calendar.HOUR_OF_DAY),
-    initialMinute: Int = Calendar.getInstance().get(Calendar.MINUTE),
-    initialDays: List<Int> = emptyList(),
-    initialInterval: String = DEFAULT_INTERVAL_MINUTES.toString(),
-    initialWifi: Boolean = false,
-    initialCharging: Boolean = false,
-    initialBattery: Int = 0,
-    initialScheduledDayOfMonth: Int? = null,
-    initialWindowStartHour: Int = 0,
-    initialWindowStartMinute: Int = 0,
-    initialWindowEndHour: Int = 23,
-    initialWindowEndMinute: Int = 59,
-    initialRandomDelayMinMillis: Long? = null,
-    initialRandomDelayMaxMillis: Long? = null,
-    initialAutomationCode: String = "",
+    initialAutomation: Automation? = null,
 ) {
-    var label by mutableStateOf(initialLabel)
-    var type by mutableStateOf(initialType)
-    var runIfMissed by mutableStateOf(initialRunIfMissed)
-    var selectedDate by mutableLongStateOf(initialDate)
-    var selectedHour by mutableIntStateOf(initialHour)
-    var selectedMinute by mutableIntStateOf(initialMinute)
-    var selectedDays by mutableStateOf(initialDays)
-    var intervalValue by mutableStateOf(initialInterval)
-    var requireWifi by mutableStateOf(initialWifi)
-    var requireCharging by mutableStateOf(initialCharging)
-    var batteryThreshold by mutableIntStateOf(initialBattery)
-    var scheduledDayOfMonth by mutableStateOf(initialScheduledDayOfMonth?.toString() ?: "")
-    var windowStartHour by mutableIntStateOf(initialWindowStartHour)
-    var windowStartMinute by mutableIntStateOf(initialWindowStartMinute)
-    var windowEndHour by mutableIntStateOf(initialWindowEndHour)
-    var windowEndMinute by mutableIntStateOf(initialWindowEndMinute)
-    var randomDelayMinValue by mutableStateOf(initialRandomDelayMinMillis?.toString() ?: "")
-    var randomDelayMaxValue by mutableStateOf(initialRandomDelayMaxMillis?.toString() ?: "")
-    var automationCode by mutableStateOf(initialAutomationCode)
+    private val initialTimestamp =
+        if (initialAutomation?.type?.triggerMode == TriggerMode.SCHEDULE) {
+            initialAutomation.scheduledTimestamp
+        } else {
+            System.currentTimeMillis()
+        }
+
+    private val initialCalendar = Calendar.getInstance().apply { timeInMillis = initialTimestamp }
+
+    var label by mutableStateOf(initialAutomation?.label ?: script.name)
+    var type by mutableStateOf(initialAutomation?.type ?: AutomationType.ONE_TIME)
+    var runIfMissed by mutableStateOf(initialAutomation?.runIfMissed ?: true)
+    var selectedDate by mutableLongStateOf(initialTimestamp)
+    var selectedHour by mutableIntStateOf(initialCalendar.get(Calendar.HOUR_OF_DAY))
+    var selectedMinute by mutableIntStateOf(initialCalendar.get(Calendar.MINUTE))
+    var selectedDays by mutableStateOf(initialAutomation?.daysOfWeek ?: emptyList())
+    var intervalValue by mutableStateOf(
+        (
+            (initialAutomation?.intervalMillis ?: DEFAULT_INTERVAL_MINUTES * MILLIS_IN_MINUTE) /
+                MILLIS_IN_MINUTE
+        ).toString(),
+    )
+    var requireWifi by mutableStateOf(initialAutomation?.requireWifi ?: false)
+    var requireCharging by mutableStateOf(initialAutomation?.requireCharging ?: false)
+    var batteryThreshold by mutableIntStateOf(initialAutomation?.batteryThreshold ?: 0)
+    var scheduledDayOfMonth by mutableStateOf(initialAutomation?.scheduledDayOfMonth?.toString() ?: "")
+    var windowStartHour by mutableIntStateOf(initialAutomation?.windowStartHour ?: 0)
+    var windowStartMinute by mutableIntStateOf(initialAutomation?.windowStartMinute ?: 0)
+    var windowEndHour by mutableIntStateOf(initialAutomation?.windowEndHour ?: DEFAULT_END_HOUR)
+    var windowEndMinute by mutableIntStateOf(initialAutomation?.windowEndMinute ?: DEFAULT_END_MINUTE)
+    var randomDelayMinValue by mutableStateOf(
+        initialAutomation?.randomDelayMinMillis?.div(MILLIS_IN_SECOND)?.toString() ?: "",
+    )
+    var randomDelayMaxValue by mutableStateOf(
+        initialAutomation?.randomDelayMaxMillis?.div(MILLIS_IN_SECOND)?.toString() ?: "",
+    )
+    var automationCode by mutableStateOf(initialAutomation?.automationCode ?: "")
 
     fun toSaveParams(scriptId: Int): AutomationSaveParams {
         val calendar =
@@ -112,31 +118,32 @@ class AutomationConfigState(
                         state.windowEndMinute,
                         state.randomDelayMinValue,
                         state.randomDelayMaxValue,
+                        state.automationCode,
                     )
                 },
                 restore = { saved ->
                     val list = saved as List<*>
-                    AutomationConfigState(
-                        script = script,
-                        initialLabel = list[0] as String,
-                        initialType = AutomationType.valueOf(list[1] as String),
-                        initialRunIfMissed = list[2] as Boolean,
-                        initialDate = list[3] as Long,
-                        initialHour = list[4] as Int,
-                        initialMinute = list[5] as Int,
-                        initialDays = (list[6] as IntArray).toList(),
-                        initialInterval = list[7] as String,
-                        initialWifi = list[8] as Boolean,
-                        initialCharging = list[9] as Boolean,
-                        initialBattery = list[10] as Int,
-                        initialScheduledDayOfMonth = (list[11] as String).toIntOrNull(),
-                        initialWindowStartHour = list[12] as Int,
-                        initialWindowStartMinute = list[13] as Int,
-                        initialWindowEndHour = list[14] as Int,
-                        initialWindowEndMinute = list[15] as Int,
-                        initialRandomDelayMinMillis = (list[16] as String).toLongOrNull(),
-                        initialRandomDelayMaxMillis = (list[17] as String).toLongOrNull(),
-                    )
+                    val state = AutomationConfigState(script)
+                    state.label = list[0] as String
+                    state.type = AutomationType.valueOf(list[1] as String)
+                    state.runIfMissed = list[2] as Boolean
+                    state.selectedDate = list[3] as Long
+                    state.selectedHour = list[4] as Int
+                    state.selectedMinute = list[5] as Int
+                    state.selectedDays = (list[6] as IntArray).toList()
+                    state.intervalValue = list[7] as String
+                    state.requireWifi = list[8] as Boolean
+                    state.requireCharging = list[9] as Boolean
+                    state.batteryThreshold = list[10] as Int
+                    state.scheduledDayOfMonth = list[11] as String
+                    state.windowStartHour = list[12] as Int
+                    state.windowStartMinute = list[13] as Int
+                    state.windowEndHour = list[14] as Int
+                    state.windowEndMinute = list[15] as Int
+                    state.randomDelayMinValue = list[16] as String
+                    state.randomDelayMaxValue = list[17] as String
+                    state.automationCode = list[18] as String
+                    state
                 },
             )
     }

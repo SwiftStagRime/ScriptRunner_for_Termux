@@ -16,6 +16,7 @@ import io.github.swiftstagrime.termuxrunner.di.IoDispatcher
 import io.github.swiftstagrime.termuxrunner.domain.model.Automation
 import io.github.swiftstagrime.termuxrunner.domain.model.Category
 import io.github.swiftstagrime.termuxrunner.domain.model.Script
+import io.github.swiftstagrime.termuxrunner.domain.model.ScriptExportField
 import io.github.swiftstagrime.termuxrunner.domain.repository.AutomationRepository
 import io.github.swiftstagrime.termuxrunner.domain.repository.CategoryRepository
 import io.github.swiftstagrime.termuxrunner.domain.repository.IconRepository
@@ -110,6 +111,14 @@ class HomeViewModel
                 started = SharingStarted.WhileSubscribed(5000),
                 initialValue = emptyList(),
             )
+
+        val showQuickSettingsBanner: StateFlow<Boolean> =
+            userPreferencesRepository.showQuickSettingsBanner
+                .stateIn(
+                    scope = viewModelScope,
+                    started = SharingStarted.WhileSubscribed(5000),
+                    initialValue = true,
+                )
 
         private val _uiEvent = Channel<HomeUiEvent>()
         val uiEvent = _uiEvent.receiveAsFlow()
@@ -267,6 +276,51 @@ class HomeViewModel
                 deleteScriptUseCase(script)
                 sendEvent(HomeUiEvent.ShowSnackbar(UiText.StringResource(R.string.msg_script_deleted)))
                 widgetManager.updateScriptsWidget()
+            }
+        }
+
+        fun exportScriptRaw(
+            uri: Uri,
+            script: Script,
+        ) {
+            viewModelScope.launch(ioDispatcher) {
+                scriptRepository
+                    .exportScriptRaw(uri, script)
+                    .onSuccess {
+                        sendEvent(HomeUiEvent.ShowSnackbar(UiText.StringResource(R.string.export_success)))
+                    }.onFailure {
+                        sendEvent(
+                            HomeUiEvent.ShowSnackbar(
+                                UiText.StringResource(
+                                    R.string.export_failed,
+                                    it.message ?: "",
+                                ),
+                            ),
+                        )
+                    }
+            }
+        }
+
+        fun exportScriptJson(
+            uri: Uri,
+            script: Script,
+            fields: Set<ScriptExportField>,
+        ) {
+            viewModelScope.launch(ioDispatcher) {
+                scriptRepository
+                    .exportScriptJson(uri, script, fields)
+                    .onSuccess {
+                        sendEvent(HomeUiEvent.ShowSnackbar(UiText.StringResource(R.string.export_success)))
+                    }.onFailure {
+                        sendEvent(
+                            HomeUiEvent.ShowSnackbar(
+                                UiText.StringResource(
+                                    R.string.export_failed,
+                                    it.message ?: "",
+                                ),
+                            ),
+                        )
+                    }
             }
         }
 

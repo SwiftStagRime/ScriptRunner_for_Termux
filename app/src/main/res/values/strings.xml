@@ -23,6 +23,25 @@
     <string name="import_success">Import Successful</string>
     <string name="import_failed">Import Failed: %1$s</string>
 
+    <!-- Home Screen -->
+    <string name="home_screen_label">Home Screen</string>
+    <string name="show_tiles_banner_label">Tiles Banner</string>
+    <string name="show_tiles_banner_desc">Show the quick settings tiles banner at the top of the home screen</string>
+    <string name="menu_export_script">Export Script</string>
+    <string name="export_script_title">Export Script</string>
+    <string name="export_script_format_label">Format</string>
+    <string name="export_script_raw">Script File</string>
+    <string name="export_script_raw_desc">Plain text file with the script code only</string>
+    <string name="export_script_json">App Format (JSON)</string>
+    <string name="export_script_json_desc">Full configuration, importable by Script Runner</string>
+    <string name="export_script_include_label">Include in Export</string>
+    <string name="export_field_env_vars">Environment Variables</string>
+    <string name="export_field_adb_code">Trigger Code</string>
+    <string name="export_field_presets">Presets</string>
+    <string name="export_field_icon">Icon</string>
+    <string name="export_sensitive_hint">Uncheck fields that contain sensitive information before sharing.</string>
+    <string name="export_button_label">Export</string>
+
     <!-- Runner -->
     <string name="script_runner_permission_denied">Permission denied</string>
 
@@ -331,6 +350,8 @@
 
     <!-- Automation -->
     <string name="automation_title">Automation</string>
+    <string name="automation_edit_title">Edit Automation</string>
+    <string name="cd_edit">Edit</string>
     <string name="automation_next_run_format">Next run: %s</string>
     <string name="automation_last_run_format">Last run: %s</string>
     <string name="automation_running_soon">Running soon</string>
@@ -364,6 +385,7 @@
     <string name="trigger_mode_event">Event</string>
     <string name="trigger_mode_boot">On Boot</string>
     <string name="automation_save_button">Schedule Task</string>
+    <string name="automation_update_button">Update Task</string>
     <string name="ok">OK</string>
     <string name="history_title">Execution History</string>
     <string name="no_logs_recorded">No logs recorded yet</string>

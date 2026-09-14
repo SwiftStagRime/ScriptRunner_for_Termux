@@ -23,7 +23,9 @@ sealed interface Route : NavKey {
     data object CustomTheme : Route
 
     @Serializable
-    data object TileSettings : Route
+    data class TileSettings(
+        val tileIndex: Int? = null,
+    ) : Route
 
     @Serializable
     data object Automation : Route

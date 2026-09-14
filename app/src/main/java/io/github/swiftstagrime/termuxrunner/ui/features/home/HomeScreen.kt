@@ -33,6 +33,7 @@ import androidx.compose.material.icons.automirrored.filled.Sort
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.DragIndicator
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.MoreVert
@@ -130,6 +131,7 @@ data class HomeActions(
     val onTileSettingsClick: () -> Unit,
     val onNavigateToAutomation: () -> Unit,
     val onNavigateToScriptHistory: (Script) -> Unit,
+    val onExportScript: (Script) -> Unit,
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -143,6 +145,7 @@ fun HomeScreen(
     isBatteryUnrestricted: Boolean,
     selectedCategoryId: Int?,
     sortOption: SortOption,
+    bannerEnabled: Boolean,
     snackbarHostState: SnackbarHostState,
     actions: HomeActions,
 ) {
@@ -206,6 +209,7 @@ fun HomeScreen(
                             selectedCategoryId = selectedCategoryId,
                             sortOption = sortOption,
                             isSearchActive = isSearchActive,
+                            bannerEnabled = bannerEnabled,
                             actions = actions,
                         )
                     }
@@ -352,12 +356,13 @@ private fun ScriptList(
     selectedCategoryId: Int?,
     sortOption: SortOption,
     isSearchActive: Boolean,
+    bannerEnabled: Boolean,
     actions: HomeActions,
     modifier: Modifier = Modifier,
 ) {
     val uncategorizedLabel = stringResource(R.string.uncategorized)
 
-    val showBanner = !isSearchActive && searchQuery.isEmpty()
+    val showBanner = bannerEnabled && !isSearchActive && searchQuery.isEmpty()
     val showTabs = !isSearchActive
 
     var listOffset = 0
@@ -531,6 +536,7 @@ private fun ScriptList(
                         onDeleteClick = actions.onDeleteScript,
                         onCreateShortcutClick = actions.onCreateShortcutClick,
                         onHistoryClick = actions.onNavigateToScriptHistory,
+                        onExportClick = actions.onExportScript,
                     )
                 }
             }
@@ -571,6 +577,7 @@ private fun ScriptList(
                         onDeleteClick = actions.onDeleteScript,
                         onCreateShortcutClick = actions.onCreateShortcutClick,
                         onHistoryClick = actions.onNavigateToScriptHistory,
+                        onExportClick = actions.onExportScript,
                     )
                 }
             }
@@ -587,6 +594,7 @@ private fun ScriptItem(
     onDeleteClick: (Script) -> Unit,
     onCreateShortcutClick: (Script) -> Unit,
     onHistoryClick: (Script) -> Unit,
+    onExportClick: (Script) -> Unit,
 ) {
     Card(
         modifier =
@@ -661,6 +669,7 @@ private fun ScriptItem(
                     onCreateShortcutClick = onCreateShortcutClick,
                     onDeleteClick = onDeleteClick,
                     onHistoryClick = onHistoryClick,
+                    onExportClick = onExportClick,
                 )
             }
         }
@@ -674,6 +683,7 @@ private fun ScriptContextMenu(
     onCreateShortcutClick: (Script) -> Unit,
     onDeleteClick: (Script) -> Unit,
     onHistoryClick: (Script) -> Unit,
+    onExportClick: (Script) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     var showMenu by remember { mutableStateOf(false) }
@@ -753,6 +763,26 @@ private fun ScriptContextMenu(
                 onClick = {
                     showMenu = false
                     onHistoryClick(script)
+                },
+            )
+            DropdownMenuItem(
+                text = {
+                    Text(
+                        stringResource(R.string.menu_export_script),
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
+                },
+                leadingIcon = {
+                    Icon(
+                        Icons.Default.Download,
+                        null,
+                        tint = MaterialTheme.colorScheme.secondary,
+                        modifier = Modifier.size(20.dp),
+                    )
+                },
+                onClick = {
+                    showMenu = false
+                    onExportClick(script)
                 },
             )
             HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
@@ -1005,6 +1035,7 @@ fun PreviewHomeScreen() {
             isBatteryUnrestricted = false,
             selectedCategoryId = null,
             sortOption = SortOption.NAME_ASC,
+            bannerEnabled = true,
             snackbarHostState = SnackbarHostState(),
             actions = stubHomeActions,
         )
@@ -1024,6 +1055,7 @@ private fun PreviewEmptyHome() {
             isBatteryUnrestricted = false,
             selectedCategoryId = null,
             sortOption = SortOption.NAME_ASC,
+            bannerEnabled = true,
             snackbarHostState = SnackbarHostState(),
             actions = stubHomeActions,
         )

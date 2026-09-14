@@ -41,6 +41,13 @@ class AutomationRepositoryImpl
             scheduler.schedule(entityWithId)
         }
 
+        override suspend fun updateAutomation(automation: Automation) {
+            val entity = automation.toEntity()
+            dao.updateAutomation(entity)
+            scheduler.cancel(entity)
+            scheduler.schedule(entity)
+        }
+
         override suspend fun deleteAutomation(automation: Automation) {
             val entity = automation.toEntity()
             scheduler.cancel(entity)

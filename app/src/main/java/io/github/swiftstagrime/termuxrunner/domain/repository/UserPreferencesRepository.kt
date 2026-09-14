@@ -23,6 +23,10 @@ interface UserPreferencesRepository {
 
     suspend fun setWebhookEnabled(enabled: Boolean)
 
+    val showQuickSettingsBanner: Flow<Boolean>
+
+    suspend fun setShowQuickSettingsBanner(enabled: Boolean)
+
     fun getScriptIdForTile(tileIndex: Int): Flow<Int?>
 
     suspend fun setScriptIdForTile(

@@ -84,6 +84,21 @@ fun AutomationRoute(
         onShowHistory = { selectedHistoryId = it.id },
         onRequestPermission = { launchExactAlarmSettings(context) },
         onEditChain = { editingChainId = it.id },
+        onEditAutomation = { automation ->
+            allScripts.find { it.id == automation.scriptId }?.let { script ->
+                flowState =
+                    AutomationFlowState.Configuring(
+                        script = script,
+                        runtime =
+                            ScriptRuntimeParams(
+                                arguments = automation.runtimeArgs ?: "",
+                                prefix = automation.runtimePrefix ?: "",
+                                envVars = automation.runtimeEnv,
+                            ),
+                        editing = automation,
+                    )
+            }
+        },
     )
 
     AutomationCreationFlow(
@@ -93,7 +108,12 @@ fun AutomationRoute(
         onDismiss = { flowState = AutomationFlowState.Idle },
         onStateChange = { flowState = it },
         onSave = { params ->
-            viewModel.saveAutomation(params)
+            val editing = (flowState as? AutomationFlowState.Configuring)?.editing
+            if (editing != null) {
+                viewModel.updateAutomation(editing.id, params)
+            } else {
+                viewModel.saveAutomation(params)
+            }
             flowState = AutomationFlowState.Idle
         },
     )
@@ -242,6 +262,7 @@ private fun AutomationCreationFlow(
         is AutomationFlowState.Configuring -> {
             AutomationConfigDialog(
                 script = flowState.script,
+                initialAutomation = flowState.editing,
                 onDismiss = onDismiss,
                 onSave = { uiParams ->
                     onSave(uiParams.copy(runtime = flowState.runtime))
@@ -330,6 +351,7 @@ sealed class AutomationFlowState : Parcelable {
     data class Configuring(
         val script: Script,
         val runtime: ScriptRuntimeParams,
+        val editing: Automation? = null,
     ) : AutomationFlowState()
 }
 

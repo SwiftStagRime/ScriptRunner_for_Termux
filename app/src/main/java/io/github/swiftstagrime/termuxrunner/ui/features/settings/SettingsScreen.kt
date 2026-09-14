@@ -75,6 +75,7 @@ fun SettingsScreen(
     selectedAccent: AppTheme,
     selectedMode: ThemeMode,
     lineWrappingEnabled: Boolean,
+    bannerEnabled: Boolean,
     actions: SettingsActions,
 ) {
     val outerBackgroundColor = MaterialTheme.colorScheme.surface
@@ -105,6 +106,18 @@ fun SettingsScreen(
                         .padding(20.dp),
             ) {
                 AppearanceSection(selectedAccent, selectedMode, actions)
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                HorizontalDivider(
+                    modifier = Modifier.padding(horizontal = 4.dp),
+                    thickness = 1.dp,
+                    color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f),
+                )
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                HomeSection(bannerEnabled, actions)
 
                 Spacer(modifier = Modifier.height(24.dp))
 
@@ -203,6 +216,26 @@ private fun AppearanceSection(
 
     Text(stringResource(R.string.display_mode_label), style = MaterialTheme.typography.labelLarge)
     DisplayModeSelector(selectedMode, actions.onModeChange)
+}
+
+@Composable
+private fun HomeSection(
+    bannerEnabled: Boolean,
+    actions: SettingsActions,
+) {
+    Text(
+        text = stringResource(R.string.home_screen_label),
+        style = MaterialTheme.typography.labelLarge,
+        color = MaterialTheme.colorScheme.primary,
+    )
+    Spacer(modifier = Modifier.height(8.dp))
+
+    SwitchRow(
+        title = stringResource(R.string.show_tiles_banner_label),
+        description = stringResource(R.string.show_tiles_banner_desc),
+        checked = bannerEnabled,
+        onCheckedChange = actions.onBannerToggle,
+    )
 }
 
 @Composable
@@ -601,11 +634,13 @@ fun PreviewSettingsScreen() {
             selectedAccent = AppTheme.GREEN,
             selectedMode = ThemeMode.SYSTEM,
             lineWrappingEnabled = false,
+            bannerEnabled = true,
             actions =
                 SettingsActions(
                     onAccentChange = {},
                     onModeChange = {},
                     onLineWrappingToggle = {},
+                    onBannerToggle = {},
                     onTriggerExport = {},
                     onTriggerImport = {},
                     onTriggerScriptImport = {},

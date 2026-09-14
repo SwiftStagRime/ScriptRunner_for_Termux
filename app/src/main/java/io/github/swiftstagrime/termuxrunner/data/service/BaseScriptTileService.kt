@@ -13,6 +13,7 @@ import io.github.swiftstagrime.termuxrunner.domain.model.InteractionMode
 import io.github.swiftstagrime.termuxrunner.domain.repository.ScriptRepository
 import io.github.swiftstagrime.termuxrunner.domain.repository.UserPreferencesRepository
 import io.github.swiftstagrime.termuxrunner.domain.usecase.RunScriptUseCase
+import io.github.swiftstagrime.termuxrunner.ui.MainActivity
 import io.github.swiftstagrime.termuxrunner.ui.features.runner.ScriptRunnerActivity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -55,11 +56,13 @@ abstract class BaseScriptTileService : TileService() {
         val scriptId = assignedScriptId
 
         if (scriptId == null) {
-            val launchIntent =
-                packageManager.getLaunchIntentForPackage(packageName)?.apply {
+            val intent =
+                Intent(this, MainActivity::class.java).apply {
                     addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    putExtra(MainActivity.EXTRA_OPEN_TILE_SETTINGS, true)
+                    putExtra(MainActivity.EXTRA_TILE_INDEX, tileIndex)
                 }
-            launchIntent?.let { safeStartActivityAndCollapse(it) }
+            safeStartActivityAndCollapse(intent)
             return
         }
 

@@ -26,6 +26,7 @@ import androidx.compose.material.icons.filled.AddAlarm
 import androidx.compose.material.icons.filled.BatteryChargingFull
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.DeleteSweep
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.Event
 import androidx.compose.material.icons.filled.Link
@@ -81,6 +82,7 @@ fun AutomationScreen(
     onShowHistory: (Automation) -> Unit,
     onRequestPermission: () -> Unit,
     onEditChain: (Automation) -> Unit,
+    onEditAutomation: (Automation) -> Unit,
 ) {
     val outerBackgroundColor = MaterialTheme.colorScheme.surface
     val sheetContainerColor = MaterialTheme.colorScheme.surfaceContainerLowest
@@ -163,6 +165,7 @@ fun AutomationScreen(
                             onRunNow = { onRunNow(item.automation) },
                             onShowHistory = { onShowHistory(item.automation) },
                             onEditChain = { onEditChain(item.automation) },
+                            onEdit = { onEditAutomation(item.automation) },
                         )
                     }
                 }
@@ -179,6 +182,7 @@ private fun AutomationItem(
     onDelete: () -> Unit,
     onShowHistory: () -> Unit,
     onEditChain: () -> Unit,
+    onEdit: () -> Unit,
 ) {
     Card(
         modifier =
@@ -297,6 +301,22 @@ private fun AutomationItem(
                                 ),
                         ) {
                             Icon(Icons.Default.PlayArrow, null, modifier = Modifier.size(20.dp))
+                        }
+
+                        Surface(
+                            onClick = onEdit,
+                            color = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.15f),
+                            contentColor = MaterialTheme.colorScheme.tertiary,
+                            shape = RoundedCornerShape(12.dp),
+                            modifier = Modifier.size(40.dp),
+                        ) {
+                            Box(contentAlignment = Alignment.Center) {
+                                Icon(
+                                    Icons.Default.Edit,
+                                    stringResource(R.string.cd_edit),
+                                    modifier = Modifier.size(20.dp),
+                                )
+                            }
                         }
 
                         Surface(
@@ -435,6 +455,7 @@ fun AutomationScreenPreview() {
             onRunNow = {},
             onShowHistory = {},
             onEditChain = {},
+            onEditAutomation = {},
         )
     }
 }
@@ -457,6 +478,7 @@ fun AutomationScreenPermissionPreview() {
             onRunNow = {},
             onShowHistory = {},
             onEditChain = {},
+            onEditAutomation = {},
         )
     }
 }

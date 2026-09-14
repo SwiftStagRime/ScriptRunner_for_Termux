@@ -12,6 +12,8 @@ interface AutomationRepository {
 
     suspend fun saveAutomation(automation: Automation)
 
+    suspend fun updateAutomation(automation: Automation)
+
     suspend fun deleteAutomation(automation: Automation)
 
     suspend fun toggleAutomation(

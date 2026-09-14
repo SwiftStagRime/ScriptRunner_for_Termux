@@ -124,6 +124,7 @@ val stubHomeActions =
         onTileSettingsClick = {},
         onNavigateToAutomation = {},
         onNavigateToScriptHistory = {},
+        onExportScript = {},
     )
 
 val sampleCategories =

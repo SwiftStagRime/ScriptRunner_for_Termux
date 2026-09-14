@@ -28,11 +28,13 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.swiftstagrime.termuxrunner.R
 import io.github.swiftstagrime.termuxrunner.domain.model.InteractionMode
 import io.github.swiftstagrime.termuxrunner.domain.model.Script
+import io.github.swiftstagrime.termuxrunner.domain.model.ScriptExportField
 import io.github.swiftstagrime.termuxrunner.domain.util.BatteryUtils
 import io.github.swiftstagrime.termuxrunner.domain.util.MiuiUtils
 import io.github.swiftstagrime.termuxrunner.ui.components.ScriptRuntimePromptDialog
 import io.github.swiftstagrime.termuxrunner.ui.extensions.ObserveAsEvents
 import io.github.swiftstagrime.termuxrunner.ui.extensions.UiText
+import io.github.swiftstagrime.termuxrunner.ui.features.home.components.ScriptExportDialog
 import io.github.swiftstagrime.termuxrunner.ui.features.home.components.ShortcutStylePickerDialog
 import kotlinx.coroutines.launch
 
@@ -51,8 +53,34 @@ fun HomeRoute(
     val selectedCategoryId by viewModel.selectedCategoryId.collectAsStateWithLifecycle()
     val sortOption by viewModel.sortOption.collectAsStateWithLifecycle()
     val automations by viewModel.automations.collectAsStateWithLifecycle()
+    val bannerEnabled by viewModel.showQuickSettingsBanner.collectAsStateWithLifecycle()
 
     var scriptForShortcutStyle by remember { mutableStateOf<Script?>(null) }
+    var exportScript by remember { mutableStateOf<Script?>(null) }
+    var exportFields by remember { mutableStateOf<Set<ScriptExportField>>(emptySet()) }
+
+    val rawExportLauncher =
+        rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.CreateDocument("application/octet-stream"),
+        ) { uri ->
+            val script = exportScript
+            exportScript = null
+            if (uri != null && script != null) {
+                viewModel.exportScriptRaw(uri, script)
+            }
+        }
+
+    val jsonExportLauncher =
+        rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.CreateDocument("application/json"),
+        ) { uri ->
+            val script = exportScript
+            val fields = exportFields
+            exportScript = null
+            if (uri != null && script != null) {
+                viewModel.exportScriptJson(uri, script, fields)
+            }
+        }
 
     val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
@@ -239,6 +267,7 @@ fun HomeRoute(
                 onTileSettingsClick = onNavigateToTileSettings,
                 onNavigateToAutomation = onNavigateToAutomation,
                 onNavigateToScriptHistory = { script -> onNavigateToScriptHistory(script.id) },
+                onExportScript = { script -> exportScript = script },
             )
         }
 
@@ -251,6 +280,7 @@ fun HomeRoute(
         isBatteryUnrestricted = isBatteryUnrestricted,
         selectedCategoryId = selectedCategoryId,
         sortOption = sortOption,
+        bannerEnabled = bannerEnabled,
         snackbarHostState = snackbarHostState,
         actions = actions,
     )
@@ -273,6 +303,21 @@ fun HomeRoute(
             onConfirm = { args, prefix, env ->
                 viewModel.runScript(script, args, prefix, env)
                 scriptToPrompt = null
+            },
+        )
+    }
+
+    exportScript?.let { script ->
+        ScriptExportDialog(
+            script = script,
+            onDismiss = { exportScript = null },
+            onExportRaw = { fileName ->
+                exportFields = emptySet()
+                rawExportLauncher.launch(fileName)
+            },
+            onExportJson = { fileName, fields ->
+                exportFields = fields
+                jsonExportLauncher.launch(fileName)
             },
         )
     }

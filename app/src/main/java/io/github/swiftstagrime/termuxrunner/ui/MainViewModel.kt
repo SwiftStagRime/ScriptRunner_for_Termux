@@ -100,9 +100,20 @@ class MainViewModel
         fun openTileScriptEditor(tileIndex: Int) {
             viewModelScope.launch(ioDispatcher) {
                 _isReady.first { it }
-                val scriptId = userPreferencesRepository.getScriptIdForTile(tileIndex).firstOrNull()
-                    ?: return@launch
+                val scriptId =
+                    userPreferencesRepository.getScriptIdForTile(tileIndex).firstOrNull()
+                        ?: return@launch
                 val target = listOf(Route.Home, Route.Editor(scriptId))
+                if (_backStack != target) {
+                    updateStack(target)
+                }
+            }
+        }
+
+        fun openTileSettings(tileIndex: Int? = null) {
+            viewModelScope.launch(ioDispatcher) {
+                _isReady.first { it }
+                val target = listOf(Route.Home, Route.TileSettings(tileIndex))
                 if (_backStack != target) {
                     updateStack(target)
                 }
