@@ -58,7 +58,6 @@ class RunScriptShellValidityTest {
                 any(),
                 any(),
                 any(),
-                any(),
             )
         }
         return slot.captured
@@ -353,6 +352,62 @@ class RunScriptShellValidityTest {
             )
             val cmd = captureCommand()
             assertTrue(cmd.contains("export X='"))
+        }
+
+    @Test
+    fun `env var backticks are escaped so the outer bash cannot execute them`() =
+        runTest {
+            useCase(
+                Script(
+                    id = 70,
+                    name = "t",
+                    codePages = listOf("echo safe"),
+                    envVars = mapOf("X" to "`rm -rf /`"),
+                ),
+            )
+            val cmd = captureCommand()
+            val bs = "\\"
+            val bt = '`'
+            val escaped = "export X='" + bs + bt + "rm -rf /" + bs + bt + "'"
+            val raw = "export X='" + bt + "rm -rf /" + bt + "'"
+            assertTrue("backtick env value must be escaped, got: $cmd", cmd.contains(escaped))
+            assertFalse("raw unescaped backtick must not survive, got: $cmd", cmd.contains(raw))
+        }
+
+    @Test
+    fun `env var dollar expansion is escaped so the outer bash cannot expand it`() =
+        runTest {
+            useCase(
+                Script(
+                    id = 71,
+                    name = "t",
+                    codePages = listOf("echo safe"),
+                    envVars = mapOf("D" to "\$HOME/\$USER"),
+                ),
+            )
+            val cmd = captureCommand()
+            val escaped = "export D='\\\$HOME/\\\$USER'"
+            val raw = "export D='\$HOME/\$USER'"
+            assertTrue("dollar env value must be escaped, got: $cmd", cmd.contains(escaped))
+            assertFalse("raw unescaped dollar must not survive, got: $cmd", cmd.contains(raw))
+        }
+
+    @Test
+    fun `env var command substitution is escaped so the outer bash cannot run it`() =
+        runTest {
+            useCase(
+                Script(
+                    id = 72,
+                    name = "t",
+                    codePages = listOf("echo safe"),
+                    envVars = mapOf("S" to "\$(reboot)"),
+                ),
+            )
+            val cmd = captureCommand()
+            val escaped = "export S='\\\$(reboot)'"
+            val raw = "export S='\$(reboot)'"
+            assertTrue("\$() env value must be escaped, got: $cmd", cmd.contains(escaped))
+            assertFalse("raw unescaped \$() must not survive, got: $cmd", cmd.contains(raw))
         }
 
     @Test

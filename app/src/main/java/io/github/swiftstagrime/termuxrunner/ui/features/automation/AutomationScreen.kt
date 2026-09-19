@@ -1,8 +1,10 @@
 package io.github.swiftstagrime.termuxrunner.ui.features.automation
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,7 +20,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -51,29 +54,40 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import io.github.swiftstagrime.termuxrunner.R
 import io.github.swiftstagrime.termuxrunner.domain.model.Automation
 import io.github.swiftstagrime.termuxrunner.domain.model.AutomationType
 import io.github.swiftstagrime.termuxrunner.ui.components.ScriptIcon
+import io.github.swiftstagrime.termuxrunner.ui.features.home.SortMenu
+import io.github.swiftstagrime.termuxrunner.ui.features.home.SortOption
 import io.github.swiftstagrime.termuxrunner.ui.preview.DevicePreviews
 import io.github.swiftstagrime.termuxrunner.ui.preview.mockAutomations
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun AutomationScreen(
     uiState: AutomationUiState,
+    sortOption: SortOption,
     onBackClick: () -> Unit,
     onToggleAutomation: (Int, Boolean) -> Unit,
     onDeleteAutomation: (Automation) -> Unit,
@@ -83,6 +97,8 @@ fun AutomationScreen(
     onRequestPermission: () -> Unit,
     onEditChain: (Automation) -> Unit,
     onEditAutomation: (Automation) -> Unit,
+    onSortOptionChange: (SortOption) -> Unit,
+    onMoveAutomation: (Int, Int) -> Unit,
 ) {
     val outerBackgroundColor = MaterialTheme.colorScheme.surface
     val sheetContainerColor = MaterialTheme.colorScheme.surfaceContainerLowest
@@ -102,6 +118,9 @@ fun AutomationScreen(
                     IconButton(onClick = onBackClick) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, null)
                     }
+                },
+                actions = {
+                    SortMenu(currentSort = sortOption, onSortSelected = onSortOptionChange)
                 },
                 colors =
                     TopAppBarDefaults.topAppBarColors(
@@ -147,28 +166,135 @@ fun AutomationScreen(
                     Spacer(modifier = Modifier.height(8.dp))
                 }
 
-                LazyColumn(
-                    contentPadding =
-                        PaddingValues(
-                            start = 16.dp,
-                            end = 16.dp,
-                            bottom = 88.dp,
-                            top = 8.dp,
-                        ),
-                    verticalArrangement = Arrangement.spacedBy(12.dp),
-                ) {
-                    items(uiState.items, key = { it.automation.id }) { item ->
-                        AutomationItem(
-                            item = item,
-                            onToggle = { onToggleAutomation(item.automation.id, it) },
-                            onDelete = { onDeleteAutomation(item.automation) },
-                            onRunNow = { onRunNow(item.automation) },
-                            onShowHistory = { onShowHistory(item.automation) },
-                            onEditChain = { onEditChain(item.automation) },
-                            onEdit = { onEditAutomation(item.automation) },
-                        )
-                    }
+                AutomationList(
+                    items = uiState.items,
+                    isManualSort = sortOption == SortOption.MANUAL,
+                    onToggle = onToggleAutomation,
+                    onDelete = onDeleteAutomation,
+                    onRunNow = onRunNow,
+                    onShowHistory = onShowHistory,
+                    onEditChain = onEditChain,
+                    onEdit = onEditAutomation,
+                    onMove = onMoveAutomation,
+                )
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+private fun AutomationList(
+    items: List<AutomationUiItem>,
+    isManualSort: Boolean,
+    onToggle: (Int, Boolean) -> Unit,
+    onDelete: (Automation) -> Unit,
+    onRunNow: (Automation) -> Unit,
+    onShowHistory: (Automation) -> Unit,
+    onEditChain: (Automation) -> Unit,
+    onEdit: (Automation) -> Unit,
+    onMove: (Int, Int) -> Unit,
+) {
+    val lazyListState = rememberLazyListState()
+    var draggedItemIndex by rememberSaveable { mutableStateOf<Int?>(null) }
+    var dragOffset by rememberSaveable { mutableFloatStateOf(0f) }
+
+    LazyColumn(
+        state = lazyListState,
+        contentPadding =
+            PaddingValues(
+                start = 16.dp,
+                end = 16.dp,
+                bottom = 88.dp,
+                top = 8.dp,
+            ),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .then(
+                    if (isManualSort) {
+                        Modifier.pointerInput(Unit) {
+                            detectDragGesturesAfterLongPress(
+                                onDragStart = { offset ->
+                                    lazyListState.layoutInfo.visibleItemsInfo
+                                        .find {
+                                            it.offset <= offset.y.toInt() &&
+                                                (it.offset + it.size) >= offset.y.toInt()
+                                        }?.let { item ->
+                                            draggedItemIndex = item.index
+                                        }
+                                },
+                                onDrag = { change, dragAmount ->
+                                    change.consume()
+                                    dragOffset += dragAmount.y
+                                    val currentIdx = draggedItemIndex ?: return@detectDragGesturesAfterLongPress
+                                    val layoutInfo = lazyListState.layoutInfo
+                                    val currentItem =
+                                        layoutInfo.visibleItemsInfo.find { it.index == currentIdx }
+
+                                    currentItem?.let {
+                                        val targetCenter = it.offset + (it.size / 2) + dragOffset
+                                        val targetItem =
+                                            layoutInfo.visibleItemsInfo.find { info ->
+                                                targetCenter.toInt() in info.offset..(info.offset + info.size)
+                                            }
+
+                                        if (targetItem != null && targetItem.index != currentIdx) {
+                                            onMove(currentIdx, targetItem.index)
+                                            draggedItemIndex = targetItem.index
+                                            dragOffset = 0f
+                                        }
+                                    }
+                                },
+                                onDragEnd = {
+                                    draggedItemIndex = null
+                                    dragOffset = 0f
+                                },
+                                onDragCancel = {
+                                    draggedItemIndex = null
+                                    dragOffset = 0f
+                                },
+                            )
+                        }
+                    } else {
+                        Modifier
+                    },
+                ),
+    ) {
+        itemsIndexed(items, key = { _, item -> item.automation.id }) { index, item ->
+            val isDragging = isManualSort && index == draggedItemIndex
+
+            val itemModifier =
+                if (isDragging) {
+                    Modifier
+                        .zIndex(3f)
+                        .graphicsLayer {
+                            translationY = dragOffset
+                            scaleX = 1.04f
+                            scaleY = 1.04f
+                            alpha = 0.9f
+                            shadowElevation = 8.dp.toPx()
+                        }
+                } else {
+                    Modifier
                 }
+
+            Box(
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .then(itemModifier),
+            ) {
+                AutomationItem(
+                    item = item,
+                    onToggle = { onToggle(item.automation.id, it) },
+                    onDelete = { onDelete(item.automation) },
+                    onRunNow = { onRunNow(item.automation) },
+                    onShowHistory = { onShowHistory(item.automation) },
+                    onEditChain = { onEditChain(item.automation) },
+                    onEdit = { onEdit(item.automation) },
+                )
             }
         }
     }
@@ -447,6 +573,7 @@ fun AutomationScreenPreview() {
                     items = mockAutomations,
                     isExactAlarmPermissionGranted = true,
                 ),
+            sortOption = SortOption.MANUAL,
             onBackClick = {},
             onToggleAutomation = { _, _ -> },
             onDeleteAutomation = {},
@@ -456,6 +583,8 @@ fun AutomationScreenPreview() {
             onShowHistory = {},
             onEditChain = {},
             onEditAutomation = {},
+            onSortOptionChange = {},
+            onMoveAutomation = { _, _ -> },
         )
     }
 }
@@ -470,6 +599,7 @@ fun AutomationScreenPermissionPreview() {
                     items = mockAutomations.take(1),
                     isExactAlarmPermissionGranted = false,
                 ),
+            sortOption = SortOption.MANUAL,
             onBackClick = {},
             onToggleAutomation = { _, _ -> },
             onDeleteAutomation = {},
@@ -479,6 +609,8 @@ fun AutomationScreenPermissionPreview() {
             onShowHistory = {},
             onEditChain = {},
             onEditAutomation = {},
+            onSortOptionChange = {},
+            onMoveAutomation = { _, _ -> },
         )
     }
 }

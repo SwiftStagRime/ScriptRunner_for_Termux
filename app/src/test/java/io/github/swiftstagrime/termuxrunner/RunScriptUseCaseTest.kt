@@ -70,7 +70,6 @@ class RunScriptUseCaseTest {
                     any(),
                     any(),
                     any(),
-                    any(),
                 )
             }
 
@@ -102,7 +101,6 @@ class RunScriptUseCaseTest {
                     any(),
                     any(),
                     any(),
-                    any(),
                 )
             }
 
@@ -126,7 +124,6 @@ class RunScriptUseCaseTest {
             verify {
                 termuxRepo.runCommand(
                     command = capture(commandSlot),
-                    any(),
                     any(),
                     any(),
                     any(),
@@ -168,7 +165,6 @@ class RunScriptUseCaseTest {
                     any(),
                     any(),
                     any(),
-                    any(),
                 )
             }
 
@@ -204,7 +200,6 @@ class RunScriptUseCaseTest {
                     shellName = any(),
                     scriptId = any(),
                     scriptName = any(),
-                    notifyOnResult = any(),
                     automationId = any(),
                 )
             }
@@ -245,7 +240,6 @@ class RunScriptUseCaseTest {
                     shellName = any(),
                     scriptId = any(),
                     scriptName = any(),
-                    notifyOnResult = any(),
                     automationId = any(),
                 )
             }
@@ -278,7 +272,6 @@ class RunScriptUseCaseTest {
                     any(),
                     any(),
                     any(),
-                    any(),
                 )
             }
 
@@ -298,7 +291,6 @@ class RunScriptUseCaseTest {
             verify {
                 termuxRepo.runCommand(
                     command = capture(commandSlot),
-                    any(),
                     any(),
                     any(),
                     any(),
@@ -327,7 +319,6 @@ class RunScriptUseCaseTest {
                     any(),
                     any(),
                     any(),
-                    any(),
                 )
             }
 
@@ -348,7 +339,6 @@ class RunScriptUseCaseTest {
             verify {
                 termuxRepo.runCommand(
                     command = capture(commandSlot),
-                    any(),
                     any(),
                     any(),
                     any(),
@@ -387,7 +377,6 @@ class RunScriptUseCaseTest {
                     any(),
                     any(),
                     any(),
-                    any(),
                 )
             }
 
@@ -414,7 +403,6 @@ class RunScriptUseCaseTest {
             verify {
                 termuxRepo.runCommand(
                     command = capture(commandSlot),
-                    any(),
                     any(),
                     any(),
                     any(),
@@ -454,7 +442,6 @@ class RunScriptUseCaseTest {
                     any(),
                     any(),
                     any(),
-                    any(),
                 )
             }
 
@@ -481,7 +468,6 @@ class RunScriptUseCaseTest {
             verify {
                 termuxRepo.runCommand(
                     command = capture(commandSlot),
-                    any(),
                     any(),
                     any(),
                     any(),
@@ -520,7 +506,6 @@ class RunScriptUseCaseTest {
                     any(),
                     any(),
                     any(),
-                    any(),
                 )
             }
 
@@ -547,7 +532,6 @@ class RunScriptUseCaseTest {
             verify {
                 termuxRepo.runCommand(
                     command = capture(commandSlot),
-                    any(),
                     any(),
                     any(),
                     any(),
@@ -591,13 +575,12 @@ class RunScriptUseCaseTest {
                     any(),
                     any(),
                     any(),
-                    any(),
                 )
             }
 
             assertTrue(
-                "Dollar sign should appear literally (safe inside single quotes)",
-                commandSlot.captured.contains("'prefix\$HOMEsuffix'"),
+                "Dollar sign must be escaped so the outer bash cannot expand it",
+                commandSlot.captured.contains("'prefix\\\$HOMEsuffix'"),
             )
         }
 
@@ -624,13 +607,12 @@ class RunScriptUseCaseTest {
                     any(),
                     any(),
                     any(),
-                    any(),
                 )
             }
 
             assertTrue(
-                "Backtick should appear literally (safe inside single quotes)",
-                commandSlot.captured.contains("`whoami`"),
+                "Backtick must be escaped so the outer bash cannot execute it",
+                commandSlot.captured.contains("prefix\\`whoami\\`suffix"),
             )
         }
 
@@ -652,7 +634,6 @@ class RunScriptUseCaseTest {
             verify {
                 termuxRepo.runCommand(
                     command = capture(commandSlot),
-                    any(),
                     any(),
                     any(),
                     any(),
@@ -691,7 +672,6 @@ class RunScriptUseCaseTest {
                     any(),
                     any(),
                     any(),
-                    any(),
                 )
             }
 
@@ -724,7 +704,6 @@ class RunScriptUseCaseTest {
                     any(),
                     any(),
                     any(),
-                    any(),
                 )
             }
 
@@ -750,7 +729,6 @@ class RunScriptUseCaseTest {
                     shellName = any(),
                     scriptId = any(),
                     scriptName = any(),
-                    notifyOnResult = any(),
                     automationId = any(),
                 )
             }
@@ -780,7 +758,6 @@ class RunScriptUseCaseTest {
                     shellName = any(),
                     scriptId = any(),
                     scriptName = any(),
-                    notifyOnResult = any(),
                     automationId = any(),
                 )
             }
@@ -810,7 +787,6 @@ class RunScriptUseCaseTest {
                     shellName = any(),
                     scriptId = any(),
                     scriptName = any(),
-                    notifyOnResult = any(),
                     automationId = any(),
                 )
             }
@@ -834,7 +810,6 @@ class RunScriptUseCaseTest {
                     shellName = captureNullable(shellNameSlot),
                     scriptId = any(),
                     scriptName = any(),
-                    notifyOnResult = any(),
                     automationId = any(),
                 )
             }
@@ -864,7 +839,6 @@ class RunScriptUseCaseTest {
                     shellName = captureNullable(shellNameSlot),
                     scriptId = any(),
                     scriptName = any(),
-                    notifyOnResult = any(),
                     automationId = any(),
                 )
             }
@@ -895,7 +869,6 @@ class RunScriptUseCaseTest {
                     shellName = captureNullable(shellNameSlot),
                     scriptId = any(),
                     scriptName = any(),
-                    notifyOnResult = any(),
                     automationId = any(),
                 )
             }

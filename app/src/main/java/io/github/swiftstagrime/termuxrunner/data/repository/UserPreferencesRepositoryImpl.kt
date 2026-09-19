@@ -33,6 +33,8 @@ class UserPreferencesRepositoryImpl
             val EDITOR_LINE_WRAPPING_ENABLED = booleanPreferencesKey("editor_line_wrapping_enabled")
             val WEBHOOK_ENABLED = booleanPreferencesKey("webhook_enabled")
             val SHOW_QS_BANNER = booleanPreferencesKey("show_qs_banner")
+            val SCRIPT_SORT_OPTION = stringPreferencesKey("script_sort_option")
+            val AUTOMATION_SORT_OPTION = stringPreferencesKey("automation_sort_option")
         }
 
         override val selectedAccent: Flow<AppTheme> =
@@ -122,6 +124,22 @@ class UserPreferencesRepositoryImpl
 
         override suspend fun setShowQuickSettingsBanner(enabled: Boolean) {
             context.dataStore.edit { it[Keys.SHOW_QS_BANNER] = enabled }
+        }
+
+        override val scriptSortOption: Flow<String> =
+            context.dataStore.data
+                .map { preferences -> preferences[Keys.SCRIPT_SORT_OPTION] ?: "" }
+
+        override suspend fun setScriptSortOption(option: String) {
+            context.dataStore.edit { it[Keys.SCRIPT_SORT_OPTION] = option }
+        }
+
+        override val automationSortOption: Flow<String> =
+            context.dataStore.data
+                .map { preferences -> preferences[Keys.AUTOMATION_SORT_OPTION] ?: "" }
+
+        override suspend fun setAutomationSortOption(option: String) {
+            context.dataStore.edit { it[Keys.AUTOMATION_SORT_OPTION] = option }
         }
     }
 

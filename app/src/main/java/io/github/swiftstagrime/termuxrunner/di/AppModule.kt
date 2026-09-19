@@ -120,7 +120,8 @@ object AppModule {
     @Singleton
     fun provideAutomationScheduler(
         @ApplicationContext context: Context,
-    ): AutomationScheduler = AutomationScheduler(context)
+        automationDao: AutomationDao,
+    ): AutomationScheduler = AutomationScheduler(context, automationDao)
 
     @Provides
     @Singleton

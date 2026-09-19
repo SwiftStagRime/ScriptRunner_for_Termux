@@ -90,6 +90,7 @@
     <string name="title_rice">Fully Customizable</string>
     <string name="body_rice">You can create your own custom color themes</string>
     <string name="termux_permission_warning">This permission is essential for the app to function.</string>
+    <string name="termux_permission_not_grantable_warning">This Termux build declares the RUN_COMMAND permission as signature-protected, so it can\'t be granted to third-party apps. The Grant button and \'pm grant\' will never work with it. Please install the official Termux app from F-Droid, or ask the fork\'s maintainer to declare the permission with protectionLevel \'dangerous\'.</string>
     <string name="title_promo">Simple. Powerful. Automated.</string>
 
     <!--Home -->
@@ -217,6 +218,9 @@
     <string name="error_empty_name">Script name cannot be empty</string>
     <string name="execution_feedback">Execution Feedback</string>
     <string name="show_a_notification_with_the_result_success_fail_when_finished">Show a notification with the result (Success/Fail) when finished</string>
+    <string name="feedback_off">Off</string>
+    <string name="feedback_success_and_failure">Success and failure</string>
+    <string name="feedback_failure_only">Failure only</string>
     <string name="section_notification_actions">Notification Actions</string>
     <string name="desc_notification_actions">Action buttons shown in script result notifications. Each button triggers another automation.</string>
     <string name="label_action_label">Label</string>

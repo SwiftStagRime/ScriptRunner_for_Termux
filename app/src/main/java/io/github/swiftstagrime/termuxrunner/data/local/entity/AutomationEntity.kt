@@ -47,6 +47,7 @@ data class AutomationEntity(
     @ColumnInfo(defaultValue = "NULL") val randomDelayMinMillis: Long? = null,
     @ColumnInfo(defaultValue = "NULL") val randomDelayMaxMillis: Long? = null,
     @ColumnInfo(defaultValue = "NULL") val automationCode: String? = null,
+    @ColumnInfo(defaultValue = "0") val orderIndex: Int = 0,
 )
 
 fun AutomationEntity.toAutomationDomain() =
@@ -77,6 +78,7 @@ fun AutomationEntity.toAutomationDomain() =
         randomDelayMinMillis = randomDelayMinMillis,
         randomDelayMaxMillis = randomDelayMaxMillis,
         automationCode = automationCode,
+        orderIndex = orderIndex,
     )
 
 fun Automation.toEntity() =
@@ -107,4 +109,5 @@ fun Automation.toEntity() =
         randomDelayMinMillis = randomDelayMinMillis,
         randomDelayMaxMillis = randomDelayMaxMillis,
         automationCode = automationCode,
+        orderIndex = orderIndex,
     )

@@ -35,4 +35,12 @@ interface UserPreferencesRepository {
     )
 
     suspend fun setCustomThemeId(id: Int)
+
+    val scriptSortOption: Flow<String>
+
+    suspend fun setScriptSortOption(option: String)
+
+    val automationSortOption: Flow<String>
+
+    suspend fun setAutomationSortOption(option: String)
 }

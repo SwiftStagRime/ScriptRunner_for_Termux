@@ -287,7 +287,7 @@ class ScriptRepositoryImplTest {
                     heartbeatTimeout = 60000,
                     heartbeatInterval = 20000,
                     orderIndex = 5,
-                    notifyOnResult = true,
+                    notifyOnResult = 1,
                     interactionMode = InteractionMode.MULTI_CHOICE,
                     argumentPresets = listOf("--opt1", "--opt2"),
                     prefixPresets = listOf("sudo", "time"),
@@ -453,7 +453,8 @@ class ScriptRepositoryImplTest {
             assertTrue(entity.useHeartbeat)
             assertEquals(45000L, entity.heartbeatTimeout)
             assertEquals(15000L, entity.heartbeatInterval)
-            assertTrue(entity.notifyOnResult)
+            // Legacy "notifyOnResult": true maps to SUCCESS_AND_FAILURE (1)
+            assertEquals(1, entity.notifyOnResult)
             assertEquals(InteractionMode.TEXT_INPUT, entity.interactionMode)
             assertEquals(listOf("p1"), entity.argumentPresets)
             assertEquals(listOf("pr1"), entity.prefixPresets)

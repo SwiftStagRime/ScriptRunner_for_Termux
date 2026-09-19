@@ -45,6 +45,31 @@ data class NotificationAction(
     val targetAutomationId: Int,
 ) : Parcelable
 
+/**
+ * Controls when a result notification is shown after a script finishes.
+ */
+@Serializable
+@Parcelize
+enum class ResultNotificationMode : Parcelable {
+    NONE,
+    SUCCESS_AND_FAILURE,
+    FAILURE_ONLY,
+    ;
+
+    fun toInt(): Int = ordinal
+
+    fun shouldNotify(exitCode: Int): Boolean =
+        when (this) {
+            NONE -> false
+            SUCCESS_AND_FAILURE -> true
+            FAILURE_ONLY -> exitCode != 0
+        }
+
+    companion object {
+        fun fromInt(value: Int): ResultNotificationMode = entries.getOrElse(value) { NONE }
+    }
+}
+
 @Parcelize
 data class Script(
     val id: Int = 0,
@@ -67,7 +92,7 @@ data class Script(
     val heartbeatInterval: Long = 10000,
     val categoryId: Int? = null,
     val orderIndex: Int = 0,
-    val notifyOnResult: Boolean = false,
+    val resultNotificationMode: ResultNotificationMode = ResultNotificationMode.NONE,
     val interactionMode: InteractionMode = InteractionMode.NONE,
     val argumentPresets: List<String> = emptyList(),
     val prefixPresets: List<String> = emptyList(),
@@ -103,7 +128,7 @@ data class Script(
             heartbeatInterval: Long = 10000,
             categoryId: Int? = null,
             orderIndex: Int = 0,
-            notifyOnResult: Boolean = false,
+            resultNotificationMode: ResultNotificationMode = ResultNotificationMode.NONE,
             interactionMode: InteractionMode = InteractionMode.NONE,
             argumentPresets: List<String> = emptyList(),
             prefixPresets: List<String> = emptyList(),
@@ -131,7 +156,7 @@ data class Script(
                 heartbeatInterval = heartbeatInterval,
                 categoryId = categoryId,
                 orderIndex = orderIndex,
-                notifyOnResult = notifyOnResult,
+                resultNotificationMode = resultNotificationMode,
                 interactionMode = interactionMode,
                 argumentPresets = argumentPresets,
                 prefixPresets = prefixPresets,

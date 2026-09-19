@@ -75,8 +75,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -109,6 +111,8 @@ private const val ANIMATION_DURATION = 300
 private const val LINE_HEIGHT_SP = 20
 private const val EXTRA_LINES_COUNT = 5
 private const val TOOLBAR_HEIGHT_DP = 50
+private const val EDITOR_TOP_PADDING_DP = 16
+private const val FOCUS_SCROLL_SETTLE_DELAY = 300L
 
 val TextFieldValueSaver =
     listSaver<TextFieldValue, Any>(
@@ -156,6 +160,39 @@ fun CodeEditor(
     val focusRequester = remember { FocusRequester() }
     val coroutineScope = rememberCoroutineScope()
     var textLayoutResult by remember { mutableStateOf<TextLayoutResult?>(null) }
+    var isFocused by remember { mutableStateOf(false) }
+    var editorViewportHeightPx by remember { mutableIntStateOf(0) }
+    val density = LocalDensity.current
+
+    // When the editor gains focus the IME opens and shrinks the viewport, which can
+    // leave the cursor out of view (or make the view "bounce"). Once the resize has
+    // settled, deterministically scroll the cursor into view.
+    LaunchedEffect(isFocused) {
+        if (isFocused) {
+            delay(FOCUS_SCROLL_SETTLE_DELAY)
+            val layout = textLayoutResult ?: return@LaunchedEffect
+            val cursorOffset = code.selection.min.coerceIn(0, code.text.length)
+            val line = layout.getLineForOffset(cursorOffset)
+            val topPaddingPx = with(density) { EDITOR_TOP_PADDING_DP.dp.toPx() }.toInt()
+            val lineTop = (topPaddingPx + layout.getLineTop(line)).toInt()
+            val lineBottom = (topPaddingPx + layout.getLineBottom(line)).toInt()
+            val viewport = editorViewportHeightPx
+            if (viewport <= 0) return@LaunchedEffect
+            val current = verticalScrollState.value
+            val target =
+                when {
+                    lineTop < current -> lineTop
+                    lineBottom > current + viewport ->
+                        (lineBottom - viewport + topPaddingPx).coerceAtLeast(0)
+
+                    else -> return@LaunchedEffect
+                }
+            verticalScrollState.animateScrollTo(
+                target.coerceIn(0, verticalScrollState.maxValue),
+                tween(200),
+            )
+        }
+    }
 
     val undoStack = rememberSaveable(saver = UndoStackSaver) { mutableStateListOf(code) }
     val redoStack = rememberSaveable(saver = UndoStackSaver) { mutableStateListOf() }
@@ -243,6 +280,8 @@ fun CodeEditor(
                 isWrappingEnabled = isWrappingEnabled,
                 visualTransformation = searchTransformation,
                 focusRequester = focusRequester,
+                onViewportSizeChange = { editorViewportHeightPx = it },
+                onFocusChange = { isFocused = it },
                 onBottomClick = { actions.handleBottomClick(code, focusRequester) },
             )
         }
@@ -486,6 +525,8 @@ private fun MainEditorArea(
     isWrappingEnabled: Boolean,
     visualTransformation: VisualTransformation,
     focusRequester: FocusRequester,
+    onViewportSizeChange: (Int) -> Unit,
+    onFocusChange: (Boolean) -> Unit,
     onBottomClick: () -> Unit,
 ) {
     val bottomBuffer =
@@ -513,6 +554,7 @@ private fun MainEditorArea(
                     .weight(1f)
                     .fillMaxHeight()
                     .verticalScroll(scrollState)
+                    .onSizeChanged { onViewportSizeChange(it.height) }
                     .then(
                         if (isWrappingEnabled) {
                             Modifier
@@ -541,8 +583,9 @@ private fun MainEditorArea(
                         Modifier
                             .then(if (isWrappingEnabled) Modifier.fillMaxWidth() else Modifier)
                             .padding(horizontal = 12.dp)
-                            .padding(top = 16.dp)
+                            .padding(top = EDITOR_TOP_PADDING_DP.dp)
                             .focusRequester(focusRequester)
+                            .onFocusChanged { onFocusChange(it.isFocused) }
                             .focusProperties {
                                 up = FocusRequester.Cancel
                                 down = FocusRequester.Cancel

@@ -5,6 +5,8 @@ interface TermuxRepository {
 
     fun isPermissionGranted(): Boolean
 
+    fun isPermissionGrantable(): Boolean
+
     fun requestTermuxOverlay()
 
     fun runCommand(
@@ -14,7 +16,6 @@ interface TermuxRepository {
         shellName: String?,
         scriptId: Int,
         scriptName: String,
-        notifyOnResult: Boolean,
         automationId: Int? = null,
     )
 

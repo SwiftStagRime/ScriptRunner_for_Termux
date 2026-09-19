@@ -31,6 +31,7 @@ data class AutomationExportDto(
     val randomDelayMinMillis: Long? = null,
     val randomDelayMaxMillis: Long? = null,
     val automationCode: String? = null,
+    val orderIndex: Int = 0,
 )
 
 fun AutomationExportDto.toEntity(newScriptId: Int): AutomationEntity =
@@ -60,6 +61,7 @@ fun AutomationExportDto.toEntity(newScriptId: Int): AutomationEntity =
         randomDelayMinMillis = this.randomDelayMinMillis,
         randomDelayMaxMillis = this.randomDelayMaxMillis,
         automationCode = this.automationCode,
+        orderIndex = this.orderIndex,
     )
 
 fun Automation.toExportDto() =
@@ -88,4 +90,5 @@ fun Automation.toExportDto() =
         randomDelayMinMillis = randomDelayMinMillis,
         randomDelayMaxMillis = randomDelayMaxMillis,
         automationCode = automationCode,
+        orderIndex = orderIndex,
     )

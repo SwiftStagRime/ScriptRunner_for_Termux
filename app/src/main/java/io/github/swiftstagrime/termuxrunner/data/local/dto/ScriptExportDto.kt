@@ -4,6 +4,7 @@ import io.github.swiftstagrime.termuxrunner.data.local.entity.ScriptEntity
 import io.github.swiftstagrime.termuxrunner.domain.model.ForegroundSessionBehavior
 import io.github.swiftstagrime.termuxrunner.domain.model.InteractionMode
 import io.github.swiftstagrime.termuxrunner.domain.model.NotificationAction
+import io.github.swiftstagrime.termuxrunner.domain.model.ResultNotificationMode
 import io.github.swiftstagrime.termuxrunner.domain.model.Script
 import kotlinx.serialization.Serializable
 
@@ -28,7 +29,9 @@ data class ScriptExportDto(
     val heartbeatInterval: Long = 10000,
     val iconBase64: String? = null,
     val orderIndex: Int = 0,
+    // Legacy field, kept for backward-compatible imports of old backups
     val notifyOnResult: Boolean = false,
+    val resultNotificationMode: ResultNotificationMode? = null,
     val interactionMode: InteractionMode = InteractionMode.NONE,
     val argumentPresets: List<String> = emptyList(),
     val prefixPresets: List<String> = emptyList(),
@@ -59,7 +62,8 @@ fun Script.toExportDto(base64Icon: String?): ScriptExportDto =
         heartbeatInterval = heartbeatInterval,
         iconBase64 = base64Icon,
         orderIndex = orderIndex,
-        notifyOnResult = notifyOnResult,
+        notifyOnResult = resultNotificationMode != ResultNotificationMode.NONE,
+        resultNotificationMode = resultNotificationMode,
         interactionMode = interactionMode,
         argumentPresets = argumentPresets,
         prefixPresets = prefixPresets,
@@ -109,7 +113,15 @@ fun ScriptExportDto.toEntity(
         envVarPresets = envVarPresets,
         iconPath = newIconPath,
         orderIndex = orderIndex,
-        notifyOnResult = notifyOnResult,
+        notifyOnResult =
+            (
+                resultNotificationMode
+                    ?: if (notifyOnResult) {
+                        ResultNotificationMode.SUCCESS_AND_FAILURE
+                    } else {
+                        ResultNotificationMode.NONE
+                    }
+            ).toInt(),
         categoryId = mappedCategoryId,
         adbCode = adbCode,
         notificationActions = notificationActions,

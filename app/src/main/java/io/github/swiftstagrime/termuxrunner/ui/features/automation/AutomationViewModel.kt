@@ -14,12 +14,18 @@ import io.github.swiftstagrime.termuxrunner.domain.repository.AutomationLogRepos
 import io.github.swiftstagrime.termuxrunner.domain.repository.AutomationRepository
 import io.github.swiftstagrime.termuxrunner.domain.repository.CategoryRepository
 import io.github.swiftstagrime.termuxrunner.domain.repository.ScriptRepository
+import io.github.swiftstagrime.termuxrunner.domain.repository.UserPreferencesRepository
 import io.github.swiftstagrime.termuxrunner.domain.usecase.RunScriptUseCase
 import io.github.swiftstagrime.termuxrunner.domain.util.AutomationTimeCalculator
+import io.github.swiftstagrime.termuxrunner.ui.features.home.SortOption
 import io.github.swiftstagrime.termuxrunner.ui.utils.WidgetManager
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -40,13 +46,33 @@ class AutomationViewModel
         private val automationLogRepository: AutomationLogRepository,
         private val chainRepository: AutomationChainRepository,
         private val runScriptUseCase: RunScriptUseCase,
+        private val userPreferencesRepository: UserPreferencesRepository,
         private val widgetManager: WidgetManager,
         @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
     ) : ViewModel() {
+        private val _sortOption = MutableStateFlow(SortOption.MANUAL)
+        val sortOption = _sortOption.asStateFlow()
+
+        private var sortOptionInitialized = false
+
+        init {
+            viewModelScope.launch {
+                val saved = userPreferencesRepository.automationSortOption.first()
+                if (!sortOptionInitialized) {
+                    _sortOption.value =
+                        runCatching { SortOption.valueOf(saved) }
+                            .getOrDefault(SortOption.MANUAL)
+                }
+            }
+        }
+
         val automations: StateFlow<List<Automation>> =
-            automationRepository
-                .getAllAutomations()
-                .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+            combine(
+                automationRepository.getAllAutomations(),
+                _sortOption,
+            ) { list, sort ->
+                sortAutomations(list, sort)
+            }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
         val allScripts: StateFlow<List<Script>> =
             scriptRepository
@@ -57,6 +83,44 @@ class AutomationViewModel
             categoryRepository
                 .getAllCategories()
                 .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+        fun setSortOption(option: SortOption) {
+            sortOptionInitialized = true
+            _sortOption.value = option
+            viewModelScope.launch {
+                userPreferencesRepository.setAutomationSortOption(option.name)
+            }
+        }
+
+        fun moveAutomation(
+            fromIndex: Int,
+            toIndex: Int,
+        ) {
+            if (sortOption.value != SortOption.MANUAL) return
+            val current = automations.value
+            if (fromIndex !in current.indices || toIndex !in current.indices) return
+
+            viewModelScope.launch(ioDispatcher) {
+                val list = current.toMutableList()
+                val item = list.removeAt(fromIndex)
+                list.add(toIndex, item)
+
+                val updates = list.mapIndexed { index, automation -> automation.id to index }
+                automationRepository.updateAutomationsOrder(updates)
+            }
+        }
+
+        private fun sortAutomations(
+            list: List<Automation>,
+            sort: SortOption,
+        ): List<Automation> =
+            when (sort) {
+                SortOption.NAME_ASC -> list.sortedBy { it.label.lowercase() }
+                SortOption.NAME_DESC -> list.sortedByDescending { it.label.lowercase() }
+                SortOption.DATE_NEWEST -> list.sortedByDescending { it.id }
+                SortOption.DATE_OLDEST -> list.sortedBy { it.id }
+                SortOption.MANUAL -> list.sortedBy { it.orderIndex }
+            }
 
         fun toggleAutomation(
             id: Int,
@@ -79,7 +143,7 @@ class AutomationViewModel
             viewModelScope.launch(ioDispatcher) {
                 scriptRepository.getScriptById(automation.scriptId)?.let { script ->
                     runScriptUseCase(
-                        script = script.copy(notifyOnResult = true),
+                        script = script,
                         runtimeArgs = automation.runtimeArgs,
                         runtimeEnv = automation.runtimeEnv,
                         runtimePrefix = automation.runtimePrefix,

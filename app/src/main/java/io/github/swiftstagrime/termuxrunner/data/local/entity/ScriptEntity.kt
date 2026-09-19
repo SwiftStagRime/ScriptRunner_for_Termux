@@ -6,6 +6,7 @@ import androidx.room.PrimaryKey
 import io.github.swiftstagrime.termuxrunner.domain.model.ForegroundSessionBehavior
 import io.github.swiftstagrime.termuxrunner.domain.model.InteractionMode
 import io.github.swiftstagrime.termuxrunner.domain.model.NotificationAction
+import io.github.swiftstagrime.termuxrunner.domain.model.ResultNotificationMode
 import io.github.swiftstagrime.termuxrunner.domain.model.Script
 
 @Entity(tableName = "scripts")
@@ -36,7 +37,7 @@ data class ScriptEntity(
     @ColumnInfo(defaultValue = "0")
     val orderIndex: Int = 0,
     @ColumnInfo(defaultValue = "0")
-    val notifyOnResult: Boolean = false,
+    val notifyOnResult: Int = 0,
     @ColumnInfo(defaultValue = "NONE")
     val interactionMode: InteractionMode = InteractionMode.NONE,
     @ColumnInfo(defaultValue = "")
@@ -74,7 +75,7 @@ data class ScriptEntity(
             heartbeatInterval = heartbeatInterval,
             categoryId = categoryId,
             orderIndex = orderIndex,
-            notifyOnResult = notifyOnResult,
+            resultNotificationMode = ResultNotificationMode.fromInt(notifyOnResult),
             interactionMode = interactionMode,
             argumentPresets = argumentPresets,
             prefixPresets = prefixPresets,
@@ -106,7 +107,7 @@ fun Script.toScriptEntity(): ScriptEntity =
         heartbeatInterval = heartbeatInterval,
         categoryId = categoryId,
         orderIndex = orderIndex,
-        notifyOnResult = notifyOnResult,
+        notifyOnResult = resultNotificationMode.toInt(),
         interactionMode = interactionMode,
         argumentPresets = argumentPresets,
         prefixPresets = prefixPresets,

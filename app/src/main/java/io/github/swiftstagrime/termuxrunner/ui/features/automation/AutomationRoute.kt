@@ -57,6 +57,7 @@ fun AutomationRoute(
     val automations by viewModel.automations.collectAsStateWithLifecycle()
     val allScripts by viewModel.allScripts.collectAsStateWithLifecycle()
     val allCategories by viewModel.allCategories.collectAsStateWithLifecycle()
+    val sortOption by viewModel.sortOption.collectAsStateWithLifecycle()
 
     var hasExactAlarmPermission by rememberSaveable { mutableStateOf(true) }
     var selectedHistoryId by rememberSaveable { mutableStateOf<Int?>(null) }
@@ -76,6 +77,7 @@ fun AutomationRoute(
 
     AutomationScreen(
         uiState = AutomationUiState(uiItems, hasExactAlarmPermission),
+        sortOption = sortOption,
         onBackClick = onBackClick,
         onToggleAutomation = viewModel::toggleAutomation,
         onDeleteAutomation = viewModel::deleteAutomation,
@@ -99,6 +101,8 @@ fun AutomationRoute(
                     )
             }
         },
+        onSortOptionChange = viewModel::setSortOption,
+        onMoveAutomation = viewModel::moveAutomation,
     )
 
     AutomationCreationFlow(

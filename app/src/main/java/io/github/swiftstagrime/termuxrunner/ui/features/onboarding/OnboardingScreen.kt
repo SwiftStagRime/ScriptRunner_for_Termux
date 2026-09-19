@@ -214,7 +214,12 @@ private fun OnboardingPageContent(
         0 -> WelcomeStep()
         1 -> TermuxInstallStep(uiState.isTermuxInstalled)
         2 -> TermuxConfigStep()
-        3 -> PermissionStep(uiState.isPermissionGranted, onGrantPermission)
+        3 ->
+            PermissionStep(
+                isPermissionGranted = uiState.isPermissionGranted,
+                isPermissionGrantable = uiState.isPermissionGrantable,
+                onGrantPermission = onGrantPermission,
+            )
         4 -> OptimizationStep(uiState.isBatteryUnrestricted, onOpenTermuxSettings)
 
         5 ->
@@ -309,12 +314,16 @@ private fun TermuxConfigStep() {
 @Composable
 private fun PermissionStep(
     isPermissionGranted: Boolean,
+    isPermissionGrantable: Boolean,
     onGrantPermission: () -> Unit,
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(16.dp),
-        modifier = Modifier.fillMaxSize(),
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState()),
     ) {
         StepIcon(Icons.Default.Security, isDone = isPermissionGranted)
         Text(
@@ -329,13 +338,19 @@ private fun PermissionStep(
         )
 
         if (!isPermissionGranted) {
-            RequirementWarning(message = stringResource(R.string.termux_permission_warning))
-            Button(
-                onClick = onGrantPermission,
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(16.dp),
-            ) {
-                Text(stringResource(R.string.grant_permission_label))
+            if (isPermissionGrantable) {
+                RequirementWarning(message = stringResource(R.string.termux_permission_warning))
+                Button(
+                    onClick = onGrantPermission,
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(16.dp),
+                ) {
+                    Text(stringResource(R.string.grant_permission_label))
+                }
+            } else {
+                RequirementWarning(
+                    message = stringResource(R.string.termux_permission_not_grantable_warning),
+                )
             }
         }
     }

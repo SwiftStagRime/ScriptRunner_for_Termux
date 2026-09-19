@@ -32,12 +32,13 @@ class DataLayerMappingTest {
         assertAllPropertiesMapped(
             source = ScriptEntity::class,
             destination = Script::class,
+            ignoreProperties = setOf("notifyOnResult"),
         )
 
         assertAllPropertiesMapped(
             source = Script::class,
             destination = ScriptEntity::class,
-            ignoreProperties = setOf("code"),
+            ignoreProperties = setOf("code", "resultNotificationMode"),
         )
 
         assertAllPropertiesMapped(

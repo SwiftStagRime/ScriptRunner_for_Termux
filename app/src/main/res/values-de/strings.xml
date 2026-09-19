@@ -192,6 +192,9 @@
     <string name="error_empty_name">Skriptname darf nicht leer sein</string>
     <string name="execution_feedback">Ausführungs-Rückmeldung</string>
     <string name="show_a_notification_with_the_result_success_fail_when_finished">Benachrichtigung mit dem Ergebnis (Erfolg/Fehler) anzeigen, wenn fertig</string>
+    <string name="feedback_off">Aus</string>
+    <string name="feedback_success_and_failure">Erfolg und Fehler</string>
+    <string name="feedback_failure_only">Nur bei Fehler</string>
     <string name="tap_to_allow_background_activity_for_better_stability">Tippen, um Hintergrundaktivität für bessere Stabilität zu erlauben</string>
     <string name="battery_unrestricted">Akku: Nicht eingeschränkt</string>
     <string name="battery_optimized_restricted">Akku: Optimiert (Eingeschränkt)</string>

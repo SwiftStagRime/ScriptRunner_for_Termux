@@ -31,4 +31,5 @@ data class Automation(
     val randomDelayMinMillis: Long? = null,
     val randomDelayMaxMillis: Long? = null,
     val automationCode: String? = null,
+    val orderIndex: Int = 0,
 ) : Parcelable

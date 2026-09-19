@@ -4,9 +4,11 @@ import io.github.swiftstagrime.termuxrunner.data.local.entity.AutomationEntity
 import io.github.swiftstagrime.termuxrunner.domain.model.AutomationType
 import io.github.swiftstagrime.termuxrunner.domain.util.AutomationTimeCalculator
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import java.util.Calendar
 
 class AutomationTimeCalculatorTest {
     private fun createPeriodicEntity(
@@ -225,6 +227,80 @@ class AutomationTimeCalculatorTest {
                 scheduledTimestamp = 0,
                 daysOfWeek = emptyList(),
             )
+
+        assertNull(AutomationTimeCalculator.calculateNextRun(entity))
+    }
+
+    // --- TIME_WINDOW tests ---
+
+    private fun createTimeWindowEntity(
+        startHour: Int,
+        startMinute: Int,
+        endHour: Int,
+        endMinute: Int,
+    ) = AutomationEntity(
+        id = 1,
+        scriptId = 1,
+        label = "test",
+        type = AutomationType.TIME_WINDOW,
+        scheduledTimestamp = 0L,
+        daysOfWeek = emptyList(),
+        windowStartHour = startHour,
+        windowStartMinute = startMinute,
+        windowEndHour = endHour,
+        windowEndMinute = endMinute,
+    )
+
+    private fun atTime(
+        year: Int,
+        month: Int,
+        day: Int,
+        hour: Int,
+        minute: Int,
+    ): Long =
+        Calendar.getInstance().apply {
+            set(year, month, day, hour, minute, 0)
+            set(Calendar.MILLISECOND, 0)
+        }.timeInMillis
+
+    private fun hourMinutesOf(timestamp: Long): Int {
+        val c = Calendar.getInstance().apply { timeInMillis = timestamp }
+        return c.get(Calendar.HOUR_OF_DAY) * 60 + c.get(Calendar.MINUTE)
+    }
+
+    @Test
+    fun `timeWindow crossing midnight returns a time inside the window`() {
+        val entity = createTimeWindowEntity(22, 0, 6, 0)
+        val from = atTime(2026, Calendar.JANUARY, 15, 12, 0)
+
+        repeat(50) {
+            val result = AutomationTimeCalculator.calculateNextRun(entity, from)
+            assertNotNull("cross-midnight window must not resolve to null", result)
+            val hm = hourMinutesOf(result!!)
+            // 22:00-23:59 (1320..1439) or 00:00-05:59 (0..359)
+            val insideWindow = hm in 1320..1439 || hm in 0..359
+            assertTrue("result $hm (min) outside 22:00-06:00 window", insideWindow)
+            assertTrue("result must be after fromTime", result > from)
+        }
+    }
+
+    @Test
+    fun `timeWindow that does not cross midnight stays inside the window`() {
+        val entity = createTimeWindowEntity(9, 0, 17, 0)
+        val from = atTime(2026, Calendar.JANUARY, 15, 8, 0)
+
+        repeat(50) {
+            val result = AutomationTimeCalculator.calculateNextRun(entity, from)
+            assertNotNull(result)
+            val hm = hourMinutesOf(result!!)
+            assertTrue("result $hm (min) outside 09:00-17:00 window", hm in 540..1019)
+            assertTrue("result must be after fromTime", result > from)
+        }
+    }
+
+    @Test
+    fun `timeWindow shorter than five minutes returns null`() {
+        val entity = createTimeWindowEntity(9, 0, 9, 2)
 
         assertNull(AutomationTimeCalculator.calculateNextRun(entity))
     }

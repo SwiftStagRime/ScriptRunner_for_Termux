@@ -15,6 +15,8 @@ import io.github.swiftstagrime.termuxrunner.data.automation.AutomationScheduler
 import io.github.swiftstagrime.termuxrunner.data.local.dao.AutomationDao
 import io.github.swiftstagrime.termuxrunner.data.local.dao.ScriptDao
 import io.github.swiftstagrime.termuxrunner.data.local.entity.AutomationEntity
+import io.github.swiftstagrime.termuxrunner.domain.model.TriggerMode
+import io.github.swiftstagrime.termuxrunner.domain.model.triggerMode
 import io.github.swiftstagrime.termuxrunner.domain.usecase.RunScriptUseCase
 import io.github.swiftstagrime.termuxrunner.domain.util.AutomationTimeCalculator
 
@@ -29,11 +31,27 @@ class AutomationWorker
         private val runScriptUseCase: RunScriptUseCase,
         private val scheduler: AutomationScheduler,
     ) : CoroutineWorker(context, workerParams) {
+        companion object {
+            const val WORK_NAME_PREFIX = "automation_worker_"
+
+            /** How often a condition-blocked run is re-checked. */
+            const val CONDITION_RETRY_INTERVAL_MS = 5 * 60 * 1000L
+        }
+
         override suspend fun doWork(): Result {
             val id = inputData.getInt("automation_id", -1)
             val automation = automationDao.getAutomationById(id) ?: return Result.failure()
 
             if (!checkConditions(automation)) {
+                // Conditions (WiFi/charging) are not met: don't strand the automation.
+                // Re-check again in a few minutes so it fires once as soon as the
+                // condition becomes met again, instead of waiting for the next boot.
+                if (automation.type.triggerMode == TriggerMode.SCHEDULE) {
+                    val retryAt = System.currentTimeMillis() + CONDITION_RETRY_INTERVAL_MS
+                    val retryAutomation = automation.copy(nextRunTimestamp = retryAt)
+                    automationDao.updateAutomation(retryAutomation)
+                    scheduler.schedule(retryAutomation)
+                }
                 return Result.success()
             }
 
@@ -47,7 +65,7 @@ class AutomationWorker
                 )
             automationDao.updateAutomation(updatedAutomation)
 
-            val scriptEntity = scriptDao.getScriptById(automation.scriptId)?.copy(notifyOnResult = true)
+            val scriptEntity = scriptDao.getScriptById(automation.scriptId)
             if (scriptEntity != null) {
                 val chainEnvVars =
                     inputData.keyValueMap

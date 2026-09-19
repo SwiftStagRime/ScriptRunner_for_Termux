@@ -60,7 +60,7 @@ class TermuxRepositoryTest {
     @Test
     fun `runCommand throws NotInstalledException when Termux missing`() {
         assertThrows(TermuxNotInstalledException::class.java) {
-            repository.runCommand("ls", true, "0", null, 1, "Test", false, null)
+            repository.runCommand("ls", true, "0", null, 1, "Test", null)
         }
     }
 
@@ -77,7 +77,6 @@ class TermuxRepositoryTest {
             shellName = null,
             scriptId = 123,
             scriptName = "MyScript",
-            notifyOnResult = true,
             automationId = 456,
         )
 
@@ -117,7 +116,6 @@ class TermuxRepositoryTest {
             shellName = null,
             scriptId = 1,
             scriptName = "MyScript",
-            notifyOnResult = false,
             automationId = null,
         )
 
@@ -140,7 +138,6 @@ class TermuxRepositoryTest {
             shellName = null,
             scriptId = 1,
             scriptName = "MyScript",
-            notifyOnResult = false,
             automationId = null,
         )
 
@@ -162,7 +159,6 @@ class TermuxRepositoryTest {
             shellName = "My SSH Session",
             scriptId = 1,
             scriptName = "MyScript",
-            notifyOnResult = false,
             automationId = null,
         )
 
@@ -190,7 +186,6 @@ class TermuxRepositoryTest {
             shellName = null,
             scriptId = 1,
             scriptName = "MyScript",
-            notifyOnResult = false,
             automationId = null,
         )
 
@@ -214,7 +209,7 @@ class TermuxRepositoryTest {
         } throws RuntimeException("ForegroundServiceStartNotAllowedException")
 
         assertThrows(TermuxBackgroundRestrictionException::class.java) {
-            repoWithSpy.runCommand("ls", true, "0", null, 1, "Test", false, null)
+            repoWithSpy.runCommand("ls", true, "0", null, 1, "Test", null)
         }
     }
 

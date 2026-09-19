@@ -14,13 +14,17 @@ import androidx.work.WorkerParameters
 import androidx.work.workDataOf
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
+import io.github.swiftstagrime.termuxrunner.data.automation.AutomationScheduler
 import io.github.swiftstagrime.termuxrunner.data.local.dao.AutomationDao
 import io.github.swiftstagrime.termuxrunner.data.worker.AutomationWorker
 import io.github.swiftstagrime.termuxrunner.domain.model.AutomationType
+import io.github.swiftstagrime.termuxrunner.domain.model.TriggerMode
+import io.github.swiftstagrime.termuxrunner.domain.model.triggerMode
 
 class EventReceiver : BroadcastReceiver() {
     companion object {
         private const val TAG = "EventReceiver"
+        private const val OVERDUE_CATCH_UP_WORK_NAME = "overdue_automation_catch_up"
     }
 
     override fun onReceive(
@@ -32,6 +36,21 @@ class EventReceiver : BroadcastReceiver() {
         val eventAutomationType = mapActionToType(context, intent) ?: return
 
         enqueueWorkerForType(context, eventAutomationType)
+
+        // Connectivity restored: let condition-blocked scheduled automations
+        // re-check their conditions so they fire once as soon as WiFi is back.
+        if (eventAutomationType == AutomationType.NETWORK_CONNECTED) {
+            enqueueOverdueCatchUp(context)
+        }
+    }
+
+    private fun enqueueOverdueCatchUp(context: Context) {
+        val workRequest = OneTimeWorkRequestBuilder<OverdueAutomationWorker>().build()
+        WorkManager.getInstance(context).enqueueUniqueWork(
+            OVERDUE_CATCH_UP_WORK_NAME,
+            ExistingWorkPolicy.KEEP,
+            workRequest,
+        )
     }
 
     private fun mapActionToType(
@@ -101,9 +120,40 @@ class EventAutomationWorker
                         .OneTimeWorkRequestBuilder<AutomationWorker>()
                         .setInputData(workDataOf("automation_id" to automation.id))
                         .build()
-                WorkManager.getInstance(applicationContext).enqueue(workRequest)
+                WorkManager.getInstance(applicationContext).enqueueUniqueWork(
+                    AutomationWorker.WORK_NAME_PREFIX + automation.id,
+                    ExistingWorkPolicy.KEEP,
+                    workRequest,
+                )
             }
 
+            return Result.success()
+        }
+    }
+
+/**
+ * Re-triggers overdue scheduled automations when a relevant system event (e.g. WiFi
+ * reconnect) arrives. Each worker re-checks its conditions, so an automation only
+ * runs once its conditions are actually met.
+ */
+@HiltWorker
+class OverdueAutomationWorker
+    @AssistedInject
+    constructor(
+        @Assisted context: Context,
+        @Assisted workerParams: WorkerParameters,
+        private val automationDao: AutomationDao,
+        private val scheduler: AutomationScheduler,
+    ) : CoroutineWorker(context, workerParams) {
+        override suspend fun doWork(): Result {
+            val now = System.currentTimeMillis()
+            val overdue =
+                automationDao.getEnabledAutomations().filter {
+                    it.type.triggerMode == TriggerMode.SCHEDULE &&
+                        it.runIfMissed &&
+                        (it.nextRunTimestamp ?: it.scheduledTimestamp) < now
+                }
+            overdue.forEach { scheduler.triggerImmediate(it.id) }
             return Result.success()
         }
     }

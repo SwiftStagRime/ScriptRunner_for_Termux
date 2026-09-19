@@ -1,0 +1,1 @@
+List sorting, fixes for automation chaining crash, timing fixes, better Termux permission warning

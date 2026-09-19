@@ -20,7 +20,7 @@ class RunAutomationAction : ActionCallback {
         val script = entryPoint.scriptRepository().getScriptById(automation.scriptId) ?: return
 
         entryPoint.runScriptUseCase()(
-            script = script.copy(notifyOnResult = true),
+            script = script,
             runtimeArgs = automation.runtimeArgs,
             runtimeEnv = automation.runtimeEnv,
             runtimePrefix = automation.runtimePrefix,

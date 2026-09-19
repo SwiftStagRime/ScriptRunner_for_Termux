@@ -31,7 +31,7 @@ class ScriptConfigState(
     var keepOpen by mutableStateOf(script.keepSessionOpen)
     var interactionMode by mutableStateOf(script.interactionMode)
     var showAddCategoryDialog by mutableStateOf(false)
-    var notifyOnResult by mutableStateOf(script.notifyOnResult)
+    var resultNotificationMode by mutableStateOf(script.resultNotificationMode)
     val envVars =
         script.envVars.entries
             .map { it.key to it.value }
@@ -76,7 +76,7 @@ class ScriptConfigState(
             reuseSession = reuseSession,
             keepSessionOpen = keepOpen,
             interactionMode = interactionMode,
-            notifyOnResult = notifyOnResult,
+            resultNotificationMode = resultNotificationMode,
             envVars = envVars.filter { it.first.isNotBlank() }.toMap(),
             argumentPresets = argumentPresets.toList(),
             prefixPresets = prefixPresets.toList(),

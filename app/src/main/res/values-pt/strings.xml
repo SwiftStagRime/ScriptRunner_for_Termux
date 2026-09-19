@@ -191,6 +191,9 @@
     <string name="error_empty_name">O nome do script não pode estar vazio</string>
     <string name="execution_feedback">Feedback de execução</string>
     <string name="show_a_notification_with_the_result_success_fail_when_finished">Mostrar notificação com o resultado (Sucesso/Falha) ao concluir</string>
+    <string name="feedback_off">Desativado</string>
+    <string name="feedback_success_and_failure">Sucesso e falha</string>
+    <string name="feedback_failure_only">Apenas em caso de falha</string>
     <string name="tap_to_allow_background_activity_for_better_stability">Toque para permitir a atividade em segundo plano para melhor estabilidade</string>
     <string name="battery_unrestricted">Bateria: Sem restrições</string>
     <string name="battery_optimized_restricted">Bateria: Otimizada (Restrita)</string>

@@ -37,7 +37,7 @@ import org.json.JSONArray
         AutomationChainEntity::class,
         ScriptVersionEntity::class,
     ],
-    version = 8,
+    version = 9,
     exportSchema = true,
     autoMigrations = [
         AutoMigration(from = 1, to = 2),
@@ -49,6 +49,7 @@ import org.json.JSONArray
             from = 5,
             to = 6,
         ),
+        AutoMigration(from = 8, to = 9),
     ],
 )
 @TypeConverters(Converters::class)

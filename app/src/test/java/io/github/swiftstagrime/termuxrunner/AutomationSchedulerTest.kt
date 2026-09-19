@@ -2,15 +2,21 @@ package io.github.swiftstagrime.termuxrunner
 
 import android.app.AlarmManager
 import android.content.Context
+import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import androidx.work.WorkManager
 import androidx.work.testing.WorkManagerTestInitHelper
 import io.github.swiftstagrime.termuxrunner.data.automation.AutomationScheduler
+import io.github.swiftstagrime.termuxrunner.data.local.AppDatabase
 import io.github.swiftstagrime.termuxrunner.data.local.entity.AutomationEntity
+import io.github.swiftstagrime.termuxrunner.data.local.entity.ScriptEntity
 import io.github.swiftstagrime.termuxrunner.data.worker.AutomationWorker
 import io.github.swiftstagrime.termuxrunner.domain.model.AutomationType
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertNotNull
+import junit.framework.TestCase.assertTrue
+import kotlinx.coroutines.runBlocking
+import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -24,13 +30,36 @@ class AutomationSchedulerTest {
     private val context = ApplicationProvider.getApplicationContext<Context>()
     private val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
     private lateinit var scheduler: AutomationScheduler
+    private lateinit var database: AppDatabase
 
     @Before
     fun setup() {
         WorkManagerTestInitHelper.initializeTestWorkManager(context)
         val shadowAlarmManager = shadowOf(alarmManager)
         shadowAlarmManager.scheduledAlarms.clear()
-        scheduler = AutomationScheduler(context)
+        database = Room.inMemoryDatabaseBuilder(context, AppDatabase::class.java).build()
+        runBlocking {
+            database.scriptDao().insertScript(
+                ScriptEntity(
+                    id = 1,
+                    name = "Test",
+                    codePages = listOf("echo 1"),
+                    interpreter = "bash",
+                    runInBackground = false,
+                    openNewSession = false,
+                    executionParams = "",
+                    envVars = emptyMap(),
+                    keepSessionOpen = false,
+                    iconPath = null,
+                ),
+            )
+        }
+        scheduler = AutomationScheduler(context, database.automationDao())
+    }
+
+    @After
+    fun teardown() {
+        database.close()
     }
 
     @Test
@@ -42,7 +71,7 @@ class AutomationSchedulerTest {
                 runIfMissed = true,
             )
 
-        scheduler.schedule(automation)
+        runBlocking { scheduler.schedule(automation) }
 
         val workManager = WorkManager.getInstance(context)
         val workInfos = workManager.getWorkInfosByTag(AutomationWorker::class.java.name).get()
@@ -54,7 +83,7 @@ class AutomationSchedulerTest {
         val futureTime = System.currentTimeMillis() + 50000
         val automation = createAutomation(nextRunTimestamp = futureTime, id = 123)
 
-        scheduler.schedule(automation)
+        runBlocking { scheduler.schedule(automation) }
 
         val shadowAlarmManager = shadowOf(alarmManager)
         val alarm = shadowAlarmManager.nextScheduledAlarm
@@ -66,11 +95,33 @@ class AutomationSchedulerTest {
         assertEquals("automation://123", intent.dataString)
     }
 
+    @Test
+    fun `schedule skips missed slot to next future run when runIfMissed is false`() {
+        val pastTime = System.currentTimeMillis() - 10000
+        val automation =
+            createAutomation(
+                nextRunTimestamp = pastTime,
+                runIfMissed = false,
+                intervalMillis = 60000,
+            )
+        runBlocking { database.automationDao().insertAutomation(automation) }
+
+        runBlocking { scheduler.schedule(automation) }
+
+        val updated = runBlocking { database.automationDao().getAutomationById(automation.id) }
+        assertNotNull(updated)
+        val next = updated?.nextRunTimestamp
+        assertNotNull(next)
+        assertTrue(next!! > System.currentTimeMillis())
+        assertNotNull(shadowOf(alarmManager).nextScheduledAlarm)
+    }
+
     private fun createAutomation(
         id: Int = 1,
         isEnabled: Boolean = true,
         nextRunTimestamp: Long? = null,
         runIfMissed: Boolean = true,
+        intervalMillis: Long = 0,
     ) = AutomationEntity(
         id = id,
         isEnabled = isEnabled,
@@ -80,7 +131,7 @@ class AutomationSchedulerTest {
         type = AutomationType.PERIODIC,
         scriptId = 1,
         label = "Test",
-        intervalMillis = 0,
+        intervalMillis = intervalMillis,
         daysOfWeek = emptyList(),
         lastRunTimestamp = null,
     )

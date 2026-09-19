@@ -34,12 +34,14 @@ class OnboardingViewModel
             viewModelScope.launch(ioDispatcher) {
                 val installed = termuxRepository.isTermuxInstalled()
                 val permitted = termuxRepository.isPermissionGranted()
+                val grantable = termuxRepository.isPermissionGrantable()
                 val batteryUnrestricted = termuxRepository.isTermuxBatteryOptimized()
 
                 _uiState.update {
                     it.copy(
                         isTermuxInstalled = installed,
                         isPermissionGranted = permitted,
+                        isPermissionGrantable = grantable,
                         isBatteryUnrestricted = batteryUnrestricted,
                         isLoading = false,
                     )

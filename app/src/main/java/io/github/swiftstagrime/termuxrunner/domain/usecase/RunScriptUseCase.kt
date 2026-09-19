@@ -34,7 +34,19 @@ class RunScriptUseCase
                     .replace("$", "\\$")
                     .replace("`", "\\`")
 
-            private fun escapeForSingleQuotedBash(input: String): String = input.replace("\"", "\\\"")
+            /**
+             * Escapes an environment variable value so it survives BOTH shell layers:
+             * the outer `bash -c "..."` (which expands `$`, backticks and `$( )`) and the
+             * inner shell, where the value is wrapped in single quotes. Order matters: the
+             * backslash must be escaped first.
+             */
+            private fun escapeEnvValue(value: String): String =
+                value
+                    .replace("\\", "\\\\")
+                    .replace("\"", "\\\"")
+                    .replace("$", "\\$")
+                    .replace("`", "\\`")
+                    .replace("'", "'\\''")
         }
 
         suspend operator fun invoke(
@@ -50,7 +62,7 @@ class RunScriptUseCase
             val envVarString = StringBuilder()
             combinedEnv.forEach { (key, value) ->
                 if (key.matches(VALID_ENV_KEY_PATTERN)) {
-                    val safeValue = value.replace("'", "'\\''")
+                    val safeValue = escapeEnvValue(value)
                     envVarString.append("export $key='$safeValue'; ")
                 }
             }
@@ -133,7 +145,6 @@ class RunScriptUseCase
                     },
                 scriptId = script.id,
                 scriptName = script.name,
-                notifyOnResult = script.notifyOnResult,
                 automationId = automationId,
             )
         }
@@ -196,10 +207,9 @@ except:
             val escapedPrefix =
                 if (actualPrefix.isNotBlank()) escapeForBashDoubleQuotes(actualPrefix) + " " else ""
             val escapedArgs = escapeForBashDoubleQuotes(combinedArgs)
-            val escapedEnvVars = escapeForSingleQuotedBash(envVars)
 
             val coreExecution =
-                "$escapedEnvVars$escapedPrefix$escapedInterpreter $fullPath $escapedArgs"
+                "$envVars$escapedPrefix$escapedInterpreter $fullPath $escapedArgs"
 
             return StringBuilder()
                 .append("mkdir -p $tempDir && ")
@@ -239,10 +249,9 @@ except:
             val escapedPrefix =
                 if (actualPrefix.isNotBlank()) escapeForBashDoubleQuotes(actualPrefix) + " " else ""
             val escapedArgs = escapeForBashDoubleQuotes(combinedArgs)
-            val escapedEnvVars = escapeForSingleQuotedBash(envVars)
 
             val coreExecution =
-                "$escapedEnvVars$escapedPrefix$escapedInterpreter $termuxDestPath $escapedArgs"
+                "$envVars$escapedPrefix$escapedInterpreter $termuxDestPath $escapedArgs"
 
             return StringBuilder()
                 .append("mkdir -p ~/scriptrunner_for_termux && ")

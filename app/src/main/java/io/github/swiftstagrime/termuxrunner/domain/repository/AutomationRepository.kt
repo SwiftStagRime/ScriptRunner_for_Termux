@@ -28,4 +28,6 @@ interface AutomationRepository {
         exitCode: Int,
         timestamp: Long,
     )
+
+    suspend fun updateAutomationsOrder(orders: List<Pair<Int, Int>>)
 }

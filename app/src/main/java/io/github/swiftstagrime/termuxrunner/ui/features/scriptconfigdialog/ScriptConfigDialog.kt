@@ -78,6 +78,7 @@ import io.github.swiftstagrime.termuxrunner.domain.model.Automation
 import io.github.swiftstagrime.termuxrunner.domain.model.Category
 import io.github.swiftstagrime.termuxrunner.domain.model.ForegroundSessionBehavior
 import io.github.swiftstagrime.termuxrunner.domain.model.InteractionMode
+import io.github.swiftstagrime.termuxrunner.domain.model.ResultNotificationMode
 import io.github.swiftstagrime.termuxrunner.domain.model.Script
 import io.github.swiftstagrime.termuxrunner.ui.components.CategorySpinner
 import io.github.swiftstagrime.termuxrunner.ui.components.NewCategoryDialog
@@ -251,7 +252,7 @@ private fun BehaviorSection(state: ScriptConfigState) {
                 checked = state.keepOpen,
                 onCheckedChange = { isChecked ->
                     state.keepOpen = isChecked
-                    if (isChecked) state.notifyOnResult = false
+                    if (isChecked) state.resultNotificationMode = ResultNotificationMode.NONE
                     if (isChecked) state.foregroundSessionBehavior = ForegroundSessionBehavior.SWITCH_OPEN
                 },
             )
@@ -639,6 +640,84 @@ fun InteractionModeSpinner(
     }
 }
 
+@Composable
+private fun resultNotificationModeLabel(mode: ResultNotificationMode): String =
+    when (mode) {
+        ResultNotificationMode.NONE -> stringResource(R.string.feedback_off)
+        ResultNotificationMode.SUCCESS_AND_FAILURE ->
+            stringResource(R.string.feedback_success_and_failure)
+        ResultNotificationMode.FAILURE_ONLY -> stringResource(R.string.feedback_failure_only)
+    }
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun ResultNotificationModeSpinner(
+    selectedMode: ResultNotificationMode,
+    enabled: Boolean,
+    label: String,
+    description: String,
+    onModeSelected: (ResultNotificationMode) -> Unit,
+) {
+    var expanded by remember { mutableStateOf(false) }
+    val alpha = if (enabled) 1f else 0.5f
+
+    Column(
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(vertical = 8.dp),
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = alpha),
+        )
+        Text(
+            text = description,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = alpha),
+        )
+        ExposedDropdownMenuBox(
+            expanded = expanded,
+            onExpandedChange = { if (enabled) expanded = !expanded },
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            StyledTextField(
+                value = resultNotificationModeLabel(selectedMode),
+                onValueChange = {},
+                label = label,
+                readOnly = true,
+                enabled = enabled,
+                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+                modifier =
+                    Modifier
+                        .menuAnchor(
+                            type = ExposedDropdownMenuAnchorType.PrimaryNotEditable,
+                            enabled = enabled,
+                        ).fillMaxWidth(),
+            )
+
+            ExposedDropdownMenu(
+                expanded = expanded,
+                shape = RoundedCornerShape(12),
+                onDismissRequest = { expanded = false },
+            ) {
+                ResultNotificationMode.entries.forEach { mode ->
+                    DropdownMenuItem(
+                        text = {
+                            Text(resultNotificationModeLabel(mode))
+                        },
+                        onClick = {
+                            onModeSelected(mode)
+                            expanded = false
+                        },
+                    )
+                }
+            }
+        }
+    }
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun ConfigTopBar(
@@ -846,19 +925,19 @@ private fun ReliabilitySection(
             modifier = Modifier.padding(vertical = 8.dp),
             color = MaterialTheme.colorScheme.outlineVariant,
         )
-        SwitchRow(
-            title = stringResource(R.string.execution_feedback),
+        ResultNotificationModeSpinner(
+            selectedMode = state.resultNotificationMode,
+            enabled = !state.keepOpen,
+            label = stringResource(R.string.execution_feedback),
             description =
                 if (state.keepOpen) {
                     stringResource(R.string.not_available_in_interactive_mode)
                 } else {
                     stringResource(R.string.show_a_notification_with_the_result_success_fail_when_finished)
                 },
-            checked = state.notifyOnResult,
-            enabled = !state.keepOpen,
-            onCheckedChange = { isChecked ->
-                state.notifyOnResult = isChecked
-                if (isChecked) {
+            onModeSelected = { mode ->
+                state.resultNotificationMode = mode
+                if (mode != ResultNotificationMode.NONE) {
                     state.keepOpen = false
                     onRequestNotificationPermission()
                 }

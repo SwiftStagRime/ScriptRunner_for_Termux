@@ -3,6 +3,7 @@ package io.github.swiftstagrime.termuxrunner.data.receiver
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.OutOfQuotaPolicy
 import androidx.work.WorkManager
@@ -25,6 +26,10 @@ class AutomationReceiver : BroadcastReceiver() {
                 .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
                 .build()
 
-        WorkManager.getInstance(context).enqueue(workRequest)
+        WorkManager.getInstance(context).enqueueUniqueWork(
+            AutomationWorker.WORK_NAME_PREFIX + automationId,
+            ExistingWorkPolicy.KEEP,
+            workRequest,
+        )
     }
 }

@@ -156,29 +156,23 @@ object AutomationTimeCalculator {
         endMinute: Int,
         fromTime: Long,
     ): Long? {
+        val startMinutes = startHour * 60 + startMinute
+        val endMinutes = endHour * 60 + endMinute
+
+        val range = (endMinutes - startMinutes + 1440) % 1440
+        if (range < 5) return null
+
+        val randomOffset = (0 until range).random()
+        val selectedMinute = (startMinutes + randomOffset) % 1440
+
         val target =
             Calendar.getInstance().apply {
                 timeInMillis = fromTime
                 set(Calendar.SECOND, 0)
                 set(Calendar.MILLISECOND, 0)
+                set(Calendar.HOUR_OF_DAY, selectedMinute / 60)
+                set(Calendar.MINUTE, selectedMinute % 60)
             }
-
-        // Calculate window boundaries in minutes from midnight
-        var startMinutes = startHour * 60 + startMinute
-        var endMinutes = endHour * 60 + endMinute
-
-        if (endMinutes <= startMinutes) {
-            target.add(Calendar.DAY_OF_YEAR, 1)
-        }
-
-        val range = endMinutes - startMinutes
-        if (range < 5) return null
-
-        val randomOffset = (0 until range).random()
-        val selectedMinute = startMinutes + randomOffset
-
-        target.set(Calendar.HOUR_OF_DAY, selectedMinute / 60)
-        target.set(Calendar.MINUTE, selectedMinute % 60)
 
         if (target.timeInMillis <= fromTime) {
             target.add(Calendar.DAY_OF_YEAR, 1)

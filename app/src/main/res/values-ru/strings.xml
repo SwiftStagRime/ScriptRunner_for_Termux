@@ -190,6 +190,9 @@
     <string name="error_empty_name">Имя скрипта не может быть пустым</string>
     <string name="execution_feedback">Результат выполнения</string>
     <string name="show_a_notification_with_the_result_success_fail_when_finished">Показывать уведомление с результатом (Успех/Ошибка) по завершении</string>
+    <string name="feedback_off">Выкл</string>
+    <string name="feedback_success_and_failure">Успех и ошибка</string>
+    <string name="feedback_failure_only">Только при ошибке</string>
     <string name="tap_to_allow_background_activity_for_better_stability">Нажмите, чтобы разрешить фоновую активность для лучшей стабильности</string>
     <string name="battery_unrestricted">Батарея: Без ограничений</string>
     <string name="battery_optimized_restricted">Батарея: Оптимизировано (Ограничено)</string>

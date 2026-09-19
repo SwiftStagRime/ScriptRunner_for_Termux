@@ -2,6 +2,8 @@ package io.github.swiftstagrime.termuxrunner
 
 import io.github.swiftstagrime.termuxrunner.domain.model.AutomationLog
 import io.github.swiftstagrime.termuxrunner.domain.model.ExecutionSource
+import io.github.swiftstagrime.termuxrunner.domain.model.ResultNotificationMode
+import io.github.swiftstagrime.termuxrunner.domain.model.Script
 import io.github.swiftstagrime.termuxrunner.domain.repository.AutomationLogRepository
 import io.github.swiftstagrime.termuxrunner.domain.repository.AutomationRepository
 import io.github.swiftstagrime.termuxrunner.domain.repository.ScriptExecutionRepository
@@ -10,6 +12,7 @@ import io.github.swiftstagrime.termuxrunner.domain.repository.ScriptResultNotifi
 import io.github.swiftstagrime.termuxrunner.domain.repository.WidgetUpdater
 import io.github.swiftstagrime.termuxrunner.domain.usecase.ExecuteChainStepUseCase
 import io.github.swiftstagrime.termuxrunner.domain.usecase.ProcessTermuxResultUseCase
+import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
 import io.mockk.verify
@@ -35,9 +38,23 @@ class ProcessTermuxResultUseCaseTest {
             scriptRepo,
         )
 
+    private fun scriptWithMode(
+        scriptId: Int,
+        mode: ResultNotificationMode,
+    ) =
+        Script(
+            id = scriptId,
+            name = "Test",
+            codePages = listOf("exit 0"),
+            resultNotificationMode = mode,
+        )
+
     @Test
     fun `execute updates db and shows notification`() =
         runTest {
+            coEvery { scriptRepo.getScriptById(10) } returns
+                scriptWithMode(10, ResultNotificationMode.SUCCESS_AND_FAILURE)
+
             useCase.execute(
                 automationId = 1,
                 scriptId = 10,
@@ -62,6 +79,9 @@ class ProcessTermuxResultUseCaseTest {
     @Test
     fun `execute with id -1 skip database but shows notification`() =
         runTest {
+            coEvery { scriptRepo.getScriptById(10) } returns
+                scriptWithMode(10, ResultNotificationMode.SUCCESS_AND_FAILURE)
+
             useCase.execute(-1, 10, "Test", 0, null)
 
             coVerify(exactly = 0) { automationRepo.updateLastResult(any(), any(), any()) }
@@ -80,6 +100,9 @@ class ProcessTermuxResultUseCaseTest {
     @Test
     fun `execute with automation logs the error message`() =
         runTest {
+            coEvery { scriptRepo.getScriptById(20) } returns
+                scriptWithMode(20, ResultNotificationMode.SUCCESS_AND_FAILURE)
+
             useCase.execute(
                 automationId = 2,
                 scriptId = 20,
@@ -227,5 +250,59 @@ class ProcessTermuxResultUseCaseTest {
             useCase.execute(-1, 10, "SecondRun", 0, null)
 
             coVerify(exactly = 2) { scriptExecRepo.insert(any()) }
+        }
+
+    @Test
+    fun `failure only mode suppresses notification on success`() =
+        runTest {
+            coEvery { scriptRepo.getScriptById(10) } returns
+                scriptWithMode(10, ResultNotificationMode.FAILURE_ONLY)
+
+            useCase.execute(-1, 10, "Test", 0, null)
+
+            verify(exactly = 0) {
+                notifier.showResultNotification(
+                    scriptId = any(),
+                    name = any(),
+                    exitCode = any(),
+                    internalError = any(),
+                )
+            }
+        }
+
+    @Test
+    fun `failure only mode shows notification on failure`() =
+        runTest {
+            coEvery { scriptRepo.getScriptById(10) } returns
+                scriptWithMode(10, ResultNotificationMode.FAILURE_ONLY)
+
+            useCase.execute(-1, 10, "Test", 1, null)
+
+            verify {
+                notifier.showResultNotification(
+                    scriptId = 10,
+                    name = "Test",
+                    exitCode = 1,
+                    internalError = null,
+                )
+            }
+        }
+
+    @Test
+    fun `none mode suppresses notification on failure`() =
+        runTest {
+            coEvery { scriptRepo.getScriptById(10) } returns
+                scriptWithMode(10, ResultNotificationMode.NONE)
+
+            useCase.execute(-1, 10, "Test", 1, null)
+
+            verify(exactly = 0) {
+                notifier.showResultNotification(
+                    scriptId = any(),
+                    name = any(),
+                    exitCode = any(),
+                    internalError = any(),
+                )
+            }
         }
 }

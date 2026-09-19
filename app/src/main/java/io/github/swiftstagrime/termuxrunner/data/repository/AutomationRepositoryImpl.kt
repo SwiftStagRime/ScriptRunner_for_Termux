@@ -89,6 +89,10 @@ class AutomationRepositoryImpl
                         ?: throw AutomationNotFoundException(code)
                 entity.toAutomationDomain()
             }
+
+        override suspend fun updateAutomationsOrder(orders: List<Pair<Int, Int>>) {
+            dao.updateAutomationsOrder(orders)
+        }
     }
 
 class AutomationNotFoundException(

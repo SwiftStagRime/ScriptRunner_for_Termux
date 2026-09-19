@@ -191,6 +191,9 @@
     <string name="error_empty_name">Le nom du script ne peut pas être vide</string>
     <string name="execution_feedback">Retour d\'exécution</string>
     <string name="show_a_notification_with_the_result_success_fail_when_finished">Afficher une notification avec le résultat (Succès/Échec) une fois terminé</string>
+    <string name="feedback_off">Désactivé</string>
+    <string name="feedback_success_and_failure">Succès et échec</string>
+    <string name="feedback_failure_only">Uniquement en cas d\'échec</string>
     <string name="tap_to_allow_background_activity_for_better_stability">Appuyez pour autoriser l\'activité en arrière-plan pour une meilleure stabilité</string>
     <string name="battery_unrestricted">Batterie : Non restreinte</string>
     <string name="battery_optimized_restricted">Batterie : Optimisée (Restreinte)</string>

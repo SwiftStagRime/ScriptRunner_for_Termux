@@ -86,16 +86,19 @@ class ProcessTermuxResultUseCase
                 ),
             )
 
-            val scriptActions =
-                scriptRepository.getScriptById(scriptId)?.notificationActions ?: emptyList()
+            val script = scriptRepository.getScriptById(scriptId)
+            val scriptActions = script?.notificationActions ?: emptyList()
 
-            notificationHelper.showResultNotification(
-                scriptId = scriptId,
-                name = scriptName,
-                exitCode = exitCode,
-                internalError = internalError,
-                actions = scriptActions,
-            )
+            val shouldNotify = script?.resultNotificationMode?.shouldNotify(exitCode) ?: false
+            if (shouldNotify) {
+                notificationHelper.showResultNotification(
+                    scriptId = scriptId,
+                    name = scriptName,
+                    exitCode = exitCode,
+                    internalError = internalError,
+                    actions = scriptActions,
+                )
+            }
 
             // Trigger chain steps if automation is part of a chain
             if (automationId != -1) {

@@ -4,6 +4,7 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.content.pm.PermissionInfo
 import android.os.Build
 import android.os.PowerManager
 import android.provider.Settings
@@ -39,6 +40,34 @@ class TermuxRepositoryImpl
                 PERMISSION_RUN_COMMAND,
             ) == PackageManager.PERMISSION_GRANTED
 
+        override fun isPermissionGrantable(): Boolean {
+            if (!isTermuxInstalled()) return true
+
+            return try {
+                val info = context.packageManager.getPermissionInfo(PERMISSION_RUN_COMMAND, 0)
+
+                @Suppress("DEPRECATION")
+                val protection = info.protectionLevel
+
+                @Suppress("DEPRECATION")
+                val signatureProtected =
+                    (
+                        protection and
+                            (
+                                PermissionInfo.PROTECTION_SIGNATURE or
+                                    PermissionInfo.PROTECTION_SIGNATURE_OR_SYSTEM
+                            )
+                    ) != 0
+
+                val changeable =
+                    (protection and (PermissionInfo.PROTECTION_DANGEROUS or PermissionInfo.PROTECTION_NORMAL)) != 0
+
+                !signatureProtected && changeable
+            } catch (_: Exception) {
+                true
+            }
+        }
+
         override fun isTermuxBatteryOptimized(): Boolean {
             val powerManager = context.getSystemService(Context.POWER_SERVICE) as PowerManager
             return powerManager.isIgnoringBatteryOptimizations(TERMUX_PACKAGE)
@@ -51,7 +80,6 @@ class TermuxRepositoryImpl
             shellName: String?,
             scriptId: Int,
             scriptName: String,
-            notifyOnResult: Boolean,
             automationId: Int?,
         ) {
             if (!isTermuxInstalled()) throw TermuxNotInstalledException()
@@ -75,35 +103,36 @@ class TermuxRepositoryImpl
                         putExtra(EXTRA_SHELL_CREATE_MODE, SHELL_CREATE_MODE_NO_SHELL_WITH_NAME)
                     }
 
-                    if (notifyOnResult) {
-                        val resultIntent =
-                            Intent(context, TermuxResultReceiver::class.java).apply {
-                                action = "${context.packageName}.SCRIPT_RESULT"
-                                setPackage(context.packageName)
-                                data = "script://result/$scriptId".toUri()
-                                putExtra("script_id", scriptId)
-                                putExtra("script_name", scriptName)
-                                automationId?.let { putExtra("automation_id", it) }
-                            }
+                    // Always register the result broadcast: execution history, automation
+                    // last-result updates and chain steps all depend on it. Whether a
+                    // notification is shown is decided later based on the script config.
+                    val resultIntent =
+                        Intent(context, TermuxResultReceiver::class.java).apply {
+                            action = "${context.packageName}.SCRIPT_RESULT"
+                            setPackage(context.packageName)
+                            data = "script://result/$scriptId".toUri()
+                            putExtra("script_id", scriptId)
+                            putExtra("script_name", scriptName)
+                            automationId?.let { putExtra("automation_id", it) }
+                        }
 
-                        val flags =
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
-                            } else {
-                                PendingIntent.FLAG_UPDATE_CURRENT
-                            }
+                    val flags =
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
+                        } else {
+                            PendingIntent.FLAG_UPDATE_CURRENT
+                        }
 
-                        val requestCode = (automationId?.hashCode() ?: 0) + scriptId
-                        val pendingIntent =
-                            PendingIntent.getBroadcast(
-                                context,
-                                requestCode,
-                                resultIntent,
-                                flags,
-                            )
+                    val requestCode = (automationId?.hashCode() ?: 0) + scriptId
+                    val pendingIntent =
+                        PendingIntent.getBroadcast(
+                            context,
+                            requestCode,
+                            resultIntent,
+                            flags,
+                        )
 
-                        putExtra(EXTRA_PENDING_INTENT, pendingIntent)
-                    }
+                    putExtra(EXTRA_PENDING_INTENT, pendingIntent)
                 }
 
             try {

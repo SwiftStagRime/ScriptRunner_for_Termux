@@ -5,6 +5,7 @@ import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Transaction
 import androidx.room.Update
 import io.github.swiftstagrime.termuxrunner.data.local.entity.AutomationEntity
 import kotlinx.coroutines.flow.Flow
@@ -44,4 +45,17 @@ interface AutomationDao {
 
     @Query("SELECT * FROM automations")
     suspend fun getAllAutomationsOneShot(): List<AutomationEntity>
+
+    @Query("UPDATE automations SET orderIndex = :orderIndex WHERE id = :automationId")
+    suspend fun updateAutomationOrder(
+        automationId: Int,
+        orderIndex: Int,
+    )
+
+    @Transaction
+    suspend fun updateAutomationsOrder(orders: List<Pair<Int, Int>>) {
+        orders.forEach { (id, index) ->
+            updateAutomationOrder(id, index)
+        }
+    }
 }

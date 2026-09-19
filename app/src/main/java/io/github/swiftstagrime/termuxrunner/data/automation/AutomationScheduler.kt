@@ -6,14 +6,17 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import androidx.core.net.toUri
+import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.workDataOf
 import dagger.hilt.android.qualifiers.ApplicationContext
+import io.github.swiftstagrime.termuxrunner.data.local.dao.AutomationDao
 import io.github.swiftstagrime.termuxrunner.data.local.entity.AutomationEntity
 import io.github.swiftstagrime.termuxrunner.data.receiver.AutomationReceiver
 import io.github.swiftstagrime.termuxrunner.data.worker.AutomationWorker
 import io.github.swiftstagrime.termuxrunner.domain.model.AutomationType
+import io.github.swiftstagrime.termuxrunner.domain.util.AutomationTimeCalculator
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -22,14 +25,15 @@ class AutomationScheduler
     @Inject
     constructor(
         @ApplicationContext private val context: Context,
+        private val automationDao: AutomationDao,
     ) {
         private val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
-        fun schedule(automation: AutomationEntity) {
+        suspend fun schedule(automation: AutomationEntity) {
             if (!automation.isEnabled) return
 
             val now = System.currentTimeMillis()
-            val triggerTime = automation.nextRunTimestamp ?: automation.scheduledTimestamp
+            var triggerTime = automation.nextRunTimestamp ?: automation.scheduledTimestamp
 
             // Don't schedule AlarmManager for BOOT or event-based types
             if (automation.type == AutomationType.BOOT || automation.type.isEventBased) {
@@ -40,9 +44,15 @@ class AutomationScheduler
                 if (automation.runIfMissed) {
                     triggerImmediate(automation.id)
                     return
-                } else {
-                    return
                 }
+
+                // Missed slots are skipped: advance to the next future run so the
+                // automation is not left stranded with a stale past timestamp.
+                val nextRun = AutomationTimeCalculator.calculateNextRun(automation, now)
+                val updated = automation.copy(nextRunTimestamp = nextRun, isEnabled = nextRun != null)
+                automationDao.updateAutomation(updated)
+                if (nextRun == null) return
+                triggerTime = nextRun
             }
 
             val intent =
@@ -107,11 +117,17 @@ class AutomationScheduler
             }
         }
 
-        private fun triggerImmediate(automationId: Int) {
+        fun triggerImmediate(automationId: Int) {
             val workRequest =
                 OneTimeWorkRequestBuilder<AutomationWorker>()
                     .setInputData(workDataOf("automation_id" to automationId))
                     .build()
-            WorkManager.getInstance(context).enqueue(workRequest)
+            // Unique name + KEEP: at most one pending/running worker per automation,
+            // so catch-up fires exactly once even if scheduling is re-entered.
+            WorkManager.getInstance(context).enqueueUniqueWork(
+                AutomationWorker.WORK_NAME_PREFIX + automationId,
+                ExistingWorkPolicy.KEEP,
+                workRequest,
+            )
         }
     }

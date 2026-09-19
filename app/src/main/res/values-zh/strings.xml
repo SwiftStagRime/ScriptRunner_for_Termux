@@ -191,6 +191,9 @@
     <string name="error_empty_name">脚本名称不能为空</string>
     <string name="execution_feedback">执行反馈</string>
     <string name="show_a_notification_with_the_result_success_fail_when_finished">完成后显示包含结果（成功/失败）的通知</string>
+    <string name="feedback_off">关闭</string>
+    <string name="feedback_success_and_failure">成功和失败</string>
+    <string name="feedback_failure_only">仅在失败时</string>
     <string name="tap_to_allow_background_activity_for_better_stability">点击以允许后台活动，以获得更好的稳定性</string>
     <string name="battery_unrestricted">电池：无限制</string>
     <string name="battery_optimized_restricted">电池：已优化（受限）</string>

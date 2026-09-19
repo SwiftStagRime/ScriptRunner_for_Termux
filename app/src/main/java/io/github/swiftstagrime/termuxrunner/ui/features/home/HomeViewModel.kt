@@ -40,6 +40,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
@@ -104,6 +105,19 @@ class HomeViewModel
 
         private val _sortOption = MutableStateFlow(SortOption.NAME_ASC)
         val sortOption = _sortOption.asStateFlow()
+
+        private var sortOptionInitialized = false
+
+        init {
+            viewModelScope.launch {
+                val saved = userPreferencesRepository.scriptSortOption.first()
+                if (!sortOptionInitialized) {
+                    _sortOption.value =
+                        runCatching { SortOption.valueOf(saved) }
+                            .getOrDefault(SortOption.NAME_ASC)
+                }
+            }
+        }
 
         val automations: StateFlow<List<Automation>> =
             automationRepository.getAllAutomations().stateIn(
@@ -214,7 +228,11 @@ class HomeViewModel
         }
 
         fun setSortOption(option: SortOption) {
+            sortOptionInitialized = true
             _sortOption.value = option
+            viewModelScope.launch {
+                userPreferencesRepository.setScriptSortOption(option.name)
+            }
         }
 
         fun runScript(

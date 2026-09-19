@@ -10,6 +10,7 @@ import android.os.Build
 import android.os.IBinder
 import android.util.Log
 import androidx.core.app.NotificationCompat
+import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.workDataOf
@@ -257,7 +258,7 @@ class WebhookService : Service() {
 
             if (script != null) {
                 runScriptUseCase(
-                    script = script.copy(notifyOnResult = true),
+                    script = script,
                 )
             } else {
                 Log.e("WebhookService", "Script not found for code: $code")
@@ -277,7 +278,11 @@ class WebhookService : Service() {
                 .build()
         WorkManager
             .getInstance(this)
-            .enqueue(workRequest)
+            .enqueueUniqueWork(
+                AutomationWorker.WORK_NAME_PREFIX + automationId,
+                ExistingWorkPolicy.KEEP,
+                workRequest,
+            )
     }
 
     private fun authenticateRequest(session: IHTTPSession): Boolean {

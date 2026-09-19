@@ -10,6 +10,7 @@ import io.github.swiftstagrime.termuxrunner.domain.model.AutomationType
 import io.github.swiftstagrime.termuxrunner.domain.repository.UserPreferencesRepository
 import io.github.swiftstagrime.termuxrunner.domain.usecase.RunScriptUseCase
 import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -60,7 +61,7 @@ class DeviceBootReceiverTest {
             receiver.handleBoot(pendingResult = null, context = testContext)
 
             eventually {
-                verify(exactly = 1) { mockScheduler.schedule(any()) }
+                coVerify(exactly = 1) { mockScheduler.schedule(any()) }
             }
         }
 
