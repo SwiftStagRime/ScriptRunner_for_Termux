@@ -65,6 +65,7 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -112,7 +113,7 @@ private const val LINE_HEIGHT_SP = 20
 private const val EXTRA_LINES_COUNT = 5
 private const val TOOLBAR_HEIGHT_DP = 50
 private const val EDITOR_TOP_PADDING_DP = 16
-private const val FOCUS_SCROLL_SETTLE_DELAY = 300L
+private const val CURSOR_SCROLL_MARGIN_DP = 24
 
 val TextFieldValueSaver =
     listSaver<TextFieldValue, Any>(
@@ -163,35 +164,35 @@ fun CodeEditor(
     var isFocused by remember { mutableStateOf(false) }
     var editorViewportHeightPx by remember { mutableIntStateOf(0) }
     val density = LocalDensity.current
+    val currentCode by rememberUpdatedState(code)
 
-    // When the editor gains focus the IME opens and shrinks the viewport, which can
-    // leave the cursor out of view (or make the view "bounce"). Once the resize has
-    // settled, deterministically scroll the cursor into view.
-    LaunchedEffect(isFocused) {
-        if (isFocused) {
-            delay(FOCUS_SCROLL_SETTLE_DELAY)
-            val layout = textLayoutResult ?: return@LaunchedEffect
-            val cursorOffset = code.selection.min.coerceIn(0, code.text.length)
-            val line = layout.getLineForOffset(cursorOffset)
-            val topPaddingPx = with(density) { EDITOR_TOP_PADDING_DP.dp.toPx() }.toInt()
-            val lineTop = (topPaddingPx + layout.getLineTop(line)).toInt()
-            val lineBottom = (topPaddingPx + layout.getLineBottom(line)).toInt()
-            val viewport = editorViewportHeightPx
-            if (viewport <= 0) return@LaunchedEffect
-            val current = verticalScrollState.value
-            val target =
-                when {
-                    lineTop < current -> lineTop
-                    lineBottom > current + viewport ->
-                        (lineBottom - viewport + topPaddingPx).coerceAtLeast(0)
 
-                    else -> return@LaunchedEffect
-                }
-            verticalScrollState.animateScrollTo(
-                target.coerceIn(0, verticalScrollState.maxValue),
-                tween(200),
-            )
+    LaunchedEffect(Unit) {
+        if (code.selection.min > 0) {
+            onCodeChange(code.copy(selection = TextRange(0)))
         }
+    }
+
+    LaunchedEffect(isFocused, code.selection, editorViewportHeightPx, textLayoutResult) {
+        if (!isFocused) return@LaunchedEffect
+        val layout = textLayoutResult ?: return@LaunchedEffect
+        val viewport = editorViewportHeightPx
+        if (viewport <= 0) return@LaunchedEffect
+        val layoutEnd = layout.getLineEnd(layout.lineCount - 1)
+        val cursorOffset = currentCode.selection.min.coerceIn(0, layoutEnd)
+        val line = layout.getLineForOffset(cursorOffset)
+        val topPaddingPx = with(density) { EDITOR_TOP_PADDING_DP.dp.toPx() }.toInt()
+        val marginPx = with(density) { CURSOR_SCROLL_MARGIN_DP.dp.toPx() }.toInt()
+        val lineTop = (topPaddingPx + layout.getLineTop(line)).toInt()
+        val lineBottom = (topPaddingPx + layout.getLineBottom(line)).toInt()
+        val current = verticalScrollState.value
+        val target =
+            when {
+                lineTop < current -> lineTop - marginPx
+                lineBottom > current + viewport -> lineBottom - viewport + marginPx
+                else -> return@LaunchedEffect
+            }
+        verticalScrollState.scrollTo(target)
     }
 
     val undoStack = rememberSaveable(saver = UndoStackSaver) { mutableStateListOf(code) }
@@ -553,8 +554,8 @@ private fun MainEditorArea(
                 Modifier
                     .weight(1f)
                     .fillMaxHeight()
-                    .verticalScroll(scrollState)
                     .onSizeChanged { onViewportSizeChange(it.height) }
+                    .verticalScroll(scrollState)
                     .then(
                         if (isWrappingEnabled) {
                             Modifier
