@@ -20,6 +20,25 @@
     <string name="import_success">Импорт выполнен успешно</string>
     <string name="import_failed">Ошибка импорта: %1$s</string>
 
+    <!-- Home Screen -->
+    <string name="home_screen_label">Главный экран</string>
+    <string name="show_tiles_banner_label">Баннер виджетов</string>
+    <string name="show_tiles_banner_desc">Показывать баннер виджетов быстрых настроек вверху главного экрана</string>
+    <string name="menu_export_script">Экспорт скрипта</string>
+    <string name="export_script_title">Экспорт скрипта</string>
+    <string name="export_script_format_label">Формат</string>
+    <string name="export_script_raw">Файл скрипта</string>
+    <string name="export_script_raw_desc">Простой текстовый файл только с кодом скрипта</string>
+    <string name="export_script_json">Формат приложения (JSON)</string>
+    <string name="export_script_json_desc">Полная конфигурация, импортируемая в Script Runner</string>
+    <string name="export_script_include_label">Включить в экспорт</string>
+    <string name="export_field_env_vars">Переменные окружения</string>
+    <string name="export_field_adb_code">Код запуска</string>
+    <string name="export_field_presets">Наборы параметров</string>
+    <string name="export_field_icon">Значок</string>
+    <string name="export_sensitive_hint">Снимите отметки с полей, содержащих конфиденциальную информацию, перед тем как поделиться.</string>
+    <string name="export_button_label">Экспорт</string>
+
     <!-- Runner -->
     <string name="script_runner_permission_denied">В доступе отказано</string>
 
@@ -66,7 +85,7 @@
     <string name="body_quick_access_tiles">Настраиваемые плитки быстрого доступа из приложения</string>
     <string name="title_rice">Полная кастомизация</string>
     <string name="body_rice">Вы можете создавать свои собственные цветовые темы</string>
-    <string name="termux_permission_warning">Это разрешение необходимо для работы приложения.</string>
+    <string name="termux_permission_warning">ВАЖНО: Это приложение работает ТОЛЬКО с версией Termux из F-Droid! Версия Termux из Google Play НЕ будет работать с этим приложением. Если вы установили Termux из Google Play, удалите его и установите Termux из F-Droid (f-droid.org/packages/com.termux).</string>
     <string name="title_promo">Просто. Мощно. Автоматизировано.</string>
 
     <!--Home -->
@@ -319,6 +338,8 @@
 
     <!-- Automation -->
     <string name="automation_title">Автоматизация</string>
+    <string name="automation_edit_title">Изменить автоматизацию</string>
+    <string name="cd_edit">Изменить</string>
     <string name="automation_next_run_format">Следующий запуск: %s</string>
     <string name="automation_last_run_format">Последний запуск: %s</string>
     <string name="automation_running_soon">Запуск в ближайшее время</string>
@@ -352,6 +373,7 @@
     <string name="trigger_mode_event">Событие</string>
     <string name="trigger_mode_boot">При загрузке</string>
     <string name="automation_save_button">Запланировать</string>
+    <string name="automation_update_button">Обновить задачу</string>
     <string name="ok">ОК</string>
     <string name="history_title">История выполнения</string>
     <string name="no_logs_recorded">Логи еще не записаны</string>

@@ -89,8 +89,7 @@
     <string name="body_quick_access_tiles">Customizable access tiles from the app</string>
     <string name="title_rice">Fully Customizable</string>
     <string name="body_rice">You can create your own custom color themes</string>
-    <string name="termux_permission_warning">This permission is essential for the app to function.</string>
-    <string name="termux_permission_not_grantable_warning">This Termux build declares the RUN_COMMAND permission as signature-protected, so it can\'t be granted to third-party apps. The Grant button and \'pm grant\' will never work with it. Please install the official Termux app from F-Droid, or ask the fork\'s maintainer to declare the permission with protectionLevel \'dangerous\'.</string>
+    <string name="termux_permission_warning">IMPORTANT: This app ONLY works with the F-Droid build of Termux! The Google Play version of Termux will NOT work with this app. If you installed Termux from Google Play, uninstall it and install Termux from F-Droid (f-droid.org/packages/com.termux) instead.</string>
     <string name="title_promo">Simple. Powerful. Automated.</string>
 
     <!--Home -->

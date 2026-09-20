@@ -4,7 +4,6 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.content.pm.PermissionInfo
 import android.os.Build
 import android.os.PowerManager
 import android.provider.Settings
@@ -39,34 +38,6 @@ class TermuxRepositoryImpl
                 context,
                 PERMISSION_RUN_COMMAND,
             ) == PackageManager.PERMISSION_GRANTED
-
-        override fun isPermissionGrantable(): Boolean {
-            if (!isTermuxInstalled()) return true
-
-            return try {
-                val info = context.packageManager.getPermissionInfo(PERMISSION_RUN_COMMAND, 0)
-
-                @Suppress("DEPRECATION")
-                val protection = info.protectionLevel
-
-                @Suppress("DEPRECATION")
-                val signatureProtected =
-                    (
-                        protection and
-                            (
-                                PermissionInfo.PROTECTION_SIGNATURE or
-                                    PermissionInfo.PROTECTION_SIGNATURE_OR_SYSTEM
-                            )
-                    ) != 0
-
-                val changeable =
-                    (protection and (PermissionInfo.PROTECTION_DANGEROUS or PermissionInfo.PROTECTION_NORMAL)) != 0
-
-                !signatureProtected && changeable
-            } catch (_: Exception) {
-                true
-            }
-        }
 
         override fun isTermuxBatteryOptimized(): Boolean {
             val powerManager = context.getSystemService(Context.POWER_SERVICE) as PowerManager

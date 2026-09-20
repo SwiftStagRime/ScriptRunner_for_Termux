@@ -40,6 +40,7 @@ import androidx.compose.material.icons.filled.InstallMobile
 import androidx.compose.material.icons.filled.Security
 import androidx.compose.material.icons.filled.SettingsSuggest
 import androidx.compose.material.icons.filled.Terminal
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -214,12 +215,7 @@ private fun OnboardingPageContent(
         0 -> WelcomeStep()
         1 -> TermuxInstallStep(uiState.isTermuxInstalled)
         2 -> TermuxConfigStep()
-        3 ->
-            PermissionStep(
-                isPermissionGranted = uiState.isPermissionGranted,
-                isPermissionGrantable = uiState.isPermissionGrantable,
-                onGrantPermission = onGrantPermission,
-            )
+        3 -> PermissionStep(uiState.isPermissionGranted, onGrantPermission)
         4 -> OptimizationStep(uiState.isBatteryUnrestricted, onOpenTermuxSettings)
 
         5 ->
@@ -314,16 +310,12 @@ private fun TermuxConfigStep() {
 @Composable
 private fun PermissionStep(
     isPermissionGranted: Boolean,
-    isPermissionGrantable: Boolean,
     onGrantPermission: () -> Unit,
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(16.dp),
-        modifier =
-            Modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState()),
+        modifier = Modifier.fillMaxSize(),
     ) {
         StepIcon(Icons.Default.Security, isDone = isPermissionGranted)
         Text(
@@ -338,19 +330,16 @@ private fun PermissionStep(
         )
 
         if (!isPermissionGranted) {
-            if (isPermissionGrantable) {
-                RequirementWarning(message = stringResource(R.string.termux_permission_warning))
-                Button(
-                    onClick = onGrantPermission,
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(16.dp),
-                ) {
-                    Text(stringResource(R.string.grant_permission_label))
-                }
-            } else {
-                RequirementWarning(
-                    message = stringResource(R.string.termux_permission_not_grantable_warning),
-                )
+            RequirementWarning(
+                message = stringResource(R.string.termux_permission_warning),
+                emphasized = true,
+            )
+            Button(
+                onClick = onGrantPermission,
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+            ) {
+                Text(stringResource(R.string.grant_permission_label))
             }
         }
     }
@@ -604,26 +593,35 @@ private fun CodeBlock(
 private fun RequirementWarning(
     message: String,
     modifier: Modifier = Modifier,
+    emphasized: Boolean = false,
 ) {
+    val backgroundColor =
+        if (emphasized) {
+            MaterialTheme.colorScheme.errorContainer
+        } else {
+            MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f)
+        }
+
     Row(
         modifier =
             modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(12.dp))
-                .background(MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f))
+                .background(backgroundColor)
                 .padding(12.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         Icon(
-            imageVector = Icons.Default.Info,
+            imageVector = if (emphasized) Icons.Default.Warning else Icons.Default.Info,
             contentDescription = null,
             tint = MaterialTheme.colorScheme.error,
-            modifier = Modifier.size(20.dp),
+            modifier = Modifier.size(if (emphasized) 24.dp else 20.dp),
         )
         Text(
             text = message,
-            style = MaterialTheme.typography.bodySmall,
+            style = if (emphasized) MaterialTheme.typography.bodyMedium else MaterialTheme.typography.bodySmall,
+            fontWeight = if (emphasized) FontWeight.Bold else FontWeight.Normal,
             color = MaterialTheme.colorScheme.onErrorContainer,
         )
     }

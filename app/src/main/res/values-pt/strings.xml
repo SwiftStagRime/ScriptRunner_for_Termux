@@ -20,6 +20,25 @@
     <string name="import_success">Importação concluída</string>
     <string name="import_failed">Falha na importação: %1$s</string>
 
+    <!-- Home Screen -->
+    <string name="home_screen_label">Tela inicial</string>
+    <string name="show_tiles_banner_label">Banner de tiles</string>
+    <string name="show_tiles_banner_desc">Exibe o banner de tiles de configurações rápidas no topo da tela inicial</string>
+    <string name="menu_export_script">Exportar script</string>
+    <string name="export_script_title">Exportar script</string>
+    <string name="export_script_format_label">Formato</string>
+    <string name="export_script_raw">Arquivo de script</string>
+    <string name="export_script_raw_desc">Arquivo de texto plano apenas com o código do script</string>
+    <string name="export_script_json">Formato do app (JSON)</string>
+    <string name="export_script_json_desc">Configuração completa, importável pelo Script Runner</string>
+    <string name="export_script_include_label">Incluir na exportação</string>
+    <string name="export_field_env_vars">Variáveis de ambiente</string>
+    <string name="export_field_adb_code">Código de acionamento</string>
+    <string name="export_field_presets">Predefinições</string>
+    <string name="export_field_icon">Ícone</string>
+    <string name="export_sensitive_hint">Desmarque os campos que contêm informações sensíveis antes de compartilhar.</string>
+    <string name="export_button_label">Exportar</string>
+
     <!-- Runner -->
     <string name="script_runner_permission_denied">Permissão negada</string>
 
@@ -67,7 +86,7 @@
     <string name="body_quick_access_tiles">Atalhos de acesso personalizáveis a partir do app</string>
     <string name="title_rice">Totalmente Customizável</string>
     <string name="body_rice">Você pode criar seus próprios temas de cores personalizados</string>
-    <string name="termux_permission_warning">Esta permissão é essencial para o funcionamento do aplicativo.</string>
+    <string name="termux_permission_warning">IMPORTANTE: Este aplicativo SÓ funciona com a versão do F-Droid do Termux! A versão do Termux da Google Play NÃO funcionará com este aplicativo. Se você instalou o Termux pela Google Play, desinstale-o e instale o Termux do F-Droid (f-droid.org/packages/com.termux) em vez disso.</string>
     <string name="title_promo">Simples. Poderoso. Automatizado.</string>
 
     <!--Home -->
@@ -321,6 +340,8 @@
 
     <!-- Automation -->
     <string name="automation_title">Automação</string>
+    <string name="automation_edit_title">Editar automação</string>
+    <string name="cd_edit">Editar</string>
     <string name="automation_next_run_format">Próxima execução: %s</string>
     <string name="automation_last_run_format">Última execução: %s</string>
     <string name="automation_running_soon">Executando em breve</string>
@@ -354,6 +375,7 @@
     <string name="trigger_mode_event">Evento</string>
     <string name="trigger_mode_boot">Inicialização</string>
     <string name="automation_save_button">Agendar tarefa</string>
+    <string name="automation_update_button">Atualizar tarefa</string>
     <string name="ok">OK</string>
     <string name="history_title">Histórico de execução</string>
     <string name="no_logs_recorded">Nenhum registro gravado ainda</string>

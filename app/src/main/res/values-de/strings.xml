@@ -20,6 +20,25 @@
     <string name="import_success">Import erfolgreich</string>
     <string name="import_failed">Import fehlgeschlagen: %1$s</string>
 
+    <!-- Home Screen -->
+    <string name="home_screen_label">Startbildschirm</string>
+    <string name="show_tiles_banner_label">Kachel-Banner</string>
+    <string name="show_tiles_banner_desc">Zeigt das Kachel-Banner für Schnellzugriffe oben auf dem Startbildschirm an</string>
+    <string name="menu_export_script">Skript exportieren</string>
+    <string name="export_script_title">Skript exportieren</string>
+    <string name="export_script_format_label">Format</string>
+    <string name="export_script_raw">Skriptdatei</string>
+    <string name="export_script_raw_desc">Einfache Textdatei mit nur dem Skriptcode</string>
+    <string name="export_script_json">App-Format (JSON)</string>
+    <string name="export_script_json_desc">Vollständige Konfiguration, importierbar von Script Runner</string>
+    <string name="export_script_include_label">Im Export enthalten</string>
+    <string name="export_field_env_vars">Umgebungsvariablen</string>
+    <string name="export_field_adb_code">Auslösecode</string>
+    <string name="export_field_presets">Vorlagen</string>
+    <string name="export_field_icon">Symbol</string>
+    <string name="export_sensitive_hint">Wählen Sie vor dem Teilen die Felder mit sensiblen Informationen ab.</string>
+    <string name="export_button_label">Exportieren</string>
+
     <!-- Runner -->
     <string name="script_runner_permission_denied">Zugriff verweigert</string>
 
@@ -68,7 +87,7 @@
     <string name="body_quick_access_tiles">Anpassbare Zugriffskacheln aus der App</string>
     <string name="title_rice">Vollständig anpassbar</string>
     <string name="body_rice">Sie können Ihre eigenen Farbschemata erstellen</string>
-    <string name="termux_permission_warning">Diese Berechtigung ist für die Funktion der App erforderlich.</string>
+    <string name="termux_permission_warning">WICHTIG: Diese App funktioniert NUR mit dem F-Droid-Build von Termux! Die Google-Play-Version von Termux funktioniert NICHT mit dieser App. Falls Sie Termux aus dem Google Play Store installiert haben, deinstallieren Sie es und installieren Sie Termux von F-Droid (f-droid.org/packages/com.termux) stattdessen.</string>
     <string name="title_promo">Einfach. Leistungsstark. Automatisiert.</string>
 
     <!--Home -->
@@ -324,6 +343,8 @@
 
     <!-- Automation -->
     <string name="automation_title">Automatisierung</string>
+    <string name="automation_edit_title">Automatisierung bearbeiten</string>
+    <string name="cd_edit">Bearbeiten</string>
     <string name="automation_next_run_format">Nächster Durchlauf: %s</string>
     <string name="automation_last_run_format">Letzter Durchlauf: %s</string>
     <string name="automation_running_soon">Wird bald ausgeführt</string>
@@ -357,6 +378,7 @@
     <string name="trigger_mode_event">Ereignis</string>
     <string name="trigger_mode_boot">Beim Start</string>
     <string name="automation_save_button">Aufgabe planen</string>
+    <string name="automation_update_button">Aufgabe aktualisieren</string>
     <string name="ok">OK</string>
     <string name="history_title">Ausführungshistorie</string>
     <string name="no_logs_recorded">Noch keine Protokolle aufgezeichnet</string>

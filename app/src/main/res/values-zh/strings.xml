@@ -20,6 +20,25 @@
     <string name="import_success">导入成功</string>
     <string name="import_failed">导入失败: %1$s</string>
 
+    <!-- Home Screen -->
+    <string name="home_screen_label">主屏幕</string>
+    <string name="show_tiles_banner_label">磁贴横幅</string>
+    <string name="show_tiles_banner_desc">在主屏幕顶部显示快捷设置磁贴横幅</string>
+    <string name="menu_export_script">导出脚本</string>
+    <string name="export_script_title">导出脚本</string>
+    <string name="export_script_format_label">格式</string>
+    <string name="export_script_raw">脚本文件</string>
+    <string name="export_script_raw_desc">仅包含脚本代码的纯文本文件</string>
+    <string name="export_script_json">应用格式（JSON）</string>
+    <string name="export_script_json_desc">完整配置，可被 Script Runner 导入</string>
+    <string name="export_script_include_label">包含在导出中</string>
+    <string name="export_field_env_vars">环境变量</string>
+    <string name="export_field_adb_code">触发代码</string>
+    <string name="export_field_presets">预设</string>
+    <string name="export_field_icon">图标</string>
+    <string name="export_sensitive_hint">分享前请取消勾选包含敏感信息的字段。</string>
+    <string name="export_button_label">导出</string>
+
     <!-- Runner -->
     <string name="script_runner_permission_denied">权限被拒绝</string>
 
@@ -66,7 +85,7 @@
     <string name="body_quick_access_tiles">可从应用自定义的访问磁贴</string>
     <string name="title_rice">高度可自定义</string>
     <string name="body_rice">您可以创建自定义配色主题</string>
-    <string name="termux_permission_warning">此权限对应用正常运行至关重要。</string>
+    <string name="termux_permission_warning">重要提示：本应用仅支持 F-Droid 版本的 Termux！Google Play 版本的 Termux 无法与本应用配合使用。如果您从 Google Play 安装了 Termux，请卸载它，并改从 F-Droid 安装 Termux（f-droid.org/packages/com.termux）。</string>
     <string name="title_promo">简单、强大、自动。</string>
 
 
@@ -320,6 +339,8 @@
 
     <!-- Automation -->
     <string name="automation_title">自动化</string>
+    <string name="automation_edit_title">编辑自动化</string>
+    <string name="cd_edit">编辑</string>
     <string name="automation_next_run_format">下次运行: %s</string>
     <string name="automation_last_run_format">上次运行: %s</string>
     <string name="automation_running_soon">即将运行</string>
@@ -353,6 +374,7 @@
     <string name="trigger_mode_event">事件</string>
     <string name="trigger_mode_boot">启动时</string>
     <string name="automation_save_button">安排任务</string>
+    <string name="automation_update_button">更新任务</string>
     <string name="history_title">执行历史</string>
     <string name="no_logs_recorded">尚无日志记录</string>
     <string name="exit_code_label">退出代码：%1$d</string>

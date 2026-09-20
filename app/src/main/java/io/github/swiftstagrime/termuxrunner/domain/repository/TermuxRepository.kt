@@ -5,8 +5,6 @@ interface TermuxRepository {
 
     fun isPermissionGranted(): Boolean
 
-    fun isPermissionGrantable(): Boolean
-
     fun requestTermuxOverlay()
 
     fun runCommand(
