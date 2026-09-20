@@ -370,13 +370,19 @@ private fun ScriptList(
     if (showTabs) listOffset++
 
     val lazyListState = rememberLazyListState()
+    // The scroll key includes the sort option: switching the sort order resets the
+    // scroll to the top (the LazyList would otherwise scroll to follow the previously
+    // first visible item, which ends up somewhere else in the new order), and each
+    // sort option remembers its own scroll position.
     val scrollKey =
-        remember(selectedCategoryId, searchQuery) {
-            if (searchQuery.isNotEmpty()) {
-                "search_$searchQuery"
-            } else {
-                selectedCategoryId?.toString() ?: "ALL_LIST_PERSISTENCE_KEY"
-            }
+        remember(selectedCategoryId, searchQuery, sortOption) {
+            val baseKey =
+                if (searchQuery.isNotEmpty()) {
+                    "search_$searchQuery"
+                } else {
+                    selectedCategoryId?.toString() ?: "ALL_LIST_PERSISTENCE_KEY"
+                }
+            "${baseKey}_$sortOption"
         }
 
     val scrollPositions = rememberSaveable { mutableMapOf<String, Pair<Int, Int>>() }
@@ -389,7 +395,7 @@ private fun ScriptList(
         }
     }
 
-    LaunchedEffect(lazyListState) {
+    LaunchedEffect(lazyListState, scrollKey) {
         snapshotFlow {
             if (lazyListState.isScrollInProgress) {
                 lazyListState.firstVisibleItemIndex to lazyListState.firstVisibleItemScrollOffset

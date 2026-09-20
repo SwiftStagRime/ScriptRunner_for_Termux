@@ -54,6 +54,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -168,7 +169,7 @@ fun AutomationScreen(
 
                 AutomationList(
                     items = uiState.items,
-                    isManualSort = sortOption == SortOption.MANUAL,
+                    sortOption = sortOption,
                     onToggle = onToggleAutomation,
                     onDelete = onDeleteAutomation,
                     onRunNow = onRunNow,
@@ -186,7 +187,7 @@ fun AutomationScreen(
 @Composable
 private fun AutomationList(
     items: List<AutomationUiItem>,
-    isManualSort: Boolean,
+    sortOption: SortOption,
     onToggle: (Int, Boolean) -> Unit,
     onDelete: (Automation) -> Unit,
     onRunNow: (Automation) -> Unit,
@@ -198,6 +199,17 @@ private fun AutomationList(
     val lazyListState = rememberLazyListState()
     var draggedItemIndex by rememberSaveable { mutableStateOf<Int?>(null) }
     var dragOffset by rememberSaveable { mutableFloatStateOf(0f) }
+    val isManualSort = sortOption == SortOption.MANUAL
+
+    // The LazyList keeps the previously first visible item anchored by key across data
+    // changes, so switching the sort order would scroll the list to follow that item
+    // (e.g. from the top to where it ended up in the new order). Reset to the top
+    // instead, so the new order always starts at the beginning.
+    LaunchedEffect(sortOption) {
+        if (items.isNotEmpty()) {
+            lazyListState.scrollToItem(0)
+        }
+    }
 
     LazyColumn(
         state = lazyListState,
