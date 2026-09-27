@@ -96,6 +96,30 @@ class AutomationSchedulerTest {
     }
 
     @Test
+    fun `scheduleConditionRetry sets alarm at explicit time without immediate trigger`() {
+        val pastTime = System.currentTimeMillis() - 10000
+        val retryAt = System.currentTimeMillis() + 60 * 60 * 1000
+        val automation = createAutomation(nextRunTimestamp = pastTime, runIfMissed = true, id = 456)
+        runBlocking { database.automationDao().insertAutomation(automation) }
+
+        scheduler.scheduleConditionRetry(automation, retryAt)
+
+        // Alarm set for the explicit retry time, targeting the automation
+        val shadowAlarmManager = shadowOf(alarmManager)
+        val alarm = shadowAlarmManager.nextScheduledAlarm
+        assertNotNull(alarm)
+        assertEquals(retryAt, alarm?.triggerAtTime)
+        val intent = shadowOf(alarm?.operation).savedIntent
+        assertEquals(456, intent.getIntExtra("automation_id", -1))
+
+        // No immediate work enqueued: the catch-up stays pending in the entity
+        val workInfos = WorkManager.getInstance(context).getWorkInfosByTag(AutomationWorker::class.java.name).get()
+        assertTrue(workInfos.isEmpty())
+        val updated = runBlocking { database.automationDao().getAutomationById(automation.id) }
+        assertEquals(pastTime, updated?.nextRunTimestamp)
+    }
+
+    @Test
     fun `schedule skips missed slot to next future run when runIfMissed is false`() {
         val pastTime = System.currentTimeMillis() - 10000
         val automation =

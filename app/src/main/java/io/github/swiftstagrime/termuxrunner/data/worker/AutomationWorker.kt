@@ -1,11 +1,6 @@
 package io.github.swiftstagrime.termuxrunner.data.worker
 
 import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
-import android.net.ConnectivityManager
-import android.net.NetworkCapabilities
-import android.os.BatteryManager
 import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
@@ -19,6 +14,7 @@ import io.github.swiftstagrime.termuxrunner.domain.model.TriggerMode
 import io.github.swiftstagrime.termuxrunner.domain.model.triggerMode
 import io.github.swiftstagrime.termuxrunner.domain.usecase.RunScriptUseCase
 import io.github.swiftstagrime.termuxrunner.domain.util.AutomationTimeCalculator
+import io.github.swiftstagrime.termuxrunner.domain.util.DeviceConditions
 
 @HiltWorker
 class AutomationWorker
@@ -34,24 +30,30 @@ class AutomationWorker
         companion object {
             const val WORK_NAME_PREFIX = "automation_worker_"
 
-            /** How often a condition-blocked run is re-checked. */
-            const val CONDITION_RETRY_INTERVAL_MS = 5 * 60 * 1000L
+            /**
+             * Coarse safety-net interval for re-checking a run that is blocked by
+             * unmet conditions (WiFi/charging/battery). The primary re-trigger is
+             * event-driven (connectivity/charging broadcasts re-run overdue
+             * automations immediately), so this fallback only covers the case
+             * where those events are ever lost and stays hourly to keep
+             * background wake-ups rare.
+             */
+            const val CONDITION_FALLBACK_RETRY_MS = 60 * 60 * 1000L
         }
 
         override suspend fun doWork(): Result {
             val id = inputData.getInt("automation_id", -1)
             val automation = automationDao.getAutomationById(id) ?: return Result.failure()
 
-            if (!checkConditions(automation)) {
-                // Conditions (WiFi/charging) are not met: don't strand the automation.
-                // Re-check again in a few minutes so it fires once as soon as the
-                // condition becomes met again, instead of waiting for the next boot.
-                if (automation.type.triggerMode == TriggerMode.SCHEDULE) {
-                    val retryAt = System.currentTimeMillis() + CONDITION_RETRY_INTERVAL_MS
-                    val retryAutomation = automation.copy(nextRunTimestamp = retryAt)
-                    automationDao.updateAutomation(retryAutomation)
-                    scheduler.schedule(retryAutomation)
-                }
+            if (
+                !DeviceConditions.isConditionMet(
+                    context = applicationContext,
+                    requireWifi = automation.requireWifi,
+                    requireCharging = automation.requireCharging,
+                    batteryThreshold = automation.batteryThreshold,
+                )
+            ) {
+                handleConditionBlocked(automation)
                 return Result.success()
             }
 
@@ -94,46 +96,45 @@ class AutomationWorker
             return Result.success()
         }
 
-        private fun checkConditions(automation: AutomationEntity): Boolean {
-            if (automation.requireWifi) {
-                val cm =
-                    applicationContext.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-                val capabilities = cm.getNetworkCapabilities(cm.activeNetwork)
-                if (capabilities == null || !capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)) return false
-            }
+        /**
+         * A scheduled run was attempted but a condition (WiFi/charging/battery)
+         * is not met. Instead of polling every few minutes we:
+         *
+         * - with [AutomationEntity.runIfMissed] enabled, keep the missed slot as
+         *   [AutomationEntity.nextRunTimestamp] (still in the past), so the
+         *   catch-up stays pending: the moment WiFi comes back or the charger is
+         *   plugged in, the connectivity/charging event receivers re-trigger it
+         *   and it fires exactly once (never once per missed slot);
+         * - set a coarse fallback alarm as a safety net in case those system
+         *   events are ever lost.
+         *
+         * With [AutomationEntity.runIfMissed] disabled the missed slot is
+         * skipped outright and the schedule resumes at the next regular slot.
+         */
+        private suspend fun handleConditionBlocked(automation: AutomationEntity) {
+            if (automation.type.triggerMode != TriggerMode.SCHEDULE) return
 
-            if (!automation.requireCharging && automation.batteryThreshold <= 0) return true
+            val now = System.currentTimeMillis()
 
-            val bm = applicationContext.getSystemService(Context.BATTERY_SERVICE) as BatteryManager
-
-            val batteryIntent =
-                applicationContext.registerReceiver(
-                    null,
-                    IntentFilter(Intent.ACTION_BATTERY_CHANGED),
-                )
-
-            if (automation.requireCharging) {
-                val isCharging = bm.isCharging
-                if (!isCharging) {
-                    val status = batteryIntent?.getIntExtra(BatteryManager.EXTRA_STATUS, -1) ?: -1
-                    val charging =
-                        status == BatteryManager.BATTERY_STATUS_CHARGING || status == BatteryManager.BATTERY_STATUS_FULL
-                    if (!charging) return false
+            if (!automation.runIfMissed) {
+                val nextRun = AutomationTimeCalculator.calculateNextRun(automation, now)
+                val updated = automation.copy(nextRunTimestamp = nextRun, isEnabled = nextRun != null)
+                automationDao.updateAutomation(updated)
+                if (nextRun != null) {
+                    scheduler.schedule(updated)
                 }
+                return
             }
 
-            if (automation.batteryThreshold > 0) {
-                val level = bm.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY)
-                val finalLevel =
-                    if (level <= 0) {
-                        batteryIntent?.getIntExtra(BatteryManager.EXTRA_LEVEL, -1) ?: -1
-                    } else {
-                        level
-                    }
-
-                if (finalLevel != -1 && finalLevel < automation.batteryThreshold) return false
-            }
-
-            return true
+            // Catch-up stays pending (nextRunTimestamp untouched): schedule the
+            // fallback re-check at the later of the next regular slot and
+            // now + cap, so short-interval schedules never poll more often
+            // than the cap and long-interval ones wake at their own cadence.
+            // ONE_TIME has no next slot, so it only gets the cap.
+            val nextRegular = AutomationTimeCalculator.calculateNextRun(automation, now)
+            val fallbackAt =
+                nextRegular?.let { maxOf(it, now + CONDITION_FALLBACK_RETRY_MS) }
+                    ?: now + CONDITION_FALLBACK_RETRY_MS
+            scheduler.scheduleConditionRetry(automation, fallbackAt)
         }
     }

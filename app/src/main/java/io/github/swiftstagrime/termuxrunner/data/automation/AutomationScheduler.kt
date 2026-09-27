@@ -55,6 +55,36 @@ class AutomationScheduler
                 triggerTime = nextRun
             }
 
+            setAlarm(automation, triggerTime)
+        }
+
+        /**
+         * Schedules a condition re-check alarm at an explicit [retryAt] time.
+         *
+         * Unlike [schedule], a stale past [AutomationEntity.nextRunTimestamp] is
+         * deliberately not interpreted as "trigger immediately": the catch-up
+         * itself stays pending (kept in the past) and is re-evaluated both when
+         * this alarm fires and whenever a connectivity/charging event
+         * re-triggers the automation in the meantime.
+         */
+        fun scheduleConditionRetry(
+            automation: AutomationEntity,
+            retryAt: Long,
+        ) {
+            if (!automation.isEnabled) return
+
+            // Don't schedule AlarmManager for BOOT or event-based types
+            if (automation.type == AutomationType.BOOT || automation.type.isEventBased) {
+                return
+            }
+
+            setAlarm(automation, retryAt)
+        }
+
+        private fun setAlarm(
+            automation: AutomationEntity,
+            triggerTime: Long,
+        ) {
             val intent =
                 Intent(context, AutomationReceiver::class.java).apply {
                     putExtra("automation_id", automation.id)

@@ -348,6 +348,10 @@
     <string name="automation_next_run_format">Nächster Durchlauf: %s</string>
     <string name="automation_last_run_format">Letzter Durchlauf: %s</string>
     <string name="automation_running_soon">Wird bald ausgeführt</string>
+    <string name="automation_waiting_for">Warte auf: %1$s</string>
+    <string name="automation_wait_wifi">WLAN</string>
+    <string name="automation_wait_charging">Ladegerät</string>
+    <string name="automation_wait_battery">Akkustand</string>
     <string name="automation_never_run">Noch nie ausgeführt</string>
     <string name="automation_not_scheduled">Nicht geplant</string>
     <string name="status_success">Erfolgreich</string>

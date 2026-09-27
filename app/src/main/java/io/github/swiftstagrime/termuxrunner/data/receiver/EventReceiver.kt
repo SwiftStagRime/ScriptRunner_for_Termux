@@ -33,6 +33,13 @@ class EventReceiver : BroadcastReceiver() {
     ) {
         if (intent.action.isNullOrEmpty()) return
 
+        // Charger plugged in: automations blocked on the charging condition may
+        // now be able to run, so re-check overdue catch-ups right away.
+        if (intent.action == Intent.ACTION_POWER_CONNECTED) {
+            enqueueOverdueCatchUp(context)
+            return
+        }
+
         val eventAutomationType = mapActionToType(context, intent) ?: return
 
         enqueueWorkerForType(context, eventAutomationType)
@@ -132,9 +139,10 @@ class EventAutomationWorker
     }
 
 /**
- * Re-triggers overdue scheduled automations when a relevant system event (e.g. WiFi
- * reconnect) arrives. Each worker re-checks its conditions, so an automation only
- * runs once its conditions are actually met.
+ * Re-triggers overdue scheduled automations when a relevant system event arrives
+ * (WiFi reconnect, charger plugged in). Each re-triggered worker re-checks its
+ * conditions, so an automation only runs once its conditions are actually met —
+ * and the unique work name guarantees the catch-up fires at most once.
  */
 @HiltWorker
 class OverdueAutomationWorker

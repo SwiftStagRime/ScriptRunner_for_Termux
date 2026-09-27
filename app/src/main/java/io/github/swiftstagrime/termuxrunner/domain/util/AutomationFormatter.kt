@@ -3,27 +3,51 @@ package io.github.swiftstagrime.termuxrunner.domain.util
 import android.content.Context
 import android.text.format.DateUtils
 import io.github.swiftstagrime.termuxrunner.R
+import io.github.swiftstagrime.termuxrunner.domain.model.Automation
 
 object AutomationFormatter {
     fun formatNextRun(
         context: Context,
-        nextRun: Long?,
+        automation: Automation,
+        now: Long = System.currentTimeMillis(),
     ): String {
-        if (nextRun == null) return context.getString(R.string.automation_not_scheduled)
+        val nextRun =
+            automation.nextRunTimestamp
+                ?: return context.getString(R.string.automation_not_scheduled)
 
-        val now = System.currentTimeMillis()
-        val duration = nextRun - now
-
-        return if (duration <= 0) {
-            context.getString(R.string.automation_running_soon)
-        } else {
+        if (nextRun > now) {
             val relative =
                 DateUtils.getRelativeTimeSpanString(
                     nextRun,
                     now,
                     DateUtils.MINUTE_IN_MILLIS,
                 )
-            context.getString(R.string.automation_next_run_format, relative)
+            return context.getString(R.string.automation_next_run_format, relative)
+        }
+
+        // The scheduled slot has passed and the run is still pending. If a
+        // condition is currently unmet, say exactly what we are waiting for
+        // instead of a stale "Running soon": the automation will fire once,
+        // as soon as the condition becomes met.
+        val appContext = context.applicationContext
+        val missing = mutableListOf<String>()
+        if (automation.requireWifi && !DeviceConditions.isWifiConnected(appContext)) {
+            missing += context.getString(R.string.automation_wait_wifi)
+        }
+        if (automation.requireCharging && !DeviceConditions.isCharging(appContext)) {
+            missing += context.getString(R.string.automation_wait_charging)
+        }
+        if (automation.batteryThreshold > 0) {
+            val level = DeviceConditions.getBatteryLevel(appContext)
+            if (level in 0..100 && level < automation.batteryThreshold) {
+                missing += context.getString(R.string.automation_wait_battery)
+            }
+        }
+
+        return if (missing.isEmpty()) {
+            context.getString(R.string.automation_running_soon)
+        } else {
+            context.getString(R.string.automation_waiting_for, missing.joinToString(", "))
         }
     }
 

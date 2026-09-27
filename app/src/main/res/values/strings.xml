@@ -358,6 +358,10 @@
     <string name="automation_next_run_format">Next run: %s</string>
     <string name="automation_last_run_format">Last run: %s</string>
     <string name="automation_running_soon">Running soon</string>
+    <string name="automation_waiting_for">Waiting for: %1$s</string>
+    <string name="automation_wait_wifi">WiFi</string>
+    <string name="automation_wait_charging">charger</string>
+    <string name="automation_wait_battery">battery level</string>
     <string name="automation_never_run">Never run</string>
     <string name="automation_not_scheduled">Not scheduled</string>
     <string name="status_success">Success</string>

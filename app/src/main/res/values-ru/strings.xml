@@ -343,6 +343,10 @@
     <string name="automation_next_run_format">Следующий запуск: %s</string>
     <string name="automation_last_run_format">Последний запуск: %s</string>
     <string name="automation_running_soon">Запуск в ближайшее время</string>
+    <string name="automation_waiting_for">Ожидание: %1$s</string>
+    <string name="automation_wait_wifi">WiFi</string>
+    <string name="automation_wait_charging">зарядку</string>
+    <string name="automation_wait_battery">уровень заряда</string>
     <string name="automation_never_run">Ни разу не запускался</string>
     <string name="automation_not_scheduled">Не запланировано</string>
     <string name="status_success">Успешно</string>

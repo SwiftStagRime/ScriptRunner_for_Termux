@@ -344,6 +344,10 @@
     <string name="automation_next_run_format">Próxima ejecución: %s</string>
     <string name="automation_last_run_format">Última ejecución: %s</string>
     <string name="automation_running_soon">Se ejecutará pronto</string>
+    <string name="automation_waiting_for">Esperando: %1$s</string>
+    <string name="automation_wait_wifi">WiFi</string>
+    <string name="automation_wait_charging">cargador</string>
+    <string name="automation_wait_battery">nivel de batería</string>
     <string name="automation_never_run">Nunca ejecutado</string>
     <string name="automation_not_scheduled">No programado</string>
     <string name="status_success">Éxito</string>

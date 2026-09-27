@@ -202,7 +202,7 @@ private fun rememberAutomationUiItems(
                 nextRunText =
                     AutomationFormatter.formatNextRun(
                         context,
-                        automation.nextRunTimestamp,
+                        automation,
                     ),
                 lastRunText =
                     AutomationFormatter.formatLastRun(

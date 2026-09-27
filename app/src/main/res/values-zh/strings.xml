@@ -344,6 +344,10 @@
     <string name="automation_next_run_format">下次运行: %s</string>
     <string name="automation_last_run_format">上次运行: %s</string>
     <string name="automation_running_soon">即将运行</string>
+    <string name="automation_waiting_for">等待中: %1$s</string>
+    <string name="automation_wait_wifi">WiFi</string>
+    <string name="automation_wait_charging">充电器</string>
+    <string name="automation_wait_battery">电量</string>
     <string name="automation_never_run">从未运行</string>
     <string name="automation_not_scheduled">未排期</string>
     <string name="status_success">成功</string>
