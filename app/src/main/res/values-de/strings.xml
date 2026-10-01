@@ -405,10 +405,6 @@
     <string name="automation_type_random_delay">Zufällige Verzögerung</string>
     <string name="automation_type_screen_on">Bildschirm an</string>
     <string name="automation_type_screen_off">Bildschirm aus</string>
-    <string name="automation_type_network_connected">Netzwerk verbunden</string>
-    <string name="automation_type_network_disconnected">Netzwerk getrennt</string>
-    <string name="automation_type_usb_connected">USB verbunden</string>
-    <string name="automation_type_usb_disconnected">USB getrennt</string>
     <string name="automation_boot_hint">Das Skript wird jedes Mal ausgeführt, wenn das Gerät startet.</string>
     <string name="automation_boot_next_run">Wird bei jedem Start ausgeführt</string>
     <string name="automation_monthly_day_of_month">Tag des Monats</string>

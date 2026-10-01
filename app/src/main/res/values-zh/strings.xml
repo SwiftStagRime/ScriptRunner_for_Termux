@@ -401,10 +401,6 @@
     <string name="automation_type_random_delay">随机延迟</string>
     <string name="automation_type_screen_on">屏幕开启</string>
     <string name="automation_type_screen_off">屏幕关闭</string>
-    <string name="automation_type_network_connected">网络已连接</string>
-    <string name="automation_type_network_disconnected">网络已断开</string>
-    <string name="automation_type_usb_connected">USB 已连接</string>
-    <string name="automation_type_usb_disconnected">USB 已断开</string>
     <string name="automation_boot_hint">设备每次启动时都将运行脚本。</string>
     <string name="automation_boot_next_run">每次启动时运行</string>
     <string name="automation_monthly_day_of_month">几号</string>

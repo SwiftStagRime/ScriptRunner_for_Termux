@@ -8,6 +8,16 @@ enum class TriggerMode {
     BOOT,
 }
 
+/**
+ * Automation trigger types.
+ *
+ * Note: the network/USB event triggers were removed — the OS does not deliver
+ * CONNECTIVITY_CHANGE / USB_DEVICE_ATTACHED to manifest receivers on API 26+,
+ * and a runtime NetworkCallback only lives while the process does, which is
+ * unreliable for a companion app that is not resident. Old exports/backups
+ * referencing them are skipped on import, and old database rows are purged in
+ * MIGRATION_9_10.
+ */
 @Serializable
 enum class AutomationType(
     val isEventBased: Boolean = false,
@@ -21,10 +31,6 @@ enum class AutomationType(
     RANDOM_DELAY,
     SCREEN_ON(isEventBased = true),
     SCREEN_OFF(isEventBased = true),
-    NETWORK_CONNECTED(isEventBased = true),
-    NETWORK_DISCONNECTED(isEventBased = true),
-    USB_CONNECTED(isEventBased = true),
-    USB_DISCONNECTED(isEventBased = true),
 }
 
 val AutomationType.triggerMode: TriggerMode
@@ -42,10 +48,6 @@ val AutomationType.triggerMode: TriggerMode
 
             AutomationType.SCREEN_ON,
             AutomationType.SCREEN_OFF,
-            AutomationType.NETWORK_CONNECTED,
-            AutomationType.NETWORK_DISCONNECTED,
-            AutomationType.USB_CONNECTED,
-            AutomationType.USB_DISCONNECTED,
             -> TriggerMode.EVENT
         }
 
@@ -66,10 +68,6 @@ val TriggerMode.availableTypes: List<AutomationType>
                 listOf(
                     AutomationType.SCREEN_ON,
                     AutomationType.SCREEN_OFF,
-                    AutomationType.NETWORK_CONNECTED,
-                    AutomationType.NETWORK_DISCONNECTED,
-                    AutomationType.USB_CONNECTED,
-                    AutomationType.USB_DISCONNECTED,
                 )
 
             TriggerMode.BOOT -> listOf(AutomationType.BOOT)

@@ -19,6 +19,7 @@ import io.github.swiftstagrime.termuxrunner.data.local.dto.toExportDto
 import io.github.swiftstagrime.termuxrunner.data.local.entity.CategoryEntity
 import io.github.swiftstagrime.termuxrunner.data.local.entity.toAutomationDomain
 import io.github.swiftstagrime.termuxrunner.data.local.entity.toScriptEntity
+import io.github.swiftstagrime.termuxrunner.domain.model.AutomationType
 import io.github.swiftstagrime.termuxrunner.domain.model.Script
 import io.github.swiftstagrime.termuxrunner.domain.model.ScriptExportField
 import io.github.swiftstagrime.termuxrunner.domain.repository.ScriptRepository
@@ -29,6 +30,9 @@ import kotlinx.coroutines.withContext
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.decodeFromJsonElement
 import java.io.BufferedReader
 import java.io.File
@@ -141,7 +145,9 @@ class ScriptRepositoryImpl
                                         ),
                                 )
                             } else {
-                                json.decodeFromJsonElement<FullBackupDto>(jsonElement)
+                                json.decodeFromJsonElement<FullBackupDto>(
+                                    dropRemovedAutomationTypes(jsonElement),
+                                )
                             }
                         } ?: throw ImportStreamException()
 
@@ -191,6 +197,24 @@ class ScriptRepositoryImpl
                     }
                 }
             }
+
+        /**
+         * Old exports may reference automation trigger types that no longer exist
+         * (network/USB event types were removed). Decoding them fails on the
+         * unknown enum value, so those automation entries are dropped up front
+         * and the rest of the backup imports normally.
+         */
+        private fun dropRemovedAutomationTypes(element: JsonElement): JsonElement {
+            val obj = element as? JsonObject ?: return element
+            val automations = obj["automations"] as? JsonArray ?: return element
+            val knownTypes = AutomationType.entries.mapTo(mutableSetOf()) { it.name }
+            val kept =
+                automations.filterIsInstance<JsonObject>().filter { automation ->
+                    (automation["type"] as? JsonPrimitive)?.content in knownTypes
+                }
+            if (kept.size == automations.size) return element
+            return JsonObject(obj + ("automations" to JsonArray(kept)))
+        }
 
         override suspend fun importSingleScript(uri: Uri): Result<Script> =
             runCatching {

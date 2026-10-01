@@ -415,10 +415,6 @@
     <string name="automation_type_random_delay">Random Delay</string>
     <string name="automation_type_screen_on">Screen On</string>
     <string name="automation_type_screen_off">Screen Off</string>
-    <string name="automation_type_network_connected">Network Connected</string>
-    <string name="automation_type_network_disconnected">Network Disconnected</string>
-    <string name="automation_type_usb_connected">USB Connected</string>
-    <string name="automation_type_usb_disconnected">USB Disconnected</string>
     <string name="automation_boot_hint">Script will run every time the device boots up.</string>
     <string name="automation_boot_next_run">Runs on every boot</string>
     <string name="automation_monthly_day_of_month">Day of month</string>

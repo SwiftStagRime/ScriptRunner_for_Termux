@@ -94,7 +94,8 @@ class TermuxRepositoryImpl
                             PendingIntent.FLAG_UPDATE_CURRENT
                         }
 
-                    val requestCode = (automationId?.hashCode() ?: 0) + scriptId
+                    val requestCode =
+                        if (automationId != null) automationId * 10_000 + scriptId else scriptId
                     val pendingIntent =
                         PendingIntent.getBroadcast(
                             context,

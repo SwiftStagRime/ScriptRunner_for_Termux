@@ -3,8 +3,6 @@ package io.github.swiftstagrime.termuxrunner.data.receiver
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.net.ConnectivityManager
-import android.net.NetworkCapabilities
 import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.ExistingWorkPolicy
@@ -40,15 +38,9 @@ class EventReceiver : BroadcastReceiver() {
             return
         }
 
-        val eventAutomationType = mapActionToType(context, intent) ?: return
+        val eventAutomationType = mapActionToType(intent) ?: return
 
         enqueueWorkerForType(context, eventAutomationType)
-
-        // Connectivity restored: let condition-blocked scheduled automations
-        // re-check their conditions so they fire once as soon as WiFi is back.
-        if (eventAutomationType == AutomationType.NETWORK_CONNECTED) {
-            enqueueOverdueCatchUp(context)
-        }
     }
 
     private fun enqueueOverdueCatchUp(context: Context) {
@@ -60,29 +52,10 @@ class EventReceiver : BroadcastReceiver() {
         )
     }
 
-    private fun mapActionToType(
-        context: Context,
-        intent: Intent,
-    ): AutomationType? =
+    private fun mapActionToType(intent: Intent): AutomationType? =
         when (intent.action) {
             Intent.ACTION_SCREEN_ON, "android.intent.action.USER_PRESENT" -> AutomationType.SCREEN_ON
             "android.intent.action.SCREEN_OFF" -> AutomationType.SCREEN_OFF
-
-            ConnectivityManager.CONNECTIVITY_ACTION -> {
-                val cm =
-                    context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-                val capabilities = cm.getNetworkCapabilities(cm.activeNetwork)
-                val isConnected =
-                    capabilities != null &&
-                        (
-                            capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) ||
-                                capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)
-                        )
-                if (isConnected) AutomationType.NETWORK_CONNECTED else AutomationType.NETWORK_DISCONNECTED
-            }
-
-            "android.hardware.usb.action.USB_DEVICE_ATTACHED" -> AutomationType.USB_CONNECTED
-            "android.hardware.usb.action.USB_DEVICE_DETACHED" -> AutomationType.USB_DISCONNECTED
 
             else -> null
         }
@@ -140,9 +113,9 @@ class EventAutomationWorker
 
 /**
  * Re-triggers overdue scheduled automations when a relevant system event arrives
- * (WiFi reconnect, charger plugged in). Each re-triggered worker re-checks its
- * conditions, so an automation only runs once its conditions are actually met —
- * and the unique work name guarantees the catch-up fires at most once.
+ * (e.g. charger plugged in). Each re-triggered worker re-checks its conditions,
+ * so an automation only runs once its conditions are actually met — and the
+ * unique work name guarantees the catch-up fires at most once.
  */
 @HiltWorker
 class OverdueAutomationWorker

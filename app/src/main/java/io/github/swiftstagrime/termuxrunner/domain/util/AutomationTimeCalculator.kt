@@ -61,10 +61,6 @@ object AutomationTimeCalculator {
             // Event-based types don't use scheduled timestamps
             AutomationType.SCREEN_ON,
             AutomationType.SCREEN_OFF,
-            AutomationType.NETWORK_CONNECTED,
-            AutomationType.NETWORK_DISCONNECTED,
-            AutomationType.USB_CONNECTED,
-            AutomationType.USB_DISCONNECTED,
             -> {
                 null
             }

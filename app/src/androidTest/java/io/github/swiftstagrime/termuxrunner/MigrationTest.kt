@@ -6,6 +6,7 @@ import androidx.test.platform.app.InstrumentationRegistry
 import io.github.swiftstagrime.termuxrunner.data.local.AppDatabase
 import io.github.swiftstagrime.termuxrunner.data.local.MIGRATION_6_7
 import io.github.swiftstagrime.termuxrunner.data.local.MIGRATION_7_8
+import io.github.swiftstagrime.termuxrunner.data.local.MIGRATION_9_10
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertTrue
 import org.junit.Assert.assertNotEquals
@@ -383,5 +384,66 @@ class MigrationTest {
             "timestamp column should exist in script_versions",
             versionColumnNames.contains("timestamp"),
         )
+    }
+
+    @Test
+    @Throws(IOException::class)
+    fun migrate9To10_purgesRemovedNetworkAndUsbEventAutomations() {
+        var db =
+            helper.createDatabase(testDb, 9).apply {
+                execSQL(
+                    """
+                    INSERT INTO scripts (id, name, codePages, page_names, interpreter, fileExtension,
+                    commandPrefix, runInBackground, openNewSession, executionParams, envVars, keepSessionOpen)
+                    VALUES (1, 'Test Script', '["echo 1"]', '[]', 'bash', 'sh', '', 0, 0, '', '{}', 0)
+                    """.trimIndent(),
+                )
+                execSQL(
+                    """
+                    INSERT INTO automations (id, scriptId, label, type, scheduledTimestamp,
+                    intervalMillis, daysOfWeek, isEnabled, runIfMissed)
+                    VALUES (1, 1, 'Keeps Running', 'PERIODIC', 0, 3600000, '[]', 1, 1)
+                    """.trimIndent(),
+                )
+                execSQL(
+                    """
+                    INSERT INTO automations (id, scriptId, label, type, scheduledTimestamp,
+                    intervalMillis, daysOfWeek, isEnabled, runIfMissed)
+                    VALUES (2, 1, 'Network Trigger', 'NETWORK_CONNECTED', 0, 0, '[]', 1, 0)
+                    """.trimIndent(),
+                )
+                execSQL(
+                    """
+                    INSERT INTO automations (id, scriptId, label, type, scheduledTimestamp,
+                    intervalMillis, daysOfWeek, isEnabled, runIfMissed)
+                    VALUES (3, 1, 'USB Trigger', 'USB_DISCONNECTED', 0, 0, '[]', 1, 0)
+                    """.trimIndent(),
+                )
+                execSQL(
+                    """
+                    INSERT INTO automation_logs (automationId, timestamp, exitCode, message)
+                    VALUES (2, 0, 0, 'last run before removal')
+                    """.trimIndent(),
+                )
+                close()
+            }
+
+        db = helper.runMigrationsAndValidate(testDb, 10, true, MIGRATION_9_10)
+
+        // Removed trigger types are purged
+        val removed = db.query("SELECT * FROM automations WHERE type IN ('NETWORK_CONNECTED', 'NETWORK_DISCONNECTED', 'USB_CONNECTED', 'USB_DISCONNECTED')")
+        assertEquals("Removed event automations should be deleted", 0, removed.count)
+        removed.close()
+
+        // Existing valid automations survive
+        val kept = db.query("SELECT * FROM automations WHERE id = 1")
+        assertTrue(kept.moveToFirst())
+        assertEquals("PERIODIC", kept.getString(kept.getColumnIndexOrThrow("type")))
+        kept.close()
+
+        // Logs of the purged automations cascade away
+        val logs = db.query("SELECT * FROM automation_logs WHERE automationId = 2")
+        assertEquals("Logs of purged automations should cascade", 0, logs.count)
+        logs.close()
     }
 }

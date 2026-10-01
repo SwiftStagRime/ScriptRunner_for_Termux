@@ -15,6 +15,7 @@ import io.github.swiftstagrime.termuxrunner.data.local.entity.AutomationEntity
 import io.github.swiftstagrime.termuxrunner.data.local.entity.CategoryEntity
 import io.github.swiftstagrime.termuxrunner.data.local.entity.ScriptEntity
 import io.github.swiftstagrime.termuxrunner.data.repository.ScriptRepositoryImpl
+import io.github.swiftstagrime.termuxrunner.domain.model.AutomationType
 import io.github.swiftstagrime.termuxrunner.domain.model.InteractionMode
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -121,6 +122,35 @@ class ScriptRepositoryImplTest {
             val result = repository.importScripts(uri)
             assertTrue("Import failed: ${result.exceptionOrNull()}", result.isSuccess)
             assertEquals(100, capturedAutomation.captured.scriptId)
+        }
+
+    @Test
+    fun `importScripts skips automations with removed trigger types and imports the rest`() =
+        runTest {
+            val json =
+                """
+                {
+                    "categories": [],
+                    "scripts": [{ ${validScriptJson(555, "Test")} }],
+                    "automations": [
+                        { ${validAutomationJson(555).replace("\"type\": \"ONE_TIME\"", "\"type\": \"PERIODIC\"")} },
+                        { ${validAutomationJson(555).replace("\"type\": \"ONE_TIME\"", "\"type\": \"NETWORK_CONNECTED\"")} },
+                        { ${validAutomationJson(555).replace("\"type\": \"ONE_TIME\"", "\"type\": \"USB_DISCONNECTED\"")} }
+                    ]
+                }
+                """.trimIndent()
+
+            val uri = setupMockFile("old_backup.json", json)
+            coEvery { scriptDao.insertScript(any()) } returns 100L
+            coEvery { automationDao.insertAutomation(capture(capturedAutomation)) } returns 1L
+
+            val result = repository.importScripts(uri)
+
+            // The removed types must not abort the whole backup import
+            assertTrue("Import failed: ${result.exceptionOrNull()}", result.isSuccess)
+            // Only the still-supported automation is imported
+            coVerify(exactly = 1) { automationDao.insertAutomation(any()) }
+            assertEquals(AutomationType.PERIODIC, capturedAutomation.captured.type)
         }
 
     @Test

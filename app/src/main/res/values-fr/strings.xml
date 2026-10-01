@@ -402,10 +402,6 @@
     <string name="automation_type_random_delay">Délai Aléatoire</string>
     <string name="automation_type_screen_on">Écran Allumé</string>
     <string name="automation_type_screen_off">Écran Éteint</string>
-    <string name="automation_type_network_connected">Réseau Connecté</string>
-    <string name="automation_type_network_disconnected">Réseau Déconnecté</string>
-    <string name="automation_type_usb_connected">USB Connecté</string>
-    <string name="automation_type_usb_disconnected">USB Déconnecté</string>
     <string name="automation_boot_hint">Le script s\'exécutera à chaque démarrage de l\'appareil.</string>
     <string name="automation_boot_next_run">S\'exécute à chaque démarrage</string>
     <string name="automation_monthly_day_of_month">Jour du mois</string>

@@ -16,15 +16,19 @@ import io.github.swiftstagrime.termuxrunner.data.local.AppDatabase
 import io.github.swiftstagrime.termuxrunner.data.local.entity.AutomationEntity
 import io.github.swiftstagrime.termuxrunner.data.local.entity.ScriptEntity
 import io.github.swiftstagrime.termuxrunner.data.receiver.OverdueAutomationWorker
+import io.github.swiftstagrime.termuxrunner.data.repository.TermuxBackgroundRestrictionException
 import io.github.swiftstagrime.termuxrunner.data.worker.AutomationWorker
 import io.github.swiftstagrime.termuxrunner.domain.model.AutomationType
 import io.github.swiftstagrime.termuxrunner.domain.usecase.RunScriptUseCase
+import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
 import io.mockk.verify
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertNotNull
+import junit.framework.TestCase.assertNull
 import junit.framework.TestCase.assertTrue
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Before
@@ -216,6 +220,86 @@ class AutomationWorkerTest {
         verify(exactly = 0) { mockScheduler.triggerImmediate(3) }
     }
 
+    @Test
+    fun `dispatch failure logs error keeps catch-up pending and re-arms fallback alarm`() {
+        val missedAt = System.currentTimeMillis() - 10_000
+        insertAutomation(
+            id = 1,
+            type = AutomationType.PERIODIC,
+            intervalMillis = 60 * 60 * 1000,
+            nextRunTimestamp = missedAt,
+            runIfMissed = true,
+        )
+        coEvery { runScriptUseCase(any(), any(), any(), any(), any()) } throws
+            TermuxBackgroundRestrictionException()
+
+        runWorker(1)
+
+        coVerify(exactly = 1) { runScriptUseCase(any(), any(), any(), any(), any()) }
+
+        val updated = runBlocking { database.automationDao().getAutomationById(1) }
+        // The run never happened: no misleading "last run" record
+        assertNull(updated?.lastRunTimestamp)
+        // Catch-up stays pending: next run is still the missed slot in the past
+        assertEquals(missedAt, updated?.nextRunTimestamp)
+
+        // Fallback re-check alarm is armed: the schedule is not stranded
+        val alarm = shadowOf(alarmManager).nextScheduledAlarm
+        assertNotNull(alarm)
+        val now = System.currentTimeMillis()
+        val triggerAt = alarm?.triggerAtTime
+        assertTrue(triggerAt in (now + 50 * 60 * 1000)..(now + 70 * 60 * 1000))
+
+        // The failure is recorded in the automation log
+        val logs = runBlocking { database.automationLogDao().getLogsForAutomation(1).first() }
+        assertEquals(1, logs.size)
+        assertEquals(AutomationWorker.DISPATCH_FAILED_EXIT_CODE, logs.first().exitCode)
+        assertNotNull(logs.first().message)
+    }
+
+    @Test
+    fun `dispatch failure skips missed slot when runIfMissed is false`() {
+        val missedAt = System.currentTimeMillis() - 10_000
+        insertAutomation(
+            id = 1,
+            type = AutomationType.PERIODIC,
+            intervalMillis = 60 * 1000,
+            nextRunTimestamp = missedAt,
+            runIfMissed = false,
+        )
+        coEvery { runScriptUseCase(any(), any(), any(), any(), any()) } throws
+            TermuxBackgroundRestrictionException()
+
+        runWorker(1)
+
+        val updated = runBlocking { database.automationDao().getAutomationById(1) }
+        assertNull(updated?.lastRunTimestamp)
+        // The missed slot is skipped: schedule resumes at the next future slot
+        val next = updated?.nextRunTimestamp
+        assertNotNull(next)
+        assertTrue(next!! in (System.currentTimeMillis() + 10_000)..(System.currentTimeMillis() + 120 * 1000))
+        assertEquals(next, shadowOf(alarmManager).nextScheduledAlarm?.triggerAtTime)
+    }
+
+    @Test
+    fun `event-based automation stays enabled after a successful run`() {
+        insertAutomation(
+            id = 1,
+            type = AutomationType.SCREEN_ON,
+            nextRunTimestamp = null,
+        )
+
+        runWorker(1)
+
+        coVerify(exactly = 1) { runScriptUseCase(any(), any(), any(), any(), any()) }
+
+        val updated = runBlocking { database.automationDao().getAutomationById(1) }
+        // Event automations have no next scheduled slot and must not be retired
+        assertTrue(updated?.isEnabled == true)
+        assertNotNull(updated?.lastRunTimestamp)
+        assertNull(updated?.nextRunTimestamp)
+    }
+
     private fun runWorker(automationId: Int) {
         val factory =
             object : WorkerFactory() {
@@ -228,6 +312,7 @@ class AutomationWorkerTest {
                         appContext,
                         workerParameters,
                         database.automationDao(),
+                        database.automationLogDao(),
                         database.scriptDao(),
                         runScriptUseCase,
                         scheduler,

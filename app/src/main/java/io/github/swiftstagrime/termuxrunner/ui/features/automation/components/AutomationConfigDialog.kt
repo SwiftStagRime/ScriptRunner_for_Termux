@@ -27,9 +27,6 @@ import androidx.compose.material.icons.filled.Power
 import androidx.compose.material.icons.filled.Repeat
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.Timer
-import androidx.compose.material.icons.filled.Usb
-import androidx.compose.material.icons.filled.Wifi
-import androidx.compose.material.icons.filled.WifiOff
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -883,20 +880,12 @@ private fun getAutomationTypeLabel(type: AutomationType) =
         AutomationType.RANDOM_DELAY -> stringResource(R.string.automation_type_random_delay)
         AutomationType.SCREEN_ON -> stringResource(R.string.automation_type_screen_on)
         AutomationType.SCREEN_OFF -> stringResource(R.string.automation_type_screen_off)
-        AutomationType.NETWORK_CONNECTED -> stringResource(R.string.automation_type_network_connected)
-        AutomationType.NETWORK_DISCONNECTED -> stringResource(R.string.automation_type_network_disconnected)
-        AutomationType.USB_CONNECTED -> stringResource(R.string.automation_type_usb_connected)
-        AutomationType.USB_DISCONNECTED -> stringResource(R.string.automation_type_usb_disconnected)
     }
 
 private fun getEventTypeIcon(type: AutomationType): ImageVector =
     when (type) {
         AutomationType.SCREEN_ON -> Icons.Default.BrightnessHigh
         AutomationType.SCREEN_OFF -> Icons.Default.BrightnessLow
-        AutomationType.NETWORK_CONNECTED -> Icons.Default.Wifi
-        AutomationType.NETWORK_DISCONNECTED -> Icons.Default.WifiOff
-        AutomationType.USB_CONNECTED -> Icons.Default.Usb
-        AutomationType.USB_DISCONNECTED -> Icons.Default.Usb
         else -> Icons.Default.Power
     }
 

@@ -152,7 +152,6 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation(libs.androidx.exifinterface)
     implementation(libs.androidx.appcompat)
-    implementation(libs.androidx.room.testing)
     implementation(libs.androidx.compose.ui.text)
     implementation(libs.androidx.compose.foundation.layout)
     implementation(libs.androidx.work.runtime.ktx)
@@ -160,7 +159,6 @@ dependencies {
     implementation(libs.androidx.hilt.work)
     implementation(libs.androidx.compose.ui.unit)
     implementation(libs.core.ktx)
-    implementation(libs.androidx.work.testing)
     implementation(libs.androidx.profileinstaller)
     implementation(libs.androidx.glance.preview)
     "baselineProfile"(project(":baselineprofile"))
@@ -172,6 +170,9 @@ dependencies {
     implementation(libs.coil.compose)
     implementation(libs.coil.network.okhttp)
     testImplementation(libs.junit)
+    // Unit tests build workers via work-testing; keep it out of the release
+    // APK by scoping it to test source sets only.
+    testImplementation(libs.androidx.work.testing)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
@@ -197,6 +198,9 @@ dependencies {
     androidTestImplementation(libs.androidx.uiautomator)
     testImplementation(libs.mockk)
     testImplementation(libs.kotlinx.coroutines.test)
+    // MigrationTest (androidTest) needs room-testing too; testImplementation
+    // is not visible to the androidTest source set.
+    androidTestImplementation(libs.androidx.room.testing)
     androidTestImplementation(libs.mockk.android)
     androidTestImplementation(libs.hilt.android.testing)
     kspAndroidTest(libs.hilt.compiler)

@@ -402,10 +402,6 @@
     <string name="automation_type_random_delay">Atraso Aleatório</string>
     <string name="automation_type_screen_on">Tela Ligada</string>
     <string name="automation_type_screen_off">Tela Desligada</string>
-    <string name="automation_type_network_connected">Rede Conectada</string>
-    <string name="automation_type_network_disconnected">Rede Desconectada</string>
-    <string name="automation_type_usb_connected">USB Conectado</string>
-    <string name="automation_type_usb_disconnected">USB Desconectado</string>
     <string name="automation_boot_hint">O script será executado sempre que o dispositivo for iniciado.</string>
     <string name="automation_boot_next_run">Executa em cada inicialização</string>
     <string name="automation_monthly_day_of_month">Dia do mês</string>

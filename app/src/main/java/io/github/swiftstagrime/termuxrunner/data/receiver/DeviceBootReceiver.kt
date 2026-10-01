@@ -58,6 +58,8 @@ class DeviceBootReceiver : BroadcastReceiver() {
         val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
         scope.launch {
             try {
+                scheduler.ensureSweepEnqueued()
+
                 val allAutomations = automationDao.getEnabledAutomations()
                 allAutomations.forEach { automation ->
                     if (automation.type == AutomationType.BOOT) {

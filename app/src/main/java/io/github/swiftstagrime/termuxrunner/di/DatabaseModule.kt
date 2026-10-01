@@ -10,6 +10,7 @@ import dagger.hilt.components.SingletonComponent
 import io.github.swiftstagrime.termuxrunner.data.local.AppDatabase
 import io.github.swiftstagrime.termuxrunner.data.local.MIGRATION_6_7
 import io.github.swiftstagrime.termuxrunner.data.local.MIGRATION_7_8
+import io.github.swiftstagrime.termuxrunner.data.local.MIGRATION_9_10
 import io.github.swiftstagrime.termuxrunner.data.local.dao.AutomationChainDao
 import io.github.swiftstagrime.termuxrunner.data.local.dao.AutomationDao
 import io.github.swiftstagrime.termuxrunner.data.local.dao.AutomationLogDao
@@ -35,7 +36,7 @@ object DatabaseModule {
                 AppDatabase::class.java,
                 "script_runner_secure.db",
             ).openHelperFactory(keyManagerFactory)
-            .addMigrations(MIGRATION_6_7, MIGRATION_7_8)
+            .addMigrations(MIGRATION_6_7, MIGRATION_7_8, MIGRATION_9_10)
             .enableMultiInstanceInvalidation()
             .fallbackToDestructiveMigration(false)
             .build()

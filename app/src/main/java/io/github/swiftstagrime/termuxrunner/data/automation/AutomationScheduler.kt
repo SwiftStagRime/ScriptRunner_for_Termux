@@ -6,17 +6,21 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import androidx.core.net.toUri
+import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.workDataOf
 import dagger.hilt.android.qualifiers.ApplicationContext
 import io.github.swiftstagrime.termuxrunner.data.local.dao.AutomationDao
 import io.github.swiftstagrime.termuxrunner.data.local.entity.AutomationEntity
 import io.github.swiftstagrime.termuxrunner.data.receiver.AutomationReceiver
+import io.github.swiftstagrime.termuxrunner.data.worker.AutomationSweepWorker
 import io.github.swiftstagrime.termuxrunner.data.worker.AutomationWorker
 import io.github.swiftstagrime.termuxrunner.domain.model.AutomationType
 import io.github.swiftstagrime.termuxrunner.domain.util.AutomationTimeCalculator
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -64,7 +68,7 @@ class AutomationScheduler
          * Unlike [schedule], a stale past [AutomationEntity.nextRunTimestamp] is
          * deliberately not interpreted as "trigger immediately": the catch-up
          * itself stays pending (kept in the past) and is re-evaluated both when
-         * this alarm fires and whenever a connectivity/charging event
+         * this alarm fires and whenever a charging event or the periodic sweep
          * re-triggers the automation in the meantime.
          */
         fun scheduleConditionRetry(
@@ -158,6 +162,30 @@ class AutomationScheduler
                 AutomationWorker.WORK_NAME_PREFIX + automationId,
                 ExistingWorkPolicy.KEEP,
                 workRequest,
+            )
+        }
+
+        /**
+         * Ensures the periodic maintenance sweep ([AutomationSweepWorker]) is
+         * enqueued. It rescues automations whose alarm chain was broken (crashed
+         * worker, OS-cancelled alarm, WorkManager reset) so a stale
+         * [AutomationEntity.nextRunTimestamp] never sits without a pending
+         * alarm for more than one sweep interval.
+         *
+         * WorkManager persists periodic work across restarts, so [KEEP] makes
+         * this idempotent; calling it on every app start and after boot simply
+         * recreates it if it was ever lost.
+         */
+        fun ensureSweepEnqueued() {
+            val sweepRequest =
+                PeriodicWorkRequestBuilder<AutomationSweepWorker>(
+                    AutomationSweepWorker.SWEEP_INTERVAL_MS,
+                    TimeUnit.MILLISECONDS,
+                ).build()
+            WorkManager.getInstance(context).enqueueUniquePeriodicWork(
+                AutomationSweepWorker.UNIQUE_WORK_NAME,
+                ExistingPeriodicWorkPolicy.KEEP,
+                sweepRequest,
             )
         }
     }

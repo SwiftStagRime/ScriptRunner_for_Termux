@@ -508,10 +508,6 @@ private fun FrequencyBadge(type: AutomationType) {
             AutomationType.RANDOM_DELAY -> stringResource(R.string.automation_type_random_delay)
             AutomationType.SCREEN_ON -> stringResource(R.string.automation_type_screen_on)
             AutomationType.SCREEN_OFF -> stringResource(R.string.automation_type_screen_off)
-            AutomationType.NETWORK_CONNECTED -> stringResource(R.string.automation_type_network_connected)
-            AutomationType.NETWORK_DISCONNECTED -> stringResource(R.string.automation_type_network_disconnected)
-            AutomationType.USB_CONNECTED -> stringResource(R.string.automation_type_usb_connected)
-            AutomationType.USB_DISCONNECTED -> stringResource(R.string.automation_type_usb_disconnected)
         }
 
     Surface(

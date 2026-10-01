@@ -37,7 +37,7 @@ import org.json.JSONArray
         AutomationChainEntity::class,
         ScriptVersionEntity::class,
     ],
-    version = 9,
+    version = 10,
     exportSchema = true,
     autoMigrations = [
         AutoMigration(from = 1, to = 2),
@@ -279,5 +279,25 @@ val MIGRATION_7_8: Migration =
         """,
             )
             database.execSQL("CREATE INDEX index_script_versions_scriptId ON script_versions(scriptId)")
+        }
+    }
+
+val MIGRATION_9_10: Migration =
+    object : Migration(9, 10) {
+        private val removedTypes =
+            "(SELECT id FROM automations WHERE type IN (" +
+                "'NETWORK_CONNECTED', 'NETWORK_DISCONNECTED', " +
+                "'USB_CONNECTED', 'USB_DISCONNECTED'))"
+
+        override fun migrate(database: SupportSQLiteDatabase) {
+            // NETWORK_*/USB_* event triggers were removed: the OS does not
+            // deliver those broadcasts to manifest receivers on API 26+, so
+            // these automations could never fire. Purge the rows (and their
+            // logs / triggering chains explicitly, not relying on FK cascades)
+            // — otherwise the stored type strings can no longer be parsed into
+            // AutomationType and every DAO read would crash.
+            database.execSQL("DELETE FROM automation_logs WHERE automationId IN $removedTypes")
+            database.execSQL("DELETE FROM automation_chains WHERE triggerAutomationId IN $removedTypes")
+            database.execSQL("DELETE FROM automations WHERE id IN $removedTypes")
         }
     }

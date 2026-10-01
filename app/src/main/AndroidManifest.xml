@@ -2,7 +2,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="com.termux.permission.RUN_COMMAND" />
     <uses-permission android:name="com.android.launcher.permission.INSTALL_SHORTCUT" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
@@ -97,14 +96,22 @@
         <receiver
             android:name=".data.receiver.EventReceiver"
             android:exported="false">
+            <!--
+                CONNECTIVITY_CHANGE and USB_DEVICE_ATTACHED/DETACHED are
+                deliberately absent: since API 26 they are not delivered to
+                manifest-registered receivers, so declaring them here is dead
+                configuration. NETWORK_*/USB_* automation types were removed
+                entirely (a runtime NetworkCallback would only live while the
+                process does, which is unreliable for a non-resident companion
+                app). Re-checking condition-blocked automations is owned by
+                the charging broadcast below, the periodic AutomationSweepWorker,
+                and the fallback re-check alarms.
+            -->
             <intent-filter>
                 <action android:name="android.intent.action.SCREEN_ON" />
                 <action android:name="android.intent.action.USER_PRESENT" />
                 <action android:name="android.intent.action.SCREEN_OFF" />
-                <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
                 <action android:name="android.intent.action.ACTION_POWER_CONNECTED" />
-                <action android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED" />
-                <action android:name="android.hardware.usb.action.USB_DEVICE_DETACHED" />
             </intent-filter>
         </receiver>
 
