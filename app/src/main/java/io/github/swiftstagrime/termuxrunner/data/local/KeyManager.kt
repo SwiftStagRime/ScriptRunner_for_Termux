@@ -14,7 +14,11 @@ import com.google.crypto.tink.aead.AesGcmKeyManager
 import com.google.crypto.tink.integration.android.AndroidKeysetManager
 import com.google.crypto.tink.subtle.Base64
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import java.security.GeneralSecurityException
@@ -37,6 +41,7 @@ class KeyManager
     ) {
         private var cachedKey: ByteArray? = null
         private val mutex = Mutex()
+        private val appScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
         suspend fun getRoomPassphrase(): ByteArray =
             mutex.withLock {
@@ -50,6 +55,15 @@ class KeyManager
                     generateNewKey()
                 }
             }
+
+        fun prefetch() {
+            appScope.launch {
+                try {
+                    getRoomPassphrase()
+                } catch (_: Exception) {
+                }
+            }
+        }
 
         private suspend fun loadExistingKey(): ByteArray {
             val aead = getMasterKeyOrThrow()

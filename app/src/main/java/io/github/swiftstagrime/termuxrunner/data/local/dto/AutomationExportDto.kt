@@ -7,6 +7,9 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class AutomationExportDto(
+    // Backup-local automation id; lets automation chains remap their
+    // trigger/step references when automations get new ids on import.
+    val id: Int = 0,
     val scriptId: Int,
     val type: AutomationType,
     val scheduledTimestamp: Long,
@@ -66,6 +69,7 @@ fun AutomationExportDto.toEntity(newScriptId: Int): AutomationEntity =
 
 fun Automation.toExportDto() =
     AutomationExportDto(
+        id = id,
         scriptId = scriptId,
         type = type,
         scheduledTimestamp = scheduledTimestamp,

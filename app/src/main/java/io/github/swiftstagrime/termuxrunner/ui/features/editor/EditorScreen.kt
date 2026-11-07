@@ -118,7 +118,11 @@ fun EditorScreen(
                     }
                 },
                 actions = {
-                    IconButton(onClick = onNavigateToVersions, enabled = scriptDraft.id != 0) {
+                    IconButton(
+                        onClick = onNavigateToVersions,
+                        enabled = scriptDraft.id != 0,
+                        modifier = Modifier.testTag("editor_versions_btn"),
+                    ) {
                         Icon(
                             Icons.Default.History,
                             "Code versions",

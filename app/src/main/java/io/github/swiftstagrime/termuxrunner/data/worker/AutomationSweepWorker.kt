@@ -9,6 +9,7 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import io.github.swiftstagrime.termuxrunner.data.automation.AutomationScheduler
 import io.github.swiftstagrime.termuxrunner.data.local.dao.AutomationDao
+import io.github.swiftstagrime.termuxrunner.data.local.dao.ScriptExecutionDao
 import io.github.swiftstagrime.termuxrunner.data.local.entity.AutomationEntity
 import io.github.swiftstagrime.termuxrunner.domain.model.TriggerMode
 import io.github.swiftstagrime.termuxrunner.domain.model.triggerMode
@@ -46,12 +47,15 @@ class AutomationSweepWorker
         @Assisted workerParams: WorkerParameters,
         private val automationDao: AutomationDao,
         private val scheduler: AutomationScheduler,
+        private val scriptExecutionDao: ScriptExecutionDao,
     ) : CoroutineWorker(context, workerParams) {
         companion object {
             const val UNIQUE_WORK_NAME = "automation_sweep"
 
             /** WorkManager's minimum interval for periodic work. */
             const val SWEEP_INTERVAL_MS = 15 * 60 * 1000L
+
+            const val EXECUTION_HISTORY_RETENTION_DAYS = 30
 
             private const val TAG = "AutomationSweepWorker"
         }
@@ -74,6 +78,14 @@ class AutomationSweepWorker
                 } catch (e: Exception) {
                     Log.e(TAG, "Sweep failed for automation ${automation.id}", e)
                 }
+            }
+
+            try {
+                val threshold =
+                    now -
+                    EXECUTION_HISTORY_RETENTION_DAYS.toLong() * 24 * 60 * 60 * 1000
+                scriptExecutionDao.deleteOldRecords(threshold)
+            } catch (_: Exception) {
             }
             return Result.success()
         }

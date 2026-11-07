@@ -18,6 +18,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccessTime
+import androidx.compose.material.icons.filled.BatteryChargingFull
 import androidx.compose.material.icons.filled.BrightnessHigh
 import androidx.compose.material.icons.filled.BrightnessLow
 import androidx.compose.material.icons.filled.CalendarMonth
@@ -64,6 +65,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalLocale
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -214,7 +216,9 @@ private fun GeneralSection(state: AutomationConfigState) {
             value = state.label,
             onValueChange = { state.label = it },
             label = { Text(stringResource(R.string.automation_label_hint)) },
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .testTag("automation_label_input"),
             shape = RoundedCornerShape(12.dp),
             colors = transparentTextFieldColors(),
         )
@@ -880,12 +884,15 @@ private fun getAutomationTypeLabel(type: AutomationType) =
         AutomationType.RANDOM_DELAY -> stringResource(R.string.automation_type_random_delay)
         AutomationType.SCREEN_ON -> stringResource(R.string.automation_type_screen_on)
         AutomationType.SCREEN_OFF -> stringResource(R.string.automation_type_screen_off)
+        AutomationType.CHARGING_STARTED -> stringResource(R.string.automation_type_charging_started)
+        AutomationType.UNKNOWN -> stringResource(R.string.automation_type_unknown)
     }
 
 private fun getEventTypeIcon(type: AutomationType): ImageVector =
     when (type) {
         AutomationType.SCREEN_ON -> Icons.Default.BrightnessHigh
         AutomationType.SCREEN_OFF -> Icons.Default.BrightnessLow
+        AutomationType.CHARGING_STARTED -> Icons.Default.BatteryChargingFull
         else -> Icons.Default.Power
     }
 

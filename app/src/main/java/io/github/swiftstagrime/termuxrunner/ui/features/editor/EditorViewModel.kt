@@ -298,7 +298,16 @@ class EditorViewModel
             val id = _currentScript.value?.id ?: return
             if (id == 0) return
             viewModelScope.launch(ioDispatcher) {
-                _currentScript.value = scriptRepository.getScriptById(id)
+                val fromDb = scriptRepository.getScriptById(id) ?: return@launch
+                val current = _currentScript.value
+                // Resume must not discard unsaved edits: keep the in-memory code
+                // and pages, refresh everything else from the database.
+                _currentScript.value =
+                    if (current != null && current.id == id) {
+                        fromDb.copy(codePages = current.codePages, pageNames = current.pageNames)
+                    } else {
+                        fromDb
+                    }
             }
         }
     }

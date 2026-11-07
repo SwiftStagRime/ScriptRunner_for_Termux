@@ -31,6 +31,11 @@ enum class AutomationType(
     RANDOM_DELAY,
     SCREEN_ON(isEventBased = true),
     SCREEN_OFF(isEventBased = true),
+    CHARGING_STARTED(isEventBased = true),
+
+    // Fallback for rows written by a newer app version after a downgrade;
+    // never fires and is never offered in the type picker.
+    UNKNOWN,
 }
 
 val AutomationType.triggerMode: TriggerMode
@@ -42,12 +47,14 @@ val AutomationType.triggerMode: TriggerMode
             AutomationType.MONTHLY,
             AutomationType.TIME_WINDOW,
             AutomationType.RANDOM_DELAY,
+            AutomationType.UNKNOWN,
             -> TriggerMode.SCHEDULE
 
             AutomationType.BOOT -> TriggerMode.BOOT
 
             AutomationType.SCREEN_ON,
             AutomationType.SCREEN_OFF,
+            AutomationType.CHARGING_STARTED,
             -> TriggerMode.EVENT
         }
 
@@ -68,6 +75,7 @@ val TriggerMode.availableTypes: List<AutomationType>
                 listOf(
                     AutomationType.SCREEN_ON,
                     AutomationType.SCREEN_OFF,
+                    AutomationType.CHARGING_STARTED,
                 )
 
             TriggerMode.BOOT -> listOf(AutomationType.BOOT)

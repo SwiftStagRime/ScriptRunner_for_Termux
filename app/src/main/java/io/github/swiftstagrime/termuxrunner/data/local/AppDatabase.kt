@@ -229,7 +229,6 @@ val MIGRATION_7_8: Migration =
             database.execSQL("CREATE INDEX index_script_executions_scriptId ON script_executions(scriptId)")
             database.execSQL("CREATE INDEX index_script_executions_timestamp ON script_executions(timestamp)")
 
-            // New columns on automations for advanced scheduling and event triggers
             database.execSQL("ALTER TABLE automations ADD COLUMN scheduledDayOfMonth INTEGER DEFAULT NULL")
             database.execSQL("ALTER TABLE automations ADD COLUMN windowStartHour INTEGER NOT NULL DEFAULT 0")
             database.execSQL("ALTER TABLE automations ADD COLUMN windowStartMinute INTEGER NOT NULL DEFAULT 0")
@@ -239,18 +238,14 @@ val MIGRATION_7_8: Migration =
             database.execSQL("ALTER TABLE automations ADD COLUMN randomDelayMaxMillis INTEGER DEFAULT NULL")
             database.execSQL("ALTER TABLE automations ADD COLUMN automationCode TEXT DEFAULT NULL")
 
-            // New column on scripts for notification actions
             database.execSQL("ALTER TABLE scripts ADD COLUMN notificationActions TEXT NOT NULL DEFAULT ''")
 
-            // New column on scripts for foreground session behavior
             database.execSQL(
                 "ALTER TABLE scripts ADD COLUMN foregroundSessionBehavior TEXT NOT NULL DEFAULT 'KEEP_OPEN'",
             )
 
-            // New column on scripts for reusing an existing session named after the script
             database.execSQL("ALTER TABLE scripts ADD COLUMN reuseSession INTEGER NOT NULL DEFAULT 0")
 
-            // New table for automation chains
             database.execSQL(
                 """
             CREATE TABLE automation_chains (
@@ -264,7 +259,6 @@ val MIGRATION_7_8: Migration =
             )
             database.execSQL("CREATE INDEX index_automation_chains_trigger_id ON automation_chains(triggerAutomationId)")
 
-            // New table for script code versioning
             database.execSQL(
                 """
             CREATE TABLE script_versions (

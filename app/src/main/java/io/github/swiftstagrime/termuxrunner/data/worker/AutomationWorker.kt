@@ -13,6 +13,7 @@ import io.github.swiftstagrime.termuxrunner.data.local.dao.AutomationLogDao
 import io.github.swiftstagrime.termuxrunner.data.local.dao.ScriptDao
 import io.github.swiftstagrime.termuxrunner.data.local.entity.AutomationEntity
 import io.github.swiftstagrime.termuxrunner.data.local.entity.AutomationLogEntity
+import io.github.swiftstagrime.termuxrunner.domain.model.AutomationType
 import io.github.swiftstagrime.termuxrunner.domain.model.TriggerMode
 import io.github.swiftstagrime.termuxrunner.domain.model.triggerMode
 import io.github.swiftstagrime.termuxrunner.domain.usecase.RunScriptUseCase
@@ -57,6 +58,11 @@ class AutomationWorker
         override suspend fun doWork(): Result {
             val id = inputData.getInt("automation_id", -1)
             val automation = automationDao.getAutomationById(id) ?: return Result.failure()
+
+            if (automation.type == AutomationType.UNKNOWN) {
+                Log.w(TAG, "Automation $id has an unrecognized trigger type; skipping")
+                return Result.success()
+            }
 
             if (
                 !DeviceConditions.isConditionMet(

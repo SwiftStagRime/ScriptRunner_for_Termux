@@ -92,7 +92,6 @@ android {
         baseline = file("lint-baseline.xml")
     }
     packaging {
-        jniLibs.keepDebugSymbols.add("**/*.so")
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1,LICENSE.md,LICENSE-notice.md}"
         }
@@ -108,6 +107,11 @@ android {
         includeInApk = false
         includeInBundle = false
     }
+}
+
+composeCompiler {
+    metricsDestination.set(layout.buildDirectory.dir("compose-metrics"))
+    reportsDestination.set(layout.buildDirectory.dir("compose-reports"))
 }
 
 base {
@@ -150,7 +154,6 @@ dependencies {
     implementation(libs.hilt.android)
     implementation(libs.androidx.hilt.navigation.compose)
     implementation(libs.androidx.material3)
-    implementation(libs.androidx.exifinterface)
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.compose.ui.text)
     implementation(libs.androidx.compose.foundation.layout)
@@ -168,7 +171,6 @@ dependencies {
     implementation(libs.androidx.sqlite)
     implementation(libs.tink.android)
     implementation(libs.coil.compose)
-    implementation(libs.coil.network.okhttp)
     testImplementation(libs.junit)
     // Unit tests build workers via work-testing; keep it out of the release
     // APK by scoping it to test source sets only.
@@ -181,7 +183,6 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.test.manifest)
     implementation(libs.androidx.compose.material.icons.extended)
     implementation(libs.androidx.room.runtime)
-    implementation(libs.androidx.hilt.navigation.compose)
     implementation(libs.androidx.navigation3.ui)
     implementation(libs.androidx.navigation3.runtime)
     implementation(libs.androidx.lifecycle.viewmodel.navigation3)

@@ -66,7 +66,12 @@ class Converters {
     fun fromAutomationType(value: AutomationType) = value.name
 
     @TypeConverter
-    fun toAutomationType(value: String) = AutomationType.valueOf(value)
+    fun toAutomationType(value: String): AutomationType =
+        try {
+            AutomationType.valueOf(value)
+        } catch (_: Exception) {
+            AutomationType.UNKNOWN
+        }
 
     @TypeConverter
     fun fromIntList(list: List<Int>): String = json.encodeToString(list)

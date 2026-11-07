@@ -49,6 +49,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ClipEntry
 import androidx.compose.ui.platform.Clipboard
 import androidx.compose.ui.platform.LocalClipboard
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.input.KeyboardType
@@ -166,6 +167,7 @@ private fun ServiceStatusCard(
                 Switch(
                     checked = state.isEnabled,
                     onCheckedChange = actions.onToggleEnabled,
+                    modifier = Modifier.testTag("webhook_enable_switch"),
                 )
             }
         }

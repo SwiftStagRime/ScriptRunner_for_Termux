@@ -465,7 +465,7 @@ class RunScriptShellValidityTest {
     @Test
     fun `large script bridge path with special chars in filename`() =
         runTest {
-            val largeCode = "a".repeat(4001)
+            val largeCode = "a".repeat(300_001)
             coEvery {
                 fileRepo.saveToBridge(
                     any(),

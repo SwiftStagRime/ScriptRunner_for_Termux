@@ -68,6 +68,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -132,7 +133,9 @@ fun AutomationScreen(
         },
         floatingActionButton = {
             FloatingActionButton(
-                modifier = Modifier.padding(end = 8.dp, bottom = 8.dp),
+                modifier = Modifier
+                    .padding(end = 8.dp, bottom = 8.dp)
+                    .testTag("automation_fab"),
                 onClick = onAddAutomationClick,
                 containerColor = MaterialTheme.colorScheme.primaryContainer,
                 contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
@@ -508,6 +511,8 @@ private fun FrequencyBadge(type: AutomationType) {
             AutomationType.RANDOM_DELAY -> stringResource(R.string.automation_type_random_delay)
             AutomationType.SCREEN_ON -> stringResource(R.string.automation_type_screen_on)
             AutomationType.SCREEN_OFF -> stringResource(R.string.automation_type_screen_off)
+            AutomationType.CHARGING_STARTED -> stringResource(R.string.automation_type_charging_started)
+            AutomationType.UNKNOWN -> stringResource(R.string.automation_type_unknown)
         }
 
     Surface(

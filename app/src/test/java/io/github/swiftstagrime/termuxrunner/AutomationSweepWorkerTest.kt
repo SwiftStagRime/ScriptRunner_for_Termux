@@ -14,13 +14,16 @@ import io.github.swiftstagrime.termuxrunner.data.automation.AutomationScheduler
 import io.github.swiftstagrime.termuxrunner.data.local.AppDatabase
 import io.github.swiftstagrime.termuxrunner.data.local.entity.AutomationEntity
 import io.github.swiftstagrime.termuxrunner.data.local.entity.ScriptEntity
+import io.github.swiftstagrime.termuxrunner.data.local.entity.ScriptExecutionEntity
 import io.github.swiftstagrime.termuxrunner.data.worker.AutomationSweepWorker
 import io.github.swiftstagrime.termuxrunner.domain.model.AutomationType
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertNotNull
 import junit.framework.TestCase.assertNull
 import junit.framework.TestCase.assertTrue
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -137,6 +140,37 @@ class AutomationSweepWorkerTest {
         assertEquals(future, futureRun?.nextRunTimestamp)
     }
 
+    @Test
+    fun `sweep prunes execution history older than the retention window`() =
+        runTest {
+            val now = System.currentTimeMillis()
+            val retentionMs =
+                AutomationSweepWorker.EXECUTION_HISTORY_RETENTION_DAYS.toLong() *
+                24 * 60 * 60 * 1000
+            database.scriptExecutionDao().insert(
+                ScriptExecutionEntity(
+                    scriptId = 1,
+                    scriptName = "Old",
+                    timestamp = now - retentionMs - 1000,
+                    exitCode = 0,
+                ),
+            )
+            database.scriptExecutionDao().insert(
+                ScriptExecutionEntity(
+                    scriptId = 1,
+                    scriptName = "Recent",
+                    timestamp = now,
+                    exitCode = 0,
+                ),
+            )
+
+            runSweep()
+
+            val remaining = database.scriptExecutionDao().getAllExecutions().first()
+            assertEquals(1, remaining.size)
+            assertEquals("Recent", remaining[0].scriptName)
+        }
+
     private fun runSweep() {
         val factory =
             object : WorkerFactory() {
@@ -150,6 +184,7 @@ class AutomationSweepWorkerTest {
                         workerParameters,
                         database.automationDao(),
                         scheduler,
+                        database.scriptExecutionDao(),
                     )
             }
         val worker =

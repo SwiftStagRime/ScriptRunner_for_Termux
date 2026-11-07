@@ -82,7 +82,7 @@ class RunScriptUseCaseTest {
     @Test
     fun `large script is saved to bridge repository`() =
         runTest {
-            val largeCode = "a".repeat(4001)
+            val largeCode = "a".repeat(300_001)
             val script = Script(id = 2, name = "LargeScript", codePages = listOf(largeCode))
 
             coEvery { fileRepo.saveToBridge(any(), any()) } returns "/sdcard/bridge/script_2.sh"
@@ -329,7 +329,7 @@ class RunScriptUseCaseTest {
     @Test
     fun `returns error message command when large script fails to save to bridge`() =
         runTest {
-            val script = Script(id = 9, name = "FailTest", codePages = listOf("a".repeat(4001)))
+            val script = Script(id = 9, name = "FailTest", codePages = listOf("a".repeat(300_001)))
 
             coEvery { fileRepo.saveToBridge(any(), any()) } throws RuntimeException("Disk Full")
 

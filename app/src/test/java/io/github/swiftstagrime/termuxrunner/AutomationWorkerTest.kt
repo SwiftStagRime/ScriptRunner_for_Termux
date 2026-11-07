@@ -300,6 +300,19 @@ class AutomationWorkerTest {
         assertNull(updated?.nextRunTimestamp)
     }
 
+    @Test
+    fun `unrecognized trigger type is skipped without running the script`() {
+        insertAutomation(
+            id = 1,
+            type = AutomationType.UNKNOWN,
+            nextRunTimestamp = System.currentTimeMillis() - 1000,
+        )
+
+        runWorker(1)
+
+        coVerify(exactly = 0) { runScriptUseCase(any(), any(), any(), any(), any()) }
+    }
+
     private fun runWorker(automationId: Int) {
         val factory =
             object : WorkerFactory() {

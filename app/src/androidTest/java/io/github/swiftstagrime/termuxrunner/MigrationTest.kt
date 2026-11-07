@@ -401,22 +401,25 @@ class MigrationTest {
                 execSQL(
                     """
                     INSERT INTO automations (id, scriptId, label, type, scheduledTimestamp,
-                    intervalMillis, daysOfWeek, isEnabled, runIfMissed)
-                    VALUES (1, 1, 'Keeps Running', 'PERIODIC', 0, 3600000, '[]', 1, 1)
+                    intervalMillis, daysOfWeek, isEnabled, runIfMissed,
+                    runtimeEnv, requireWifi, requireCharging, batteryThreshold)
+                    VALUES (1, 1, 'Keeps Running', 'PERIODIC', 0, 3600000, '[]', 1, 1, '{}', 0, 0, 0)
                     """.trimIndent(),
                 )
                 execSQL(
                     """
                     INSERT INTO automations (id, scriptId, label, type, scheduledTimestamp,
-                    intervalMillis, daysOfWeek, isEnabled, runIfMissed)
-                    VALUES (2, 1, 'Network Trigger', 'NETWORK_CONNECTED', 0, 0, '[]', 1, 0)
+                    intervalMillis, daysOfWeek, isEnabled, runIfMissed,
+                    runtimeEnv, requireWifi, requireCharging, batteryThreshold)
+                    VALUES (2, 1, 'Network Trigger', 'NETWORK_CONNECTED', 0, 0, '[]', 1, 0, '{}', 0, 0, 0)
                     """.trimIndent(),
                 )
                 execSQL(
                     """
                     INSERT INTO automations (id, scriptId, label, type, scheduledTimestamp,
-                    intervalMillis, daysOfWeek, isEnabled, runIfMissed)
-                    VALUES (3, 1, 'USB Trigger', 'USB_DISCONNECTED', 0, 0, '[]', 1, 0)
+                    intervalMillis, daysOfWeek, isEnabled, runIfMissed,
+                    runtimeEnv, requireWifi, requireCharging, batteryThreshold)
+                    VALUES (3, 1, 'USB Trigger', 'USB_DISCONNECTED', 0, 0, '[]', 1, 0, '{}', 0, 0, 0)
                     """.trimIndent(),
                 )
                 execSQL(

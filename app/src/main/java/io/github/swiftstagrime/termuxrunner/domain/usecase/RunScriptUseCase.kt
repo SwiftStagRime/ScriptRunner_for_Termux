@@ -26,6 +26,8 @@ class RunScriptUseCase
             private val VALID_ENV_KEY_PATTERN = Regex("^[a-zA-Z_][a-zA-Z0-9_]*$")
             private val SAFE_INTERPRETER_PATTERN = Regex("^[a-z0-9_/.-]+$", RegexOption.IGNORE_CASE)
 
+            private const val LARGE_SCRIPT_THRESHOLD = 300_000
+
             /** Escapes a string for safe placement inside bash -c "..." double-quoted context. */
             private fun escapeForBashDoubleQuotes(input: String): String =
                 input
@@ -91,9 +93,8 @@ class RunScriptUseCase
                     runtimeArgs?.trim()?.takeIf { it.isNotBlank() },
                 ).joinToString(" ")
 
-            // Use a 4KB threshold to decide between Base64 embedding or external file bridging
-            // to avoid Binder transaction size limits in Android Intents.
-            val isLargeScript = script.code.length > 4000
+            // ~400 KB base64 stays within the 1 MB shared Binder buffer (issue #25)
+            val isLargeScript = script.code.length > LARGE_SCRIPT_THRESHOLD
 
             val finalCommand =
                 if (isLargeScript) {

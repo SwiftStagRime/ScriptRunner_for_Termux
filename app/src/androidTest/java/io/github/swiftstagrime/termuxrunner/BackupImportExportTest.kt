@@ -7,13 +7,16 @@ import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import io.github.swiftstagrime.termuxrunner.data.local.AppDatabase
+import io.github.swiftstagrime.termuxrunner.data.local.dao.AutomationChainDao
 import io.github.swiftstagrime.termuxrunner.data.local.dao.AutomationDao
 import io.github.swiftstagrime.termuxrunner.data.local.dao.CategoryDao
 import io.github.swiftstagrime.termuxrunner.data.local.dao.CustomThemeDao
 import io.github.swiftstagrime.termuxrunner.data.local.dao.ScriptDao
 import io.github.swiftstagrime.termuxrunner.data.local.dto.FullBackupDto
+import io.github.swiftstagrime.termuxrunner.data.local.entity.AutomationChainEntity
 import io.github.swiftstagrime.termuxrunner.data.local.entity.AutomationEntity
 import io.github.swiftstagrime.termuxrunner.data.local.entity.CategoryEntity
+import io.github.swiftstagrime.termuxrunner.data.local.entity.ChainStepDto
 import io.github.swiftstagrime.termuxrunner.data.local.entity.CustomThemeEntity
 import io.github.swiftstagrime.termuxrunner.data.local.entity.ScriptEntity
 import io.github.swiftstagrime.termuxrunner.data.repository.ScriptRepositoryImpl
@@ -38,6 +41,7 @@ class BackupImportExportTest {
     private lateinit var scriptDao: ScriptDao
     private lateinit var categoryDao: CategoryDao
     private lateinit var automationDao: AutomationDao
+    private lateinit var chainDao: AutomationChainDao
     private lateinit var customThemeDao: CustomThemeDao
     private lateinit var repository: ScriptRepositoryImpl
     private lateinit var context: Context
@@ -60,6 +64,7 @@ class BackupImportExportTest {
         scriptDao = db.scriptDao()
         categoryDao = db.categoryDao()
         automationDao = db.automationDao()
+        chainDao = db.automationChainDao()
         customThemeDao = db.customThemeDao()
 
         repository =
@@ -636,6 +641,7 @@ class BackupImportExportTest {
             scriptDao = db.scriptDao()
             categoryDao = db.categoryDao()
             automationDao = db.automationDao()
+            chainDao = db.automationChainDao()
             customThemeDao = db.customThemeDao()
             repository =
                 ScriptRepositoryImpl(
@@ -1252,5 +1258,121 @@ class BackupImportExportTest {
             assertEquals(listOf("Main", "Page 2", "Page 3"), script.pageNames)
 
             file.delete()
+        }
+
+    @Test
+    fun fullBackup_roundTripsAutomationChains() =
+        runTest {
+            val scriptId =
+                scriptDao
+                    .insertScript(
+                        ScriptEntity(
+                            name = "Chain Script",
+                            codePages = listOf("echo chain"),
+                            pageNames = listOf("Main"),
+                            interpreter = "bash",
+                            runInBackground = false,
+                            openNewSession = true,
+                            executionParams = "",
+                            envVars = emptyMap(),
+                            keepSessionOpen = false,
+                            iconPath = null,
+                        ),
+                    ).toInt()
+
+            val now = System.currentTimeMillis()
+            val triggerId =
+                automationDao
+                    .insertAutomation(
+                        AutomationEntity(
+                            scriptId = scriptId,
+                            label = "Chain Trigger",
+                            type = AutomationType.PERIODIC,
+                            scheduledTimestamp = now,
+                            intervalMillis = 3_600_000,
+                            daysOfWeek = emptyList(),
+                            isEnabled = true,
+                        ),
+                    ).toInt()
+            val stepId =
+                automationDao
+                    .insertAutomation(
+                        AutomationEntity(
+                            scriptId = scriptId,
+                            label = "Chain Step",
+                            type = AutomationType.PERIODIC,
+                            scheduledTimestamp = now,
+                            intervalMillis = 7_200_000,
+                            daysOfWeek = emptyList(),
+                            isEnabled = true,
+                        ),
+                    ).toInt()
+
+            chainDao.insertChain(
+                AutomationChainEntity(
+                    name = "My Chain",
+                    triggerAutomationId = triggerId,
+                    steps =
+                        """[{"targetAutomationId":$stepId,"condition":"ON_FAILURE","envPassThrough":{"K":"V"}}]""",
+                ),
+            )
+
+            val exportFile = File(context.cacheDir, "chains_roundtrip.json")
+            repository.exportScripts(Uri.fromFile(exportFile))
+
+            val exported = json.decodeFromString<FullBackupDto>(exportFile.readText())
+            assertEquals(1, exported.chains.size)
+            assertEquals("My Chain", exported.chains[0].name)
+            assertEquals(triggerId, exported.chains[0].triggerAutomationId)
+            assertEquals(1, exported.chains[0].steps.size)
+            assertEquals(stepId, exported.chains[0].steps[0].targetAutomationId)
+            assertEquals("ON_FAILURE", exported.chains[0].steps[0].condition)
+            assertEquals(mapOf("K" to "V"), exported.chains[0].steps[0].envPassThrough)
+            val exportedAutomationIds =
+                exported.automations
+                    .map { it.id }
+                    .distinct()
+            assertEquals(2, exportedAutomationIds.size)
+
+            db.close()
+            db =
+                Room
+                    .inMemoryDatabaseBuilder(context, AppDatabase::class.java)
+                    .allowMainThreadQueries()
+                    .build()
+            scriptDao = db.scriptDao()
+            categoryDao = db.categoryDao()
+            automationDao = db.automationDao()
+            chainDao = db.automationChainDao()
+            customThemeDao = db.customThemeDao()
+            repository =
+                ScriptRepositoryImpl(
+                    scriptDao,
+                    categoryDao,
+                    automationDao,
+                    customThemeDao,
+                    db,
+                    context,
+                )
+
+            val result = repository.importScripts(Uri.fromFile(exportFile))
+            assertTrue("Import should succeed: ${result.exceptionOrNull()}", result.isSuccess)
+
+            val importedAutomations = automationDao.getAllAutomationsOneShot()
+            val newTriggerId = importedAutomations.first { it.label == "Chain Trigger" }.id
+            val newStepId = importedAutomations.first { it.label == "Chain Step" }.id
+
+            val chains = chainDao.getAllChainsOneShot()
+            assertEquals(1, chains.size)
+            assertEquals("My Chain", chains[0].name)
+            assertEquals(newTriggerId, chains[0].triggerAutomationId)
+
+            val steps = json.decodeFromString<List<ChainStepDto>>(chains[0].steps)
+            assertEquals(1, steps.size)
+            assertEquals(newStepId, steps[0].targetAutomationId)
+            assertEquals("ON_FAILURE", steps[0].condition)
+            assertEquals(mapOf("K" to "V"), steps[0].envPassThrough)
+
+            exportFile.delete()
         }
 }

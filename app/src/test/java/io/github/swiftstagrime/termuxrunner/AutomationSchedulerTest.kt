@@ -14,6 +14,7 @@ import io.github.swiftstagrime.termuxrunner.data.worker.AutomationWorker
 import io.github.swiftstagrime.termuxrunner.domain.model.AutomationType
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertNotNull
+import junit.framework.TestCase.assertNull
 import junit.framework.TestCase.assertTrue
 import kotlinx.coroutines.runBlocking
 import org.junit.After
@@ -140,19 +141,33 @@ class AutomationSchedulerTest {
         assertNotNull(shadowOf(alarmManager).nextScheduledAlarm)
     }
 
+    @Test
+    fun `schedule skips unrecognized trigger type`() {
+        val futureTime = System.currentTimeMillis() + 50000
+        val automation =
+            createAutomation(
+                nextRunTimestamp = futureTime,
+                type = AutomationType.UNKNOWN,
+            )
+
+        runBlocking { scheduler.schedule(automation) }
+
+        assertNull(shadowOf(alarmManager).nextScheduledAlarm)
+    }
+
     private fun createAutomation(
         id: Int = 1,
-        isEnabled: Boolean = true,
         nextRunTimestamp: Long? = null,
         runIfMissed: Boolean = true,
         intervalMillis: Long = 0,
+        type: AutomationType = AutomationType.PERIODIC,
     ) = AutomationEntity(
         id = id,
-        isEnabled = isEnabled,
+        isEnabled = true,
         nextRunTimestamp = nextRunTimestamp,
         runIfMissed = runIfMissed,
         scheduledTimestamp = System.currentTimeMillis(),
-        type = AutomationType.PERIODIC,
+        type = type,
         scriptId = 1,
         label = "Test",
         intervalMillis = intervalMillis,

@@ -35,6 +35,7 @@ class EventReceiver : BroadcastReceiver() {
         // now be able to run, so re-check overdue catch-ups right away.
         if (intent.action == Intent.ACTION_POWER_CONNECTED) {
             enqueueOverdueCatchUp(context)
+            enqueueWorkerForType(context, AutomationType.CHARGING_STARTED)
             return
         }
 
@@ -69,9 +70,26 @@ class EventReceiver : BroadcastReceiver() {
                 .setInputData(workDataOf("event_type" to automationType.name))
                 .build()
 
+        // A damaged charger can flap POWER_CONNECTED several times in seconds;
+        // a fixed name + REPLACE collapses that burst into one pending run.
+        // Screen events stay per-occurrence so quick on/off sequences all fire.
+        val unique = automationType == AutomationType.CHARGING_STARTED
+        val name =
+            if (unique) {
+                "event_${automationType.name}"
+            } else {
+                "event_${automationType.name}_${System.currentTimeMillis()}"
+            }
+        val policy =
+            if (unique) {
+                ExistingWorkPolicy.REPLACE
+            } else {
+                ExistingWorkPolicy.APPEND
+            }
+
         WorkManager.getInstance(context).enqueueUniqueWork(
-            "event_${automationType.name}_${System.currentTimeMillis()}",
-            ExistingWorkPolicy.APPEND,
+            name,
+            policy,
             workRequest,
         )
     }
