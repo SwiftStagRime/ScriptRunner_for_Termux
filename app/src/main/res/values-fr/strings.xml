@@ -506,5 +506,52 @@
     <string name="webhook_stop_server">Arrêter le serveur</string>
     <string name="copied_label">Copié !</string>
     <string name="execution_history_label">Historique des exécutions</string>
+    <string name="automation_type_unknown">Inconnu</string>
+    <!-- Chain editor -->
+    <string name="chain_editor_title">Éditeur de chaînes</string>
+    <string name="chain_editor_general">Général</string>
+    <string name="chain_editor_trigger">Déclencheur</string>
+    <string name="chain_editor_steps">Étapes</string>
+    <string name="chain_name_label">Nom de la chaîne</string>
+    <string name="chain_no_steps">Aucune étape configurée. Appuyez sur + pour ajouter une étape.</string>
+    <string name="chain_add_step">Ajouter une étape</string>
+    <string name="chain_step_number">Étape %1$d</string>
+    <string name="chain_target_automation">Automatisation cible</string>
+    <string name="chain_select_target">Sélectionner l\'automatisation cible</string>
+    <string name="chain_on_success">En cas de succès</string>
+    <string name="chain_on_failure">En cas d\'échec</string>
+    <string name="chain_always">Toujours</string>
+    <!-- Execution history -->
+    <string name="exec_history_for">Historique : %1$s</string>
+    <string name="exec_history_empty">Aucun historique d\'exécution</string>
+    <string name="exec_history_clear_30">Effacer les 30 derniers jours</string>
+    <string name="exec_history_clear_all">Effacer tout l\'historique</string>
+    <string name="exec_history_args">Arguments : %1$s</string>
+    <string name="source_manual">Manuel</string>
+    <string name="source_automation">Automatisation</string>
+    <string name="source_tile">Tuile</string>
+    <string name="source_widget">Widget</string>
+    <string name="source_shortcut">Raccourci</string>
+    <!-- Code versions -->
+    <string name="versions_title">Versions du code</string>
+    <string name="versions_empty">Aucune version enregistrée</string>
+    <string name="versions_restore_title">Restaurer la version</string>
+    <string name="versions_restore_body">Le code actuel sera enregistré comme nouvelle version avant la restauration.</string>
+    <string name="versions_restore">Restaurer</string>
+    <string name="versions_default_label">Version</string>
+    <string name="versions_delete_title">Supprimer la version</string>
+    <string name="versions_delete_body">Supprimer cette version ? Cette action est irréversible.</string>
+    <!-- Widget configuration -->
+    <string name="widget_add_script">Ajouter un script</string>
+    <string name="cd_done">Terminé</string>
+    <!-- Misc -->
+    <string name="cd_code_versions">Versions du code</string>
+    <string name="category_label">Catégorie</string>
+    <string name="theme_default_name">Nouveau thème</string>
 
+    <string name="widget_config_title">Configuration du widget</string>
+    <string name="widget_selected_scripts">Scripts sélectionnés (%1$d/5)</string>
+    <string name="widget_unknown_script">Script inconnu</string>
+    <string name="webhook_notification_title">Serveur webhook actif</string>
+    <string name="webhook_notification_port">Port : %1$d</string>
 </resources>

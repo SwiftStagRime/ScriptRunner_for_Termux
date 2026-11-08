@@ -50,7 +50,7 @@ fun CategorySpinner(
 
     Column {
         Text(
-            text = "Category",
+            text = stringResource(R.string.category_label),
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.primary,
             modifier = Modifier.padding(start = 4.dp, bottom = 4.dp),

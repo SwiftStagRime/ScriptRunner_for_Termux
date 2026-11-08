@@ -1,0 +1,5 @@
+UI consistency pass ahead of 1.9:
+1) Chain editor, execution history, code versions and widget configuration screens are now fully translated (were English-only)
+2) Fixed clipped labels: theme names in settings and long automation names now ellipsize instead of being cut mid-word
+3) Fixed broken Russian translation of the trigger code field, category label and a few other strings
+4) Execution source badges, category chips and remaining content descriptions localized across all 7 languages

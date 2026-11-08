@@ -514,4 +514,50 @@
     <!-- General -->
     <string name="copied_label">Copied!</string>
     <string name="execution_history_label">Execution History</string>
+    <!-- Chain editor -->
+    <string name="chain_editor_title">Chain Editor</string>
+    <string name="chain_editor_general">General</string>
+    <string name="chain_editor_trigger">Trigger</string>
+    <string name="chain_editor_steps">Steps</string>
+    <string name="chain_name_label">Chain Name</string>
+    <string name="chain_no_steps">No steps configured. Tap + to add a step.</string>
+    <string name="chain_add_step">Add Step</string>
+    <string name="chain_step_number">Step %1$d</string>
+    <string name="chain_target_automation">Target Automation</string>
+    <string name="chain_select_target">Select target automation</string>
+    <string name="chain_on_success">On Success</string>
+    <string name="chain_on_failure">On Failure</string>
+    <string name="chain_always">Always</string>
+    <!-- Execution history -->
+    <string name="exec_history_for">History: %1$s</string>
+    <string name="exec_history_empty">No execution history</string>
+    <string name="exec_history_clear_30">Clear Last 30 Days</string>
+    <string name="exec_history_clear_all">Clear All History</string>
+    <string name="exec_history_args">Args: %1$s</string>
+    <string name="source_manual">Manual</string>
+    <string name="source_automation">Automation</string>
+    <string name="source_tile">Tile</string>
+    <string name="source_widget">Widget</string>
+    <string name="source_shortcut">Shortcut</string>
+    <!-- Code versions -->
+    <string name="versions_title">Code Versions</string>
+    <string name="versions_empty">No versions saved yet</string>
+    <string name="versions_restore_title">Restore Version</string>
+    <string name="versions_restore_body">Current code will be saved as a new version before restoring.</string>
+    <string name="versions_restore">Restore</string>
+    <string name="versions_default_label">Version</string>
+    <string name="versions_delete_title">Delete Version</string>
+    <string name="versions_delete_body">Are you sure you want to delete this version? This cannot be undone.</string>
+    <!-- Widget configuration -->
+    <string name="widget_add_script">Add Script</string>
+    <string name="cd_done">Done</string>
+    <!-- Misc -->
+    <string name="cd_code_versions">Code versions</string>
+    <string name="category_label">Category</string>
+    <string name="theme_default_name">New Theme</string>
+    <string name="widget_config_title">Widget Configuration</string>
+    <string name="widget_selected_scripts">Selected Scripts (%1$d/5)</string>
+    <string name="widget_unknown_script">Unknown Script</string>
+    <string name="webhook_notification_title">Webhook Server Active</string>
+    <string name="webhook_notification_port">Port: %1$d</string>
 </resources>

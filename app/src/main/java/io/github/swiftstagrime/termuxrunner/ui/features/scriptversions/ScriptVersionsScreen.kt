@@ -42,9 +42,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import io.github.swiftstagrime.termuxrunner.R
 import io.github.swiftstagrime.termuxrunner.domain.model.ScriptVersion
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -62,10 +64,13 @@ fun ScriptVersionsScreen(
         containerColor = MaterialTheme.colorScheme.surface,
         topBar = {
             TopAppBar(
-                title = { Text("Code Versions") },
+                title = { Text(stringResource(R.string.versions_title)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = stringResource(R.string.back_description),
+                        )
                     }
                 },
             )
@@ -90,7 +95,7 @@ fun ScriptVersionsScreen(
                     contentAlignment = Alignment.Center,
                 ) {
                     Text(
-                        "No versions saved yet",
+                        stringResource(R.string.versions_empty),
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -118,12 +123,12 @@ fun ScriptVersionsScreen(
     versionToRestore?.let { version ->
         AlertDialog(
             onDismissRequest = { versionToRestore = null },
-            title = { Text("Restore Version") },
+            title = { Text(stringResource(R.string.versions_restore_title)) },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text(version.label ?: "Version")
+                    Text(version.label ?: stringResource(R.string.versions_default_label))
                     Text(
-                        "Current code will be saved as a new version before restoring.",
+                        stringResource(R.string.versions_restore_body),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -134,12 +139,12 @@ fun ScriptVersionsScreen(
                     viewModel.restoreVersion(version.id)
                     versionToRestore = null
                 }) {
-                    Text("Restore")
+                    Text(stringResource(R.string.versions_restore))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { versionToRestore = null }) {
-                    Text("Cancel")
+                    Text(stringResource(R.string.cancel))
                 }
             },
         )
@@ -148,10 +153,10 @@ fun ScriptVersionsScreen(
     versionToDelete?.let { version ->
         AlertDialog(
             onDismissRequest = { versionToDelete = null },
-            title = { Text("Delete Version") },
+            title = { Text(stringResource(R.string.versions_delete_title)) },
             text = {
                 Text(
-                    "Are you sure you want to delete this version? This cannot be undone.",
+                    stringResource(R.string.versions_delete_body),
                 )
             },
             confirmButton = {
@@ -159,12 +164,12 @@ fun ScriptVersionsScreen(
                     viewModel.deleteVersion(version)
                     versionToDelete = null
                 }) {
-                    Text("Delete", color = MaterialTheme.colorScheme.error)
+                    Text(stringResource(R.string.delete), color = MaterialTheme.colorScheme.error)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { versionToDelete = null }) {
-                    Text("Cancel")
+                    Text(stringResource(R.string.cancel))
                 }
             },
         )
@@ -215,7 +220,7 @@ private fun VersionCard(
 
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    version.label ?: "Version",
+                    version.label ?: stringResource(R.string.versions_default_label),
                     style = MaterialTheme.typography.titleMedium,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
@@ -229,11 +234,19 @@ private fun VersionCard(
             }
 
             IconButton(onClick = onRestore) {
-                Icon(Icons.Default.Restore, "Restore", tint = MaterialTheme.colorScheme.primary)
+                Icon(
+                    Icons.Default.Restore,
+                    stringResource(R.string.versions_restore),
+                    tint = MaterialTheme.colorScheme.primary,
+                )
             }
 
             IconButton(onClick = onDelete) {
-                Icon(Icons.Default.Delete, "Delete", tint = MaterialTheme.colorScheme.error)
+                Icon(
+                    Icons.Default.Delete,
+                    stringResource(R.string.delete),
+                    tint = MaterialTheme.colorScheme.error,
+                )
             }
         }
     }

@@ -29,8 +29,8 @@ android {
         applicationId = "io.github.swiftstagrime.termuxrunner"
         minSdk = 24
         targetSdk = 37
-        versionCode = 182
-        versionName = "1.8.2"
+        versionCode = 183
+        versionName = "1.8.3"
 
         testInstrumentationRunner = "io.github.swiftstagrime.termuxrunner.di.HiltTestRunner"
     }

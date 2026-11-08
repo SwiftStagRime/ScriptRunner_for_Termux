@@ -157,7 +157,7 @@ fun QuickSettingsBanner(
                     ) {
                         Icon(
                             imageVector = Icons.Default.Settings,
-                            contentDescription = "Configure Tiles",
+                            contentDescription = stringResource(R.string.configure_tiles),
                             modifier = Modifier.size(20.dp),
                             tint = MaterialTheme.colorScheme.onTertiaryContainer.copy(alpha = 0.7f),
                         )

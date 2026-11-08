@@ -670,7 +670,7 @@ private fun ScriptItem(
                 ) {
                     Icon(
                         Icons.Default.PlayArrow,
-                        contentDescription = "Run",
+                        contentDescription = stringResource(R.string.cd_run_script),
                         modifier = Modifier.size(20.dp),
                     )
                 }
@@ -923,7 +923,7 @@ fun CategoryTabs(
     ) {
         item {
             CategoryChip(
-                label = "All",
+                label = stringResource(R.string.label_all),
                 isSelected = selectedCategoryId == null,
                 onClick = { onCategorySelect(null) },
             )

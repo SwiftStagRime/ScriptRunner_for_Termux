@@ -509,5 +509,52 @@
     <string name="webhook_stop_server">Server stoppen</string>
     <string name="copied_label">Kopiert!</string>
     <string name="execution_history_label">Verlauf der Ausführung</string>
+    <string name="automation_type_unknown">Unbekannt</string>
+    <!-- Chain editor -->
+    <string name="chain_editor_title">Ketten-Editor</string>
+    <string name="chain_editor_general">Allgemein</string>
+    <string name="chain_editor_trigger">Auslöser</string>
+    <string name="chain_editor_steps">Schritte</string>
+    <string name="chain_name_label">Kettenname</string>
+    <string name="chain_no_steps">Keine Schritte konfiguriert. Tippe auf +, um einen Schritt hinzuzufügen.</string>
+    <string name="chain_add_step">Schritt hinzufügen</string>
+    <string name="chain_step_number">Schritt %1$d</string>
+    <string name="chain_target_automation">Ziel-Automatisierung</string>
+    <string name="chain_select_target">Ziel-Automatisierung auswählen</string>
+    <string name="chain_on_success">Bei Erfolg</string>
+    <string name="chain_on_failure">Bei Fehler</string>
+    <string name="chain_always">Immer</string>
+    <!-- Execution history -->
+    <string name="exec_history_for">Verlauf: %1$s</string>
+    <string name="exec_history_empty">Kein Ausführungsverlauf</string>
+    <string name="exec_history_clear_30">Letzte 30 Tage löschen</string>
+    <string name="exec_history_clear_all">Gesamten Verlauf löschen</string>
+    <string name="exec_history_args">Argumente: %1$s</string>
+    <string name="source_manual">Manuell</string>
+    <string name="source_automation">Automatisierung</string>
+    <string name="source_tile">Kachel</string>
+    <string name="source_widget">Widget</string>
+    <string name="source_shortcut">Verknüpfung</string>
+    <!-- Code versions -->
+    <string name="versions_title">Codeversionen</string>
+    <string name="versions_empty">Noch keine Versionen gespeichert</string>
+    <string name="versions_restore_title">Version wiederherstellen</string>
+    <string name="versions_restore_body">Der aktuelle Code wird vor dem Wiederherstellen als neue Version gespeichert.</string>
+    <string name="versions_restore">Wiederherstellen</string>
+    <string name="versions_default_label">Version</string>
+    <string name="versions_delete_title">Version löschen</string>
+    <string name="versions_delete_body">Diese Version wirklich löschen? Das kann nicht rückgängig gemacht werden.</string>
+    <!-- Widget configuration -->
+    <string name="widget_add_script">Skript hinzufügen</string>
+    <string name="cd_done">Fertig</string>
+    <!-- Misc -->
+    <string name="cd_code_versions">Codeversionen</string>
+    <string name="category_label">Kategorie</string>
+    <string name="theme_default_name">Neues Theme</string>
 
+    <string name="widget_config_title">Widget-Konfiguration</string>
+    <string name="widget_selected_scripts">Ausgewählte Skripte (%1$d/5)</string>
+    <string name="widget_unknown_script">Unbekanntes Skript</string>
+    <string name="webhook_notification_title">Webhook-Server aktiv</string>
+    <string name="webhook_notification_port">Port: %1$d</string>
 </resources>

@@ -314,26 +314,38 @@ private fun PermissionStep(
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(16.dp),
         modifier = Modifier.fillMaxSize(),
     ) {
-        StepIcon(Icons.Default.Security, isDone = isPermissionGranted)
-        Text(
-            stringResource(R.string.setup_step_3_title),
-            style = MaterialTheme.typography.headlineSmall,
-            fontWeight = FontWeight.Bold,
-        )
-        Text(
-            stringResource(R.string.setup_step_3_desc),
-            textAlign = TextAlign.Center,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            modifier =
+                Modifier
+                    .weight(1f)
+                    .verticalScroll(rememberScrollState()),
+        ) {
+            StepIcon(Icons.Default.Security, isDone = isPermissionGranted)
+            Text(
+                stringResource(R.string.setup_step_3_title),
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Bold,
+            )
+            Text(
+                stringResource(R.string.setup_step_3_desc),
+                textAlign = TextAlign.Center,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+
+            if (!isPermissionGranted) {
+                RequirementWarning(
+                    message = stringResource(R.string.termux_permission_warning),
+                    emphasized = true,
+                )
+            }
+        }
 
         if (!isPermissionGranted) {
-            RequirementWarning(
-                message = stringResource(R.string.termux_permission_warning),
-                emphasized = true,
-            )
+            Spacer(modifier = Modifier.height(16.dp))
             Button(
                 onClick = onGrantPermission,
                 modifier = Modifier.fillMaxWidth(),
@@ -352,25 +364,41 @@ private fun OptimizationStep(
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(16.dp),
         modifier = Modifier.fillMaxSize(),
     ) {
-        StepIcon(Icons.Default.BatteryChargingFull, isDone = isBatteryUnrestricted)
-        Text(
-            stringResource(R.string.setup_step_5_title),
-            style = MaterialTheme.typography.headlineSmall,
-            fontWeight = FontWeight.Bold,
-        )
-        Text(
-            stringResource(R.string.setup_step_5_desc),
-            textAlign = TextAlign.Center,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            modifier =
+                Modifier
+                    .weight(1f)
+                    .verticalScroll(rememberScrollState()),
+        ) {
+            StepIcon(Icons.Default.BatteryChargingFull, isDone = isBatteryUnrestricted)
+            Text(
+                stringResource(R.string.setup_step_5_title),
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Bold,
+            )
+            Text(
+                stringResource(R.string.setup_step_5_desc),
+                textAlign = TextAlign.Center,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
 
-        if (!isBatteryUnrestricted) {
-            RequirementWarning(message = stringResource(R.string.battery_warning_text))
+            if (!isBatteryUnrestricted) {
+                RequirementWarning(message = stringResource(R.string.battery_warning_text))
+            }
+
+            Text(
+                text = stringResource(R.string.setup_step_4_desc),
+                style = MaterialTheme.typography.labelSmall,
+                textAlign = TextAlign.Center,
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+            )
         }
 
+        Spacer(modifier = Modifier.height(16.dp))
         Button(
             onClick = onOpenSettings,
             modifier = Modifier.fillMaxWidth(),
@@ -381,13 +409,6 @@ private fun OptimizationStep(
             Spacer(modifier = Modifier.width(8.dp))
             Icon(Icons.AutoMirrored.Filled.OpenInNew, null, modifier = Modifier.size(18.dp))
         }
-
-        Text(
-            text = stringResource(R.string.setup_step_4_desc),
-            style = MaterialTheme.typography.labelSmall,
-            textAlign = TextAlign.Center,
-            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
-        )
     }
 }
 

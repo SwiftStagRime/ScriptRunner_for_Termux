@@ -505,5 +505,52 @@
     <string name="webhook_stop_server">停止服务器</string>
     <string name="copied_label">已复制！</string>
     <string name="execution_history_label">执行历史</string>
+    <string name="automation_type_unknown">未知</string>
+    <!-- Chain editor -->
+    <string name="chain_editor_title">链编辑器</string>
+    <string name="chain_editor_general">常规</string>
+    <string name="chain_editor_trigger">触发器</string>
+    <string name="chain_editor_steps">步骤</string>
+    <string name="chain_name_label">链名称</string>
+    <string name="chain_no_steps">尚未配置步骤。点按 + 添加步骤。</string>
+    <string name="chain_add_step">添加步骤</string>
+    <string name="chain_step_number">步骤 %1$d</string>
+    <string name="chain_target_automation">目标自动化</string>
+    <string name="chain_select_target">选择目标自动化</string>
+    <string name="chain_on_success">成功时</string>
+    <string name="chain_on_failure">失败时</string>
+    <string name="chain_always">始终</string>
+    <!-- Execution history -->
+    <string name="exec_history_for">历史记录：%1$s</string>
+    <string name="exec_history_empty">暂无执行历史</string>
+    <string name="exec_history_clear_30">清除最近 30 天</string>
+    <string name="exec_history_clear_all">清除全部历史</string>
+    <string name="exec_history_args">参数：%1$s</string>
+    <string name="source_manual">手动</string>
+    <string name="source_automation">自动化</string>
+    <string name="source_tile">磁贴</string>
+    <string name="source_widget">小部件</string>
+    <string name="source_shortcut">快捷方式</string>
+    <!-- Code versions -->
+    <string name="versions_title">代码版本</string>
+    <string name="versions_empty">尚未保存任何版本</string>
+    <string name="versions_restore_title">恢复版本</string>
+    <string name="versions_restore_body">恢复前会将当前代码保存为新版本。</string>
+    <string name="versions_restore">恢复</string>
+    <string name="versions_default_label">版本</string>
+    <string name="versions_delete_title">删除版本</string>
+    <string name="versions_delete_body">确定要删除此版本吗？此操作无法撤销。</string>
+    <!-- Widget configuration -->
+    <string name="widget_add_script">添加脚本</string>
+    <string name="cd_done">完成</string>
+    <!-- Misc -->
+    <string name="cd_code_versions">代码版本</string>
+    <string name="category_label">类别</string>
+    <string name="theme_default_name">新主题</string>
 
+    <string name="widget_config_title">小部件配置</string>
+    <string name="widget_selected_scripts">已选脚本（%1$d/5）</string>
+    <string name="widget_unknown_script">未知脚本</string>
+    <string name="webhook_notification_title">Webhook 服务器已启用</string>
+    <string name="webhook_notification_port">端口：%1$d</string>
 </resources>

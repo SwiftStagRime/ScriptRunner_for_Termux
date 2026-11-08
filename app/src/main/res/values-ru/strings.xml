@@ -189,7 +189,7 @@
     <string name="label_key">Ключ</string>
     <string name="label_value">Значение</string>
     <string name="placeholder_value">12345</string>
-    <string name="adb_code">Имя код ADB (по умолчанию его нет)</string>
+    <string name="adb_code">Код триггера (пусто = запуск извне невозможен)</string>
     <string name="cd_remove">Удалить</string>
     <string name="reliability_monitoring">Надежность и Мониторинг</string>
     <string name="auto_restart_lazarus">Автоперезапуск (Lazarus)</string>
@@ -431,7 +431,7 @@
 
     <!-- Custom theme -->
     <string name="custom_themes_title">Пользовательские темы</string>
-    <string name="new_theme_label">Новая Тема</string>
+    <string name="new_theme_label">Новая тема</string>
     <string name="theme_name_label">Название темы</string>
     <string name="dark_mode_label">Палитра темной темы</string>
     <string name="colors_section_label">Цвета палитры</string>
@@ -504,5 +504,51 @@
     <string name="webhook_stop_server">Остановить сервер</string>
     <string name="copied_label">Скопировано!</string>
     <string name="execution_history_label">История выполнения</string>
-
+    <string name="automation_type_unknown">Неизвестный</string>
+    <!-- Chain editor -->
+    <string name="chain_editor_title">Редактор цепочек</string>
+    <string name="chain_editor_general">Общие</string>
+    <string name="chain_editor_trigger">Триггер</string>
+    <string name="chain_editor_steps">Шаги</string>
+    <string name="chain_name_label">Название цепочки</string>
+    <string name="chain_no_steps">Шаги не настроены. Нажмите +, чтобы добавить шаг.</string>
+    <string name="chain_add_step">Добавить шаг</string>
+    <string name="chain_step_number">Шаг %1$d</string>
+    <string name="chain_target_automation">Целевая автоматизация</string>
+    <string name="chain_select_target">Выберите целевую автоматизацию</string>
+    <string name="chain_on_success">При успехе</string>
+    <string name="chain_on_failure">При ошибке</string>
+    <string name="chain_always">Всегда</string>
+    <!-- Execution history -->
+    <string name="exec_history_for">История: %1$s</string>
+    <string name="exec_history_empty">Нет записей истории</string>
+    <string name="exec_history_clear_30">Очистить за 30 дней</string>
+    <string name="exec_history_clear_all">Очистить всю историю</string>
+    <string name="exec_history_args">Аргументы: %1$s</string>
+    <string name="source_manual">Вручную</string>
+    <string name="source_automation">Автоматизация</string>
+    <string name="source_tile">Плитка</string>
+    <string name="source_widget">Виджет</string>
+    <string name="source_shortcut">Ярлык</string>
+    <!-- Code versions -->
+    <string name="versions_title">Версии кода</string>
+    <string name="versions_empty">Версии ещё не сохранены</string>
+    <string name="versions_restore_title">Восстановить версию</string>
+    <string name="versions_restore_body">Текущий код будет сохранён как новая версия перед восстановлением.</string>
+    <string name="versions_restore">Восстановить</string>
+    <string name="versions_default_label">Версия</string>
+    <string name="versions_delete_title">Удалить версию</string>
+    <string name="versions_delete_body">Удалить эту версию? Это действие нельзя отменить.</string>
+    <!-- Widget configuration -->
+    <string name="widget_add_script">Добавить скрипт</string>
+    <string name="cd_done">Готово</string>
+    <!-- Misc -->
+    <string name="cd_code_versions">Версии кода</string>
+    <string name="category_label">Категория</string>
+    <string name="theme_default_name">Новая тема</string>
+    <string name="widget_config_title">Настройка виджета</string>
+    <string name="widget_selected_scripts">Выбранные скрипты (%1$d/5)</string>
+    <string name="widget_unknown_script">Неизвестный скрипт</string>
+    <string name="webhook_notification_title">Webhook-сервер запущен</string>
+    <string name="webhook_notification_port">Порт: %1$d</string>
 </resources>

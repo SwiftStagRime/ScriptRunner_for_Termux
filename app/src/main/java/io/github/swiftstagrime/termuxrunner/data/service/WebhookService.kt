@@ -169,8 +169,8 @@ class WebhookService : Service() {
 
         return NotificationCompat
             .Builder(this, CHANNEL_ID)
-            .setContentTitle("Webhook Server Active")
-            .setContentText("Port: $port")
+            .setContentTitle(getString(R.string.webhook_notification_title))
+            .setContentText(getString(R.string.webhook_notification_port, port))
             .setSmallIcon(R.mipmap.ic_launcher)
             .setContentIntent(pendingIntent)
             .addAction(

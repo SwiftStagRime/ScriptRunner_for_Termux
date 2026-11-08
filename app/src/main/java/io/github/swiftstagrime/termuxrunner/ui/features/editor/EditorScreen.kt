@@ -125,7 +125,7 @@ fun EditorScreen(
                     ) {
                         Icon(
                             Icons.Default.History,
-                            "Code versions",
+                            stringResource(R.string.cd_code_versions),
                             tint = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }

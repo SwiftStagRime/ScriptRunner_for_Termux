@@ -30,6 +30,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.glance.appwidget.state.getAppWidgetState
@@ -38,6 +40,7 @@ import androidx.glance.state.PreferencesGlanceStateDefinition
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import dagger.hilt.android.AndroidEntryPoint
+import io.github.swiftstagrime.termuxrunner.R
 import io.github.swiftstagrime.termuxrunner.ui.components.ScriptPickerDialog
 import io.github.swiftstagrime.termuxrunner.ui.features.widget.script.ScriptWidget
 import io.github.swiftstagrime.termuxrunner.ui.theme.ScriptRunnerForTermuxTheme
@@ -98,14 +101,17 @@ class WidgetConfigurationActivity : ComponentActivity() {
                 Scaffold(
                     topBar = {
                         Text(
-                            "Widget Configuration",
+                            stringResource(R.string.widget_config_title),
                             modifier = Modifier.padding(16.dp),
                             style = MaterialTheme.typography.headlineSmall,
                         )
                     },
                     floatingActionButton = {
                         FloatingActionButton(onClick = { saveAndExit() }) {
-                            Icon(Icons.Default.Check, contentDescription = "Done")
+                            Icon(
+                                Icons.Default.Check,
+                                contentDescription = stringResource(R.string.cd_done),
+                            )
                         }
                     },
                 ) { padding ->
@@ -116,7 +122,7 @@ class WidgetConfigurationActivity : ComponentActivity() {
                                 .fillMaxSize(),
                     ) {
                         Text(
-                            "Selected Scripts (${selectedScriptIds.size}/5)",
+                            stringResource(R.string.widget_selected_scripts, selectedScriptIds.size),
                             modifier = Modifier.padding(16.dp),
                         )
 
@@ -124,12 +130,18 @@ class WidgetConfigurationActivity : ComponentActivity() {
                             items(selectedScriptIds) { id ->
                                 val script = allScripts.find { it.id == id }
                                 ListItem(
-                                    headlineContent = { Text(script?.name ?: "Unknown Script") },
+                                    headlineContent = {
+                                        Text(
+                                            script?.name ?: stringResource(R.string.widget_unknown_script),
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis,
+                                        )
+                                    },
                                     trailingContent = {
                                         IconButton(onClick = { selectedScriptIds.remove(id) }) {
                                             Icon(
                                                 Icons.Default.Delete,
-                                                contentDescription = "Remove",
+                                                contentDescription = stringResource(R.string.cd_remove),
                                             )
                                         }
                                     },
@@ -144,7 +156,7 @@ class WidgetConfigurationActivity : ComponentActivity() {
                                                 .fillMaxWidth()
                                                 .padding(16.dp),
                                     ) {
-                                        Text("Add Script")
+                                        Text(stringResource(R.string.widget_add_script))
                                     }
                                 }
                             }

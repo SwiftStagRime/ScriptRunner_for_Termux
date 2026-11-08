@@ -359,6 +359,8 @@ private fun AutomationItem(
                             text = item.automation.label,
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis,
                         )
                         Row(
                             verticalAlignment = Alignment.CenterVertically,

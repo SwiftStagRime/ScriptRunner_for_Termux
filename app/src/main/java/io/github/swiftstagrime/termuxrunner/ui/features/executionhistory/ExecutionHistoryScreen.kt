@@ -43,10 +43,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import io.github.swiftstagrime.termuxrunner.R
 import io.github.swiftstagrime.termuxrunner.domain.model.ExecutionSource
 import io.github.swiftstagrime.termuxrunner.domain.model.ScriptExecution
 import java.text.SimpleDateFormat
@@ -108,7 +110,7 @@ fun ExecutionHistoryScreen(
                             )
                             Spacer(modifier = Modifier.height(16.dp))
                             Text(
-                                "No execution history",
+                                stringResource(R.string.exec_history_empty),
                                 style = MaterialTheme.typography.bodyLarge,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
@@ -136,30 +138,44 @@ private fun ExecutionHistoryTopBar(
 
     TopAppBar(
         title = {
-            Text(if (scriptName != null) "History: $scriptName" else "Execution History")
+            Text(
+                if (scriptName != null) {
+                    stringResource(R.string.exec_history_for, scriptName)
+                } else {
+                    stringResource(R.string.history_title)
+                },
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
         },
         navigationIcon = {
             IconButton(onClick = onBack) {
-                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                Icon(
+                    Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = stringResource(R.string.back_description),
+                )
             }
         },
         actions = {
             IconButton(onClick = { showMenu = true }) {
-                Icon(Icons.Default.MoreVert, contentDescription = "More options")
+                Icon(
+                    Icons.Default.MoreVert,
+                    contentDescription = stringResource(R.string.cd_more_options),
+                )
             }
             DropdownMenu(
                 expanded = showMenu,
                 onDismissRequest = { showMenu = false },
             ) {
                 DropdownMenuItem(
-                    text = { Text("Clear Last 30 Days") },
+                    text = { Text(stringResource(R.string.exec_history_clear_30)) },
                     onClick = {
                         viewModel.deleteOldRecords(30)
                         showMenu = false
                     },
                 )
                 DropdownMenuItem(
-                    text = { Text("Clear All History") },
+                    text = { Text(stringResource(R.string.exec_history_clear_all)) },
                     onClick = {
                         viewModel.clearAll()
                         showMenu = false
@@ -270,11 +286,12 @@ private fun ExecutionHistoryCard(execution: ScriptExecution) {
                     if (execution.runtimeArgs != null && execution.runtimeArgs.isNotBlank()) {
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = "Args: ${execution.runtimeArgs}",
+                            text = stringResource(R.string.exec_history_args, execution.runtimeArgs),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.weight(1f),
                         )
                     }
                 }
@@ -311,8 +328,17 @@ private fun ExecutionSourceBadge(source: ExecutionSource) {
                 .padding(horizontal = 6.dp, vertical = 2.dp),
     ) {
         Text(
-            text = source.name.lowercase().replaceFirstChar { it.uppercase() },
+            text =
+                when (source) {
+                    ExecutionSource.MANUAL -> stringResource(R.string.source_manual)
+                    ExecutionSource.AUTOMATION -> stringResource(R.string.source_automation)
+                    ExecutionSource.TILE -> stringResource(R.string.source_tile)
+                    ExecutionSource.WIDGET -> stringResource(R.string.source_widget)
+                    ExecutionSource.SHORTCUT -> stringResource(R.string.source_shortcut)
+                },
             style = MaterialTheme.typography.labelSmall,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
             color =
                 when (source) {
                     ExecutionSource.MANUAL -> MaterialTheme.colorScheme.onPrimaryContainer
