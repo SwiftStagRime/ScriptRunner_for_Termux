@@ -14,12 +14,11 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import io.github.swiftstagrime.termuxrunner.R
 import io.github.swiftstagrime.termuxrunner.data.automation.AutomationScheduler
+import io.github.swiftstagrime.termuxrunner.data.automation.recordDispatchFailure
 import io.github.swiftstagrime.termuxrunner.data.local.dao.AutomationDao
 import io.github.swiftstagrime.termuxrunner.data.local.dao.AutomationLogDao
 import io.github.swiftstagrime.termuxrunner.data.local.dao.ScriptDao
 import io.github.swiftstagrime.termuxrunner.data.local.entity.AutomationEntity
-import io.github.swiftstagrime.termuxrunner.data.local.entity.AutomationLogEntity
-import io.github.swiftstagrime.termuxrunner.data.repository.TermuxException
 import io.github.swiftstagrime.termuxrunner.domain.model.AutomationType
 import io.github.swiftstagrime.termuxrunner.domain.model.TriggerMode
 import io.github.swiftstagrime.termuxrunner.domain.model.triggerMode
@@ -237,25 +236,12 @@ class AutomationWorker
                 error,
             )
 
-            runCatching {
-                // Termux-specific failures carry a localized explanation; anything else
-                // only has its exception message, and a bare class name helps nobody.
-                val reason =
-                    when (error) {
-                        is TermuxException -> error.uiText.asString(applicationContext)
-                        else -> error.message ?: error::class.simpleName ?: "unknown error"
-                    }
-                automationLogDao.insertLog(
-                    AutomationLogEntity(
-                        automationId = automation.id,
-                        timestamp = System.currentTimeMillis(),
-                        exitCode = DISPATCH_FAILED_EXIT_CODE,
-                        message = "Could not start script: $reason",
-                    ),
-                )
-            }.onFailure { logError ->
-                Log.w(TAG, "Could not persist failure log for automation ${automation.id}", logError)
-            }
+            automationLogDao.recordDispatchFailure(
+                automationId = automation.id,
+                error = error,
+                context = applicationContext,
+                tag = TAG,
+            )
 
             if (automation.type.triggerMode != TriggerMode.SCHEDULE) return
 

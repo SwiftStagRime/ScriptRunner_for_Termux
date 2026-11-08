@@ -7,8 +7,11 @@ import android.util.Log
 import androidx.core.content.ContextCompat
 import dagger.hilt.android.AndroidEntryPoint
 import io.github.swiftstagrime.termuxrunner.data.automation.AutomationScheduler
+import io.github.swiftstagrime.termuxrunner.data.automation.recordDispatchFailure
 import io.github.swiftstagrime.termuxrunner.data.local.dao.AutomationDao
+import io.github.swiftstagrime.termuxrunner.data.local.dao.AutomationLogDao
 import io.github.swiftstagrime.termuxrunner.data.local.dao.ScriptDao
+import io.github.swiftstagrime.termuxrunner.data.local.entity.AutomationEntity
 import io.github.swiftstagrime.termuxrunner.data.service.WebhookService
 import io.github.swiftstagrime.termuxrunner.domain.model.AutomationType
 import io.github.swiftstagrime.termuxrunner.domain.repository.UserPreferencesRepository
@@ -26,6 +29,9 @@ class DeviceBootReceiver : BroadcastReceiver() {
     lateinit var automationDao: AutomationDao
 
     @Inject
+    lateinit var automationLogDao: AutomationLogDao
+
+    @Inject
     lateinit var scheduler: AutomationScheduler
 
     @Inject
@@ -37,6 +43,10 @@ class DeviceBootReceiver : BroadcastReceiver() {
     @Inject
     lateinit var userPreferencesRepository: UserPreferencesRepository
 
+    /**
+     * Set in [onReceive]; [handleBoot] uses it as the default so tests can call
+     * [handleBoot] directly without a receiver context.
+     */
     private var receiverContext: Context? = null
 
     override fun onReceive(
@@ -64,19 +74,7 @@ class DeviceBootReceiver : BroadcastReceiver() {
                 val allAutomations = automationDao.getEnabledAutomations()
                 allAutomations.forEach { automation ->
                     if (automation.type == AutomationType.BOOT) {
-                        val scriptEntity = scriptDao.getScriptById(automation.scriptId)
-                        if (scriptEntity != null) {
-                            runScriptUseCase(
-                                script = scriptEntity.toScriptDomain(),
-                                runtimeArgs = automation.runtimeArgs,
-                                runtimeEnv = automation.runtimeEnv,
-                                runtimePrefix = automation.runtimePrefix,
-                                automationId = automation.id,
-                            )
-                        }
-                        automationDao.updateAutomation(
-                            automation.copy(lastRunTimestamp = System.currentTimeMillis()),
-                        )
+                        runBootAutomation(automation, context)
                     } else {
                         scheduler.schedule(automation)
                     }
@@ -96,5 +94,51 @@ class DeviceBootReceiver : BroadcastReceiver() {
                 pendingResult?.finish()
             }
         }
+    }
+
+    /**
+     * Runs one BOOT automation. The run itself is recorded by Termux's result
+     * broadcast, never here: handing the command to the system does not prove it
+     * arrived, and a boot into a force-stopped Termux used to show up as a
+     * completed run. A failing dispatch is logged for this automation only, so
+     * one broken script cannot stop the remaining boot work.
+     */
+    private suspend fun runBootAutomation(
+        automation: AutomationEntity,
+        context: Context,
+    ) {
+        val scriptEntity = scriptDao.getScriptById(automation.scriptId)
+
+        val dispatchError =
+            if (scriptEntity != null) {
+                try {
+                    runScriptUseCase(
+                        script = scriptEntity.toScriptDomain(),
+                        runtimeArgs = automation.runtimeArgs,
+                        runtimeEnv = automation.runtimeEnv,
+                        runtimePrefix = automation.runtimePrefix,
+                        automationId = automation.id,
+                    )
+                    null
+                } catch (e: Exception) {
+                    e
+                }
+            } else {
+                null
+            }
+
+        if (dispatchError == null) return
+
+        Log.e(
+            "DeviceBootReceiver",
+            "Boot automation ${automation.id} (${automation.label}) failed to dispatch",
+            dispatchError,
+        )
+        automationLogDao.recordDispatchFailure(
+            automationId = automation.id,
+            error = dispatchError,
+            context = context,
+            tag = "DeviceBootReceiver",
+        )
     }
 }
