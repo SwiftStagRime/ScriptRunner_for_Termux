@@ -87,11 +87,16 @@ class AutomationWorker
 
             // Event- and boot-based automations have no next scheduled slot; they
             // must stay armed for their next trigger. Only single-shot or
-            // misconfigured schedules (nextRun == null) are retired here.
+            // misconfigured schedules (nextRun == null) are retired here, and a run
+            // never turns a disabled automation back on.
             val isEnabled =
                 when (automation.type.triggerMode) {
                     TriggerMode.EVENT, TriggerMode.BOOT -> automation.isEnabled
-                    TriggerMode.SCHEDULE -> nextRun != null
+                    // A run never switches an automation back on: chain steps, the
+                    // overdue catch-up and "run now" all execute disabled automations,
+                    // and the user's choice to keep it off has to survive them. Only a
+                    // schedule that cannot produce a next slot retires it here.
+                    TriggerMode.SCHEDULE -> automation.isEnabled && nextRun != null
                 }
 
             val scriptEntity = scriptDao.getScriptById(automation.scriptId)
@@ -272,12 +277,17 @@ class AutomationWorker
         /**
          * Skips the current (missed) slot: advances the schedule to the next
          * future run and re-arms the alarm. If no future run exists (expired
-         * one-shot, misconfigured interval) the automation is retired.
+         * one-shot, misconfigured interval) the automation is retired. A disabled
+         * automation stays disabled: skipping a slot is not a reason to switch it on.
          */
         private suspend fun skipToNextSlot(automation: AutomationEntity) {
             val now = System.currentTimeMillis()
             val nextRun = AutomationTimeCalculator.calculateNextRun(automation, now)
-            val updated = automation.copy(nextRunTimestamp = nextRun, isEnabled = nextRun != null)
+            val updated =
+                automation.copy(
+                    nextRunTimestamp = nextRun,
+                    isEnabled = automation.isEnabled && nextRun != null,
+                )
             automationDao.updateAutomation(updated)
             if (nextRun != null) {
                 scheduler.schedule(updated)

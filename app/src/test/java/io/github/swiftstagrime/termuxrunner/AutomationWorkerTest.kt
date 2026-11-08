@@ -25,6 +25,7 @@ import io.mockk.coVerify
 import io.mockk.mockk
 import io.mockk.verify
 import junit.framework.TestCase.assertEquals
+import junit.framework.TestCase.assertFalse
 import junit.framework.TestCase.assertNotNull
 import junit.framework.TestCase.assertNull
 import junit.framework.TestCase.assertTrue
@@ -360,6 +361,47 @@ class AutomationWorkerTest {
         assertTrue(info.notification.channelId.isNotEmpty())
     }
 
+    @Test
+    fun `running a disabled automation keeps it disabled and arms no alarm`() {
+        // Chain steps, overdue catch-up and "run now" all execute automations the user
+        // switched off. Running one must not switch it back on behind their back.
+        insertAutomation(
+            id = 1,
+            type = AutomationType.PERIODIC,
+            intervalMillis = 60 * 60 * 1000,
+            nextRunTimestamp = System.currentTimeMillis() - 10_000,
+            isEnabled = false,
+        )
+
+        runWorker(1)
+
+        coVerify(exactly = 1) { runScriptUseCase(any(), any(), any(), any(), any()) }
+
+        val updated = runBlocking { database.automationDao().getAutomationById(1) }
+        assertFalse(updated?.isEnabled ?: true)
+        assertNull(shadowOf(alarmManager).nextScheduledAlarm)
+    }
+
+    @Test
+    fun `failed dispatch for a disabled automation keeps it disabled`() {
+        insertAutomation(
+            id = 1,
+            type = AutomationType.PERIODIC,
+            intervalMillis = 60 * 1000,
+            nextRunTimestamp = System.currentTimeMillis() - 10_000,
+            runIfMissed = false,
+            isEnabled = false,
+        )
+        coEvery { runScriptUseCase(any(), any(), any(), any(), any()) } throws
+            TermuxBackgroundRestrictionException()
+
+        runWorker(1)
+
+        val updated = runBlocking { database.automationDao().getAutomationById(1) }
+        assertFalse(updated?.isEnabled ?: true)
+        assertNull(shadowOf(alarmManager).nextScheduledAlarm)
+    }
+
     private fun runWorker(automationId: Int) {
         val factory =
             object : WorkerFactory() {
@@ -394,6 +436,7 @@ class AutomationWorkerTest {
         nextRunTimestamp: Long?,
         requireWifi: Boolean = false,
         runIfMissed: Boolean = true,
+        isEnabled: Boolean = true,
     ) = runBlocking {
         database.automationDao().insertAutomation(
             AutomationEntity(
@@ -404,7 +447,7 @@ class AutomationWorkerTest {
                 scheduledTimestamp = System.currentTimeMillis() - 24 * 60 * 60 * 1000,
                 intervalMillis = intervalMillis,
                 daysOfWeek = emptyList(),
-                isEnabled = true,
+                isEnabled = isEnabled,
                 nextRunTimestamp = nextRunTimestamp,
                 runIfMissed = runIfMissed,
                 requireWifi = requireWifi,
