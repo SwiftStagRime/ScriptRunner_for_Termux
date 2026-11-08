@@ -1,18 +1,25 @@
 package io.github.swiftstagrime.termuxrunner.data.worker
 
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.content.Context
+import android.os.Build
 import android.util.Log
+import androidx.core.app.NotificationCompat
 import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
+import androidx.work.ForegroundInfo
 import androidx.work.WorkerParameters
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
+import io.github.swiftstagrime.termuxrunner.R
 import io.github.swiftstagrime.termuxrunner.data.automation.AutomationScheduler
 import io.github.swiftstagrime.termuxrunner.data.local.dao.AutomationDao
 import io.github.swiftstagrime.termuxrunner.data.local.dao.AutomationLogDao
 import io.github.swiftstagrime.termuxrunner.data.local.dao.ScriptDao
 import io.github.swiftstagrime.termuxrunner.data.local.entity.AutomationEntity
 import io.github.swiftstagrime.termuxrunner.data.local.entity.AutomationLogEntity
+import io.github.swiftstagrime.termuxrunner.data.repository.TermuxException
 import io.github.swiftstagrime.termuxrunner.domain.model.AutomationType
 import io.github.swiftstagrime.termuxrunner.domain.model.TriggerMode
 import io.github.swiftstagrime.termuxrunner.domain.model.triggerMode
@@ -35,6 +42,7 @@ class AutomationWorker
         companion object {
             const val WORK_NAME_PREFIX = "automation_worker_"
             private const val TAG = "AutomationWorker"
+            private const val FOREGROUND_NOTIFICATION_ID = 4203
 
             /**
              * Exit code recorded in the automation log when a run could not even be
@@ -123,12 +131,13 @@ class AutomationWorker
                 return Result.success()
             }
 
-            // Only record a completed run after the dispatch actually succeeded;
-            // a failed catch-up must not show up as "Last run: ..." without an
-            // exit code.
+            // The dispatch is fire-and-forget: startForegroundService() returning only
+            // proves the system accepted the request, not that Termux ran anything (a
+            // force-stopped Termux silently swallows it). The run itself is recorded by
+            // the result broadcast, which stores exit code and timestamp together, so a
+            // command that never reached Termux cannot masquerade as a completed run.
             val updatedAutomation =
                 automation.copy(
-                    lastRunTimestamp = System.currentTimeMillis(),
                     nextRunTimestamp = nextRun,
                     isEnabled = isEnabled,
                 )
@@ -139,6 +148,39 @@ class AutomationWorker
             }
 
             return Result.success()
+        }
+
+        /**
+         * The alarm path enqueues this worker expedited so a scheduled run starts
+         * promptly. WorkManager then requires a foreground notification, and without
+         * this override CoroutineWorker throws IllegalStateException("Not implemented")
+         * and the whole run fails before the script is ever dispatched.
+         */
+        override suspend fun getForegroundInfo(): ForegroundInfo {
+            val channelId = "automation_worker"
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                val channel =
+                    NotificationChannel(
+                        channelId,
+                        applicationContext.getString(R.string.automation_worker_channel),
+                        NotificationManager.IMPORTANCE_LOW,
+                    )
+                applicationContext
+                    .getSystemService(NotificationManager::class.java)
+                    .createNotificationChannel(channel)
+            }
+
+            val notification =
+                NotificationCompat
+                    .Builder(applicationContext, channelId)
+                    .setSmallIcon(R.drawable.ic_terminal_tile)
+                    .setContentTitle(applicationContext.getString(R.string.automation_worker_notification_title))
+                    .setContentText(applicationContext.getString(R.string.automation_worker_notification_text))
+                    .setOngoing(true)
+                    .build()
+
+            return ForegroundInfo(FOREGROUND_NOTIFICATION_ID, notification)
         }
 
         /**
@@ -196,14 +238,19 @@ class AutomationWorker
             )
 
             runCatching {
+                // Termux-specific failures carry a localized explanation; anything else
+                // only has its exception message, and a bare class name helps nobody.
+                val reason =
+                    when (error) {
+                        is TermuxException -> error.uiText.asString(applicationContext)
+                        else -> error.message ?: error::class.simpleName ?: "unknown error"
+                    }
                 automationLogDao.insertLog(
                     AutomationLogEntity(
                         automationId = automation.id,
                         timestamp = System.currentTimeMillis(),
                         exitCode = DISPATCH_FAILED_EXIT_CODE,
-                        message =
-                            "Could not start script: " +
-                                (error.message ?: error::class.simpleName ?: "unknown error"),
+                        message = "Could not start script: $reason",
                     ),
                 )
             }.onFailure { logError ->

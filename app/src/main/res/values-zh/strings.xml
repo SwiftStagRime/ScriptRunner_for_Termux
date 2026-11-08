@@ -233,6 +233,7 @@
     <!-- Repo errors -->
     <string name="error_termux_permission_missing">缺少 Termux "Run Command" 权限。</string>
     <string name="error_background_restriction">检测到后台限制。请为 Termux/Runner 关闭电池优化。</string>
+    <string name="error_termux_force_stopped">Termux 已被强制停止，因此命令未送达。请打开一次 Termux 以重新启用它。</string>
     <string name="error_find_overlay_manually">请手动找到 “显示在其他应用的上层” 选项。</string>
     <string name="error_open_settings_manually">无法打开设置。请手动打开 Android 设置。</string>
     <string name="error_decode_icon">无法解码图标文件。</string>
@@ -403,6 +404,12 @@
     <string name="automation_type_screen_off">屏幕关闭</string>
     <string name="automation_type_charging_started">开始充电</string>
     <string name="automation_boot_hint">设备每次启动时都将运行脚本。</string>
+    <string name="automation_event_hint">事件触发器需要 ScriptRunner 保持一个常驻前台服务，因此会持续显示一条进行中的通知。请为 ScriptRunner 关闭电池优化，否则息屏后触发器将不再触发。</string>
+    <string name="event_watcher_notification_title">自动化事件监听</string>
+    <string name="event_watcher_notification_text">正在监听屏幕与充电事件</string>
+    <string name="automation_worker_channel">正在运行自动化</string>
+    <string name="automation_worker_notification_title">正在运行自动化</string>
+    <string name="automation_worker_notification_text">正在 Termux 中启动计划脚本</string>
     <string name="automation_boot_next_run">每次启动时运行</string>
     <string name="automation_monthly_day_of_month">几号</string>
     <string name="automation_window_from">从 %1$s 开始</string>

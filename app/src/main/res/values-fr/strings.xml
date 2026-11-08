@@ -234,6 +234,7 @@
     <!-- Repo errors -->
     <string name="error_termux_permission_missing">La permission "Run Command" de Termux est manquante.</string>
     <string name="error_background_restriction">Restriction d\'arrière-plan détectée. Désactivez l\'optimisation de batterie pour Termux/Runner.</string>
+    <string name="error_termux_force_stopped">Termux a été arrêté de force, la commande n\'a donc pas été transmise. Ouvrez Termux une fois pour le réactiver.</string>
     <string name="error_find_overlay_manually">Veuillez trouver \'Afficher sur d\'autres applications\' manuellement.</string>
     <string name="error_open_settings_manually">Impossible d\'ouvrir les paramètres. Veuillez ouvrir les paramètres Android manuellement.</string>
     <string name="error_decode_icon">Impossible de décoder le fichier d\'icône.</string>
@@ -404,6 +405,12 @@
     <string name="automation_type_screen_off">Écran Éteint</string>
     <string name="automation_type_charging_started">Charge démarrée</string>
     <string name="automation_boot_hint">Le script s\'exécutera à chaque démarrage de l\'appareil.</string>
+    <string name="automation_event_hint">Les déclencheurs sur événement exigent que ScriptRunner maintienne un service de premier plan permanent ; une notification continue restera donc visible. Désactivez l\'optimisation de batterie pour ScriptRunner, sinon les déclencheurs cesseront de fonctionner écran éteint.</string>
+    <string name="event_watcher_notification_title">Surveillance des événements d\'automatisation</string>
+    <string name="event_watcher_notification_text">À l\'écoute des événements d\'écran et de charge</string>
+    <string name="automation_worker_channel">Automatisation en cours</string>
+    <string name="automation_worker_notification_title">Automatisation en cours</string>
+    <string name="automation_worker_notification_text">Démarrage du script planifié dans Termux</string>
     <string name="automation_boot_next_run">S\'exécute à chaque démarrage</string>
     <string name="automation_monthly_day_of_month">Jour du mois</string>
     <string name="automation_window_from">De %1$s</string>

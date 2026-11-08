@@ -24,6 +24,7 @@ import androidx.compose.material.icons.filled.BrightnessLow
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Power
 import androidx.compose.material.icons.filled.Repeat
 import androidx.compose.material.icons.filled.Schedule
@@ -416,6 +417,44 @@ private fun EventSourceSection(state: AutomationConfigState) {
                     )
                 }
             }
+        }
+
+        EventTriggerHint()
+    }
+}
+
+/**
+ * Event triggers only arrive through the runtime receiver in
+ * [io.github.swiftstagrime.termuxrunner.data.service.AutomationEventService], which has to
+ * stay a foreground service to survive. The user is told the cost up front: an ongoing
+ * notification, and battery optimization off for this app.
+ */
+@Composable
+private fun EventTriggerHint() {
+    Surface(
+        color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.15f),
+        shape = RoundedCornerShape(12.dp),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.secondary.copy(alpha = 0.3f)),
+    ) {
+        Row(
+            modifier =
+                Modifier
+                    .padding(horizontal = 16.dp, vertical = 12.dp)
+                    .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            Icon(
+                Icons.Default.Info,
+                null,
+                modifier = Modifier.size(20.dp),
+                tint = MaterialTheme.colorScheme.secondary,
+            )
+            Text(
+                text = stringResource(R.string.automation_event_hint),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
         }
     }
 }

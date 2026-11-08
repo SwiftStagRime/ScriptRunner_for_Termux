@@ -19,12 +19,18 @@ import io.github.swiftstagrime.termuxrunner.domain.model.AutomationType
 import io.github.swiftstagrime.termuxrunner.domain.model.TriggerMode
 import io.github.swiftstagrime.termuxrunner.domain.model.triggerMode
 
+/**
+ * Receives every event trigger: the screen events, the unlock broadcast and the
+ * power-connected broadcast.
+ *
+ * This receiver is registered at runtime by AutomationEventService rather than declared in
+ * the manifest. The system flags SCREEN_ON and SCREEN_OFF as registered-receiver-only and
+ * refuses USER_PRESENT to receivers outside the system, while the power broadcasts are
+ * implicit and not exempted from the API 26 manifest-receiver ban. A manifest entry for
+ * them would be dead configuration that silently never fires, which is exactly how this
+ * used to fail.
+ */
 class EventReceiver : BroadcastReceiver() {
-    companion object {
-        private const val TAG = "EventReceiver"
-        private const val OVERDUE_CATCH_UP_WORK_NAME = "overdue_automation_catch_up"
-    }
-
     override fun onReceive(
         context: Context,
         intent: Intent,
@@ -34,64 +40,14 @@ class EventReceiver : BroadcastReceiver() {
         // Charger plugged in: automations blocked on the charging condition may
         // now be able to run, so re-check overdue catch-ups right away.
         if (intent.action == Intent.ACTION_POWER_CONNECTED) {
-            enqueueOverdueCatchUp(context)
-            enqueueWorkerForType(context, AutomationType.CHARGING_STARTED)
+            EventAutomationDispatcher.enqueueOverdueCatchUp(context)
+            EventAutomationDispatcher.enqueueForType(context, AutomationType.CHARGING_STARTED)
             return
         }
 
-        val eventAutomationType = mapActionToType(intent) ?: return
+        val eventAutomationType = EventAutomationDispatcher.mapActionToType(intent) ?: return
 
-        enqueueWorkerForType(context, eventAutomationType)
-    }
-
-    private fun enqueueOverdueCatchUp(context: Context) {
-        val workRequest = OneTimeWorkRequestBuilder<OverdueAutomationWorker>().build()
-        WorkManager.getInstance(context).enqueueUniqueWork(
-            OVERDUE_CATCH_UP_WORK_NAME,
-            ExistingWorkPolicy.KEEP,
-            workRequest,
-        )
-    }
-
-    private fun mapActionToType(intent: Intent): AutomationType? =
-        when (intent.action) {
-            Intent.ACTION_SCREEN_ON, "android.intent.action.USER_PRESENT" -> AutomationType.SCREEN_ON
-            "android.intent.action.SCREEN_OFF" -> AutomationType.SCREEN_OFF
-
-            else -> null
-        }
-
-    private fun enqueueWorkerForType(
-        context: Context,
-        automationType: AutomationType,
-    ) {
-        val workRequest =
-            OneTimeWorkRequestBuilder<EventAutomationWorker>()
-                .setInputData(workDataOf("event_type" to automationType.name))
-                .build()
-
-        // A damaged charger can flap POWER_CONNECTED several times in seconds;
-        // a fixed name + REPLACE collapses that burst into one pending run.
-        // Screen events stay per-occurrence so quick on/off sequences all fire.
-        val unique = automationType == AutomationType.CHARGING_STARTED
-        val name =
-            if (unique) {
-                "event_${automationType.name}"
-            } else {
-                "event_${automationType.name}_${System.currentTimeMillis()}"
-            }
-        val policy =
-            if (unique) {
-                ExistingWorkPolicy.REPLACE
-            } else {
-                ExistingWorkPolicy.APPEND
-            }
-
-        WorkManager.getInstance(context).enqueueUniqueWork(
-            name,
-            policy,
-            workRequest,
-        )
+        EventAutomationDispatcher.enqueueForType(context, eventAutomationType)
     }
 }
 

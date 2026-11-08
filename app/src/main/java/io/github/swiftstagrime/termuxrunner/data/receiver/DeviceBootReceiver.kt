@@ -59,6 +59,7 @@ class DeviceBootReceiver : BroadcastReceiver() {
         scope.launch {
             try {
                 scheduler.ensureSweepEnqueued()
+                scheduler.reconcileEventWatcher()
 
                 val allAutomations = automationDao.getEnabledAutomations()
                 allAutomations.forEach { automation ->

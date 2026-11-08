@@ -25,6 +25,7 @@ class ScriptRunnerApp :
         super.onCreate()
         keyManager.prefetch()
         automationScheduler.ensureSweepEnqueued()
+        automationScheduler.reconcileEventWatcher()
     }
 
     override val workManagerConfiguration: Configuration

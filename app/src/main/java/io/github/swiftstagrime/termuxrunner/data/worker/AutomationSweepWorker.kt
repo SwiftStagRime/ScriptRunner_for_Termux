@@ -62,6 +62,9 @@ class AutomationSweepWorker
 
         override suspend fun doWork(): Result {
             val now = System.currentTimeMillis()
+            // The alarm chain is not the only link that can break: the event watcher can be
+            // killed by the OS or refused a background start, so the sweep re-arms it too.
+            scheduler.reconcileEventWatcher()
             val overdue =
                 automationDao.getEnabledAutomations().filter {
                     it.type.triggerMode == TriggerMode.SCHEDULE &&

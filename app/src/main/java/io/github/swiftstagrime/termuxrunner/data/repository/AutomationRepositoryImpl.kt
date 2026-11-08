@@ -39,6 +39,7 @@ class AutomationRepositoryImpl
             val insertedId = dao.insertAutomation(entity)
             val entityWithId = entity.copy(id = insertedId.toInt())
             scheduler.schedule(entityWithId)
+            scheduler.reconcileEventWatcher()
         }
 
         override suspend fun updateAutomation(automation: Automation) {
@@ -46,12 +47,14 @@ class AutomationRepositoryImpl
             dao.updateAutomation(entity)
             scheduler.cancel(entity)
             scheduler.schedule(entity)
+            scheduler.reconcileEventWatcher()
         }
 
         override suspend fun deleteAutomation(automation: Automation) {
             val entity = automation.toEntity()
             scheduler.cancel(entity)
             dao.deleteAutomation(entity)
+            scheduler.reconcileEventWatcher()
         }
 
         override suspend fun toggleAutomation(
@@ -67,6 +70,7 @@ class AutomationRepositoryImpl
             } else {
                 scheduler.cancel(updated)
             }
+            scheduler.reconcileEventWatcher()
         }
 
         override suspend fun getAutomationsForScript(scriptId: Int): List<Automation> =

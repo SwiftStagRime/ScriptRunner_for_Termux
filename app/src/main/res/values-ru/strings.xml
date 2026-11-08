@@ -232,6 +232,7 @@
     <!-- Repo errors -->
     <string name="error_termux_permission_missing">Отсутствует разрешение "Run Command" для Termux.</string>
     <string name="error_background_restriction">Фоновое выполнение ограничено. Отключите экономию батареи для Termux/Runner.</string>
+    <string name="error_termux_force_stopped">Termux был остановлен принудительно, поэтому команда не была передана. Откройте Termux один раз, чтобы снова его включить.</string>
     <string name="error_find_overlay_manually">Пожалуйста, найдите \'Поверх других приложений\' вручную.</string>
     <string name="error_open_settings_manually">Не удалось открыть настройки. Пожалуйста, откройте настройки Android вручную.</string>
     <string name="error_decode_icon">Не удалось декодировать файл иконки.</string>
@@ -402,6 +403,12 @@
     <string name="automation_type_screen_off">Экран выключен</string>
     <string name="automation_type_charging_started">Зарядка начата</string>
     <string name="automation_boot_hint">Скрипт будет запускаться каждый раз при включении устройства.</string>
+    <string name="automation_event_hint">Для событийных триггеров ScriptRunner должен держать постоянный сервис на переднем плане, поэтому неснимаемое уведомление останется на экране. Отключите экономию батареи для ScriptRunner, иначе триггеры перестанут срабатывать при выключенном экране.</string>
+    <string name="event_watcher_notification_title">Наблюдатель событий автоматизации</string>
+    <string name="event_watcher_notification_text">Ожидание событий экрана и зарядки</string>
+    <string name="automation_worker_channel">Выполнение автоматизации</string>
+    <string name="automation_worker_notification_title">Выполнение автоматизации</string>
+    <string name="automation_worker_notification_text">Запуск запланированного скрипта в Termux</string>
     <string name="automation_boot_next_run">Запускается при каждом включении</string>
     <string name="automation_monthly_day_of_month">День месяца</string>
     <string name="automation_window_from">С %1$s</string>

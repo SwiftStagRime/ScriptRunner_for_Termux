@@ -16,10 +16,15 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import io.github.swiftstagrime.termuxrunner.data.local.dao.AutomationDao
 import io.github.swiftstagrime.termuxrunner.data.local.entity.AutomationEntity
 import io.github.swiftstagrime.termuxrunner.data.receiver.AutomationReceiver
+import io.github.swiftstagrime.termuxrunner.data.service.AutomationEventService
 import io.github.swiftstagrime.termuxrunner.data.worker.AutomationSweepWorker
 import io.github.swiftstagrime.termuxrunner.data.worker.AutomationWorker
 import io.github.swiftstagrime.termuxrunner.domain.model.AutomationType
 import io.github.swiftstagrime.termuxrunner.domain.util.AutomationTimeCalculator
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -32,6 +37,26 @@ class AutomationScheduler
         private val automationDao: AutomationDao,
     ) {
         private val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+
+        private val watcherScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+
+        /**
+         * Starts or stops the event watcher so that it runs exactly while an enabled
+         * automation listens for an event trigger. Event broadcasts reach only a runtime
+         * receiver, and that receiver lives in [AutomationEventService], so the watcher is
+         * what makes screen and charging automations fire at all.
+         */
+        fun reconcileEventWatcher() {
+            watcherScope.launch {
+                val needsWatcher =
+                    automationDao.getEnabledAutomations().any { it.type.isEventBased }
+                if (needsWatcher) {
+                    AutomationEventService.start(context)
+                } else {
+                    AutomationEventService.stop(context)
+                }
+            }
+        }
 
         suspend fun schedule(automation: AutomationEntity) {
             if (!automation.isEnabled) return

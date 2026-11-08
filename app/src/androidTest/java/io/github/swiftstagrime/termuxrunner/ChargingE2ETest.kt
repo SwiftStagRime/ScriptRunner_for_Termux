@@ -21,7 +21,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNotNull
 import org.junit.Assume.assumeTrue
 import org.junit.Before
 import org.junit.Rule
@@ -57,7 +56,10 @@ class ChargingE2ETest {
         hiltRule.inject()
         context = ApplicationProvider.getApplicationContext()
         // The test app's WorkManager provider has no Hilt factory, so arm
-        // WorkManager with one before the receiver enqueues Hilt workers.
+        // WorkManager with one before the receiver enqueues Hilt workers. The
+        // event watcher the repository starts on save can reach WorkManager first
+        // and lock in the default configuration, so drop that instance first.
+        resetWorkManager()
         WorkManager.initialize(
             context,
             Configuration.Builder().setWorkerFactory(workerFactory).build(),
@@ -109,7 +111,7 @@ class ChargingE2ETest {
 
             try {
                 // POWER_CONNECTED is protected from app-sent broadcasts, so
-                // deliver it straight to the receiver the manifest wires it to.
+                // deliver it straight to the receiver the event watcher registers.
                 EventReceiver().onReceive(
                     context,
                     Intent(Intent.ACTION_POWER_CONNECTED).setPackage(context.packageName),
@@ -122,9 +124,19 @@ class ChargingE2ETest {
                 }
                 assertEquals("CHARGING_E2E_OK", markerFile.readText().trim())
 
+                // The run is recorded when Termux reports back, not when the command is
+                // handed to the system, so give the result broadcast a moment to land.
                 val automation =
-                    automationRepository.getAutomationsForScript(scriptId).firstOrNull()
-                assertNotNull(automation?.lastRunTimestamp)
+                    withTimeout(RESULT_TIMEOUT_MS.milliseconds) {
+                        var reported: Automation? = null
+                        while (reported?.lastExitCode == null) {
+                            reported =
+                                automationRepository.getAutomationsForScript(scriptId).firstOrNull()
+                            delay(250.milliseconds)
+                        }
+                        reported
+                    }
+                assertEquals(0, automation?.lastExitCode)
             } finally {
                 markerFile.delete()
                 val automations = automationRepository.getAutomationsForScript(scriptId)
@@ -133,7 +145,34 @@ class ChargingE2ETest {
             }
         }
 
+    /**
+     * Clears WorkManager's cached instance so [WorkManager.initialize] can install the
+     * Hilt worker factory. WorkManager 2.11 refuses to re-initialize, so a component
+     * that reached it first (the event watcher the repository starts on save) would
+     * otherwise pin the default configuration and break Hilt worker creation.
+     */
+    private fun resetWorkManager() {
+        if (!WorkManager.isInitialized()) return
+        for (holder in listOf<Any?>(WorkManager.Companion, null)) {
+            runCatching {
+                WorkManager::class.java
+                    .declaredFields
+                    .filter { it.type == WorkManager::class.java }
+                    .forEach { field ->
+                        field.isAccessible = true
+                        if (field.get(holder) != null) field.set(holder, null)
+                    }
+            }
+        }
+    }
+
     companion object {
         const val TERMUX_TIMEOUT_MS = 60_000L
+
+        /**
+         * Termux reports the exit code only after the command's process exits, which
+         * can lag behind the script's own side effects by several seconds.
+         */
+        const val RESULT_TIMEOUT_MS = 45_000L
     }
 }

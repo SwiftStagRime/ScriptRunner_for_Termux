@@ -173,7 +173,10 @@ class AutomationWorkerTest {
         coVerify(exactly = 1) { runScriptUseCase(any(), any(), any(), any(), any()) }
 
         val updated = runBlocking { database.automationDao().getAutomationById(1) }
-        assertNotNull(updated?.lastRunTimestamp)
+        // A dispatch alone is not a completed run: last run and exit code are written by
+        // Termux's result broadcast, so a command the system swallowed cannot pose as one.
+        assertNull(updated?.lastRunTimestamp)
+        assertNull(updated?.lastExitCode)
         val next = updated?.nextRunTimestamp
         assertNotNull(next)
         // All missed slots are skipped: first slot after now
@@ -250,11 +253,14 @@ class AutomationWorkerTest {
         val triggerAt = alarm?.triggerAtTime
         assertTrue(triggerAt in (now + 50 * 60 * 1000)..(now + 70 * 60 * 1000))
 
-        // The failure is recorded in the automation log
+        // The failure is recorded in the automation log with a readable reason
         val logs = runBlocking { database.automationLogDao().getLogsForAutomation(1).first() }
         assertEquals(1, logs.size)
         assertEquals(AutomationWorker.DISPATCH_FAILED_EXIT_CODE, logs.first().exitCode)
-        assertNotNull(logs.first().message)
+        assertEquals(
+            "Could not start script: " + context.getString(R.string.error_background_restriction),
+            logs.first().message,
+        )
     }
 
     @Test
@@ -296,7 +302,8 @@ class AutomationWorkerTest {
         val updated = runBlocking { database.automationDao().getAutomationById(1) }
         // Event automations have no next scheduled slot and must not be retired
         assertTrue(updated?.isEnabled == true)
-        assertNotNull(updated?.lastRunTimestamp)
+        // The result broadcast owns "last run": the worker only dispatches
+        assertNull(updated?.lastRunTimestamp)
         assertNull(updated?.nextRunTimestamp)
     }
 
@@ -311,6 +318,46 @@ class AutomationWorkerTest {
         runWorker(1)
 
         coVerify(exactly = 0) { runScriptUseCase(any(), any(), any(), any(), any()) }
+    }
+
+    @Test
+    fun `expedited runs supply foreground info`() {
+        // The alarm path enqueues the worker expedited; without foreground info
+        // CoroutineWorker throws IllegalStateException and the run never happens.
+        insertAutomation(
+            id = 1,
+            type = AutomationType.PERIODIC,
+            intervalMillis = 60 * 1000,
+            nextRunTimestamp = System.currentTimeMillis() - 10_000,
+        )
+
+        val factory =
+            object : WorkerFactory() {
+                override fun createWorker(
+                    appContext: Context,
+                    workerClassName: String,
+                    workerParameters: WorkerParameters,
+                ): ListenableWorker =
+                    AutomationWorker(
+                        appContext,
+                        workerParameters,
+                        database.automationDao(),
+                        database.automationLogDao(),
+                        database.scriptDao(),
+                        runScriptUseCase,
+                        scheduler,
+                    )
+            }
+        val worker =
+            TestListenableWorkerBuilder<AutomationWorker>(context)
+                .setInputData(workDataOf("automation_id" to 1))
+                .setWorkerFactory(factory)
+                .build() as AutomationWorker
+
+        val info = runBlocking { worker.getForegroundInfo() }
+
+        assertNotNull(info.notification)
+        assertTrue(info.notification.channelId.isNotEmpty())
     }
 
     private fun runWorker(automationId: Int) {

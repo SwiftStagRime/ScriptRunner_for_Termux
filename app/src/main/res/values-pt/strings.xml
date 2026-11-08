@@ -234,6 +234,7 @@
     <!-- Repo errors -->
     <string name="error_termux_permission_missing">Permissão "Run Command" do Termux está faltando.</string>
     <string name="error_background_restriction">Restrição de segundo plano detectada. Desative a otimização de bateria para Termux/Runner.</string>
+    <string name="error_termux_force_stopped">O Termux foi parado à força, então o comando não foi entregue. Abra o Termux uma vez para reativá-lo.</string>
     <string name="error_find_overlay_manually">Por favor, encontre \'Sobrepor a outros apps\' manualmente.</string>
     <string name="error_open_settings_manually">Não foi possível abrir as configurações. Abra as configurações do Android manualmente.</string>
     <string name="error_decode_icon">Não foi possível decodificar o arquivo de ícone.</string>
@@ -404,6 +405,12 @@
     <string name="automation_type_screen_off">Tela Desligada</string>
     <string name="automation_type_charging_started">Carga iniciada</string>
     <string name="automation_boot_hint">O script será executado sempre que o dispositivo for iniciado.</string>
+    <string name="automation_event_hint">Os gatilhos de evento exigem que o ScriptRunner mantenha um serviço permanente em primeiro plano, então uma notificação contínua ficará visível. Desative a otimização de bateria para o ScriptRunner; caso contrário, os gatilhos deixarão de funcionar com a tela desligada.</string>
+    <string name="event_watcher_notification_title">Observador de eventos de automação</string>
+    <string name="event_watcher_notification_text">Escutando eventos de tela e de carregamento</string>
+    <string name="automation_worker_channel">Automação em execução</string>
+    <string name="automation_worker_notification_title">Automação em execução</string>
+    <string name="automation_worker_notification_text">Iniciando o script agendado no Termux</string>
     <string name="automation_boot_next_run">Executa em cada inicialização</string>
     <string name="automation_monthly_day_of_month">Dia do mês</string>
     <string name="automation_window_from">De %1$s</string>

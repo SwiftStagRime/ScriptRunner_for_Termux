@@ -3,10 +3,12 @@ package io.github.swiftstagrime.termuxrunner
 import android.app.Application
 import android.app.PendingIntent
 import android.content.Context
+import android.content.pm.ApplicationInfo
 import android.content.pm.PackageInfo
 import android.os.PowerManager
 import androidx.test.core.app.ApplicationProvider
 import io.github.swiftstagrime.termuxrunner.data.repository.TermuxBackgroundRestrictionException
+import io.github.swiftstagrime.termuxrunner.data.repository.TermuxForceStoppedException
 import io.github.swiftstagrime.termuxrunner.data.repository.TermuxNotInstalledException
 import io.github.swiftstagrime.termuxrunner.data.repository.TermuxRepositoryImpl
 import io.mockk.every
@@ -14,6 +16,7 @@ import io.mockk.spyk
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertFalse
 import junit.framework.TestCase.assertNotNull
+import junit.framework.TestCase.assertNull
 import junit.framework.TestCase.assertTrue
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertThrows
@@ -123,6 +126,45 @@ class TermuxRepositoryTest {
         assertNotNull(intent)
         assertTrue(intent.hasExtra(TermuxRepositoryImpl.EXTRA_SESSION_ACTION))
         assertEquals("0", intent.getStringExtra(TermuxRepositoryImpl.EXTRA_SESSION_ACTION))
+    }
+
+    @Test
+    fun `runCommand throws ForceStoppedException when Termux sits in the stopped state`() {
+        installTermux(stopped = true)
+
+        assertThrows(TermuxForceStoppedException::class.java) {
+            repository.runCommand("ls", true, "0", null, 1, "Test", null)
+        }
+        assertNull(shadowOf(context as Application).nextStartedService)
+    }
+
+    @Test
+    fun `runCommand dispatches when Termux has been launched`() {
+        installTermux(stopped = false)
+
+        repository.runCommand("ls", true, "0", null, 1, "Test", null)
+
+        assertNotNull(shadowOf(context as Application).nextStartedService)
+    }
+
+    private fun installTermux(stopped: Boolean) {
+        val applicationInfo =
+            ApplicationInfo().apply {
+                packageName = TermuxRepositoryImpl.TERMUX_PACKAGE
+                flags =
+                    if (stopped) {
+                        flags or ApplicationInfo.FLAG_STOPPED
+                    } else {
+                        flags and ApplicationInfo.FLAG_STOPPED.inv()
+                    }
+            }
+        shadowPackageManager.installPackage(
+            PackageInfo().apply {
+                packageName = TermuxRepositoryImpl.TERMUX_PACKAGE
+                this.applicationInfo = applicationInfo
+            },
+        )
+        shadowOf(context as Application).grantPermissions(TermuxRepositoryImpl.PERMISSION_RUN_COMMAND)
     }
 
     @Test

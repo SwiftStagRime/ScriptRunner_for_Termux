@@ -233,6 +233,7 @@
     <!-- Repo errors -->
     <string name="error_termux_permission_missing">Falta el permiso "Run Command" de Termux.</string>
     <string name="error_background_restriction">Restricción de fondo detectada. Desactiva la optimización de batería para Termux/Runner.</string>
+    <string name="error_termux_force_stopped">Termux se detuvo forzosamente, así que la orden no se envió. Abre Termux una vez para volver a activarlo.</string>
     <string name="error_find_overlay_manually">Por favor, encuentra \'Mostrar sobre otras aplicaciones\' manualmente.</string>
     <string name="error_open_settings_manually">No se pudieron abrir los ajustes. Por favor, abre los ajustes de Android manualmente.</string>
     <string name="error_decode_icon">No se pudo decodificar el archivo de icono.</string>
@@ -403,6 +404,12 @@
     <string name="automation_type_screen_off">Pantalla Apagada</string>
     <string name="automation_type_charging_started">Carga iniciada</string>
     <string name="automation_boot_hint">El script se ejecutará cada vez que el dispositivo se inicie.</string>
+    <string name="automation_event_hint">Los disparadores de eventos requieren que ScriptRunner mantenga un servicio en primer plano permanente, así que quedará visible una notificación continua. Desactiva la optimización de batería para ScriptRunner; de lo contrario, los disparadores dejarán de funcionar con la pantalla apagada.</string>
+    <string name="event_watcher_notification_title">Observador de eventos de automatización</string>
+    <string name="event_watcher_notification_text">Escuchando eventos de pantalla y de carga</string>
+    <string name="automation_worker_channel">Automatización en ejecución</string>
+    <string name="automation_worker_notification_title">Automatización en ejecución</string>
+    <string name="automation_worker_notification_text">Iniciando el script programado en Termux</string>
     <string name="automation_boot_next_run">Se ejecuta en cada arranque</string>
     <string name="automation_monthly_day_of_month">Día del mes</string>
     <string name="automation_window_from">Desde %1$s</string>

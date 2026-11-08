@@ -243,6 +243,7 @@
     <!-- Repo errors -->
     <string name="error_termux_permission_missing">Termux Run Command permission is missing.</string>
     <string name="error_background_restriction">Background restriction prevented execution. Disable Battery Optimizations for Termux/Runner.</string>
+    <string name="error_termux_force_stopped">Termux was force-stopped, so the command was not delivered. Open Termux once to re-enable it.</string>
     <string name="error_find_overlay_manually">Please find \'Display over other apps\' manually.</string>
     <string name="error_open_settings_manually">Could not open settings. Please open Android Settings manually.</string>
     <string name="error_decode_icon">Could not decode icon file.</string>
@@ -418,6 +419,12 @@
     <string name="automation_type_charging_started">Charging Started</string>
     <string name="automation_type_unknown">Unknown</string>
     <string name="automation_boot_hint">Script will run every time the device boots up.</string>
+    <string name="automation_event_hint">Event triggers need ScriptRunner to keep a persistent foreground service running, so an ongoing notification stays visible. Disable battery optimization for ScriptRunner, otherwise the triggers stop firing when the screen is off.</string>
+    <string name="event_watcher_notification_title">Automation event watcher</string>
+    <string name="event_watcher_notification_text">Listening for screen and charging events</string>
+    <string name="automation_worker_channel">Running automation</string>
+    <string name="automation_worker_notification_title">Running automation</string>
+    <string name="automation_worker_notification_text">Starting the scheduled script in Termux</string>
     <string name="automation_boot_next_run">Runs on every boot</string>
     <string name="automation_monthly_day_of_month">Day of month</string>
     <string name="automation_window_from">From %1$s</string>

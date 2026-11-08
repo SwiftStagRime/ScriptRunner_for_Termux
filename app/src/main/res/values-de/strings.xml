@@ -236,6 +236,7 @@
     <!-- Repo errors -->
     <string name="error_termux_permission_missing">Termux "Run Command" Berechtigung fehlt.</string>
     <string name="error_background_restriction">Hintergrundbeschränkung erkannt. Deaktivieren Sie die Akku-Optimierung für Termux/Runner.</string>
+    <string name="error_termux_force_stopped">Termux wurde erzwungen beendet, daher wurde der Befehl nicht übermittelt. Öffnen Sie Termux einmal, um es wieder zu aktivieren.</string>
     <string name="error_find_overlay_manually">Bitte finden Sie \'Über anderen Apps einblenden\' manuell.</string>
     <string name="error_open_settings_manually">Einstellungen konnten nicht geöffnet werden. Bitte öffnen Sie die Android-Einstellungen manuell.</string>
     <string name="error_decode_icon">Symboldatei konnte nicht dekodiert werden.</string>
@@ -407,6 +408,12 @@
     <string name="automation_type_screen_off">Bildschirm aus</string>
     <string name="automation_type_charging_started">Laden gestartet</string>
     <string name="automation_boot_hint">Das Skript wird jedes Mal ausgeführt, wenn das Gerät startet.</string>
+    <string name="automation_event_hint">Ereignis-Auslöser erfordern, dass ScriptRunner einen dauerhaften Vordergrunddienst ausführt, daher bleibt eine fortlaufende Benachrichtigung sichtbar. Deaktivieren Sie die Akku-Optimierung für ScriptRunner, sonst feuern die Auslöser bei ausgeschaltetem Bildschirm nicht mehr.</string>
+    <string name="event_watcher_notification_title">Ereignisüberwachung für Automationen</string>
+    <string name="event_watcher_notification_text">Belauscht Bildschirm- und Ladeereignisse</string>
+    <string name="automation_worker_channel">Automation läuft</string>
+    <string name="automation_worker_notification_title">Automation läuft</string>
+    <string name="automation_worker_notification_text">Geplantes Skript wird in Termux gestartet</string>
     <string name="automation_boot_next_run">Wird bei jedem Start ausgeführt</string>
     <string name="automation_monthly_day_of_month">Tag des Monats</string>
     <string name="automation_window_from">Von %1$s</string>
