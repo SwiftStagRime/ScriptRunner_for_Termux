@@ -304,4 +304,21 @@ class AutomationTimeCalculatorTest {
 
         assertNull(AutomationTimeCalculator.calculateNextRun(entity))
     }
+
+    @Test
+    fun `event-based types have no scheduled next run`() {
+        listOf(
+            AutomationType.SCREEN_ON,
+            AutomationType.SCREEN_OFF,
+            AutomationType.CHARGING_STARTED,
+        ).forEach { type ->
+            val entity =
+                createPeriodicEntity().copy(
+                    type = type,
+                    scheduledTimestamp = 1_000_000,
+                    nextRunTimestamp = null,
+                )
+            assertNull(AutomationTimeCalculator.calculateNextRun(entity, fromTime = 500_000))
+        }
+    }
 }

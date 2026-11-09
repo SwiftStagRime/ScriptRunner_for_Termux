@@ -189,7 +189,7 @@
     <string name="label_key">Ключ</string>
     <string name="label_value">Значение</string>
     <string name="placeholder_value">12345</string>
-    <string name="adb_code">Имя код ADB (по умолчанию его нет)</string>
+    <string name="adb_code">Код триггера (пусто = запуск извне невозможен)</string>
     <string name="cd_remove">Удалить</string>
     <string name="reliability_monitoring">Надежность и Мониторинг</string>
     <string name="auto_restart_lazarus">Автоперезапуск (Lazarus)</string>
@@ -232,6 +232,7 @@
     <!-- Repo errors -->
     <string name="error_termux_permission_missing">Отсутствует разрешение "Run Command" для Termux.</string>
     <string name="error_background_restriction">Фоновое выполнение ограничено. Отключите экономию батареи для Termux/Runner.</string>
+    <string name="error_termux_force_stopped">Termux был остановлен принудительно, поэтому команда не была передана. Откройте Termux один раз, чтобы снова его включить.</string>
     <string name="error_find_overlay_manually">Пожалуйста, найдите \'Поверх других приложений\' вручную.</string>
     <string name="error_open_settings_manually">Не удалось открыть настройки. Пожалуйста, откройте настройки Android вручную.</string>
     <string name="error_decode_icon">Не удалось декодировать файл иконки.</string>
@@ -343,6 +344,10 @@
     <string name="automation_next_run_format">Следующий запуск: %s</string>
     <string name="automation_last_run_format">Последний запуск: %s</string>
     <string name="automation_running_soon">Запуск в ближайшее время</string>
+    <string name="automation_waiting_for">Ожидание: %1$s</string>
+    <string name="automation_wait_wifi">WiFi</string>
+    <string name="automation_wait_charging">зарядку</string>
+    <string name="automation_wait_battery">уровень заряда</string>
     <string name="automation_never_run">Ни разу не запускался</string>
     <string name="automation_not_scheduled">Не запланировано</string>
     <string name="status_success">Успешно</string>
@@ -396,11 +401,14 @@
     <string name="automation_type_random_delay">Случайная задержка</string>
     <string name="automation_type_screen_on">Экран включён</string>
     <string name="automation_type_screen_off">Экран выключен</string>
-    <string name="automation_type_network_connected">Сеть подключена</string>
-    <string name="automation_type_network_disconnected">Сеть отключена</string>
-    <string name="automation_type_usb_connected">USB подключён</string>
-    <string name="automation_type_usb_disconnected">USB отключён</string>
+    <string name="automation_type_charging_started">Зарядка начата</string>
     <string name="automation_boot_hint">Скрипт будет запускаться каждый раз при включении устройства.</string>
+    <string name="automation_event_hint">Для событийных триггеров ScriptRunner должен держать постоянный сервис на переднем плане, поэтому неснимаемое уведомление останется на экране. Отключите экономию батареи для ScriptRunner, иначе триггеры перестанут срабатывать при выключенном экране.</string>
+    <string name="event_watcher_notification_title">Наблюдатель событий автоматизации</string>
+    <string name="event_watcher_notification_text">Ожидание событий экрана и зарядки</string>
+    <string name="automation_worker_channel">Выполнение автоматизации</string>
+    <string name="automation_worker_notification_title">Выполнение автоматизации</string>
+    <string name="automation_worker_notification_text">Запуск запланированного скрипта в Termux</string>
     <string name="automation_boot_next_run">Запускается при каждом включении</string>
     <string name="automation_monthly_day_of_month">День месяца</string>
     <string name="automation_window_from">С %1$s</string>
@@ -430,7 +438,7 @@
 
     <!-- Custom theme -->
     <string name="custom_themes_title">Пользовательские темы</string>
-    <string name="new_theme_label">Новая Тема</string>
+    <string name="new_theme_label">Новая тема</string>
     <string name="theme_name_label">Название темы</string>
     <string name="dark_mode_label">Палитра темной темы</string>
     <string name="colors_section_label">Цвета палитры</string>
@@ -503,5 +511,51 @@
     <string name="webhook_stop_server">Остановить сервер</string>
     <string name="copied_label">Скопировано!</string>
     <string name="execution_history_label">История выполнения</string>
-
+    <string name="automation_type_unknown">Неизвестный</string>
+    <!-- Chain editor -->
+    <string name="chain_editor_title">Редактор цепочек</string>
+    <string name="chain_editor_general">Общие</string>
+    <string name="chain_editor_trigger">Триггер</string>
+    <string name="chain_editor_steps">Шаги</string>
+    <string name="chain_name_label">Название цепочки</string>
+    <string name="chain_no_steps">Шаги не настроены. Нажмите +, чтобы добавить шаг.</string>
+    <string name="chain_add_step">Добавить шаг</string>
+    <string name="chain_step_number">Шаг %1$d</string>
+    <string name="chain_target_automation">Целевая автоматизация</string>
+    <string name="chain_select_target">Выберите целевую автоматизацию</string>
+    <string name="chain_on_success">При успехе</string>
+    <string name="chain_on_failure">При ошибке</string>
+    <string name="chain_always">Всегда</string>
+    <!-- Execution history -->
+    <string name="exec_history_for">История: %1$s</string>
+    <string name="exec_history_empty">Нет записей истории</string>
+    <string name="exec_history_clear_30">Очистить за 30 дней</string>
+    <string name="exec_history_clear_all">Очистить всю историю</string>
+    <string name="exec_history_args">Аргументы: %1$s</string>
+    <string name="source_manual">Вручную</string>
+    <string name="source_automation">Автоматизация</string>
+    <string name="source_tile">Плитка</string>
+    <string name="source_widget">Виджет</string>
+    <string name="source_shortcut">Ярлык</string>
+    <!-- Code versions -->
+    <string name="versions_title">Версии кода</string>
+    <string name="versions_empty">Версии ещё не сохранены</string>
+    <string name="versions_restore_title">Восстановить версию</string>
+    <string name="versions_restore_body">Текущий код будет сохранён как новая версия перед восстановлением.</string>
+    <string name="versions_restore">Восстановить</string>
+    <string name="versions_default_label">Версия</string>
+    <string name="versions_delete_title">Удалить версию</string>
+    <string name="versions_delete_body">Удалить эту версию? Это действие нельзя отменить.</string>
+    <!-- Widget configuration -->
+    <string name="widget_add_script">Добавить скрипт</string>
+    <string name="cd_done">Готово</string>
+    <!-- Misc -->
+    <string name="cd_code_versions">Версии кода</string>
+    <string name="category_label">Категория</string>
+    <string name="theme_default_name">Новая тема</string>
+    <string name="widget_config_title">Настройка виджета</string>
+    <string name="widget_selected_scripts">Выбранные скрипты (%1$d/5)</string>
+    <string name="widget_unknown_script">Неизвестный скрипт</string>
+    <string name="webhook_notification_title">Webhook-сервер запущен</string>
+    <string name="webhook_notification_port">Порт: %1$d</string>
 </resources>

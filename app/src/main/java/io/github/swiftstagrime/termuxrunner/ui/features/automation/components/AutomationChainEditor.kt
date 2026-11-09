@@ -54,9 +54,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import io.github.swiftstagrime.termuxrunner.R
 import io.github.swiftstagrime.termuxrunner.domain.model.Automation
 import io.github.swiftstagrime.termuxrunner.domain.model.AutomationChain
 import io.github.swiftstagrime.termuxrunner.domain.model.ChainCondition
@@ -86,7 +89,7 @@ fun AutomationChainEditorDialog(
             TopAppBar(
                 title = {
                     Text(
-                        text = "Chain Editor",
+                        text = stringResource(R.string.chain_editor_title),
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.SemiBold,
                     )
@@ -152,11 +155,11 @@ private fun ChainNameField(
     value: String,
     onValueChange: (String) -> Unit,
 ) {
-    ConfigSection(title = "GENERAL") {
+    ConfigSection(title = stringResource(R.string.chain_editor_general)) {
         androidx.compose.material3.TextField(
             value = value,
             onValueChange = onValueChange,
-            label = { Text("Chain Name") },
+            label = { Text(stringResource(R.string.chain_name_label)) },
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(12.dp),
             colors = chainEditorTextFieldColors(),
@@ -166,7 +169,7 @@ private fun ChainNameField(
 
 @Composable
 private fun TriggerSection(triggerAutomationLabel: String) {
-    ConfigSection(title = "TRIGGER") {
+    ConfigSection(title = stringResource(R.string.chain_editor_trigger)) {
         Surface(
             color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.15f),
             shape = RoundedCornerShape(12.dp),
@@ -191,6 +194,9 @@ private fun TriggerSection(triggerAutomationLabel: String) {
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurface,
                     fontWeight = FontWeight.Medium,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f, fill = false),
                 )
             }
         }
@@ -202,14 +208,14 @@ private fun StepsSection(
     steps: MutableList<ChainStep>,
     availableAutomations: List<Automation>,
 ) {
-    ConfigSection(title = "STEPS") {
+    ConfigSection(title = stringResource(R.string.chain_editor_steps)) {
         if (steps.isEmpty()) {
             Surface(
                 color = MaterialTheme.colorScheme.surfaceContainerLowest,
                 shape = RoundedCornerShape(16.dp),
             ) {
                 Text(
-                    text = "No steps configured. Tap + to add a step.",
+                    text = stringResource(R.string.chain_no_steps),
                     modifier = Modifier.padding(24.dp),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -253,7 +259,7 @@ private fun StepsSection(
         ) {
             Icon(Icons.Default.Add, null, modifier = Modifier.size(18.dp))
             Spacer(modifier = Modifier.width(8.dp))
-            Text("Add Step")
+            Text(stringResource(R.string.chain_add_step))
         }
     }
 }
@@ -287,7 +293,7 @@ private fun ChainStepCard(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
-                    text = "Step ${index + 1}",
+                    text = stringResource(R.string.chain_step_number, index + 1),
                     style = MaterialTheme.typography.labelLarge,
                     color = MaterialTheme.colorScheme.primary,
                     fontWeight = FontWeight.Bold,
@@ -338,10 +344,10 @@ private fun TargetAutomationDropdown(
         onExpandedChange = { expanded = !expanded },
     ) {
         OutlinedTextField(
-            value = selected?.label ?: "Select target automation",
+            value = selected?.label ?: stringResource(R.string.chain_select_target),
             onValueChange = {},
             readOnly = true,
-            label = { Text("Target Automation") },
+            label = { Text(stringResource(R.string.chain_target_automation)) },
             trailingIcon = {
                 ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
             },
@@ -391,9 +397,9 @@ private fun TargetAutomationDropdown(
 @Composable
 private fun getConditionLabel(condition: ChainCondition): String =
     when (condition) {
-        ChainCondition.ON_SUCCESS -> "On Success"
-        ChainCondition.ON_FAILURE -> "On Failure"
-        ChainCondition.ALWAYS -> "Always"
+        ChainCondition.ON_SUCCESS -> stringResource(R.string.chain_on_success)
+        ChainCondition.ON_FAILURE -> stringResource(R.string.chain_on_failure)
+        ChainCondition.ALWAYS -> stringResource(R.string.chain_always)
     }
 
 @Composable

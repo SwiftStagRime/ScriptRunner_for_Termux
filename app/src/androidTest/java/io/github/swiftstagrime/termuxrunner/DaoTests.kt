@@ -461,23 +461,6 @@ class DaoTests {
             assertTrue(remaining.none { it.id == id })
         }
 
-    @Test
-    fun getExecutionsWithScriptsJoinsWithScriptsTable() =
-        runTest {
-            scriptDao.insertScript(createScript(name = "Joined"))
-            executionDao.insert(
-                ScriptExecutionEntity(
-                    scriptId = 1,
-                    scriptName = "Exec",
-                    timestamp = System.currentTimeMillis(),
-                    exitCode = 0,
-                ),
-            )
-
-            val results = executionDao.getExecutionsWithScripts().first()
-            assertTrue(results.isNotEmpty())
-        }
-
     private fun createScript(name: String = "Test") =
         ScriptEntity(
             name = name,

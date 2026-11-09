@@ -11,14 +11,20 @@ import io.github.swiftstagrime.termuxrunner.data.local.dao.AutomationDao
 import io.github.swiftstagrime.termuxrunner.data.local.dao.CategoryDao
 import io.github.swiftstagrime.termuxrunner.data.local.dao.CustomThemeDao
 import io.github.swiftstagrime.termuxrunner.data.local.dao.ScriptDao
+import io.github.swiftstagrime.termuxrunner.data.local.dto.AutomationChainExportDto
+import io.github.swiftstagrime.termuxrunner.data.local.dto.AutomationChainStepExportDto
 import io.github.swiftstagrime.termuxrunner.data.local.dto.CategoryExportDto
 import io.github.swiftstagrime.termuxrunner.data.local.dto.FullBackupDto
 import io.github.swiftstagrime.termuxrunner.data.local.dto.ScriptExportDto
 import io.github.swiftstagrime.termuxrunner.data.local.dto.toEntity
 import io.github.swiftstagrime.termuxrunner.data.local.dto.toExportDto
+import io.github.swiftstagrime.termuxrunner.data.local.entity.AutomationChainEntity
 import io.github.swiftstagrime.termuxrunner.data.local.entity.CategoryEntity
+import io.github.swiftstagrime.termuxrunner.data.local.entity.ChainStepDto
 import io.github.swiftstagrime.termuxrunner.data.local.entity.toAutomationDomain
+import io.github.swiftstagrime.termuxrunner.data.local.entity.toDomain
 import io.github.swiftstagrime.termuxrunner.data.local.entity.toScriptEntity
+import io.github.swiftstagrime.termuxrunner.domain.model.AutomationType
 import io.github.swiftstagrime.termuxrunner.domain.model.Script
 import io.github.swiftstagrime.termuxrunner.domain.model.ScriptExportField
 import io.github.swiftstagrime.termuxrunner.domain.repository.ScriptRepository
@@ -29,6 +35,9 @@ import kotlinx.coroutines.withContext
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.decodeFromJsonElement
 import java.io.BufferedReader
 import java.io.File
@@ -89,8 +98,9 @@ class ScriptRepositoryImpl
                             val scriptEntities = dao.getAllScriptsOneShot()
                             val automations = automationDao.getAllAutomationsOneShot()
                             val themes = customThemeDao.getAllThemesOneShot()
+                            val chains = appDatabase.automationChainDao().getAllChainsOneShot()
 
-                            Triple(categories, scriptEntities, Pair(automations, themes))
+                            Triple(categories, scriptEntities, Triple(automations, themes, chains))
                         }
                     }
 
@@ -117,6 +127,22 @@ class ScriptRepositoryImpl
                         scripts = scripts,
                         automations = others.first.map { it.toAutomationDomain().toExportDto() },
                         themes = others.second.map { it.toExportDto() },
+                        chains =
+                            others.third.map { chainEntity ->
+                                val chain = chainEntity.toDomain()
+                                AutomationChainExportDto(
+                                    name = chain.name,
+                                    triggerAutomationId = chain.triggerAutomationId,
+                                    steps =
+                                        chain.steps.map { step ->
+                                            AutomationChainStepExportDto(
+                                                targetAutomationId = step.targetAutomationId,
+                                                condition = step.condition.name,
+                                                envPassThrough = step.envPassThrough,
+                                            )
+                                        },
+                                )
+                            },
                     )
 
                 withContext(Dispatchers.IO) {
@@ -141,7 +167,9 @@ class ScriptRepositoryImpl
                                         ),
                                 )
                             } else {
-                                json.decodeFromJsonElement<FullBackupDto>(jsonElement)
+                                json.decodeFromJsonElement<FullBackupDto>(
+                                    dropRemovedAutomationTypes(jsonElement),
+                                )
                             }
                         } ?: throw ImportStreamException()
 
@@ -182,15 +210,65 @@ class ScriptRepositoryImpl
                             scriptIdMap[dto.id] = newId.toInt()
                         }
 
-                        val automationEntities =
-                            backup.automations.mapNotNull { dto ->
-                                val newScriptId = scriptIdMap[dto.scriptId] ?: return@mapNotNull null
-                                dto.toEntity(newScriptId)
+                        val automationIdMap = mutableMapOf<Int, Int>()
+                        backup.automations.forEach { dto ->
+                            val newScriptId = scriptIdMap[dto.scriptId] ?: return@forEach
+                            val newId = automationDao.insertAutomation(dto.toEntity(newScriptId)).toInt()
+                            if (dto.id > 0) {
+                                automationIdMap[dto.id] = newId
                             }
-                        automationEntities.forEach { automationDao.insertAutomation(it) }
+                        }
+
+                        importChainsWithRemappedIds(backup, automationIdMap)
                     }
                 }
             }
+
+        private suspend fun importChainsWithRemappedIds(
+            backup: FullBackupDto,
+            automationIdMap: Map<Int, Int>,
+        ) {
+            val chainDao = appDatabase.automationChainDao()
+            backup.chains.forEach { chainDto ->
+                val newTriggerId =
+                    automationIdMap[chainDto.triggerAutomationId] ?: return@forEach
+                val steps =
+                    chainDto.steps.mapNotNull { step ->
+                        val newTargetId =
+                            automationIdMap[step.targetAutomationId] ?: return@mapNotNull null
+                        ChainStepDto(
+                            targetAutomationId = newTargetId,
+                            condition = step.condition,
+                            envPassThrough = step.envPassThrough,
+                        )
+                    }
+                chainDao.insertChain(
+                    AutomationChainEntity(
+                        name = chainDto.name,
+                        triggerAutomationId = newTriggerId,
+                        steps = json.encodeToString(steps),
+                    ),
+                )
+            }
+        }
+
+        /**
+         * Old exports may reference automation trigger types that no longer exist
+         * (network/USB event types were removed). Decoding them fails on the
+         * unknown enum value, so those automation entries are dropped up front
+         * and the rest of the backup imports normally.
+         */
+        private fun dropRemovedAutomationTypes(element: JsonElement): JsonElement {
+            val obj = element as? JsonObject ?: return element
+            val automations = obj["automations"] as? JsonArray ?: return element
+            val knownTypes = AutomationType.entries.mapTo(mutableSetOf()) { it.name }
+            val kept =
+                automations.filterIsInstance<JsonObject>().filter { automation ->
+                    (automation["type"] as? JsonPrimitive)?.content in knownTypes
+                }
+            if (kept.size == automations.size) return element
+            return JsonObject(obj + ("automations" to JsonArray(kept)))
+        }
 
         override suspend fun importSingleScript(uri: Uri): Result<Script> =
             runCatching {

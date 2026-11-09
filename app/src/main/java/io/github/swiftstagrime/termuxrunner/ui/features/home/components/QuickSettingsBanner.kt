@@ -36,6 +36,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -58,7 +59,9 @@ fun QuickSettingsBanner(
     modifier: Modifier = Modifier,
 ) {
     Card(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier
+            .fillMaxWidth()
+            .testTag("tile_settings_banner"),
         shape = RoundedCornerShape(24.dp),
         colors =
             CardDefaults.cardColors(
@@ -154,7 +157,7 @@ fun QuickSettingsBanner(
                     ) {
                         Icon(
                             imageVector = Icons.Default.Settings,
-                            contentDescription = "Configure Tiles",
+                            contentDescription = stringResource(R.string.configure_tiles),
                             modifier = Modifier.size(20.dp),
                             tint = MaterialTheme.colorScheme.onTertiaryContainer.copy(alpha = 0.7f),
                         )
@@ -183,6 +186,7 @@ fun TileCircleItem(
                     .size(48.dp)
                     .clip(CircleShape)
                     .clickable(onClick = onClick)
+                    .testTag("banner_tile_$index")
                     .background(
                         if (isAssigned) {
                             MaterialTheme.colorScheme.surface

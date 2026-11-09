@@ -36,6 +36,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import io.github.swiftstagrime.termuxrunner.R
@@ -283,13 +284,17 @@ private fun ExportFormatOption(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
-            Box {
+            // Weighted so a long script name can't squeeze the title/description
+            // column; the name itself is capped to one line with ellipsis.
+            Box(modifier = Modifier.weight(0.6f)) {
                 Text(
                     text = fileName,
                     style = MaterialTheme.typography.bodySmall,
                     fontFamily = FontFamily.Monospace,
                     textDecoration = TextDecoration.Underline,
                     color = MaterialTheme.colorScheme.primary,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
                 )
             }
         }

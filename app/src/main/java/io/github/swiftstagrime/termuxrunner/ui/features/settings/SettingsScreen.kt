@@ -57,6 +57,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -169,7 +170,10 @@ private fun SettingsTopBar(onBack: () -> Unit) {
     TopAppBar(
         title = { Text(stringResource(R.string.settings_title)) },
         navigationIcon = {
-            IconButton(onClick = onBack) {
+            IconButton(
+                onClick = onBack,
+                modifier = Modifier.testTag("settings_back_btn"),
+            ) {
                 Icon(
                     Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = stringResource(R.string.back_description),
@@ -196,7 +200,10 @@ private fun AppearanceSection(
 
     Text(stringResource(R.string.accent_color_label), style = MaterialTheme.typography.labelLarge)
 
-    LazyRow(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+    LazyRow(
+        modifier = Modifier.testTag("accent_theme_row"),
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
+    ) {
         items(AppTheme.entries) { accent ->
             ThemeSelectorItem(
                 theme = accent,
@@ -251,6 +258,7 @@ private fun CustomThemeManagementItem(onClick: () -> Unit) {
                     .clip(CircleShape)
                     .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
                     .clickable { onClick() }
+                    .testTag("settings_custom_theme_item")
                     .border(
                         width = 1.dp,
                         color = MaterialTheme.colorScheme.outlineVariant,
@@ -273,6 +281,7 @@ private fun CustomThemeManagementItem(onClick: () -> Unit) {
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.onSurface,
             maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
             textAlign = TextAlign.Center,
             modifier = Modifier.fillMaxWidth(),
         )
@@ -361,7 +370,8 @@ private fun WebhookNavTile(actions: SettingsActions) {
         modifier =
             Modifier
                 .fillMaxWidth()
-                .clickable { actions.onNavigateToWebhookSettings() },
+                .clickable { actions.onNavigateToWebhookSettings() }
+                .testTag("settings_webhook_tile"),
         colors =
             CardDefaults.cardColors(
                 containerColor = MaterialTheme.colorScheme.secondaryContainer,
@@ -466,7 +476,9 @@ private fun DataManagementSection(actions: SettingsActions) {
         onClick = actions.onNavigateToExecutionHistory,
         icon = Icons.Default.History,
         label = stringResource(R.string.execution_history_label),
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .testTag("settings_history_row"),
     )
 }
 
@@ -588,6 +600,7 @@ fun ThemeSelectorItem(
             color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
             fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
             maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
             textAlign = TextAlign.Center,
             modifier = Modifier.fillMaxWidth(),
         )

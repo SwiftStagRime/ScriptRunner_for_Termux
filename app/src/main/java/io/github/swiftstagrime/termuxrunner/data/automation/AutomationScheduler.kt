@@ -6,17 +6,26 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import androidx.core.net.toUri
+import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.workDataOf
 import dagger.hilt.android.qualifiers.ApplicationContext
 import io.github.swiftstagrime.termuxrunner.data.local.dao.AutomationDao
 import io.github.swiftstagrime.termuxrunner.data.local.entity.AutomationEntity
 import io.github.swiftstagrime.termuxrunner.data.receiver.AutomationReceiver
+import io.github.swiftstagrime.termuxrunner.data.service.AutomationEventService
+import io.github.swiftstagrime.termuxrunner.data.worker.AutomationSweepWorker
 import io.github.swiftstagrime.termuxrunner.data.worker.AutomationWorker
 import io.github.swiftstagrime.termuxrunner.domain.model.AutomationType
 import io.github.swiftstagrime.termuxrunner.domain.util.AutomationTimeCalculator
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -29,14 +38,38 @@ class AutomationScheduler
     ) {
         private val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
+        private val watcherScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+
+        /**
+         * Starts or stops the event watcher so that it runs exactly while an enabled
+         * automation listens for an event trigger. Event broadcasts reach only a runtime
+         * receiver, and that receiver lives in [AutomationEventService], so the watcher is
+         * what makes screen and charging automations fire at all.
+         */
+        fun reconcileEventWatcher() {
+            watcherScope.launch {
+                val needsWatcher =
+                    automationDao.getEnabledAutomations().any { it.type.isEventBased }
+                if (needsWatcher) {
+                    AutomationEventService.start(context)
+                } else {
+                    AutomationEventService.stop(context)
+                }
+            }
+        }
+
         suspend fun schedule(automation: AutomationEntity) {
             if (!automation.isEnabled) return
 
             val now = System.currentTimeMillis()
             var triggerTime = automation.nextRunTimestamp ?: automation.scheduledTimestamp
 
-            // Don't schedule AlarmManager for BOOT or event-based types
-            if (automation.type == AutomationType.BOOT || automation.type.isEventBased) {
+            // Don't schedule AlarmManager for BOOT, event-based or unrecognized types
+            if (
+                automation.type == AutomationType.BOOT ||
+                automation.type == AutomationType.UNKNOWN ||
+                automation.type.isEventBased
+            ) {
                 return
             }
 
@@ -55,6 +88,40 @@ class AutomationScheduler
                 triggerTime = nextRun
             }
 
+            setAlarm(automation, triggerTime)
+        }
+
+        /**
+         * Schedules a condition re-check alarm at an explicit [retryAt] time.
+         *
+         * Unlike [schedule], a stale past [AutomationEntity.nextRunTimestamp] is
+         * deliberately not interpreted as "trigger immediately": the catch-up
+         * itself stays pending (kept in the past) and is re-evaluated both when
+         * this alarm fires and whenever a charging event or the periodic sweep
+         * re-triggers the automation in the meantime.
+         */
+        fun scheduleConditionRetry(
+            automation: AutomationEntity,
+            retryAt: Long,
+        ) {
+            if (!automation.isEnabled) return
+
+            // Don't schedule AlarmManager for BOOT, event-based or unrecognized types
+            if (
+                automation.type == AutomationType.BOOT ||
+                automation.type == AutomationType.UNKNOWN ||
+                automation.type.isEventBased
+            ) {
+                return
+            }
+
+            setAlarm(automation, retryAt)
+        }
+
+        private fun setAlarm(
+            automation: AutomationEntity,
+            triggerTime: Long,
+        ) {
             val intent =
                 Intent(context, AutomationReceiver::class.java).apply {
                     putExtra("automation_id", automation.id)
@@ -128,6 +195,30 @@ class AutomationScheduler
                 AutomationWorker.WORK_NAME_PREFIX + automationId,
                 ExistingWorkPolicy.KEEP,
                 workRequest,
+            )
+        }
+
+        /**
+         * Ensures the periodic maintenance sweep ([AutomationSweepWorker]) is
+         * enqueued. It rescues automations whose alarm chain was broken (crashed
+         * worker, OS-cancelled alarm, WorkManager reset) so a stale
+         * [AutomationEntity.nextRunTimestamp] never sits without a pending
+         * alarm for more than one sweep interval.
+         *
+         * WorkManager persists periodic work across restarts, so [KEEP] makes
+         * this idempotent; calling it on every app start and after boot simply
+         * recreates it if it was ever lost.
+         */
+        fun ensureSweepEnqueued() {
+            val sweepRequest =
+                PeriodicWorkRequestBuilder<AutomationSweepWorker>(
+                    AutomationSweepWorker.SWEEP_INTERVAL_MS,
+                    TimeUnit.MILLISECONDS,
+                ).build()
+            WorkManager.getInstance(context).enqueueUniquePeriodicWork(
+                AutomationSweepWorker.UNIQUE_WORK_NAME,
+                ExistingPeriodicWorkPolicy.KEEP,
+                sweepRequest,
             )
         }
     }

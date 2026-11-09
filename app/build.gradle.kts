@@ -29,8 +29,8 @@ android {
         applicationId = "io.github.swiftstagrime.termuxrunner"
         minSdk = 24
         targetSdk = 37
-        versionCode = 182
-        versionName = "1.8.2"
+        versionCode = 183
+        versionName = "1.8.3"
 
         testInstrumentationRunner = "io.github.swiftstagrime.termuxrunner.di.HiltTestRunner"
     }
@@ -92,7 +92,6 @@ android {
         baseline = file("lint-baseline.xml")
     }
     packaging {
-        jniLibs.keepDebugSymbols.add("**/*.so")
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1,LICENSE.md,LICENSE-notice.md}"
         }
@@ -108,6 +107,11 @@ android {
         includeInApk = false
         includeInBundle = false
     }
+}
+
+composeCompiler {
+    metricsDestination.set(layout.buildDirectory.dir("compose-metrics"))
+    reportsDestination.set(layout.buildDirectory.dir("compose-reports"))
 }
 
 base {
@@ -150,9 +154,7 @@ dependencies {
     implementation(libs.hilt.android)
     implementation(libs.androidx.hilt.navigation.compose)
     implementation(libs.androidx.material3)
-    implementation(libs.androidx.exifinterface)
     implementation(libs.androidx.appcompat)
-    implementation(libs.androidx.room.testing)
     implementation(libs.androidx.compose.ui.text)
     implementation(libs.androidx.compose.foundation.layout)
     implementation(libs.androidx.work.runtime.ktx)
@@ -160,7 +162,6 @@ dependencies {
     implementation(libs.androidx.hilt.work)
     implementation(libs.androidx.compose.ui.unit)
     implementation(libs.core.ktx)
-    implementation(libs.androidx.work.testing)
     implementation(libs.androidx.profileinstaller)
     implementation(libs.androidx.glance.preview)
     "baselineProfile"(project(":baselineprofile"))
@@ -170,8 +171,10 @@ dependencies {
     implementation(libs.androidx.sqlite)
     implementation(libs.tink.android)
     implementation(libs.coil.compose)
-    implementation(libs.coil.network.okhttp)
     testImplementation(libs.junit)
+    // Unit tests build workers via work-testing; keep it out of the release
+    // APK by scoping it to test source sets only.
+    testImplementation(libs.androidx.work.testing)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
@@ -180,7 +183,6 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.test.manifest)
     implementation(libs.androidx.compose.material.icons.extended)
     implementation(libs.androidx.room.runtime)
-    implementation(libs.androidx.hilt.navigation.compose)
     implementation(libs.androidx.navigation3.ui)
     implementation(libs.androidx.navigation3.runtime)
     implementation(libs.androidx.lifecycle.viewmodel.navigation3)
@@ -197,6 +199,9 @@ dependencies {
     androidTestImplementation(libs.androidx.uiautomator)
     testImplementation(libs.mockk)
     testImplementation(libs.kotlinx.coroutines.test)
+    // MigrationTest (androidTest) needs room-testing too; testImplementation
+    // is not visible to the androidTest source set.
+    androidTestImplementation(libs.androidx.room.testing)
     androidTestImplementation(libs.mockk.android)
     androidTestImplementation(libs.hilt.android.testing)
     kspAndroidTest(libs.hilt.compiler)

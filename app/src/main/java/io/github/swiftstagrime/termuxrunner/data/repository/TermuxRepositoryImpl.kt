@@ -3,6 +3,7 @@ package io.github.swiftstagrime.termuxrunner.data.repository
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.PowerManager
@@ -44,6 +45,21 @@ class TermuxRepositoryImpl
             return powerManager.isIgnoringBatteryOptimizations(TERMUX_PACKAGE)
         }
 
+        /**
+         * True while the system keeps Termux in its "stopped" state: never launched
+         * since install, wiped, or force-stopped by the user or by a ROM autostart
+         * manager. A run-command request is then accepted by the system without
+         * throwing, but Termux's process is never created, so the command sits in
+         * the service's pending-start queue forever and no result broadcast ever
+         * arrives. Reporting that as a failure is the only way an automation can
+         * tell "dispatched" apart from "delivered".
+         */
+        private fun isTermuxForceStopped(): Boolean =
+            runCatching {
+                val info = context.packageManager.getApplicationInfo(TERMUX_PACKAGE, 0)
+                info.flags and ApplicationInfo.FLAG_STOPPED != 0
+            }.getOrDefault(false)
+
         override fun runCommand(
             command: String,
             runInBackground: Boolean,
@@ -55,6 +71,7 @@ class TermuxRepositoryImpl
         ) {
             if (!isTermuxInstalled()) throw TermuxNotInstalledException()
             if (!isPermissionGranted()) throw TermuxPermissionException()
+            if (isTermuxForceStopped()) throw TermuxForceStoppedException()
 
             val dataDirPrefix =
                 context.filesDir.absolutePath
@@ -94,7 +111,8 @@ class TermuxRepositoryImpl
                             PendingIntent.FLAG_UPDATE_CURRENT
                         }
 
-                    val requestCode = (automationId?.hashCode() ?: 0) + scriptId
+                    val requestCode =
+                        if (automationId != null) automationId * 10_000 + scriptId else scriptId
                     val pendingIntent =
                         PendingIntent.getBroadcast(
                             context,
@@ -195,4 +213,13 @@ class TermuxPermissionException :
 class TermuxBackgroundRestrictionException :
     TermuxException(
         UiText.StringResource(R.string.error_background_restriction),
+    )
+
+/**
+ * Termux sits in the system's stopped state, so the system accepts the run-command
+ * request but never starts Termux. The user has to open Termux once to clear it.
+ */
+class TermuxForceStoppedException :
+    TermuxException(
+        UiText.StringResource(R.string.error_termux_force_stopped),
     )

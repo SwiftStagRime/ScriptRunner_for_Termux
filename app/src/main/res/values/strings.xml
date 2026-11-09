@@ -243,6 +243,7 @@
     <!-- Repo errors -->
     <string name="error_termux_permission_missing">Termux Run Command permission is missing.</string>
     <string name="error_background_restriction">Background restriction prevented execution. Disable Battery Optimizations for Termux/Runner.</string>
+    <string name="error_termux_force_stopped">Termux was force-stopped, so the command was not delivered. Open Termux once to re-enable it.</string>
     <string name="error_find_overlay_manually">Please find \'Display over other apps\' manually.</string>
     <string name="error_open_settings_manually">Could not open settings. Please open Android Settings manually.</string>
     <string name="error_decode_icon">Could not decode icon file.</string>
@@ -358,6 +359,10 @@
     <string name="automation_next_run_format">Next run: %s</string>
     <string name="automation_last_run_format">Last run: %s</string>
     <string name="automation_running_soon">Running soon</string>
+    <string name="automation_waiting_for">Waiting for: %1$s</string>
+    <string name="automation_wait_wifi">WiFi</string>
+    <string name="automation_wait_charging">charger</string>
+    <string name="automation_wait_battery">battery level</string>
     <string name="automation_never_run">Never run</string>
     <string name="automation_not_scheduled">Not scheduled</string>
     <string name="status_success">Success</string>
@@ -411,11 +416,15 @@
     <string name="automation_type_random_delay">Random Delay</string>
     <string name="automation_type_screen_on">Screen On</string>
     <string name="automation_type_screen_off">Screen Off</string>
-    <string name="automation_type_network_connected">Network Connected</string>
-    <string name="automation_type_network_disconnected">Network Disconnected</string>
-    <string name="automation_type_usb_connected">USB Connected</string>
-    <string name="automation_type_usb_disconnected">USB Disconnected</string>
+    <string name="automation_type_charging_started">Charging Started</string>
+    <string name="automation_type_unknown">Unknown</string>
     <string name="automation_boot_hint">Script will run every time the device boots up.</string>
+    <string name="automation_event_hint">Event triggers need ScriptRunner to keep a persistent foreground service running, so an ongoing notification stays visible. Disable battery optimization for ScriptRunner, otherwise the triggers stop firing when the screen is off.</string>
+    <string name="event_watcher_notification_title">Automation event watcher</string>
+    <string name="event_watcher_notification_text">Listening for screen and charging events</string>
+    <string name="automation_worker_channel">Running automation</string>
+    <string name="automation_worker_notification_title">Running automation</string>
+    <string name="automation_worker_notification_text">Starting the scheduled script in Termux</string>
     <string name="automation_boot_next_run">Runs on every boot</string>
     <string name="automation_monthly_day_of_month">Day of month</string>
     <string name="automation_window_from">From %1$s</string>
@@ -512,4 +521,50 @@
     <!-- General -->
     <string name="copied_label">Copied!</string>
     <string name="execution_history_label">Execution History</string>
+    <!-- Chain editor -->
+    <string name="chain_editor_title">Chain Editor</string>
+    <string name="chain_editor_general">General</string>
+    <string name="chain_editor_trigger">Trigger</string>
+    <string name="chain_editor_steps">Steps</string>
+    <string name="chain_name_label">Chain Name</string>
+    <string name="chain_no_steps">No steps configured. Tap + to add a step.</string>
+    <string name="chain_add_step">Add Step</string>
+    <string name="chain_step_number">Step %1$d</string>
+    <string name="chain_target_automation">Target Automation</string>
+    <string name="chain_select_target">Select target automation</string>
+    <string name="chain_on_success">On Success</string>
+    <string name="chain_on_failure">On Failure</string>
+    <string name="chain_always">Always</string>
+    <!-- Execution history -->
+    <string name="exec_history_for">History: %1$s</string>
+    <string name="exec_history_empty">No execution history</string>
+    <string name="exec_history_clear_30">Clear Last 30 Days</string>
+    <string name="exec_history_clear_all">Clear All History</string>
+    <string name="exec_history_args">Args: %1$s</string>
+    <string name="source_manual">Manual</string>
+    <string name="source_automation">Automation</string>
+    <string name="source_tile">Tile</string>
+    <string name="source_widget">Widget</string>
+    <string name="source_shortcut">Shortcut</string>
+    <!-- Code versions -->
+    <string name="versions_title">Code Versions</string>
+    <string name="versions_empty">No versions saved yet</string>
+    <string name="versions_restore_title">Restore Version</string>
+    <string name="versions_restore_body">Current code will be saved as a new version before restoring.</string>
+    <string name="versions_restore">Restore</string>
+    <string name="versions_default_label">Version</string>
+    <string name="versions_delete_title">Delete Version</string>
+    <string name="versions_delete_body">Are you sure you want to delete this version? This cannot be undone.</string>
+    <!-- Widget configuration -->
+    <string name="widget_add_script">Add Script</string>
+    <string name="cd_done">Done</string>
+    <!-- Misc -->
+    <string name="cd_code_versions">Code versions</string>
+    <string name="category_label">Category</string>
+    <string name="theme_default_name">New Theme</string>
+    <string name="widget_config_title">Widget Configuration</string>
+    <string name="widget_selected_scripts">Selected Scripts (%1$d/5)</string>
+    <string name="widget_unknown_script">Unknown Script</string>
+    <string name="webhook_notification_title">Webhook Server Active</string>
+    <string name="webhook_notification_port">Port: %1$d</string>
 </resources>

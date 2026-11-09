@@ -34,6 +34,10 @@ object AutomationTimeCalculator {
                 null
             }
 
+            AutomationType.UNKNOWN -> {
+                null
+            }
+
             AutomationType.MONTHLY -> {
                 val dayOfMonth = automation.scheduledDayOfMonth ?: return null
                 if (dayOfMonth < 1 || dayOfMonth > 31) return null
@@ -61,10 +65,7 @@ object AutomationTimeCalculator {
             // Event-based types don't use scheduled timestamps
             AutomationType.SCREEN_ON,
             AutomationType.SCREEN_OFF,
-            AutomationType.NETWORK_CONNECTED,
-            AutomationType.NETWORK_DISCONNECTED,
-            AutomationType.USB_CONNECTED,
-            AutomationType.USB_DISCONNECTED,
+            AutomationType.CHARGING_STARTED,
             -> {
                 null
             }

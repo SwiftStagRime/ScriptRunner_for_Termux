@@ -12,6 +12,7 @@ class KeyManagerFactory
         private val keyManager: KeyManager,
     ) : SupportSQLiteOpenHelper.Factory {
         override fun create(configuration: SupportSQLiteOpenHelper.Configuration): SupportSQLiteOpenHelper {
+            System.loadLibrary("sqlcipher")
             val passphrase = runBlocking { keyManager.getRoomPassphrase() }
 
             val actualFactory = SupportOpenHelperFactory(passphrase)

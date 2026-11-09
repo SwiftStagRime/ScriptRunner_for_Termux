@@ -91,9 +91,9 @@ class ConvertersTest {
         }
     }
 
-    @Test(expected = IllegalArgumentException::class)
-    fun `toAutomationType - throws exception for invalid input`() {
-        converters.toAutomationType("INVALID_TYPE")
+    @Test
+    fun `toAutomationType - returns UNKNOWN for invalid input`() {
+        assertEquals(AutomationType.UNKNOWN, converters.toAutomationType("INVALID_TYPE"))
     }
 
     @Test

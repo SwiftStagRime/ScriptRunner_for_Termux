@@ -22,13 +22,6 @@ interface ScriptExecutionDao {
     @Query("SELECT * FROM script_executions ORDER BY timestamp DESC")
     fun getAllExecutions(): Flow<List<ScriptExecutionEntity>>
 
-    @Query(
-        "SELECT se.* FROM script_executions se " +
-            "INNER JOIN scripts s ON se.scriptId = s.id " +
-            "ORDER BY se.timestamp DESC",
-    )
-    fun getExecutionsWithScripts(): Flow<List<ScriptExecutionEntity>>
-
     @Query("DELETE FROM script_executions WHERE timestamp < :threshold")
     suspend fun deleteOldRecords(threshold: Long)
 

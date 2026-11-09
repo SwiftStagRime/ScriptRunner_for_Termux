@@ -10,8 +10,6 @@ interface ScriptExecutionRepository {
 
     fun getRecentExecutions(limit: Int = 100): Flow<List<ScriptExecution>>
 
-    fun getAllExecutions(): Flow<List<ScriptExecution>>
-
     suspend fun deleteOldRecords(threshold: Long)
 
     suspend fun deleteForScript(scriptId: Int)

@@ -35,11 +35,15 @@ class ExecuteChainStepUseCase
 
                 for (chain in chains) {
                     val steps = chain.steps
-                    if (steps.size < 2) continue
+                    if (steps.isEmpty()) continue
 
-                    val triggerStepIndex =
-                        steps.indexOfFirst { it.targetAutomationId == completedAutomationId }
-                    val startIndex = if (triggerStepIndex >= 0) triggerStepIndex + 1 else 1
+                    // The editor keeps the trigger in chain.triggerAutomationId and stores
+                    // only the follow-up steps, so steps[0] really is the next step. A chain
+                    // that still carries the completed automation as its first step (older
+                    // backups) is advanced past it so that run is not dispatched twice.
+                    val triggerStoredAsFirstStep =
+                        steps.first().targetAutomationId == completedAutomationId
+                    val startIndex = if (triggerStoredAsFirstStep) 1 else 0
                     if (startIndex >= steps.size) continue
 
                     val matchedConditions =

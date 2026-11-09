@@ -52,6 +52,7 @@ class WebhookService : Service() {
     private var httpServer: WebhookHttpServer? = null
 
     companion object {
+        private const val TAG = "WebhookService"
         private const val NOTIFICATION_ID = 4201
         private const val CHANNEL_ID = "webhook_service"
         const val ACTION_STOP = "ACTION_STOP_WEBHOOK"
@@ -88,6 +89,7 @@ class WebhookService : Service() {
                     }
                 webhookServiceState.setRunning(true)
             } catch (e: Exception) {
+                Log.e(TAG, "Failed to start webhook server on $bindAddress:$port", e)
                 webhookServiceState.setRunning(false)
             }
         }
@@ -167,8 +169,8 @@ class WebhookService : Service() {
 
         return NotificationCompat
             .Builder(this, CHANNEL_ID)
-            .setContentTitle("Webhook Server Active")
-            .setContentText("Port: $port")
+            .setContentTitle(getString(R.string.webhook_notification_title))
+            .setContentText(getString(R.string.webhook_notification_port, port))
             .setSmallIcon(R.mipmap.ic_launcher)
             .setContentIntent(pendingIntent)
             .addAction(

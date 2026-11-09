@@ -16,7 +16,10 @@ local.properties
 
 .idea/
 .gradle/
+.kotlin/
 **/build/
 **/release/
 *.apk
 *.bundle
+scripts/
+org/

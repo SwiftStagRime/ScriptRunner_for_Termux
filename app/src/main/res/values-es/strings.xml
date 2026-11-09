@@ -233,6 +233,7 @@
     <!-- Repo errors -->
     <string name="error_termux_permission_missing">Falta el permiso "Run Command" de Termux.</string>
     <string name="error_background_restriction">Restricción de fondo detectada. Desactiva la optimización de batería para Termux/Runner.</string>
+    <string name="error_termux_force_stopped">Termux se detuvo forzosamente, así que la orden no se envió. Abre Termux una vez para volver a activarlo.</string>
     <string name="error_find_overlay_manually">Por favor, encuentra \'Mostrar sobre otras aplicaciones\' manualmente.</string>
     <string name="error_open_settings_manually">No se pudieron abrir los ajustes. Por favor, abre los ajustes de Android manualmente.</string>
     <string name="error_decode_icon">No se pudo decodificar el archivo de icono.</string>
@@ -344,6 +345,10 @@
     <string name="automation_next_run_format">Próxima ejecución: %s</string>
     <string name="automation_last_run_format">Última ejecución: %s</string>
     <string name="automation_running_soon">Se ejecutará pronto</string>
+    <string name="automation_waiting_for">Esperando: %1$s</string>
+    <string name="automation_wait_wifi">WiFi</string>
+    <string name="automation_wait_charging">cargador</string>
+    <string name="automation_wait_battery">nivel de batería</string>
     <string name="automation_never_run">Nunca ejecutado</string>
     <string name="automation_not_scheduled">No programado</string>
     <string name="status_success">Éxito</string>
@@ -397,11 +402,14 @@
     <string name="automation_type_random_delay">Retraso Aleatorio</string>
     <string name="automation_type_screen_on">Pantalla Encendida</string>
     <string name="automation_type_screen_off">Pantalla Apagada</string>
-    <string name="automation_type_network_connected">Red Conectada</string>
-    <string name="automation_type_network_disconnected">Red Desconectada</string>
-    <string name="automation_type_usb_connected">USB Conectado</string>
-    <string name="automation_type_usb_disconnected">USB Desconectado</string>
+    <string name="automation_type_charging_started">Carga iniciada</string>
     <string name="automation_boot_hint">El script se ejecutará cada vez que el dispositivo se inicie.</string>
+    <string name="automation_event_hint">Los disparadores de eventos requieren que ScriptRunner mantenga un servicio en primer plano permanente, así que quedará visible una notificación continua. Desactiva la optimización de batería para ScriptRunner; de lo contrario, los disparadores dejarán de funcionar con la pantalla apagada.</string>
+    <string name="event_watcher_notification_title">Observador de eventos de automatización</string>
+    <string name="event_watcher_notification_text">Escuchando eventos de pantalla y de carga</string>
+    <string name="automation_worker_channel">Automatización en ejecución</string>
+    <string name="automation_worker_notification_title">Automatización en ejecución</string>
+    <string name="automation_worker_notification_text">Iniciando el script programado en Termux</string>
     <string name="automation_boot_next_run">Se ejecuta en cada arranque</string>
     <string name="automation_monthly_day_of_month">Día del mes</string>
     <string name="automation_window_from">Desde %1$s</string>
@@ -504,5 +512,52 @@
     <string name="webhook_stop_server">Detener servidor</string>
     <string name="copied_label">¡Copiado!</string>
     <string name="execution_history_label">Historial de ejecución</string>
+    <string name="automation_type_unknown">Desconocido</string>
+    <!-- Chain editor -->
+    <string name="chain_editor_title">Editor de cadenas</string>
+    <string name="chain_editor_general">General</string>
+    <string name="chain_editor_trigger">Disparador</string>
+    <string name="chain_editor_steps">Pasos</string>
+    <string name="chain_name_label">Nombre de la cadena</string>
+    <string name="chain_no_steps">Sin pasos configurados. Toca + para añadir un paso.</string>
+    <string name="chain_add_step">Añadir paso</string>
+    <string name="chain_step_number">Paso %1$d</string>
+    <string name="chain_target_automation">Automatización de destino</string>
+    <string name="chain_select_target">Seleccionar automatización de destino</string>
+    <string name="chain_on_success">Al tener éxito</string>
+    <string name="chain_on_failure">Al fallar</string>
+    <string name="chain_always">Siempre</string>
+    <!-- Execution history -->
+    <string name="exec_history_for">Historial: %1$s</string>
+    <string name="exec_history_empty">Sin historial de ejecución</string>
+    <string name="exec_history_clear_30">Borrar últimos 30 días</string>
+    <string name="exec_history_clear_all">Borrar todo el historial</string>
+    <string name="exec_history_args">Argumentos: %1$s</string>
+    <string name="source_manual">Manual</string>
+    <string name="source_automation">Automatización</string>
+    <string name="source_tile">Mosaico</string>
+    <string name="source_widget">Widget</string>
+    <string name="source_shortcut">Acceso directo</string>
+    <!-- Code versions -->
+    <string name="versions_title">Versiones de código</string>
+    <string name="versions_empty">Aún no hay versiones guardadas</string>
+    <string name="versions_restore_title">Restaurar versión</string>
+    <string name="versions_restore_body">El código actual se guardará como una nueva versión antes de restaurar.</string>
+    <string name="versions_restore">Restaurar</string>
+    <string name="versions_default_label">Versión</string>
+    <string name="versions_delete_title">Eliminar versión</string>
+    <string name="versions_delete_body">¿Seguro que quieres eliminar esta versión? No se puede deshacer.</string>
+    <!-- Widget configuration -->
+    <string name="widget_add_script">Añadir script</string>
+    <string name="cd_done">Listo</string>
+    <!-- Misc -->
+    <string name="cd_code_versions">Versiones de código</string>
+    <string name="category_label">Categoría</string>
+    <string name="theme_default_name">Tema nuevo</string>
 
+    <string name="widget_config_title">Configuración del widget</string>
+    <string name="widget_selected_scripts">Scripts seleccionados (%1$d/5)</string>
+    <string name="widget_unknown_script">Script desconocido</string>
+    <string name="webhook_notification_title">Servidor webhook activo</string>
+    <string name="webhook_notification_port">Puerto: %1$d</string>
 </resources>

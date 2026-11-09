@@ -97,7 +97,10 @@ fun CustomThemeScreen(
                             Icon(Icons.Default.Delete, contentDescription = null)
                         }
                         IconButton(onClick = actions.onSave) {
-                            Icon(Icons.Default.Check, contentDescription = "Save")
+                            Icon(
+                                Icons.Default.Check,
+                                contentDescription = stringResource(R.string.cd_save),
+                            )
                         }
                     }
                 },

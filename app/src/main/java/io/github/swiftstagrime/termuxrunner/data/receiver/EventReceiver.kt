@@ -3,8 +3,6 @@ package io.github.swiftstagrime.termuxrunner.data.receiver
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.net.ConnectivityManager
-import android.net.NetworkCapabilities
 import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.ExistingWorkPolicy
@@ -21,79 +19,35 @@ import io.github.swiftstagrime.termuxrunner.domain.model.AutomationType
 import io.github.swiftstagrime.termuxrunner.domain.model.TriggerMode
 import io.github.swiftstagrime.termuxrunner.domain.model.triggerMode
 
+/**
+ * Receives every event trigger: the screen events, the unlock broadcast and the
+ * power-connected broadcast.
+ *
+ * This receiver is registered at runtime by AutomationEventService rather than declared in
+ * the manifest. The system flags SCREEN_ON and SCREEN_OFF as registered-receiver-only and
+ * refuses USER_PRESENT to receivers outside the system, while the power broadcasts are
+ * implicit and not exempted from the API 26 manifest-receiver ban. A manifest entry for
+ * them would be dead configuration that silently never fires, which is exactly how this
+ * used to fail.
+ */
 class EventReceiver : BroadcastReceiver() {
-    companion object {
-        private const val TAG = "EventReceiver"
-        private const val OVERDUE_CATCH_UP_WORK_NAME = "overdue_automation_catch_up"
-    }
-
     override fun onReceive(
         context: Context,
         intent: Intent,
     ) {
         if (intent.action.isNullOrEmpty()) return
 
-        val eventAutomationType = mapActionToType(context, intent) ?: return
-
-        enqueueWorkerForType(context, eventAutomationType)
-
-        // Connectivity restored: let condition-blocked scheduled automations
-        // re-check their conditions so they fire once as soon as WiFi is back.
-        if (eventAutomationType == AutomationType.NETWORK_CONNECTED) {
-            enqueueOverdueCatchUp(context)
-        }
-    }
-
-    private fun enqueueOverdueCatchUp(context: Context) {
-        val workRequest = OneTimeWorkRequestBuilder<OverdueAutomationWorker>().build()
-        WorkManager.getInstance(context).enqueueUniqueWork(
-            OVERDUE_CATCH_UP_WORK_NAME,
-            ExistingWorkPolicy.KEEP,
-            workRequest,
-        )
-    }
-
-    private fun mapActionToType(
-        context: Context,
-        intent: Intent,
-    ): AutomationType? =
-        when (intent.action) {
-            Intent.ACTION_SCREEN_ON, "android.intent.action.USER_PRESENT" -> AutomationType.SCREEN_ON
-            "android.intent.action.SCREEN_OFF" -> AutomationType.SCREEN_OFF
-
-            ConnectivityManager.CONNECTIVITY_ACTION -> {
-                val cm =
-                    context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-                val capabilities = cm.getNetworkCapabilities(cm.activeNetwork)
-                val isConnected =
-                    capabilities != null &&
-                        (
-                            capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) ||
-                                capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)
-                        )
-                if (isConnected) AutomationType.NETWORK_CONNECTED else AutomationType.NETWORK_DISCONNECTED
-            }
-
-            "android.hardware.usb.action.USB_DEVICE_ATTACHED" -> AutomationType.USB_CONNECTED
-            "android.hardware.usb.action.USB_DEVICE_DETACHED" -> AutomationType.USB_DISCONNECTED
-
-            else -> null
+        // Charger plugged in: automations blocked on the charging condition may
+        // now be able to run, so re-check overdue catch-ups right away.
+        if (intent.action == Intent.ACTION_POWER_CONNECTED) {
+            EventAutomationDispatcher.enqueueOverdueCatchUp(context)
+            EventAutomationDispatcher.enqueueForType(context, AutomationType.CHARGING_STARTED)
+            return
         }
 
-    private fun enqueueWorkerForType(
-        context: Context,
-        automationType: AutomationType,
-    ) {
-        val workRequest =
-            OneTimeWorkRequestBuilder<EventAutomationWorker>()
-                .setInputData(workDataOf("event_type" to automationType.name))
-                .build()
+        val eventAutomationType = EventAutomationDispatcher.mapActionToType(intent) ?: return
 
-        WorkManager.getInstance(context).enqueueUniqueWork(
-            "event_${automationType.name}_${System.currentTimeMillis()}",
-            ExistingWorkPolicy.APPEND,
-            workRequest,
-        )
+        EventAutomationDispatcher.enqueueForType(context, eventAutomationType)
     }
 }
 
@@ -132,9 +86,10 @@ class EventAutomationWorker
     }
 
 /**
- * Re-triggers overdue scheduled automations when a relevant system event (e.g. WiFi
- * reconnect) arrives. Each worker re-checks its conditions, so an automation only
- * runs once its conditions are actually met.
+ * Re-triggers overdue scheduled automations when a relevant system event arrives
+ * (e.g. charger plugged in). Each re-triggered worker re-checks its conditions,
+ * so an automation only runs once its conditions are actually met — and the
+ * unique work name guarantees the catch-up fires at most once.
  */
 @HiltWorker
 class OverdueAutomationWorker

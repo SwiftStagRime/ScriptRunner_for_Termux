@@ -339,11 +339,17 @@ private fun AppBarActions(
     IconButton(onClick = { onToggleSearch(true) }) {
         Icon(Icons.Default.Search, stringResource(R.string.cd_search))
     }
-    IconButton(onClick = actions.onNavigateToAutomation) {
+    IconButton(
+        onClick = actions.onNavigateToAutomation,
+        modifier = Modifier.testTag("home_automation_btn"),
+    ) {
         Icon(Icons.Default.Schedule, stringResource(R.string.cd_automation))
     }
     SortMenu(currentSort = sortOption, onSortSelected = actions.onSortOptionChange)
-    IconButton(onClick = actions.onSettingsClick) {
+    IconButton(
+        onClick = actions.onSettingsClick,
+        modifier = Modifier.testTag("home_settings_btn"),
+    ) {
         Icon(Icons.Default.Settings, stringResource(R.string.cd_settings))
     }
 }
@@ -664,7 +670,7 @@ private fun ScriptItem(
                 ) {
                     Icon(
                         Icons.Default.PlayArrow,
-                        contentDescription = "Run",
+                        contentDescription = stringResource(R.string.cd_run_script),
                         modifier = Modifier.size(20.dp),
                     )
                 }
@@ -917,7 +923,7 @@ fun CategoryTabs(
     ) {
         item {
             CategoryChip(
-                label = "All",
+                label = stringResource(R.string.label_all),
                 isSelected = selectedCategoryId == null,
                 onClick = { onCategorySelect(null) },
             )

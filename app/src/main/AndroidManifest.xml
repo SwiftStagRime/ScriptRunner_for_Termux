@@ -2,7 +2,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="com.termux.permission.RUN_COMMAND" />
     <uses-permission android:name="com.android.launcher.permission.INSTALL_SHORTCUT" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
@@ -13,10 +12,12 @@
         android:name="android.permission.FOREGROUND_SERVICE"
         tools:ignore="ForegroundServicesPolicy" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <queries>
         <package android:name="com.termux" />
@@ -90,22 +91,29 @@
             android:foregroundServiceType="dataSync"
             android:process=":monitor" />
 
+        <!--
+            specialUse rather than dataSync: the watcher has no data transfer to finish,
+            and dataSync foreground services are capped at six hours per day since
+            Android 14, which would silently stop event automations every morning.
+        -->
+        <service
+            android:name=".data.service.AutomationEventService"
+            android:exported="false"
+            android:foregroundServiceType="specialUse">
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="Receives screen and charging events so event automations can fire" />
+        </service>
+
         <receiver
             android:name=".data.receiver.AutomationReceiver"
             android:exported="false" />
 
-        <receiver
-            android:name=".data.receiver.EventReceiver"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="android.intent.action.SCREEN_ON" />
-                <action android:name="android.intent.action.USER_PRESENT" />
-                <action android:name="android.intent.action.SCREEN_OFF" />
-                <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
-                <action android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED" />
-                <action android:name="android.hardware.usb.action.USB_DEVICE_DETACHED" />
-            </intent-filter>
-        </receiver>
+        <!--
+            Event triggers (screen on/off, unlock, power connected) have no manifest
+            receiver: none of those broadcasts reach a manifest-declared receiver on
+            API 26+, so AutomationEventService registers EventReceiver at runtime.
+        -->
 
         <receiver
             android:name=".data.receiver.DeviceBootReceiver"

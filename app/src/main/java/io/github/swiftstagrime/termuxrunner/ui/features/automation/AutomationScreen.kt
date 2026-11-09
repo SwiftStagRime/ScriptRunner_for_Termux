@@ -1,7 +1,6 @@
 package io.github.swiftstagrime.termuxrunner.ui.features.automation
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
@@ -68,6 +67,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -84,7 +84,7 @@ import io.github.swiftstagrime.termuxrunner.ui.features.home.SortOption
 import io.github.swiftstagrime.termuxrunner.ui.preview.DevicePreviews
 import io.github.swiftstagrime.termuxrunner.ui.preview.mockAutomations
 
-@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AutomationScreen(
     uiState: AutomationUiState,
@@ -132,7 +132,9 @@ fun AutomationScreen(
         },
         floatingActionButton = {
             FloatingActionButton(
-                modifier = Modifier.padding(end = 8.dp, bottom = 8.dp),
+                modifier = Modifier
+                    .padding(end = 8.dp, bottom = 8.dp)
+                    .testTag("automation_fab"),
                 onClick = onAddAutomationClick,
                 containerColor = MaterialTheme.colorScheme.primaryContainer,
                 contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
@@ -183,7 +185,6 @@ fun AutomationScreen(
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun AutomationList(
     items: List<AutomationUiItem>,
@@ -201,10 +202,6 @@ private fun AutomationList(
     var dragOffset by rememberSaveable { mutableFloatStateOf(0f) }
     val isManualSort = sortOption == SortOption.MANUAL
 
-    // The LazyList keeps the previously first visible item anchored by key across data
-    // changes, so switching the sort order would scroll the list to follow that item
-    // (e.g. from the top to where it ended up in the new order). Reset to the top
-    // instead, so the new order always starts at the beginning.
     LaunchedEffect(sortOption) {
         if (items.isNotEmpty()) {
             lazyListState.scrollToItem(0)
@@ -356,6 +353,8 @@ private fun AutomationItem(
                             text = item.automation.label,
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis,
                         )
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
@@ -407,86 +406,86 @@ private fun AutomationItem(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.Bottom) {
-                    Column(
-                        modifier =
-                            Modifier
-                                .weight(1f)
-                                .clip(RoundedCornerShape(8.dp))
-                                .clickable { onShowHistory() }
-                                .padding(4.dp),
+                Column(
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(8.dp))
+                            .clickable { onShowHistory() }
+                            .padding(4.dp),
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                ) {
+                    MonitoringInfo(
+                        icon = Icons.Default.Event,
+                        text = item.nextRunText,
+                        contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    MonitoringInfo(
+                        icon = if (item.automation.lastExitCode == 0) Icons.Default.CheckCircle else Icons.Default.Error,
+                        text = item.lastRunText,
+                        contentColor = Color(item.statusColor),
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    FilledIconButton(
+                        onClick = onRunNow,
+                        modifier = Modifier.size(40.dp),
+                        colors =
+                            IconButtonDefaults.filledIconButtonColors(
+                                containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                            ),
                     ) {
-                        MonitoringInfo(
-                            icon = Icons.Default.Event,
-                            text = item.nextRunText,
-                            contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                        Spacer(modifier = Modifier.height(4.dp))
-                        MonitoringInfo(
-                            icon = if (item.automation.lastExitCode == 0) Icons.Default.CheckCircle else Icons.Default.Error,
-                            text = item.lastRunText,
-                            contentColor = Color(item.statusColor),
-                        )
+                        Icon(Icons.Default.PlayArrow, null, modifier = Modifier.size(20.dp))
                     }
 
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        FilledIconButton(
-                            onClick = onRunNow,
-                            modifier = Modifier.size(40.dp),
-                            colors =
-                                IconButtonDefaults.filledIconButtonColors(
-                                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                                ),
-                        ) {
-                            Icon(Icons.Default.PlayArrow, null, modifier = Modifier.size(20.dp))
+                    Surface(
+                        onClick = onEdit,
+                        color = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.15f),
+                        contentColor = MaterialTheme.colorScheme.tertiary,
+                        shape = RoundedCornerShape(12.dp),
+                        modifier = Modifier.size(40.dp),
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Icon(
+                                Icons.Default.Edit,
+                                stringResource(R.string.cd_edit),
+                                modifier = Modifier.size(20.dp),
+                            )
                         }
+                    }
 
-                        Surface(
-                            onClick = onEdit,
-                            color = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.15f),
-                            contentColor = MaterialTheme.colorScheme.tertiary,
-                            shape = RoundedCornerShape(12.dp),
-                            modifier = Modifier.size(40.dp),
-                        ) {
-                            Box(contentAlignment = Alignment.Center) {
-                                Icon(
-                                    Icons.Default.Edit,
-                                    stringResource(R.string.cd_edit),
-                                    modifier = Modifier.size(20.dp),
-                                )
-                            }
+                    Surface(
+                        onClick = onEditChain,
+                        color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.15f),
+                        contentColor = MaterialTheme.colorScheme.primary,
+                        shape = RoundedCornerShape(12.dp),
+                        modifier = Modifier.size(40.dp),
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Icon(
+                                Icons.Default.Link,
+                                null,
+                                modifier = Modifier.size(20.dp),
+                            )
                         }
+                    }
 
-                        Surface(
-                            onClick = onEditChain,
-                            color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.15f),
-                            contentColor = MaterialTheme.colorScheme.primary,
-                            shape = RoundedCornerShape(12.dp),
-                            modifier = Modifier.size(40.dp),
-                        ) {
-                            Box(contentAlignment = Alignment.Center) {
-                                Icon(
-                                    Icons.Default.Link,
-                                    null,
-                                    modifier = Modifier.size(20.dp),
-                                )
-                            }
-                        }
-
-                        Surface(
-                            onClick = onDelete,
-                            color = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.15f),
-                            contentColor = MaterialTheme.colorScheme.error,
-                            shape = RoundedCornerShape(12.dp),
-                            modifier = Modifier.size(40.dp),
-                        ) {
-                            Box(contentAlignment = Alignment.Center) {
-                                Icon(
-                                    Icons.Default.DeleteSweep,
-                                    null,
-                                    modifier = Modifier.size(20.dp),
-                                )
-                            }
+                    Surface(
+                        onClick = onDelete,
+                        color = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.15f),
+                        contentColor = MaterialTheme.colorScheme.error,
+                        shape = RoundedCornerShape(12.dp),
+                        modifier = Modifier.size(40.dp),
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Icon(
+                                Icons.Default.DeleteSweep,
+                                null,
+                                modifier = Modifier.size(20.dp),
+                            )
                         }
                     }
                 }
@@ -508,10 +507,8 @@ private fun FrequencyBadge(type: AutomationType) {
             AutomationType.RANDOM_DELAY -> stringResource(R.string.automation_type_random_delay)
             AutomationType.SCREEN_ON -> stringResource(R.string.automation_type_screen_on)
             AutomationType.SCREEN_OFF -> stringResource(R.string.automation_type_screen_off)
-            AutomationType.NETWORK_CONNECTED -> stringResource(R.string.automation_type_network_connected)
-            AutomationType.NETWORK_DISCONNECTED -> stringResource(R.string.automation_type_network_disconnected)
-            AutomationType.USB_CONNECTED -> stringResource(R.string.automation_type_usb_connected)
-            AutomationType.USB_DISCONNECTED -> stringResource(R.string.automation_type_usb_disconnected)
+            AutomationType.CHARGING_STARTED -> stringResource(R.string.automation_type_charging_started)
+            AutomationType.UNKNOWN -> stringResource(R.string.automation_type_unknown)
         }
 
     Surface(
@@ -548,6 +545,8 @@ private fun MonitoringInfo(
             text = text,
             style = MaterialTheme.typography.labelMedium,
             color = contentColor,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis,
         )
     }
 }

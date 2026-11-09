@@ -30,12 +30,10 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -49,12 +47,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ClipEntry
 import androidx.compose.ui.platform.Clipboard
 import androidx.compose.ui.platform.LocalClipboard
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import io.github.swiftstagrime.termuxrunner.R
+import io.github.swiftstagrime.termuxrunner.ui.components.StyledTextField
 import io.github.swiftstagrime.termuxrunner.ui.theme.ScriptRunnerForTermuxTheme
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
@@ -166,6 +166,7 @@ private fun ServiceStatusCard(
                 Switch(
                     checked = state.isEnabled,
                     onCheckedChange = actions.onToggleEnabled,
+                    modifier = Modifier.testTag("webhook_enable_switch"),
                 )
             }
         }
@@ -185,74 +186,37 @@ private fun ConfigurationSection(
 
     Spacer(modifier = Modifier.height(12.dp))
 
-    Row(
+    StyledTextField(
+        value = state.port.toString(),
+        onValueChange = { actions.onPortChange(it.toIntOrNull() ?: 0) },
+        label = stringResource(R.string.webhook_port_label),
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = stringResource(R.string.webhook_port_label),
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            OutlinedTextField(
-                value = state.port.toString(),
-                onValueChange = { it -> actions.onPortChange(it.toIntOrNull() ?: 0) },
-                modifier = Modifier.fillMaxWidth(),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                colors =
-                    TextFieldDefaults.colors(
-                        focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
-                        unfocusedContainerColor =
-                            MaterialTheme.colorScheme.surfaceVariant.copy(
-                                alpha = 0.3f,
-                            ),
-                    ),
-                singleLine = true,
-            )
-        }
+    )
 
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = stringResource(R.string.webhook_bind_label),
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            OutlinedTextField(
-                value =
-                    if (state.lanAccess) {
-                        stringResource(R.string.webhook_bind_all)
-                    } else {
-                        stringResource(
-                            R.string.webhook_bind_local,
-                        )
-                    },
-                onValueChange = {},
-                modifier = Modifier.fillMaxWidth(),
-                readOnly = true,
-                trailingIcon = {
-                    Switch(
-                        checked = state.lanAccess,
-                        onCheckedChange = actions.onToggleLanAccess,
-                        modifier = Modifier.padding(end = 4.dp),
-                    )
+    Spacer(modifier = Modifier.height(12.dp))
+
+    StyledTextField(
+        value =
+            stringResource(
+                if (state.lanAccess) {
+                    R.string.webhook_bind_all
+                } else {
+                    R.string.webhook_bind_local
                 },
-                colors =
-                    TextFieldDefaults.colors(
-                        focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
-                        unfocusedContainerColor =
-                            MaterialTheme.colorScheme.surfaceVariant.copy(
-                                alpha = 0.3f,
-                            ),
-                        disabledIndicatorColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f),
-                    ),
-                singleLine = true,
+            ),
+        onValueChange = {},
+        readOnly = true,
+        label = stringResource(R.string.webhook_bind_label),
+        trailingIcon = {
+            Switch(
+                checked = state.lanAccess,
+                onCheckedChange = actions.onToggleLanAccess,
+                modifier = Modifier.padding(end = 4.dp),
             )
-        }
-    }
+        },
+        modifier = Modifier.fillMaxWidth(),
+    )
 
     Spacer(modifier = Modifier.height(8.dp))
 

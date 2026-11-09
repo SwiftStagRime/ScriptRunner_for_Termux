@@ -24,8 +24,6 @@ class ScriptExecutionRepositoryImpl
         override fun getRecentExecutions(limit: Int): Flow<List<ScriptExecution>> =
             dao.getRecentExecutions(limit).map { it.map { entity -> entity.toDomain() } }
 
-        override fun getAllExecutions(): Flow<List<ScriptExecution>> = dao.getAllExecutions().map { it.map { entity -> entity.toDomain() } }
-
         override suspend fun deleteOldRecords(threshold: Long) {
             dao.deleteOldRecords(threshold)
         }

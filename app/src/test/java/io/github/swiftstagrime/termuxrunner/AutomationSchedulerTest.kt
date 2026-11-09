@@ -14,6 +14,7 @@ import io.github.swiftstagrime.termuxrunner.data.worker.AutomationWorker
 import io.github.swiftstagrime.termuxrunner.domain.model.AutomationType
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertNotNull
+import junit.framework.TestCase.assertNull
 import junit.framework.TestCase.assertTrue
 import kotlinx.coroutines.runBlocking
 import org.junit.After
@@ -96,6 +97,30 @@ class AutomationSchedulerTest {
     }
 
     @Test
+    fun `scheduleConditionRetry sets alarm at explicit time without immediate trigger`() {
+        val pastTime = System.currentTimeMillis() - 10000
+        val retryAt = System.currentTimeMillis() + 60 * 60 * 1000
+        val automation = createAutomation(nextRunTimestamp = pastTime, runIfMissed = true, id = 456)
+        runBlocking { database.automationDao().insertAutomation(automation) }
+
+        scheduler.scheduleConditionRetry(automation, retryAt)
+
+        // Alarm set for the explicit retry time, targeting the automation
+        val shadowAlarmManager = shadowOf(alarmManager)
+        val alarm = shadowAlarmManager.nextScheduledAlarm
+        assertNotNull(alarm)
+        assertEquals(retryAt, alarm?.triggerAtTime)
+        val intent = shadowOf(alarm?.operation).savedIntent
+        assertEquals(456, intent.getIntExtra("automation_id", -1))
+
+        // No immediate work enqueued: the catch-up stays pending in the entity
+        val workInfos = WorkManager.getInstance(context).getWorkInfosByTag(AutomationWorker::class.java.name).get()
+        assertTrue(workInfos.isEmpty())
+        val updated = runBlocking { database.automationDao().getAutomationById(automation.id) }
+        assertEquals(pastTime, updated?.nextRunTimestamp)
+    }
+
+    @Test
     fun `schedule skips missed slot to next future run when runIfMissed is false`() {
         val pastTime = System.currentTimeMillis() - 10000
         val automation =
@@ -116,19 +141,33 @@ class AutomationSchedulerTest {
         assertNotNull(shadowOf(alarmManager).nextScheduledAlarm)
     }
 
+    @Test
+    fun `schedule skips unrecognized trigger type`() {
+        val futureTime = System.currentTimeMillis() + 50000
+        val automation =
+            createAutomation(
+                nextRunTimestamp = futureTime,
+                type = AutomationType.UNKNOWN,
+            )
+
+        runBlocking { scheduler.schedule(automation) }
+
+        assertNull(shadowOf(alarmManager).nextScheduledAlarm)
+    }
+
     private fun createAutomation(
         id: Int = 1,
-        isEnabled: Boolean = true,
         nextRunTimestamp: Long? = null,
         runIfMissed: Boolean = true,
         intervalMillis: Long = 0,
+        type: AutomationType = AutomationType.PERIODIC,
     ) = AutomationEntity(
         id = id,
-        isEnabled = isEnabled,
+        isEnabled = true,
         nextRunTimestamp = nextRunTimestamp,
         runIfMissed = runIfMissed,
         scheduledTimestamp = System.currentTimeMillis(),
-        type = AutomationType.PERIODIC,
+        type = type,
         scriptId = 1,
         label = "Test",
         intervalMillis = intervalMillis,

@@ -14,6 +14,9 @@ interface AutomationChainDao {
     @Query("SELECT * FROM automation_chains")
     fun getAllChains(): Flow<List<AutomationChainEntity>>
 
+    @Query("SELECT * FROM automation_chains")
+    suspend fun getAllChainsOneShot(): List<AutomationChainEntity>
+
     @Query("SELECT * FROM automation_chains WHERE id = :id")
     suspend fun getChainById(id: Int): AutomationChainEntity?
 

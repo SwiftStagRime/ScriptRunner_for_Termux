@@ -51,9 +51,9 @@ class CustomThemeViewModel
             }
         }
 
-        fun createNewTheme() {
+        fun createNewTheme(defaultName: String) {
             val defaultPrimary = 0xFF6750A4
-            val draft = createDefaultTheme("New Theme", defaultPrimary, isDark = true)
+            val draft = createDefaultTheme(defaultName, defaultPrimary, isDark = true)
 
             _uiState.update {
                 it.copy(
